@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "sentry-unplugin-tsconfigs/base-config.json",
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "types": ["node"]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "sentry-unplugin",
+  "version": "0.0.1",
+  "description": "Sentry unplugin.",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "repository": "https://github.com/lforst/sentry-unplugin",
+  "scripts": {
+    "build": "run-p build",
+    "build:watch": "run-p build:rollup:watch",
+    "build:rollup": "rollup --config rollup.config.js",
+    "build:rollup:watch": "rollup --config rollup.config.js --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "7.18.5",
+    "@babel/preset-env": "7.18.2",
+    "@babel/preset-typescript": "7.17.12",
+    "@rollup/plugin-babel": "5.3.1",
+    "@rollup/plugin-commonjs": "22.0.1",
+    "@rollup/plugin-node-resolve": "13.3.0",
+    "@types/node": "^8",
+    "npm-run-all": "^4.1.5",
+    "rollup": "2.75.7",
+    "sentry-unplugin-tsconfigs": "*"
+  }
+}
