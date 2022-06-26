@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "build": "lerna run --parallel build",
-    "build:watch": "lerna run --parallel build:watch"
+    "build:watch": "lerna run --parallel build:watch",
+    "check:types": "lerna run --parallel check:types"
   },
   "devDependencies": {
     "lerna": "3.13.4"

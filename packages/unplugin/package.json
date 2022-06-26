@@ -12,7 +12,8 @@
     "build:rollup": "rollup --config rollup.config.js",
     "build:rollup:watch": "rollup --config rollup.config.js --watch --no-watch.clearScreen",
     "build:types": "tsc --project tsconfig.types.json",
-    "build:types:watch": "tsc --project tsconfig.types.json --watch --preserveWatchOutput"
+    "build:types:watch": "tsc --project tsconfig.types.json --watch --preserveWatchOutput",
+    "check:types": "tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {},
   "devDependencies": {
