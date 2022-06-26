@@ -6,7 +6,7 @@
   "module": "dist/esm/index.js",
   "repository": "https://github.com/lforst/sentry-unplugin",
   "scripts": {
-    "build": "run-p build",
+    "build": "run-p build:rollup",
     "build:watch": "run-p build:rollup:watch",
     "build:rollup": "rollup --config rollup.config.js",
     "build:rollup:watch": "rollup --config rollup.config.js --watch"
