@@ -10,9 +10,15 @@
   "scripts": {
     "build": "lerna run --parallel build",
     "build:watch": "lerna run --parallel build:watch",
-    "check:types": "lerna run --parallel check:types"
+    "check:types": "lerna run --parallel check:types",
+    "check:formatting": "prettier --check .",
+    "fix:formatting": "prettier --write .",
+    "prepare": "husky install"
   },
   "devDependencies": {
-    "lerna": "3.13.4"
+    "husky": "^8.0.0",
+    "lerna": "3.13.4",
+    "prettier": "^2.7.1",
+    "pretty-quick": "^3.1.3"
   }
 }
