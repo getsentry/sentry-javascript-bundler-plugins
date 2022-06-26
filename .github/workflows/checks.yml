@@ -19,3 +19,14 @@ jobs:
           node-version: ${{ env.DEFAULT_NODE_VERSION }}
       - run: yarn --frozen-lockfile
       - run: yarn build
+
+  type-check:
+    name: check typing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.DEFAULT_NODE_VERSION }}
+      - run: yarn --frozen-lockfile
+      - run: yarn check:types
