@@ -10,7 +10,7 @@ env:
 
 jobs:
   build:
-    name: build
+    name: Build packages
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,7 +21,7 @@ jobs:
       - run: yarn build
 
   type-check:
-    name: Check typing
+    name: Typing check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -32,7 +32,18 @@ jobs:
       - run: yarn check:types
 
   formatting-check:
-    name: Check formatting
+    name: Formatting check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.DEFAULT_NODE_VERSION }}
+      - run: yarn --frozen-lockfile
+      - run: yarn check:formatting
+
+  test:
+    name: Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
