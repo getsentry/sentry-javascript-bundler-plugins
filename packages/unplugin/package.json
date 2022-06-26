@@ -4,12 +4,15 @@
   "description": "Sentry unplugin.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
   "repository": "https://github.com/lforst/sentry-unplugin",
   "scripts": {
-    "build": "run-p build:rollup",
-    "build:watch": "run-p build:rollup:watch",
+    "build": "run-p build:rollup build:types",
+    "build:watch": "run-p build:rollup:watch build:types:watch",
     "build:rollup": "rollup --config rollup.config.js",
-    "build:rollup:watch": "rollup --config rollup.config.js --watch"
+    "build:rollup:watch": "rollup --config rollup.config.js --watch --no-watch.clearScreen",
+    "build:types": "tsc --project tsconfig.types.json",
+    "build:types:watch": "tsc --project tsconfig.types.json --watch --preserveWatchOutput"
   },
   "dependencies": {},
   "devDependencies": {
@@ -22,6 +25,7 @@
     "@types/node": "^8",
     "npm-run-all": "^4.1.5",
     "rollup": "2.75.7",
-    "sentry-unplugin-tsconfigs": "*"
+    "sentry-unplugin-tsconfigs": "*",
+    "typescript": "^4.7.4"
   }
 }
