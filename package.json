@@ -11,6 +11,7 @@
     "build": "lerna run --parallel build",
     "build:watch": "lerna run --parallel build:watch",
     "check:types": "lerna run --parallel check:types",
+    "test": "lerna run --parallel test",
     "check:formatting": "prettier --check .",
     "fix:formatting": "prettier --write .",
     "prepare": "husky install"
