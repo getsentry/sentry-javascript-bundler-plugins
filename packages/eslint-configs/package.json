@@ -1,0 +1,19 @@
+{
+  "name": "eslint-config-local",
+  "version": "0.0.0",
+  "private": true,
+  "peerDependencies": {
+    "eslint": "^8.14.0"
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.13.0",
+    "@typescript-eslint/parser": "^5.13.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-jest": "^25.3.0",
+    "eslint-plugin-react": "^7.29.4",
+    "eslint-plugin-react-hooks": "^4.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.14.0"
+  }
+}
