@@ -7,7 +7,7 @@ module.exports = {
   ignorePatterns: [".eslintrc.js", "dist", "jest.config.js", "rollup.config.js"],
   parserOptions: {
     tsconfigRootDir: __dirname,
-    project: ["./tsconfig.json", "./test/tsconfig.json"],
+    project: ["./src/tsconfig.json", "./test/tsconfig.json"],
   },
   env: {
     node: true,
