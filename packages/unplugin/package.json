@@ -13,7 +13,7 @@
     "build:rollup:watch": "rollup --config rollup.config.js --watch --no-watch.clearScreen",
     "build:types": "tsc --project types.tsconfig.json",
     "build:types:watch": "tsc --project types.tsconfig.json --watch --preserveWatchOutput",
-    "check:types": "tsc --project tsconfig.json --noEmit",
+    "check:types": "tsc --project ./src/tsconfig.json --noEmit",
     "test": "jest",
     "lint": "eslint ./src ./test --max-warnings=0"
   },
