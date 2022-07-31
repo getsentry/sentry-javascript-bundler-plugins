@@ -75,7 +75,11 @@ const unplugin = createUnplugin<Options>((options) => {
   };
 });
 
-export const sentryVitePlugin = unplugin.vite;
-export const sentryRollupPlugin = unplugin.rollup;
-export const sentryWebpackPlugin = unplugin.webpack;
-export const sentryEsbuildPlugin = unplugin.esbuild;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const sentryVitePlugin: (options?: Options | undefined) => any = unplugin.vite;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const sentryRollupPlugin: (options?: Options | undefined) => any = unplugin.rollup;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const sentryWebpackPlugin: (options?: Options | undefined) => any = unplugin.webpack;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const sentryEsbuildPlugin: (options?: Options | undefined) => any = unplugin.esbuild;

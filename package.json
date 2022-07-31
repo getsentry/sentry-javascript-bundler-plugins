@@ -8,7 +8,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "lerna run --parallel build",
+    "build": "lerna run --stream build",
     "build:watch": "lerna run --parallel build:watch",
     "check:types": "lerna run --parallel check:types",
     "test": "lerna run --parallel test",

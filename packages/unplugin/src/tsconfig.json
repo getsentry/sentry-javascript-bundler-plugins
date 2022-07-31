@@ -5,6 +5,6 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "types": ["node"],
-    "lib": ["ES2020"]
+    "lib": ["ES2020", "DOM"] // es2020 needed for "new Set()", DOM needed for various bundler types
   }
 }
