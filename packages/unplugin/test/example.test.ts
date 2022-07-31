@@ -1,5 +1,5 @@
-import { helloWorld } from "../src";
+import { sentryRollupPlugin } from "../src/index";
 
 test("example", () => {
-  expect(helloWorld).toBeTruthy();
+  expect(sentryRollupPlugin).toBeDefined();
 });

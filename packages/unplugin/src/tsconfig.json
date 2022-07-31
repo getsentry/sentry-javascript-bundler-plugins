@@ -4,6 +4,7 @@
   "include": ["./**/*"],
   "compilerOptions": {
     "esModuleInterop": true,
-    "types": ["node"]
+    "types": ["node"],
+    "lib": ["ES2020"]
   }
 }

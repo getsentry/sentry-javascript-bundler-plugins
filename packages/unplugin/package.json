@@ -1,5 +1,5 @@
 {
-  "name": "sentry-unplugin",
+  "name": "@sentry/unplugin",
   "version": "0.0.1",
   "description": "Sentry unplugin.",
   "main": "dist/cjs/index.js",
@@ -19,7 +19,10 @@
     "test": "jest",
     "lint": "eslint ./src ./test --max-warnings=0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "magic-string": "^0.26.2",
+    "unplugin": "^0.7.2"
+  },
   "devDependencies": {
     "@babel/core": "7.18.5",
     "@babel/preset-env": "7.18.2",

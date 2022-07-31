@@ -9,9 +9,10 @@ const extensions = [".js", ".ts"];
 
 export default {
   input,
-  external: [...Object.keys(packageJson.dependencies)],
+  // external: [...Object.keys(packageJson.dependencies)],
+  external: ["path", "unplugin"],
   plugins: [
-    resolve({ extensions }),
+    resolve({ extensions, preferBuiltins: true }),
     commonjs(),
     babel({
       extensions,
