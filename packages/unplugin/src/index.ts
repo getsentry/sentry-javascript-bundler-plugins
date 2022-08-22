@@ -1,10 +1,8 @@
 import { createUnplugin } from "unplugin";
 import MagicString from "magic-string";
 import { getReleaseName } from "./getReleaseName";
-
-export interface Options {
-  debugLogging?: boolean;
-}
+import { Options } from "./types";
+import { makeSentryFacade } from "./facade";
 
 /**
  * The sentry-unplugin concerns itself with two things:
@@ -70,10 +68,10 @@ export interface Options {
  * TODO: elaborate a bit on how sourcemaps upload works
  */
 const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
-  function debugLog(message: string) {
+  function debugLog(...args: unknown[]) {
     if (options?.debugLogging) {
       // eslint-disable-next-line no-console
-      console.log(`[Sentry-plugin] ${message}`);
+      console.log("[Sentry-plugin]", ...args);
     }
   }
 
@@ -113,7 +111,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       debugLog(`Called "transform": ${JSON.stringify({ id })}`);
 
       if (id === "sentry-release-injector") {
-        return generateGlobalInjectorCode({ release: getReleaseName() });
+        return generateGlobalInjectorCode({ release: getReleaseName(options.release) });
       } else {
         return undefined;
       }
@@ -163,6 +161,11 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         };
       }
     },
+    buildEnd() {
+      const sentryFacade = makeSentryFacade(getReleaseName(options.release), options);
+      //TODO: do stuff with the facade here lol
+      debugLog("this is my facade:", sentryFacade);
+    },
   };
 });
 
@@ -194,3 +197,5 @@ export const sentryRollupPlugin: (options: Options) => any = unplugin.rollup;
 export const sentryWebpackPlugin: (options: Options) => any = unplugin.webpack;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sentryEsbuildPlugin: (options: Options) => any = unplugin.esbuild;
+
+export type { Options } from "./types";
