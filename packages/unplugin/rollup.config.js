@@ -2,6 +2,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
 import babel from "@rollup/plugin-babel";
 import packageJson from "./package.json";
+import json from "@rollup/plugin-json";
 
 const input = ["src/index.ts"];
 
@@ -14,6 +15,7 @@ export default {
   plugins: [
     resolve({ extensions, preferBuiltins: true }),
     commonjs(),
+    json(),
     babel({
       extensions,
       babelHelpers: "bundled",

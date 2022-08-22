@@ -2,6 +2,8 @@ import { createUnplugin } from "unplugin";
 import MagicString from "magic-string";
 import { getReleaseName } from "./getReleaseName";
 import * as path from "path";
+import { Options } from "./types";
+import { makeSentryFacade } from "./facade";
 
 function generateGlobalInjectorCode({ release }: { release: string }) {
   return `
@@ -17,15 +19,12 @@ function generateGlobalInjectorCode({ release }: { release: string }) {
     _global.SENTRY_RELEASE={id:"${release}"};`;
 }
 
-export interface Options {
-  debugLogging?: boolean;
-}
-
 const unplugin = createUnplugin<Options>((options) => {
-  function debugLog(message: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function debugLog(...args: any) {
     if (options?.debugLogging) {
       // eslint-disable-next-line no-console
-      console.log(`[Sentry-plugin] ${message}`);
+      console.log("[Sentry-plugin]}", args);
     }
   }
 
@@ -88,7 +87,9 @@ const unplugin = createUnplugin<Options>((options) => {
     transform(code, id) {
       if (entrypoints.has(path.normalize(id))) {
         const ms = new MagicString(code);
-        ms.prepend(generateGlobalInjectorCode({ release: getReleaseName() }));
+        ms.prepend(
+          generateGlobalInjectorCode({ release: getReleaseName(options.release || "0.0.1") })
+        );
         return {
           code: ms.toString(),
           map: ms.generateMap(),
@@ -97,6 +98,11 @@ const unplugin = createUnplugin<Options>((options) => {
         // Don't transform
         return undefined;
       }
+    },
+    buildEnd() {
+      const sentryFacade = makeSentryFacade(getReleaseName(options.release || "0.0.1"), options);
+      //TODO: do stuff with the facade here lol
+      debugLog("this is my facade:", sentryFacade);
     },
   };
 });
@@ -109,3 +115,5 @@ export const sentryRollupPlugin: (options: Options) => any = unplugin.rollup;
 export const sentryWebpackPlugin: (options: Options) => any = unplugin.webpack;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sentryEsbuildPlugin: (options: Options) => any = unplugin.esbuild;
+
+export type { Options } from "./types";

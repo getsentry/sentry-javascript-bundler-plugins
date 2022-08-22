@@ -17,9 +17,10 @@
     "check:types:src": "tsc --project ./src/tsconfig.json --noEmit",
     "check:types:test": "tsc --project ./test/tsconfig.json --noEmit",
     "test": "jest",
-    "lint": "eslint ./src ./test --max-warnings=0"
+    "lint": "eslint ./src ./test"
   },
   "dependencies": {
+    "@sentry/cli": "1.74.5",
     "magic-string": "0.26.2",
     "unplugin": "0.9.4"
   },
@@ -29,6 +30,7 @@
     "@babel/preset-typescript": "7.17.12",
     "@rollup/plugin-babel": "5.3.1",
     "@rollup/plugin-commonjs": "22.0.1",
+    "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "13.3.0",
     "@swc/core": "^1.2.205",
     "@swc/jest": "^0.2.21",
