@@ -7,6 +7,7 @@ on:
 
 env:
   DEFAULT_NODE_VERSION: "16.15.1"
+  SENTRY_RELEASE: "default_release_name"
 
 jobs:
   build:
