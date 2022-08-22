@@ -15,8 +15,13 @@ export function getReleaseName(releaseName?: string): string {
     return releaseName;
   }
 
+  // Env var SENTRY_RELEASE takes presendace over other env vars listed below
+  // this is why we are looking for it before proceeding with others
+  if (process.env["SENTRY_RELEASE"]) {
+    return process.env["SENTRY_RELEASE"];
+  }
+
   const ENV_VARS = [
-    "SENTRY_RELEASE",
     "SOURCE_VERSION", // Heroku #1 https://devcenter.heroku.com/changelog-items/630
     "HEROKU_SLUG_COMMIT", // Heroku #2: https://docs.sentry.io/product/integrations/deployment/heroku/#configure-releases
     "CODEBUILD_RESOLVED_SOURCE_VERSION", // AWS CodeBuild: https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
