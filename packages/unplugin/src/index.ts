@@ -1,5 +1,6 @@
 import { createUnplugin } from "unplugin";
 import MagicString from "magic-string";
+import { getReleaseName } from "./getReleaseName";
 
 export interface Options {
   debugLogging?: boolean;
@@ -183,11 +184,6 @@ function generateGlobalInjectorCode({ release }: { release: string }) {
             {};
 
     _global.SENTRY_RELEASE={id:"${release}"};`;
-}
-
-// TODO: Replace this function with actual logic
-function getReleaseName() {
-  return "default";
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
