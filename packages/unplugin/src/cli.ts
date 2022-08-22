@@ -3,8 +3,6 @@ import { Options } from "./types";
 
 /** Creates a new Sentry CLI instance. */
 export function makeSentryCli(options: Options) {
-  console.log("My opts: ", options);
-
   //TODO: pass config file instead of null
   const cli = new SentryCli(undefined, {
     silent: false, //TODO read from options

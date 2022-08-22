@@ -24,7 +24,7 @@ const unplugin = createUnplugin<Options>((options) => {
   function debugLog(...args: any) {
     if (options?.debugLogging) {
       // eslint-disable-next-line no-console
-      console.log("[Sentry-plugin]}", args);
+      console.log("[Sentry-plugin]", args);
     }
   }
 

@@ -17,7 +17,7 @@
     "check:types:src": "tsc --project ./src/tsconfig.json --noEmit",
     "check:types:test": "tsc --project ./test/tsconfig.json --noEmit",
     "test": "jest",
-    "lint": "eslint ./src ./test --max-warnings=0"
+    "lint": "eslint ./src ./test"
   },
   "dependencies": {
     "@sentry/cli": "1.74.5",

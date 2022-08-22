@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
-//TODO: remove eslint rule
+//TODO: remove eslint rules
 
 // Build a facade that exposes necessary sentry functionality
 // Idea: We start out with Sentry-CLI and replace the cli-commands one by one afterwards.
@@ -9,7 +10,6 @@
 //           - huge download
 //           - unnecessary functionality
 
-import SentryCli from "@sentry/cli";
 import { makeSentryCli } from "./cli";
 import { Options } from "./types";
 
@@ -27,11 +27,9 @@ export type SentryFacade = {
  * a release on Sentry. This includes uploading source maps and finalizing the release
  */
 export function makeSentryFacade(version: string, options: Options): SentryFacade {
-  console.log("makeSentryFacade", version, options);
-
   const cli = makeSentryCli(options);
-  console.log(cli);
-  console.log(SentryCli.getVersion());
+  //TODO: remove
+  void cli.execute(["--version"], true);
 
   return {
     createNewRelease: () => createNewRelease(version),
@@ -45,29 +43,26 @@ export function makeSentryFacade(version: string, options: Options): SentryFacad
 
 function createNewRelease(version: string) {
   //TODO(must have): implement release creation logic here
-  console.log("new release", version);
 }
 
 function uploadSourceMaps(version: string) {
   //TODO(must have): implement source maps upload logic here
-  console.log("new release", version);
 }
 
 function finalizeRelease(version: string) {
   //TODO(must have): implement release finalization logic here
-  console.log("new release", version);
 }
 
 // TODO: Stuff we worry about later:
 
 function cleanArtifacts() {
-  console.log("I'm a no-op for now, lol");
+  // NOOP for now
 }
 
 function setCommits(version: string) {
-  console.log("I'm a no-op for now, lol", version);
+  // NOOP for now
 }
 
 function addDeploy(version: string) {
-  console.log("I'm a no-op for now, lol", version);
+  // NOOP for now
 }
