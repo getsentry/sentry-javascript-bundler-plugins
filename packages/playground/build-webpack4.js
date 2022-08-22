@@ -14,7 +14,16 @@ webpack4(
       library: "ExampleBundle",
       libraryTarget: "commonjs",
     },
-    plugins: [sentryWebpackPlugin()],
+    plugins: [
+      sentryWebpackPlugin({
+        org: "sentry-sdks",
+        project: "someProj",
+        authToken: "1234",
+        include: "*",
+        debugLogging: true,
+        debug: true,
+      }),
+    ],
     devtool: "source-map",
   },
   (err) => {

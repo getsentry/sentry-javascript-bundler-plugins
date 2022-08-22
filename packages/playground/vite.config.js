@@ -14,5 +14,14 @@ export default defineConfig({
     },
     sourcemap: true,
   },
-  plugins: [sentryVitePlugin()],
+  plugins: [
+    sentryVitePlugin({
+      org: "sentry-sdks",
+      project: "someProj",
+      authToken: "1234",
+      include: "*",
+      debugLogging: true,
+      debug: true,
+    }),
+  ],
 });

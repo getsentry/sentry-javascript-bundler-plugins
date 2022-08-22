@@ -16,7 +16,16 @@ webpack5(
       },
     },
     mode: "production",
-    plugins: [sentryWebpackPlugin()],
+    plugins: [
+      sentryWebpackPlugin({
+        org: "sentry-sdks",
+        project: "someProj",
+        authToken: "1234",
+        include: "*",
+        debugLogging: true,
+        debug: true,
+      }),
+    ],
     devtool: "source-map",
   },
   (err) => {

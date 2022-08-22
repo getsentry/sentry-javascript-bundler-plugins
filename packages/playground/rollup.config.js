@@ -9,7 +9,18 @@ const extensions = [".js"];
 
 export default {
   input,
-  plugins: [resolve({ extensions }), commonjs(), sentryRollupPlugin()],
+  plugins: [
+    resolve({ extensions }),
+    commonjs(),
+    sentryRollupPlugin({
+      org: "sentry-sdks",
+      project: "someProj",
+      authToken: "1234",
+      include: "*",
+      debugLogging: true,
+      debug: true,
+    }),
+  ],
   output: {
     dir: "./out/rollup",
     format: "cjs",

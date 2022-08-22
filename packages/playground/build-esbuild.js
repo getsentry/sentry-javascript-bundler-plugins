@@ -4,7 +4,16 @@ const { build } = require("esbuild");
 build({
   entryPoints: ["./src/entrypoint1.js"],
   outdir: "./out/esbuild",
-  plugins: [sentryEsbuildPlugin()],
+  plugins: [
+    sentryEsbuildPlugin({
+      org: "sentry-sdks",
+      project: "someProj",
+      authToken: "1234",
+      include: "*",
+      debugLogging: true,
+      debug: true,
+    }),
+  ],
   minify: true,
   bundle: true,
   format: "cjs",
