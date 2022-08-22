@@ -2,6 +2,7 @@
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
 import { sentryRollupPlugin } from "@sentry/unplugin";
+import placeHolderOptions from "./config.json";
 
 const input = ["src/entrypoint1.js"];
 
@@ -13,12 +14,7 @@ export default {
     resolve({ extensions }),
     commonjs(),
     sentryRollupPlugin({
-      org: "sentry-sdks",
-      project: "someProj",
-      authToken: "1234",
-      include: "*",
-      debugLogging: true,
-      debug: true,
+      ...placeHolderOptions,
     }),
   ],
   output: {

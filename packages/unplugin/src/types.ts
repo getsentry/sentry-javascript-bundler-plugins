@@ -1,5 +1,5 @@
 //TODO: JsDoc for all properties
-export interface Options {
+export type Options = {
   debugLogging?: boolean;
 
   /* --- authentication/identification: */
@@ -10,7 +10,7 @@ export interface Options {
   // configFile: string
 
   /* --- release properties: */
-  // release?: string;
+  release?: string;
   // dist: string,
   // entries: string[] | RegExp | ((key: string) => boolean);
 
@@ -53,7 +53,7 @@ export interface Options {
   //   name?: string,
   //   url?: string,
   // }
-}
+};
 
 /*
 type IncludeEntry = {

@@ -3,6 +3,8 @@ const path = require("path");
 const webpack5 = require("webpack");
 const { sentryWebpackPlugin } = require("@sentry/unplugin");
 
+const placeHolderOptions = require("./config.json");
+
 webpack5(
   {
     cache: false,
@@ -16,16 +18,7 @@ webpack5(
       },
     },
     mode: "production",
-    plugins: [
-      sentryWebpackPlugin({
-        org: "sentry-sdks",
-        project: "someProj",
-        authToken: "1234",
-        include: "*",
-        debugLogging: true,
-        debug: true,
-      }),
-    ],
+    plugins: [sentryWebpackPlugin({ ...placeHolderOptions })],
     devtool: "source-map",
   },
   (err) => {

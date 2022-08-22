@@ -27,9 +27,9 @@ export type SentryFacade = {
  * a release on Sentry. This includes uploading source maps and finalizing the release
  */
 export function makeSentryFacade(version: string, options: Options): SentryFacade {
-  const cli = makeSentryCli(options);
+  makeSentryCli(options);
   //TODO: remove
-  void cli.execute(["--version"], true);
+  // void cli.execute(["--version"], true);
 
   return {
     createNewRelease: () => createNewRelease(version),

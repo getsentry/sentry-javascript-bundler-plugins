@@ -2,6 +2,7 @@
 import { sentryVitePlugin } from "@sentry/unplugin";
 import { defineConfig } from "vite";
 import * as path from "path";
+import placeHolderOptions from "./config.json";
 
 export default defineConfig({
   build: {
@@ -16,12 +17,7 @@ export default defineConfig({
   },
   plugins: [
     sentryVitePlugin({
-      org: "sentry-sdks",
-      project: "someProj",
-      authToken: "1234",
-      include: "*",
-      debugLogging: true,
-      debug: true,
+      ...placeHolderOptions,
     }),
   ],
 });
