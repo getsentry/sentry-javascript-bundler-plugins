@@ -31,7 +31,7 @@ describe("environmental getReleaseName", () => {
     expect(getReleaseName()).toBe(sha);
   });
 
-  it("throws an error if git is not present", () => {
+  it("throws an error if no release information could be found", () => {
     (mockedFs.existsSync as jest.Mock).mockReturnValueOnce(false);
 
     expect(getReleaseName).toThrow("Could not return a release name");
