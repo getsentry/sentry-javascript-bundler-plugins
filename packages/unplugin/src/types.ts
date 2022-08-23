@@ -1,4 +1,5 @@
 //TODO: JsDoc for all properties
+//TODO: compare types w/ webpack plugin (and sentry-cli?)
 export type Options = {
   debugLogging?: boolean;
 
@@ -7,16 +8,16 @@ export type Options = {
   project?: string;
   authToken?: string;
   url?: string;
-  // configFile: string
+  configFile?: string;
 
   /* --- release properties: */
   release?: string;
   // dist: string,
   // entries: string[] | RegExp | ((key: string) => boolean);
+  finalize?: boolean;
 
   /* --- source maps properties: */
-  //TODO: make this required
-  include?: string; //| string[] | IncludeEntry[];
+  include: string; // | Array<string | IncludeEntry>;
   // ignoreFile: string
   // ignore: string | string[]
   // ext: string[]
@@ -32,11 +33,10 @@ export type Options = {
   // vcsRemote: string,
   // customHeader: string,
 
-  // finalize?: boolean,
   // dryRun?: boolean,
   debug?: boolean;
   // silent?: boolean,
-  // cleanArtifacts?: boolean,
+  cleanArtifacts?: boolean;
   // errorHandler?: (err: Error, invokeErr: function(): void, compilation: unknown) => void,
   // setCommits?: {
   //   repo?: string,

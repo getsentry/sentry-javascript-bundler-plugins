@@ -11,7 +11,7 @@ const extensions = [".js", ".ts"];
 export default {
   input,
   // external: [...Object.keys(packageJson.dependencies)],
-  external: ["path", "unplugin"],
+  external: ["path", "unplugin", "@sentry/cli"],
   plugins: [
     resolve({ extensions, preferBuiltins: true }),
     commonjs(),
