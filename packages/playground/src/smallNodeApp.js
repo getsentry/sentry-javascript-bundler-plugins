@@ -6,11 +6,7 @@ Sentry.init({
   debug: true,
   enabled: true,
   sampleRate: 1.0,
-  integrations: [new RewriteFrames({})],
-  beforeSend(evt) {
-    console.log(evt.exception.values[0].stacktrace);
-    return evt;
-  },
+  integrations: [new RewriteFrames()],
 });
 
 const fibonacci = (n) => {
