@@ -4,6 +4,15 @@ import { getReleaseName } from "./getReleaseName";
 import { Options } from "./types";
 import { makeSentryFacade } from "./facade";
 
+const defaultOptions: Omit<Options, "include"> = {
+  //TODO: add default options here as we port over options from the webpack plugin
+  // validate: false
+  configFile: "~/.sentryclirc",
+  debug: false,
+  cleanArtifacts: false,
+  finalize: true,
+};
+
 /**
  * The sentry-unplugin concerns itself with two things:
  * - Release injection
@@ -67,7 +76,9 @@ import { makeSentryFacade } from "./facade";
  * The sentry-unplugin will also take care of uploading source maps to Sentry. This is all done in the `buildEnd` hook.
  * TODO: elaborate a bit on how sourcemaps upload works
  */
-const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
+const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) => {
+  const options = { ...defaultOptions, ...originalOptions };
+
   function debugLog(...args: unknown[]) {
     if (options?.debugLogging) {
       // eslint-disable-next-line no-console
@@ -162,9 +173,27 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       }
     },
     buildEnd() {
-      const sentryFacade = makeSentryFacade(getReleaseName(options.release), options);
-      //TODO: do stuff with the facade here lol
-      debugLog("this is my facade:", sentryFacade);
+      const release = getReleaseName(options.release);
+      //TODO:
+      //  1. validate options to see if we get a valid include property, release name, etc.
+      //  2. normalize the include property: Users can pass string | string [] | IncludeEntry[].
+      //     That's good for them but a hassle for us. Let's try to normalize this into one data type
+      //     (I vote IncludeEntry[]) and continue with that down the line
+
+      const sentryFacade = makeSentryFacade(release, options);
+
+      sentryFacade
+        .createNewRelease()
+        .then(() => sentryFacade.cleanArtifacts())
+        .then(() => sentryFacade.uploadSourceMaps())
+        .then(() => sentryFacade.setCommits()) // this is a noop for now
+        .then(() => sentryFacade.finalizeRelease())
+        .then(() => sentryFacade.addDeploy()) // this is a noop for now
+        .catch((e) => {
+          //TODO: invoke error handler here
+          // https://github.com/getsentry/sentry-webpack-plugin/blob/137503f3ac6fe423b16c5c50379859c86e689017/src/index.js#L540-L547
+          debugLog(e);
+        });
     },
   };
 });

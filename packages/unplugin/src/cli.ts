@@ -4,7 +4,7 @@ import { Options } from "./types";
 /** Creates a new Sentry CLI instance. */
 export function makeSentryCli(options: Options) {
   //TODO: pass config file instead of null
-  const cli = new SentryCli(undefined, {
+  const cli = new SentryCli(options.configFile, {
     silent: false, //TODO read from options
     org: options.org,
     project: options.project,

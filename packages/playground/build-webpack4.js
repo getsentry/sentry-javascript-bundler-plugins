@@ -18,12 +18,7 @@ webpack4(
     },
     plugins: [
       sentryWebpackPlugin({
-        org: "sentry-sdks",
-        project: "someProj",
-        authToken: "1234",
-        include: "*",
-        debugLogging: true,
-        debug: true,
+        ...placeHolderOptions,
       }),
     ],
     devtool: "source-map",
