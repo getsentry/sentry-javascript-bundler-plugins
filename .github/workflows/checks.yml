@@ -7,7 +7,6 @@ on:
 
 env:
   DEFAULT_NODE_VERSION: "16.15.1"
-  SENTRY_RELEASE: "default_release_name"
 
 jobs:
   build:
@@ -22,6 +21,7 @@ jobs:
       - run: yarn build
 
   type-check:
+    needs: build
     name: Typing check
     runs-on: ubuntu-latest
     steps:
@@ -30,6 +30,7 @@ jobs:
         with:
           node-version: ${{ env.DEFAULT_NODE_VERSION }}
       - run: yarn --frozen-lockfile
+      - run: yarn build
       - run: yarn check:types
 
   formatting-check:
@@ -44,6 +45,7 @@ jobs:
       - run: yarn check:formatting
 
   test:
+    needs: build
     name: Tests
     runs-on: ubuntu-latest
     steps:
@@ -52,9 +54,11 @@ jobs:
         with:
           node-version: ${{ env.DEFAULT_NODE_VERSION }}
       - run: yarn --frozen-lockfile
-      - run: yarn check:formatting
+      - run: yarn build
+      - run: yarn test
 
   lint:
+    needs: build
     name: Linter check
     runs-on: ubuntu-latest
     steps:
@@ -63,4 +67,5 @@ jobs:
         with:
           node-version: ${{ env.DEFAULT_NODE_VERSION }}
       - run: yarn --frozen-lockfile
+      - run: yarn build
       - run: yarn lint

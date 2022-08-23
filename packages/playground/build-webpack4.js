@@ -16,11 +16,7 @@ webpack4(
       library: "ExampleBundle",
       libraryTarget: "commonjs",
     },
-    plugins: [
-      sentryWebpackPlugin({
-        ...placeHolderOptions,
-      }),
-    ],
+    plugins: [sentryWebpackPlugin({ ...placeHolderOptions })],
     devtool: "source-map",
   },
   (err) => {

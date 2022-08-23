@@ -13,5 +13,5 @@ build({
   minify: true,
   bundle: true,
   format: "cjs",
-  sourcemap: true, // currently we break source maps :(, we need to fix this upstream in unplugin
+  sourcemap: true,
 });
