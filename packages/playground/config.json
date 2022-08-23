@@ -1,5 +1,4 @@
 {
-  "configFile": "./sentry.properties",
   "release": "0.0.1",
   "org": "some-org",
   "project": "some-proj",

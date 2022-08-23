@@ -1,9 +1,6 @@
 const Sentry = require("@sentry/node");
 const { RewriteFrames } = require("@sentry/integrations");
 
-// import * as Sentry from '@sentry/node';
-// import { RewriteFrames } from "@sentry/integrations";
-
 Sentry.init({
   dsn: "https://8fa8ac58d94740a69f74934665aa0770@o1151230.ingest.sentry.io/6680403",
   debug: true,
