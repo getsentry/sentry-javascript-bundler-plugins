@@ -56,7 +56,7 @@ jobs:
           node-version: ${{ env.DEFAULT_NODE_VERSION }}
       - run: yarn --frozen-lockfile
       - run: yarn build
-      - run: yarn check:formatting
+      - run: yarn test
 
   lint:
     needs: build
