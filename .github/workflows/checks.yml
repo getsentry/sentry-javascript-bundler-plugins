@@ -22,6 +22,7 @@ jobs:
       - run: yarn build
 
   type-check:
+    needs: build
     name: Typing check
     runs-on: ubuntu-latest
     steps:
@@ -30,6 +31,7 @@ jobs:
         with:
           node-version: ${{ env.DEFAULT_NODE_VERSION }}
       - run: yarn --frozen-lockfile
+      - run: yarn build
       - run: yarn check:types
 
   formatting-check:
@@ -44,6 +46,7 @@ jobs:
       - run: yarn check:formatting
 
   test:
+    needs: build
     name: Tests
     runs-on: ubuntu-latest
     steps:
@@ -52,9 +55,11 @@ jobs:
         with:
           node-version: ${{ env.DEFAULT_NODE_VERSION }}
       - run: yarn --frozen-lockfile
+      - run: yarn build
       - run: yarn check:formatting
 
   lint:
+    needs: build
     name: Linter check
     runs-on: ubuntu-latest
     steps:
@@ -63,4 +68,5 @@ jobs:
         with:
           node-version: ${{ env.DEFAULT_NODE_VERSION }}
       - run: yarn --frozen-lockfile
+      - run: yarn build
       - run: yarn lint
