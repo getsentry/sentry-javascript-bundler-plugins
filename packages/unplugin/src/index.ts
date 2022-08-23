@@ -76,7 +76,9 @@ const defaultOptions: Omit<Options, "include"> = {
  * The sentry-unplugin will also take care of uploading source maps to Sentry. This is all done in the `buildEnd` hook.
  * TODO: elaborate a bit on how sourcemaps upload works
  */
-const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
+const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) => {
+  const options = { ...defaultOptions, ...originalOptions };
+
   function debugLog(...args: unknown[]) {
     if (options?.debugLogging) {
       // eslint-disable-next-line no-console
