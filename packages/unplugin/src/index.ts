@@ -2,7 +2,7 @@ import { createUnplugin } from "unplugin";
 import MagicString from "magic-string";
 import { getReleaseName } from "./getReleaseName";
 import { Options } from "./types";
-import { makeSentryFacade } from "./facade";
+import { makeSentryFacade } from "./sentry/facade";
 
 const defaultOptions: Omit<Options, "include"> = {
   //TODO: add default options here as we port over options from the webpack plugin
@@ -11,6 +11,7 @@ const defaultOptions: Omit<Options, "include"> = {
   debug: false,
   cleanArtifacts: false,
   finalize: true,
+  url: "https://sentry.io",
 };
 
 /**

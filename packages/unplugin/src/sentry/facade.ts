@@ -7,8 +7,9 @@
 //           - unnecessary functionality
 
 import { makeSentryCli } from "./cli";
-import { Options } from "./types";
+import { Options } from "../types";
 import SentryCli from "@sentry/cli";
+import { makeNewReleaseRequest } from "./api";
 
 export type SentryFacade = {
   createNewRelease: () => Promise<string>;
@@ -27,7 +28,7 @@ export function makeSentryFacade(release: string, options: Options): SentryFacad
   const cli = makeSentryCli(options);
 
   return {
-    createNewRelease: () => createNewRelease(cli, release),
+    createNewRelease: () => createNewRelease(release, options),
     cleanArtifacts: () => cleanArtifacts(cli, release, options),
     uploadSourceMaps: () => uploadSourceMaps(cli, release, options),
     setCommits: () => setCommits(/* release */),
@@ -36,8 +37,8 @@ export function makeSentryFacade(release: string, options: Options): SentryFacad
   };
 }
 
-async function createNewRelease(cli: SentryCli, release: string): Promise<string> {
-  return cli.releases.new(release);
+async function createNewRelease(release: string, options: Options): Promise<string> {
+  return makeNewReleaseRequest(release, options);
 }
 
 async function uploadSourceMaps(

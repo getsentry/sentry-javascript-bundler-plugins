@@ -22,7 +22,7 @@ export default defineConfig({
       project: "hackweek-node-sample-app",
       debug: true,
       debugLogging: true,
-      release: "0.0.1",
+      release: "0.0.6",
       include: "out/vite-smallNodeApp",
       cleanArtifacts: true,
     }),
