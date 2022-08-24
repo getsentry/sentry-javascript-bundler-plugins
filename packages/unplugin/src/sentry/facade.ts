@@ -130,7 +130,9 @@ async function uploadSourceMaps(
     return Promise.resolve("nothing to do here");
   }
 
-  const files = getFiles(include, ext);
+  //TODO: Remove this once we have internal options. this property must always be present
+  const fileExtensions = ext || [];
+  const files = getFiles(include, fileExtensions);
 
   return Promise.all(
     files.map((file) =>
