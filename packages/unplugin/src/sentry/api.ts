@@ -33,7 +33,12 @@ export async function createRelease({
   authToken: string;
   sentryUrl: string;
 }): Promise<void> {
+  // using the legacy endpoint here because the sentry webpack plugin only associates one project
+  // with the release. If we ever wanna support multiple projects in the unplugin,
+  // take a look at how sentry/cli calls the new endpoint:
+  // https://github.com/getsentry/sentry-cli/blob/4fa813549cd249e77ae6ba974d76e606a19f48de/src/api.rs#L769-L773
   const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/`;
+
   const releasePayload = {
     version: release,
     projects: [project],
@@ -42,10 +47,6 @@ export async function createRelease({
   };
 
   try {
-    // using the legacy endpoint here because the sentry webpack plugin only associates one project
-    // with the release. If we ever wanna support multiple projects in the unplugin,
-    // take a look at how sentry/cli calls the new endpoint:
-    // https://github.com/getsentry/sentry-cli/blob/4fa813549cd249e77ae6ba974d76e606a19f48de/src/api.rs#L769-L773
     await sentryApiAxiosInstance.post(requestUrl, releasePayload, {
       headers: { Authorization: `Bearer ${authToken}` },
     });
