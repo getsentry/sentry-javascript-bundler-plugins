@@ -26,7 +26,7 @@ function getAllIncludedFileNames(
     .map((file) => path.join(dirPath, "/", file))
     .forEach((file) => {
       if (fs.statSync(file).isDirectory()) {
-        accFiles.concat(getAllIncludedFileNames(file, allowedExtensions, accFiles));
+        accFiles = accFiles.concat(getAllIncludedFileNames(file, allowedExtensions, accFiles));
       } else {
         if (allowedExtensions.some((e) => file.endsWith(e))) {
           accFiles.push(file);
