@@ -9,7 +9,8 @@
 import { makeSentryCli } from "./cli";
 import { Options } from "../types";
 import SentryCli from "@sentry/cli";
-import { createRelease, deleteAllReleaseArtifacts, updateRelease } from "./api";
+import { createRelease, deleteAllReleaseArtifacts, uploadReleaseFile, updateRelease } from "./api";
+import { getFiles } from "./sourcemaps";
 
 export type SentryFacade = {
   createNewRelease: () => Promise<string>;
@@ -76,12 +77,25 @@ async function uploadSourceMaps(
   release: string,
   options: Options
 ): Promise<string> {
-  /**
-   * One or more paths to ignore during upload. Overrides entries in ignoreFile file.
-   */
+  // This is what Sentry CLI does:
+  //  TODO: 0. Preprocess source maps
+  //           - (Out of scope for now)
+  //           - For rewriting source maps see https://github.com/getsentry/rust-sourcemap/blob/master/src/types.rs#L763
+  //  TODO: 1. Creates a new release to make sure it exists
+  //           - can we assume that the release will exist b/c we don't give unplugin users the
+  //           option to skip this step?
+  //  TODO: 2. download already uploaded files and get their checksums
+  //  TODO: 3. identify new or changed files (by comparing checksums)
+  //  TODO: 4. upload new and changed files
+  //           - CLI asks API for chunk options https://github.com/getsentry/sentry-cli/blob/7b8466885d9cfd51aee6fdc041eca9f645026303/src/utils/file_upload.rs#L106-L112
+  //           - WTF?
+  //           - don't upload more than 20k files
+  //           - upload files concurrently
+  //           - 2 options: chunked upload (multiple files per chunk) or single file upload
 
   const {
     include,
+    ext,
     // ignore,
     // ignoreFile,
     // rewrite,
@@ -91,16 +105,58 @@ async function uploadSourceMaps(
     // validate,
     // urlPrefix,
     // urlSuffix,
-    // ext,
+    org,
+    project,
+    authToken,
+    url,
   } = options;
 
-  //TODO: sort out mess between Sentry CLI options and WebPack plugin options (ideally,
-  //      we normalize everything before and don't diverge with options between our
-  //      own CLI implementation and the plugin.
-  //      I don't want to do too much for this right now b/c we'll eventually get rid of the CLI anyway
-  const uploadSourceMapsOptions = { include: typeof include === "string" ? [include] : include };
+  // TODO: pull these checks out of here and simplify them
+  if (authToken === undefined) {
+    // eslint-disable-next-line no-console
+    console.log('[Sentry-plugin] WARNING: Missing "authToken" option. Will not create release.');
+    return Promise.resolve("nothing to do here");
+  } else if (org === undefined) {
+    // eslint-disable-next-line no-console
+    console.log('[Sentry-plugin] WARNING: Missing "org" option. Will not create release.');
+    return Promise.resolve("nothing to do here");
+  } else if (url === undefined) {
+    // eslint-disable-next-line no-console
+    console.log('[Sentry-plugin] WARNING: Missing "url" option. Will not create release.');
+    return Promise.resolve("nothing to do here");
+  } else if (project === undefined) {
+    // eslint-disable-next-line no-console
+    console.log('[Sentry-plugin] WARNING: Missing "project" option. Will not create release.');
+    return Promise.resolve("nothing to do here");
+  }
 
-  return cli.releases.uploadSourceMaps(release, uploadSourceMapsOptions);
+  // eslint-disable-next-line no-console
+  console.log("[Sentry-plugin] Uploading Sourcemaps.");
+
+  //TODO: Remove this once we have internal options. this property must always be present
+  const fileExtensions = ext || [];
+  const files = getFiles(include, fileExtensions);
+
+  // eslint-disable-next-line no-console
+  console.log(`[Sentry-plugin] > Found ${files.length} files to upload.`);
+
+  return Promise.all(
+    files.map((file) =>
+      uploadReleaseFile({
+        org,
+        project,
+        release,
+        authToken,
+        sentryUrl: url,
+        filename: file.name,
+        fileContent: file.content,
+      })
+    )
+  ).then(() => {
+    // eslint-disable-next-line no-console
+    console.log("[Sentry-plugin] Successfully uploaded sourcemaps.");
+    return "done";
+  });
 }
 
 async function finalizeRelease(

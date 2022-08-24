@@ -12,6 +12,7 @@ const defaultOptions: Omit<Options, "include"> = {
   cleanArtifacts: false,
   finalize: true,
   url: "https://sentry.io",
+  ext: ["js", "map", "jsbundle", "bundle"],
 };
 
 /**
