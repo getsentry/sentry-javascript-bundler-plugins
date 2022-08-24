@@ -78,3 +78,32 @@ export async function deleteAllReleaseArtifacts({
     throw new Error("Something went wrong while cleaning previous release artifacts");
   }
 }
+
+export async function updateRelease({
+  release,
+  org,
+  authToken,
+  sentryUrl,
+  project,
+}: {
+  release: string;
+  org: string;
+  authToken: string;
+  sentryUrl: string;
+  project: string;
+}): Promise<void> {
+  const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/`;
+
+  const releasePayload = {
+    dateReleased: new Date().toISOString(),
+  };
+
+  try {
+    await sentryApiAxiosInstance.put(requestUrl, releasePayload, {
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+  } catch (e) {
+    // TODO: Maybe do some more sopthisticated error handling here
+    throw new Error("Something went wrong while creating a release");
+  }
+}

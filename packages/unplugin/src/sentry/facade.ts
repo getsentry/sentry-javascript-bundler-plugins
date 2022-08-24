@@ -9,7 +9,7 @@
 import { makeSentryCli } from "./cli";
 import { Options } from "../types";
 import SentryCli from "@sentry/cli";
-import { createRelease, deleteAllReleaseArtifacts } from "./api";
+import { createRelease, deleteAllReleaseArtifacts, updateRelease } from "./api";
 
 export type SentryFacade = {
   createNewRelease: () => Promise<string>;
@@ -103,10 +103,33 @@ async function uploadSourceMaps(
   return cli.releases.uploadSourceMaps(release, uploadSourceMapsOptions);
 }
 
-async function finalizeRelease(cli: SentryCli, release: string, options: Options): Promise<string> {
+async function finalizeRelease(
+  _cli: SentryCli,
+  release: string,
+  options: Options
+): Promise<string> {
   if (options.finalize) {
-    return cli.releases.finalize(release);
+    const { authToken, org, url, project } = options;
+    if (!authToken || !org || !url || !project) {
+      // eslint-disable-next-line no-console
+      console.log(
+        "[Sentry-plugin] WARNING: Missing required option. Will not clean existing artifacts."
+      );
+      return Promise.resolve("nothing to do here");
+    }
+
+    await updateRelease({
+      authToken,
+      org,
+      release,
+      sentryUrl: url,
+      project,
+    });
+
+    // eslint-disable-next-line no-console
+    console.log("[Sentry-plugin] Successfully finalized release.");
   }
+
   return Promise.resolve("nothing to do here");
 }
 
