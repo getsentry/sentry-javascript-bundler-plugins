@@ -6,9 +6,7 @@
 //           - huge download
 //           - unnecessary functionality
 
-import { makeSentryCli } from "./cli";
 import { Options } from "../types";
-import SentryCli from "@sentry/cli";
 import { createRelease, deleteAllReleaseArtifacts, uploadReleaseFile, updateRelease } from "./api";
 import { getFiles } from "./sourcemaps";
 
@@ -26,14 +24,12 @@ export type SentryFacade = {
  * a release on Sentry. This includes uploading source maps and finalizing the release
  */
 export function makeSentryFacade(release: string, options: Options): SentryFacade {
-  const cli = makeSentryCli(options);
-
   return {
     createNewRelease: () => createNewRelease(release, options),
-    cleanArtifacts: () => cleanArtifacts(cli, release, options),
-    uploadSourceMaps: () => uploadSourceMaps(cli, release, options),
+    cleanArtifacts: () => cleanArtifacts(release, options),
+    uploadSourceMaps: () => uploadSourceMaps(release, options),
     setCommits: () => setCommits(/* release */),
-    finalizeRelease: () => finalizeRelease(cli, release, options),
+    finalizeRelease: () => finalizeRelease(release, options),
     addDeploy: () => addDeploy(/* release */),
   };
 }
@@ -72,11 +68,7 @@ async function createNewRelease(release: string, options: Options): Promise<stri
   return Promise.resolve("nothing to do here");
 }
 
-async function uploadSourceMaps(
-  cli: SentryCli,
-  release: string,
-  options: Options
-): Promise<string> {
+async function uploadSourceMaps(release: string, options: Options): Promise<string> {
   // This is what Sentry CLI does:
   //  TODO: 0. Preprocess source maps
   //           - (Out of scope for now)
@@ -159,11 +151,7 @@ async function uploadSourceMaps(
   });
 }
 
-async function finalizeRelease(
-  _cli: SentryCli,
-  release: string,
-  options: Options
-): Promise<string> {
+async function finalizeRelease(release: string, options: Options): Promise<string> {
   if (options.finalize) {
     const { authToken, org, url, project } = options;
     if (!authToken || !org || !url || !project) {
@@ -189,7 +177,7 @@ async function finalizeRelease(
   return Promise.resolve("nothing to do here");
 }
 
-async function cleanArtifacts(_cli: SentryCli, release: string, options: Options): Promise<string> {
+async function cleanArtifacts(release: string, options: Options): Promise<string> {
   if (options.cleanArtifacts) {
     // TODO: pull these checks out of here and simplify them
     if (options.authToken === undefined) {
