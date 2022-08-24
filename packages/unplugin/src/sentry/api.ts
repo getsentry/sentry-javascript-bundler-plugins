@@ -1,5 +1,7 @@
 import axios from "axios";
 
+import FormData from "form-data";
+
 // We need to ignore the import because the package.json is not part of the TS project as configured in tsconfig.json
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -21,9 +23,9 @@ sentryApiAxiosInstance.interceptors.request.use((config) => {
 });
 
 export async function createRelease({
-  release,
-  project,
   org,
+  project,
+  release,
   authToken,
   sentryUrl,
 }: {
@@ -54,10 +56,10 @@ export async function createRelease({
 
 export async function deleteAllReleaseArtifacts({
   org,
-  release,
-  sentryUrl,
-  authToken,
   project,
+  release,
+  authToken,
+  sentryUrl,
 }: {
   org: string;
   release: string;
@@ -105,5 +107,41 @@ export async function updateRelease({
   } catch (e) {
     // TODO: Maybe do some more sopthisticated error handling here
     throw new Error("Something went wrong while creating a release");
+  }
+}
+
+export async function uploadReleaseFile({
+  org,
+  project,
+  release,
+  authToken,
+  sentryUrl,
+  filename,
+  fileContent,
+}: {
+  org: string;
+  release: string;
+  sentryUrl: string;
+  authToken: string;
+  project: string;
+  filename: string;
+  fileContent: string;
+}) {
+  const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/files/`;
+
+  const form = new FormData();
+  form.append("name", filename);
+  form.append("file", Buffer.from(fileContent, "utf-8"), { filename });
+
+  try {
+    await sentryApiAxiosInstance.post(requestUrl, form, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  } catch (e) {
+    // TODO: Maybe do some more sopthisticated error handling here
+    throw new Error(`Something went wrong while uploading file ${filename}`);
   }
 }
