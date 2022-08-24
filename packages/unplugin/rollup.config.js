@@ -3,6 +3,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import babel from "@rollup/plugin-babel";
 import packageJson from "./package.json";
 import json from "@rollup/plugin-json";
+import modulePackage from "module";
 
 const input = ["src/index.ts"];
 
@@ -10,8 +11,7 @@ const extensions = [".js", ".ts"];
 
 export default {
   input,
-  // external: [...Object.keys(packageJson.dependencies)],
-  external: ["path", "unplugin", "@sentry/cli"],
+  external: [...Object.keys(packageJson.dependencies), ...modulePackage.builtinModules],
   plugins: [
     resolve({ extensions, preferBuiltins: true }),
     commonjs(),
