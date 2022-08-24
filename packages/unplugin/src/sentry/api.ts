@@ -84,16 +84,18 @@ export async function updateRelease({
   org,
   authToken,
   sentryUrl,
+  project,
 }: {
   release: string;
   org: string;
   authToken: string;
   sentryUrl: string;
+  project: string;
 }): Promise<void> {
-  const requestUrl = `${sentryUrl}${API_PATH}/organizations/${org}/releases/${release}/`;
+  const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/`;
 
   const releasePayload = {
-    dateReleased: new Date(),
+    dateReleased: new Date().toISOString(),
   };
 
   try {

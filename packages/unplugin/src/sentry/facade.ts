@@ -109,8 +109,8 @@ async function finalizeRelease(
   options: Options
 ): Promise<string> {
   if (options.finalize) {
-    const { authToken, org, url } = options;
-    if (!authToken || !org || !url) {
+    const { authToken, org, url, project } = options;
+    if (!authToken || !org || !url || !project) {
       // eslint-disable-next-line no-console
       console.log(
         "[Sentry-plugin] WARNING: Missing required option. Will not clean existing artifacts."
@@ -123,7 +123,11 @@ async function finalizeRelease(
       org,
       release,
       sentryUrl: url,
+      project,
     });
+
+    // eslint-disable-next-line no-console
+    console.log("[Sentry-plugin] Successfully finalized release.");
   }
 
   return Promise.resolve("nothing to do here");
