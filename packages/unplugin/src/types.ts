@@ -20,7 +20,7 @@ export type Options = {
   include: string; // | Array<string | IncludeEntry>;
   // ignoreFile: string
   // ignore: string | string[]
-  // ext: string[]
+  ext?: string[];
   // urlPrefix: string,
   // urlSuffix: string,
   // validate: boolean

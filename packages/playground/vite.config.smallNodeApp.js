@@ -23,7 +23,7 @@ export default defineConfig({
       project: process.env.SENTRY_PROJECT,
       debug: true,
       debugLogging: true,
-      release: "hackweek-0.0.7",
+      release: "0.0.10",
       include: "out/vite-smallNodeApp",
       cleanArtifacts: true,
     }),
