@@ -131,6 +131,12 @@ async function cleanArtifacts(_cli: SentryCli, release: string, options: Options
         '[Sentry-plugin] WARNING: Missing "url" option. Will not clean existing artifacts.'
       );
       return Promise.resolve("nothing to do here");
+    } else if (options.project === undefined) {
+      // eslint-disable-next-line no-console
+      console.log(
+        '[Sentry-plugin] WARNING: Missing "project" option. Will not clean existing artifacts.'
+      );
+      return Promise.resolve("nothing to do here");
     }
 
     await deleteAllReleaseArtifacts({
