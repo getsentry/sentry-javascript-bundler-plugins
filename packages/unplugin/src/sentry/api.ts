@@ -33,15 +33,11 @@ export async function createRelease({
   authToken: string;
   sentryUrl: string;
 }): Promise<void> {
-  // using the legacy endpoint here because the sentry webpack plugin only associates one project
-  // with the release. If we ever wanna support multiple projects in the unplugin,
-  // take a look at how sentry/cli calls the new endpoint:
-  // https://github.com/getsentry/sentry-cli/blob/4fa813549cd249e77ae6ba974d76e606a19f48de/src/api.rs#L769-L773
-  const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/`;
+  const requestUrl = `${sentryUrl}${API_PATH}/organizations/${org}/releases/`;
 
   const releasePayload = {
     version: release,
-    projects: [project],
+    projects: [project], // we currently only support creating releases for a single project
     dateStarted: new Date(),
     dateReleased: new Date(), //TODO: figure out if these dates are set correctly
   };
@@ -67,11 +63,9 @@ export async function deleteAllReleaseArtifacts({
   release: string;
   sentryUrl: string;
   authToken: string;
-  project?: string;
+  project: string;
 }): Promise<void> {
-  const requestUrl = project
-    ? `${sentryUrl}${API_PATH}/projects/${org}/${project}/files/source-maps/?name=${release}` // legacy endpoint if users provide project
-    : `${sentryUrl}${API_PATH}/organizations/${org}/files/source-maps/?name=${release}`; // new endpoint
+  const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/files/source-maps/?name=${release}`;
 
   try {
     await sentryApiAxiosInstance.delete(requestUrl, {
