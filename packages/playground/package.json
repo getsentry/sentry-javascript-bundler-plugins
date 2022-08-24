@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "run-p build:rollup build:vite build:webpack4 build:webpack5 build:esbuild",
+    "build:playground": "run-p build:rollup build:vite build:webpack4 build:webpack5 build:esbuild",
     "build:rollup": "rollup --config rollup.config.js",
     "build:vite": "vite build --config vite.config.js",
     "build:webpack4": "node build-webpack4.js",
