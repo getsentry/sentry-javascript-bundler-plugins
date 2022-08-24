@@ -1,13 +1,12 @@
 import * as child_process from "child_process";
-import * as fs from "fs";
-import * as path from "path";
 
-function isGit(dir: string) {
-  return fs.existsSync(path.join(dir, ".git"));
-}
-
-function getBranchHead() {
-  return child_process.execSync("git rev-parse HEAD").toString().trim();
+function getGitBranchHead(): string | undefined {
+  try {
+    return child_process.execSync("git rev-parse HEAD").toString().trim();
+  } catch (e) {
+    // no git installed
+    return undefined;
+  }
 }
 
 export function getReleaseName(releaseName?: string): string {
@@ -35,8 +34,10 @@ export function getReleaseName(releaseName?: string): string {
     return process.env[releaseFromEnvironmentVar] as string;
   }
 
-  if (isGit(process.cwd())) {
-    return getBranchHead();
+  const gitBranchHead = getGitBranchHead();
+
+  if (gitBranchHead) {
+    return gitBranchHead;
   } else {
     throw new Error("Could not return a release name");
   }
