@@ -37,7 +37,7 @@ export type Options = {
   debug?: boolean;
   // silent?: boolean,
   cleanArtifacts?: boolean;
-  // errorHandler?: (err: Error, invokeErr: function(): void, compilation: unknown) => void,
+  errorHandler?: (err: Error) => void;
   // setCommits?: {
   //   repo?: string,
   //   commit?: string,
