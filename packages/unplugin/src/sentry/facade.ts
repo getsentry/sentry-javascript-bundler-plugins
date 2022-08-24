@@ -130,9 +130,15 @@ async function uploadSourceMaps(
     return Promise.resolve("nothing to do here");
   }
 
+  // eslint-disable-next-line no-console
+  console.log("[Sentry-plugin] Uploading Sourcemaps.");
+
   //TODO: Remove this once we have internal options. this property must always be present
   const fileExtensions = ext || [];
   const files = getFiles(include, fileExtensions);
+
+  // eslint-disable-next-line no-console
+  console.log(`[Sentry-plugin] > Found ${files.length} files to upload.`);
 
   return Promise.all(
     files.map((file) =>
@@ -148,7 +154,7 @@ async function uploadSourceMaps(
     )
   ).then(() => {
     // eslint-disable-next-line no-console
-    console.log("[Sentry-plugin] Successfully created release.");
+    console.log("[Sentry-plugin] Successfully uploaded sourcemaps.");
     return "done";
   });
 }

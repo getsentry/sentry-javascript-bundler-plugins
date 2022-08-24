@@ -20,20 +20,19 @@ function getAllIncludedFileNames(
   allowedExtensions: string[],
   accFiles: string[]
 ): string[] {
-  let allFiles = accFiles;
   const files = fs.readdirSync(dirPath);
 
   files
     .map((file) => path.join(dirPath, "/", file))
     .forEach((file) => {
       if (fs.statSync(file).isDirectory()) {
-        allFiles = getAllIncludedFileNames(file, allowedExtensions, allFiles);
+        accFiles.concat(getAllIncludedFileNames(file, allowedExtensions, accFiles));
       } else {
         if (allowedExtensions.some((e) => file.endsWith(e))) {
-          allFiles.push(file);
+          accFiles.push(file);
         }
       }
     });
 
-  return allFiles;
+  return accFiles;
 }
