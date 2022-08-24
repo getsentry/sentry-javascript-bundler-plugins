@@ -17,12 +17,13 @@ export default defineConfig({
   },
   plugins: [
     sentryVitePlugin({
+      url: process.env.SENTRY_URL,
       authToken: process.env.SENTRY_AUTH_TOKEN,
-      org: "lms-testorg-9m",
-      project: "hackweek-node-sample-app",
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
       debug: true,
       debugLogging: true,
-      release: "0.0.1",
+      release: "hackweek-0.0.7",
       include: "out/vite-smallNodeApp",
       cleanArtifacts: true,
     }),

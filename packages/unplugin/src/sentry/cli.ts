@@ -1,5 +1,5 @@
 import SentryCli from "@sentry/cli";
-import { Options } from "./types";
+import { Options } from "../types";
 
 /** Creates a new Sentry CLI instance. */
 export function makeSentryCli(options: Options) {
