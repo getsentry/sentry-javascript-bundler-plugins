@@ -1,5 +1,5 @@
 {
-  "name": "@sentry/sentry-unplugin-tsconfigs",
+  "name": "sentry-unplugin-tsconfigs",
   "version": "0.0.0",
   "private": true
 }

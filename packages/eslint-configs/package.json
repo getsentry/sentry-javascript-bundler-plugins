@@ -1,5 +1,5 @@
 {
-  "name": "@sentry/eslint-config-local",
+  "name": "eslint-config-local",
   "version": "0.0.0",
   "private": true,
   "peerDependencies": {
