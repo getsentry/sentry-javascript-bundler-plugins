@@ -13,7 +13,7 @@ import {
 } from "@sentry/unplugin";
 
 export function createCjsBundles(
-  entryPointPath: string,
+  entrypoints: { [name: string]: string },
   outFolder: string,
   sentryUnpluginOptions: Options
 ): void {
@@ -21,10 +21,12 @@ export function createCjsBundles(
     clearScreen: false,
     build: {
       outDir: path.join(outFolder, "vite"),
-      lib: {
-        entry: entryPointPath,
-        fileName: "index",
-        formats: ["cjs"],
+      rollupOptions: {
+        input: entrypoints,
+        output: {
+          format: "cjs",
+          entryFileNames: "[name].js",
+        },
       },
     },
     plugins: [sentryVitePlugin(sentryUnpluginOptions)],
@@ -32,20 +34,20 @@ export function createCjsBundles(
 
   void rollup
     .rollup({
-      input: entryPointPath,
+      input: entrypoints,
       plugins: [sentryRollupPlugin(sentryUnpluginOptions)],
     })
     .then((bundle) =>
       bundle.write({
-        file: path.join(outFolder, "rollup/index.js"),
+        dir: path.join(outFolder, "rollup"),
         format: "cjs",
         exports: "named",
       })
     );
 
   void esbuild.build({
-    entryPoints: [entryPointPath],
-    outfile: path.join(outFolder, "esbuild/index.js"),
+    entryPoints: entrypoints,
+    outdir: path.join(outFolder, "esbuild"),
     plugins: [sentryEsbuildPlugin(sentryUnpluginOptions)],
     minify: true,
     bundle: true,
@@ -55,11 +57,10 @@ export function createCjsBundles(
   webpack4(
     {
       mode: "production",
-      entry: entryPointPath,
+      entry: entrypoints,
       cache: false,
       output: {
         path: path.join(outFolder, "webpack4"),
-        filename: "index.js",
         libraryTarget: "commonjs",
       },
       target: "node", // needed for webpack 4 so we can access node api
@@ -75,9 +76,8 @@ export function createCjsBundles(
   webpack5(
     {
       cache: false,
-      entry: entryPointPath,
+      entry: entrypoints,
       output: {
-        filename: "index.js",
         path: path.join(outFolder, "webpack5"),
         library: {
           type: "commonjs",

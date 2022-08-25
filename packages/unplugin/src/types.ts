@@ -13,7 +13,7 @@ export type Options = {
   /* --- release properties: */
   release?: string;
   // dist: string,
-  // entries: string[] | RegExp | ((key: string) => boolean);
+  entries?: (string | RegExp)[] | RegExp | string | ((filePath: string) => boolean);
   finalize?: boolean;
 
   /* --- source maps properties: */
