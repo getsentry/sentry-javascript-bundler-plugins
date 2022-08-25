@@ -12,5 +12,10 @@
         "cacheableOperations": ["build", "lint", "test"]
       }
     }
+  },
+  "targetDefaults": {
+    "lint": {
+      "dependsOn": ["^build"]
+    }
   }
 }
