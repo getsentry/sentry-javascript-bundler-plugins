@@ -15,6 +15,9 @@
   },
   "targetDefaults": {
     "lint": {
+      "dependsOn": ["^build", "build"]
+    },
+    "test": {
       "dependsOn": ["^build"]
     }
   }
