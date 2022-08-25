@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import FormData from "form-data";
+import * as Sentry from "@sentry/node";
 
 // We need to ignore the import because the package.json is not part of the TS project as configured in tsconfig.json
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -49,8 +50,7 @@ export async function createRelease({
       headers: { Authorization: `Bearer ${authToken}` },
     });
   } catch (e) {
-    // TODO: Maybe do some more sopthisticated error handling here
-    throw new Error("Something went wrong while creating a release");
+    Sentry.captureException(e);
   }
 }
 
@@ -76,8 +76,7 @@ export async function deleteAllReleaseArtifacts({
       },
     });
   } catch (e) {
-    // TODO: Maybe do some more sopthisticated error handling here
-    throw new Error("Something went wrong while cleaning previous release artifacts");
+    Sentry.captureException(e);
   }
 }
 
@@ -105,8 +104,7 @@ export async function updateRelease({
       headers: { Authorization: `Bearer ${authToken}` },
     });
   } catch (e) {
-    // TODO: Maybe do some more sopthisticated error handling here
-    throw new Error("Something went wrong while creating a release");
+    Sentry.captureException(e);
   }
 }
 
@@ -141,7 +139,6 @@ export async function uploadReleaseFile({
       },
     });
   } catch (e) {
-    // TODO: Maybe do some more sopthisticated error handling here
-    throw new Error(`Something went wrong while uploading file ${filename}`);
+    Sentry.captureException(e);
   }
 }
