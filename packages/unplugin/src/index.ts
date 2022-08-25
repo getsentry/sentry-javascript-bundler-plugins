@@ -8,8 +8,6 @@ import "@sentry/tracing";
 
 Sentry.init({
   dsn: "https://1298ac2f87bc4aae99d9a9a94ce65b42@o447951.ingest.sentry.io/6681372",
-  debug: true,
-  sampleRate: 1.0,
   tracesSampleRate: 1.0,
   integrations: [new Sentry.Integrations.Http({ tracing: true })],
 });
