@@ -13,6 +13,9 @@
     }
   },
   "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"]
+    },
     "lint": {
       "dependsOn": ["^build", "build"]
     },
