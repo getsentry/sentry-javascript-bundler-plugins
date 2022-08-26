@@ -90,6 +90,13 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
     options.org || ""
   );
 
+  if (sentryClient && sentryHub) {
+    // eslint-disable-next-line no-console
+    console.log("[Sentry-plugin]", "Sending error and performance telemetry data to Sentry.");
+    // eslint-disable-next-line no-console
+    console.log("[Sentry-Plugin]", "To disable telemetry, set `options.telemetry` to `false`.");
+  }
+
   sentryHub?.setTags({ organization: options.org, project: options.project });
   sentryHub?.setUser({ id: options.org });
 
