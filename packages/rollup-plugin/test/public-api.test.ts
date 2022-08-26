@@ -1,5 +1,6 @@
 import * as sentryRollupPlugin from "../src";
 
-test("rollup plugin should exist", () => {
+test("Rollup plugin should exist", () => {
   expect(sentryRollupPlugin).toBeDefined();
+  expect(typeof sentryRollupPlugin).toBe("function");
 });

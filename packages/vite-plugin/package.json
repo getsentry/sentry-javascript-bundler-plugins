@@ -1,15 +1,14 @@
 {
-  "name": "@sentry/rollup-plugin",
+  "name": "@sentry/vite-plugin",
   "version": "0.0.1",
-  "description": "Official Sentry Rollup plugin",
+  "description": "Official Sentry Vite plugin",
   "repository": "git://github.com/getsentry/sentry-unplugin.git",
-  "homepage": "https://github.com/getsentry/sentry-unplugin/tree/main/packages/rollup-plugin",
+  "homepage": "https://github.com/getsentry/sentry-unplugin/tree/main/packages/vite-plugin",
   "author": "Sentry",
   "license": "MIT",
   "keywords": [
     "Sentry",
-    "rollup-plugin",
-    "Rollup",
+    "Vite",
     "bundler",
     "plugin"
   ],
