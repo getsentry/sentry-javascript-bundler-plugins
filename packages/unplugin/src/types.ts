@@ -64,6 +64,18 @@ export type Options = {
   //   name?: string,
   //   url?: string,
   // }
+
+  /**
+   * If set to true, internal plugin errors and performance data will be sent to Sentry.
+   *
+   * At Sentry we like to use Sentry ourselves to deliver faster and more stable products.
+   * We're very careful of what we're sending. We won't collect anything other than error
+   * and high-level performance data. We will never collect your code or any details of the
+   * projects in which you're using this plugin.
+   *
+   * Defaults to true
+   */
+  telemetry?: boolean;
 };
 
 /*
