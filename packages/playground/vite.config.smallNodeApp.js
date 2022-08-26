@@ -1,5 +1,5 @@
 // @ts-check
-import { sentryVitePlugin } from "@sentry/unplugin";
+import { sentryVitePlugin } from "@sentry/sentry-unplugin";
 import { defineConfig } from "vite";
 import * as path from "path";
 

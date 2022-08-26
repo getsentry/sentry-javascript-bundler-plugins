@@ -1,7 +1,6 @@
 {
   "extends": "nx/presets/npm.json",
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "npmScope": "sentry",
   "affected": {
     "defaultBase": "main"
   },
@@ -14,6 +13,9 @@
     }
   },
   "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"]
+    },
     "lint": {
       "dependsOn": ["^build", "build"]
     },

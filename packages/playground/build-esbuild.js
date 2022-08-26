@@ -1,4 +1,4 @@
-const { sentryEsbuildPlugin } = require("@sentry/unplugin");
+const { sentryEsbuildPlugin } = require("@sentry/sentry-unplugin");
 const { build } = require("esbuild");
 const placeHolderOptions = require("./config.json");
 
