@@ -13,7 +13,18 @@ export type Options = {
   /* --- release properties: */
   release?: string;
   // dist: string,
+
+  /**
+   * Filter for bundle entry points that should contain the provided release. By default, the release will be injected
+   * into all entry points.
+   *
+   * This option may contain a string, a RegEx, or an array containing strings and RegExes.
+   * It's also possible to provide a filter function that takes the absolute path of a processed entrypoint and should
+   * return `true` if the release should be injected into the entrypoint and `false` otherwise.
+   * String values of this option require a full match with the absolute path of the bundle.
+   */
   entries?: (string | RegExp)[] | RegExp | string | ((filePath: string) => boolean);
+
   finalize?: boolean;
 
   /* --- source maps properties: */
