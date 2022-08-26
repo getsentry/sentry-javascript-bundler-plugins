@@ -82,7 +82,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
   //TODO: We can get rid of this variable once we have internal plugin options
   const telemetryEnabled = options.telemetry === true;
 
-  const { client: sentryClient, hub: sentryHub } = makeSentryClient(
+  const { hub: sentryHub } = makeSentryClient(
     "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
     telemetryEnabled,
     options.org

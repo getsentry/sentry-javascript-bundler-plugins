@@ -1,7 +1,6 @@
 import axios from "axios";
 
 import FormData from "form-data";
-import * as Sentry from "@sentry/node";
 
 // We need to ignore the import because the package.json is not part of the TS project as configured in tsconfig.json
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
