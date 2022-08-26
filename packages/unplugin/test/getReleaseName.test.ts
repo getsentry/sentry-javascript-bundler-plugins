@@ -40,7 +40,7 @@ describe("environmental getReleaseName", () => {
   it("adheres to user defined release name", () => {
     const releaseName = "USER_DEFINED_this-is-my-custom-release";
 
-    expect(getReleaseName(releaseName)).toBe(releaseName);
+    expect(getReleaseName({ releaseName })).toBe(releaseName);
   });
 
   it("adheres to process.env.SENTRY_RELEASE", () => {
@@ -93,6 +93,19 @@ describe("environmental getReleaseName", () => {
     process.env["VERCEL_GIT_COMMIT_SHA"] = vercelReleaseName;
     process.env["SENTRY_RELEASE"] = sentryReleaseName;
 
-    expect(getReleaseName("cutom_release_name")).toBe("cutom_release_name");
+    expect(getReleaseName({ releaseName: "custom_release_name" })).toBe("custom_release_name");
+  });
+
+  it("adheres to Vercel: process.env.VERCEL_GIT_COMMIT_SHA and adds a dist on top of it", () => {
+    const releaseName = "VERCEL_GIT_COMMIT_SHA_string";
+    process.env["VERCEL_GIT_COMMIT_SHA"] = releaseName;
+
+    expect(getReleaseName({ dist: "1.2.0" })).toBe(`${releaseName}@1.2.0`);
+  });
+
+  it("adheres to user defined release name and adds a dist on top of it", () => {
+    const releaseName = "USER_DEFINED_this-is-my-custom-release";
+
+    expect(getReleaseName({ releaseName, dist: "1.2.0" })).toBe(`${releaseName}@1.2.0`);
   });
 });

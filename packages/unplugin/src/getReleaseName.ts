@@ -9,15 +9,23 @@ function getGitBranchHead(): string | undefined {
   }
 }
 
-export function getReleaseName(releaseName?: string): string {
-  if (releaseName) {
-    return releaseName;
+function appendDistToRelease(releaseName: string, dist?: string) {
+  if (dist) {
+    return `${releaseName}@${dist}`;
+  }
+
+  return releaseName;
+}
+
+export function getReleaseName(props?: { releaseName?: string; dist?: string }): string {
+  if (props?.releaseName) {
+    return appendDistToRelease(props.releaseName, props.dist);
   }
 
   // Env var SENTRY_RELEASE takes presendace over other env vars listed below
   // this is why we are looking for it before proceeding with others
   if (process.env["SENTRY_RELEASE"]) {
-    return process.env["SENTRY_RELEASE"];
+    return appendDistToRelease(process.env["SENTRY_RELEASE"], props?.dist);
   }
 
   const ENV_VARS = [
@@ -31,13 +39,13 @@ export function getReleaseName(releaseName?: string): string {
   const releaseFromEnvironmentVar = ENV_VARS.find((key) => Object.keys(process.env).includes(key));
 
   if (releaseFromEnvironmentVar) {
-    return process.env[releaseFromEnvironmentVar] as string;
+    return appendDistToRelease(process.env[releaseFromEnvironmentVar] as string, props?.dist);
   }
 
   const gitBranchHead = getGitBranchHead();
 
   if (gitBranchHead) {
-    return gitBranchHead;
+    return appendDistToRelease(gitBranchHead, props?.dist);
   } else {
     throw new Error("Could not return a release name");
   }

@@ -136,7 +136,9 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
       debugLog(`Called "transform": ${JSON.stringify({ id })}`);
 
       if (id === RELEASE_INJECTOR_ID) {
-        return generateGlobalInjectorCode({ release: getReleaseName(options.release) });
+        return generateGlobalInjectorCode({
+          release: getReleaseName({ releaseName: options.release, dist: options.dist }),
+        });
       } else {
         return undefined;
       }
@@ -207,7 +209,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
       }
     },
     buildEnd() {
-      const release = getReleaseName(options.release);
+      const release = getReleaseName({ releaseName: options.release, dist: options.dist });
       //TODO:
       //  1. validate options to see if we get a valid include property, release name, etc.
       //  2. normalize the include property: Users can pass string | string [] | IncludeEntry[].

@@ -12,7 +12,7 @@ export type Options = {
 
   /* --- release properties: */
   release?: string;
-  // dist: string,
+  dist?: string;
 
   /**
    * Filter for bundle entry points that should contain the provided release. By default, the release will be injected
