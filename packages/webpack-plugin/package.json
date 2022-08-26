@@ -12,8 +12,9 @@
     "bundler",
     "plugin"
   ],
+  "private": true,
   "publishConfig": {
-    "access": "public"
+    "access": "restricted"
   },
   "files": [
     "dist"
