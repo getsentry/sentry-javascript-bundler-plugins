@@ -1,8 +1,15 @@
 import { createUnplugin } from "unplugin";
 import MagicString from "magic-string";
 import { getReleaseName } from "./getReleaseName";
-import { Options } from "./types";
-import { makeSentryFacade } from "./sentry/facade";
+import { Options, BuildContext } from "./types";
+import {
+  createNewRelease,
+  cleanArtifacts,
+  addDeploy,
+  finalizeRelease,
+  setCommits,
+  uploadSourceMaps,
+} from "./sentry/releasePipeline";
 import "@sentry/tracing";
 import { addSpanToTransaction, captureMinimalError, makeSentryClient } from "./sentry/telemetry";
 import { Span, Transaction } from "@sentry/types";
@@ -132,8 +139,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
         name: "plugin-execution",
       });
       releaseInjectionSpan = addSpanToTransaction(
-        sentryHub,
-        transaction,
+        { hub: sentryHub, parentSpan: transaction },
         "release-injection",
         "release-injection"
       );
@@ -272,11 +278,9 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
     buildEnd() {
       releaseInjectionSpan?.finish();
       const releasePipelineSpan =
-        sentryHub &&
         transaction &&
         addSpanToTransaction(
-          sentryHub,
-          transaction,
+          { hub: sentryHub, parentSpan: transaction },
           "release-creation",
           "release-creation-pipeline"
         );
@@ -294,15 +298,14 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
       //     That's good for them but a hassle for us. Let's try to normalize this into one data type
       //     (I vote IncludeEntry[]) and continue with that down the line
 
-      const sentryFacade = makeSentryFacade(release, options, sentryHub);
+      const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan };
 
-      sentryFacade
-        .createNewRelease()
-        .then(() => sentryFacade.cleanArtifacts())
-        .then(() => sentryFacade.uploadSourceMaps())
-        .then(() => sentryFacade.setCommits()) // this is a noop for now
-        .then(() => sentryFacade.finalizeRelease())
-        .then(() => sentryFacade.addDeploy()) // this is a noop for now
+      createNewRelease(release, options, ctx)
+        .then(() => cleanArtifacts(release, options, ctx))
+        .then(() => uploadSourceMaps(release, options, ctx))
+        .then(() => setCommits(ctx)) // this is a noop for now
+        .then(() => finalizeRelease(release, options, ctx))
+        .then(() => addDeploy(ctx)) // this is a noop for now
         .catch((e) => {
           //TODO: invoke error handler here
           // https://github.com/getsentry/sentry-webpack-plugin/blob/137503f3ac6fe423b16c5c50379859c86e689017/src/index.js#L540-L547

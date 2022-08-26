@@ -1,4 +1,8 @@
 //TODO: JsDoc for all properties
+
+import { Hub } from "@sentry/hub";
+import { Span } from "@sentry/tracing";
+
 //TODO: compare types w/ webpack plugin (and sentry-cli?)
 export type Options = {
   debugLogging?: boolean;
@@ -84,3 +88,12 @@ type IncludeEntry = {
   //TODO: what about the other entries??
 };
 */
+
+/**
+ * Holds data for internal purposes
+ * (e.g. telemetry and logging)
+ */
+export type BuildContext = {
+  hub: Hub;
+  parentSpan?: Span;
+};
