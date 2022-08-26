@@ -6,47 +6,19 @@
 //           - huge download
 //           - unnecessary functionality
 
-import { Hub } from "@sentry/node";
-import { Span } from "@sentry/types";
-import { Options } from "../types";
+import { Options, BuildContext } from "../types";
 import { createRelease, deleteAllReleaseArtifacts, uploadReleaseFile, updateRelease } from "./api";
 import Logger from "./logger";
 import { getFiles } from "./sourcemaps";
 import { addSpanToTransaction } from "./telemetry";
 
-export type SentryFacade = {
-  createNewRelease: () => Promise<string>;
-  cleanArtifacts: () => Promise<string>;
-  uploadSourceMaps: () => Promise<string>;
-  setCommits: () => Promise<string>;
-  finalizeRelease: () => Promise<string>;
-  addDeploy: () => Promise<string>;
-};
-
-/**
- * Factory function that provides all necessary Sentry functionality for creating
- * a release on Sentry. This includes uploading source maps and finalizing the release
- */
-export function makeSentryFacade(release: string, options: Options, sentryHub: Hub): SentryFacade {
-  const span = sentryHub.getScope()?.getSpan();
-  return {
-    createNewRelease: () => createNewRelease(release, options, sentryHub, span),
-    cleanArtifacts: () => cleanArtifacts(release, options, sentryHub, span),
-    uploadSourceMaps: () => uploadSourceMaps(release, options, sentryHub, span),
-    setCommits: () => setCommits(/* release, */ sentryHub, span),
-    finalizeRelease: () => finalizeRelease(release, options, sentryHub, span),
-    addDeploy: () => addDeploy(/* release, */ sentryHub, span),
-  };
-}
-
-async function createNewRelease(
+export async function createNewRelease(
   release: string,
   options: Options,
-  sentryHub: Hub,
-  parentSpan?: Span
+  ctx: BuildContext
 ): Promise<string> {
   const logger = new Logger(options);
-  const span = addSpanToTransaction(sentryHub, parentSpan, "create-new-release");
+  const span = addSpanToTransaction(ctx, "create-new-release");
 
   // TODO: pull these checks out of here and simplify them
   if (options.authToken === undefined) {
@@ -69,7 +41,7 @@ async function createNewRelease(
     org: options.org,
     project: options.project,
     sentryUrl: options.url,
-    sentryHub,
+    sentryHub: ctx.hub,
   });
 
   logger.info("Successfully created release.");
@@ -78,14 +50,13 @@ async function createNewRelease(
   return Promise.resolve("nothing to do here");
 }
 
-async function uploadSourceMaps(
+export async function uploadSourceMaps(
   release: string,
   options: Options,
-  sentryHub: Hub,
-  parentSpan?: Span
+  ctx: BuildContext
 ): Promise<string> {
   const logger = new Logger(options);
-  const span = addSpanToTransaction(sentryHub, parentSpan, "upload-sourceMaps");
+  const span = addSpanToTransaction(ctx, "upload-sourceMaps");
   // This is what Sentry CLI does:
   //  TODO: 0. Preprocess source maps
   //           - (Out of scope for now)
@@ -152,7 +123,7 @@ async function uploadSourceMaps(
         sentryUrl: url,
         filename: file.name,
         fileContent: file.content,
-        sentryHub,
+        sentryHub: ctx.hub,
       })
     )
   ).then(() => {
@@ -162,14 +133,13 @@ async function uploadSourceMaps(
   });
 }
 
-async function finalizeRelease(
+export async function finalizeRelease(
   release: string,
   options: Options,
-  sentryHub: Hub,
-  parentSpan?: Span
+  ctx: BuildContext
 ): Promise<string> {
   const logger = new Logger(options);
-  const span = addSpanToTransaction(sentryHub, parentSpan, "finalize-release");
+  const span = addSpanToTransaction(ctx, "finalize-release");
 
   if (options.finalize) {
     const { authToken, org, url, project } = options;
@@ -184,7 +154,7 @@ async function finalizeRelease(
       release,
       sentryUrl: url,
       project,
-      sentryHub,
+      sentryHub: ctx.hub,
     });
 
     logger.info("Successfully finalized release.");
@@ -194,14 +164,13 @@ async function finalizeRelease(
   return Promise.resolve("nothing to do here");
 }
 
-async function cleanArtifacts(
+export async function cleanArtifacts(
   release: string,
   options: Options,
-  sentryHub: Hub,
-  parentSpan?: Span
+  ctx: BuildContext
 ): Promise<string> {
   const logger = new Logger(options);
-  const span = addSpanToTransaction(sentryHub, parentSpan, "clean-artifacts");
+  const span = addSpanToTransaction(ctx, "clean-artifacts");
 
   if (options.cleanArtifacts) {
     // TODO: pull these checks out of here and simplify them
@@ -225,7 +194,7 @@ async function cleanArtifacts(
       release,
       sentryUrl: options.url,
       project: options.project,
-      sentryHub,
+      sentryHub: ctx.hub,
     });
 
     logger.info("Successfully cleaned previous artifacts.");
@@ -237,23 +206,21 @@ async function cleanArtifacts(
 
 // TODO: Stuff we worry about later:
 
-async function setCommits(
+export async function setCommits(
   /* version: string, */
-  sentryHub: Hub,
-  parentSpan?: Span
+  ctx: BuildContext
 ): Promise<string> {
-  const span = addSpanToTransaction(sentryHub, parentSpan, "set-commits");
+  const span = addSpanToTransaction(ctx, "set-commits");
 
   span?.finish();
   return Promise.resolve("Noop");
 }
 
-async function addDeploy(
+export async function addDeploy(
   /* version: string, */
-  sentryHub: Hub,
-  parentSpan?: Span
+  ctx: BuildContext
 ): Promise<string> {
-  const span = addSpanToTransaction(sentryHub, parentSpan, "add-deploy");
+  const span = addSpanToTransaction(ctx, "add-deploy");
 
   span?.finish();
   return Promise.resolve("Noop");
