@@ -42,6 +42,7 @@ export async function createRelease({
     });
   } catch (e) {
     Sentry.captureException(e);
+    throw e;
   }
 }
 
@@ -68,6 +69,7 @@ export async function deleteAllReleaseArtifacts({
     });
   } catch (e) {
     Sentry.captureException(e);
+    throw e;
   }
 }
 
@@ -96,6 +98,7 @@ export async function updateRelease({
     });
   } catch (e) {
     Sentry.captureException(e);
+    throw e;
   }
 }
 
@@ -131,5 +134,6 @@ export async function uploadReleaseFile({
     });
   } catch (e) {
     Sentry.captureException(e);
+    throw e;
   }
 }
