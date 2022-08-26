@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "sentry-unplugin-tsconfigs/base-config.json",
+  "extends": "@sentry-internal/sentry-unplugin-tsconfig/base-config.json",
   "include": ["./**/*", "../package.json"],
   "compilerOptions": {
     "esModuleInterop": true,
