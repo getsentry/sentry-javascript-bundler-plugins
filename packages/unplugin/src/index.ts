@@ -7,7 +7,6 @@ import { makeSentryFacade } from "./sentry/facade";
 const defaultOptions: Omit<Options, "include"> = {
   //TODO: add default options here as we port over options from the webpack plugin
   // validate: false
-  configFile: "~/.sentryclirc",
   debug: false,
   cleanArtifacts: false,
   finalize: true,
