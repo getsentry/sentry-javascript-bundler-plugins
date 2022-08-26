@@ -48,6 +48,20 @@ export type Options = {
   debug?: boolean;
   // silent?: boolean,
   cleanArtifacts?: boolean;
+
+  /**
+   * When an error occurs during rlease creation or sourcemaps upload, the plugin will call this function.
+   *
+   * By default, the plugin will simply throw an error, thereby stopping the bundling process. If an `errorHandler` callback is provided, compilation will continue, unless an error is thrown in the provided callback.
+   *
+   * To allow compilation to continue but still emit a warning, set this option to the following:
+   *
+   * ```js
+   * (err) => {
+   *   console.warn(err);
+   * }
+   * ```
+   */
   errorHandler?: (err: Error) => void;
   // setCommits?: {
   //   repo?: string,
