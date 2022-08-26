@@ -25,7 +25,7 @@ export function makeSentryClient(
     tracePropagationTargets: ["sentry.io/api"],
     stackParser: defaultStackParser,
     transport: makeNodeTransport,
-    release: `${org}@${unpluginVersion}`,
+    release: `${org ? `${org}@` : ""}${unpluginVersion}`,
     debug: true,
   });
   const hub = new Hub(client);
