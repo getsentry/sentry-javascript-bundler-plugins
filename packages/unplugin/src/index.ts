@@ -4,7 +4,7 @@ import { getReleaseName } from "./getReleaseName";
 import { Options } from "./types";
 import { makeSentryFacade } from "./sentry/facade";
 import "@sentry/tracing";
-import { addSpanToTransaction, makeSentryClient } from "./sentry/telemetry";
+import { addSpanToTransaction, captureMinimalError, makeSentryClient } from "./sentry/telemetry";
 import { Span, Transaction } from "@sentry/types";
 
 const defaultOptions: Omit<Options, "include"> = {
@@ -83,27 +83,25 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
   const telemetryEnabled = options.telemetry === true;
 
   const { client: sentryClient, hub: sentryHub } = makeSentryClient(
+    "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
     telemetryEnabled,
-    {
-      dsn: "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
-    },
-    options.org || ""
+    options.org
   );
 
-  if (sentryClient && sentryHub) {
+  if (options.telemetry) {
     // eslint-disable-next-line no-console
     console.log("[Sentry-plugin]", "Sending error and performance telemetry data to Sentry.");
     // eslint-disable-next-line no-console
     console.log("[Sentry-Plugin]", "To disable telemetry, set `options.telemetry` to `false`.");
   }
 
-  sentryHub?.setTags({
+  sentryHub.setTags({
     organization: options.org,
     project: options.project,
     bundler: unpluginMetaContext.framework,
   });
 
-  sentryHub?.setUser({ id: options.org });
+  sentryHub.setUser({ id: options.org });
 
   function debugLog(...args: unknown[]) {
     if (options?.debugLogging) {
@@ -129,18 +127,16 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
      * Responsible for starting the plugin execution transaction and the release injection span
      */
     buildStart() {
-      if (sentryHub) {
-        transaction = sentryHub.startTransaction({
-          op: "sentry-unplugin",
-          name: "plugin-execution",
-        });
-        releaseInjectionSpan = addSpanToTransaction(
-          sentryHub,
-          transaction,
-          "release-injection",
-          "release-injection"
-        );
-      }
+      transaction = sentryHub.startTransaction({
+        op: "sentry-unplugin",
+        name: "plugin-execution",
+      });
+      releaseInjectionSpan = addSpanToTransaction(
+        sentryHub,
+        transaction,
+        "release-injection",
+        "release-injection"
+      );
     },
 
     /**
@@ -155,7 +151,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
      * @returns `"sentry-release-injector"` when the imported file is called `"sentry-release-injector"`. Otherwise returns `undefined`.
      */
     resolveId(id, importer, { isEntry }) {
-      sentryHub?.addBreadcrumb({
+      sentryHub.addBreadcrumb({
         category: "resolveId",
         message: `isEntry: ${String(isEntry)}`,
         level: "info",
@@ -186,7 +182,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
      * @returns The global injector code when we load the "sentry-release-injector" module. Otherwise returns `undefined`.
      */
     load(id) {
-      sentryHub?.addBreadcrumb({
+      sentryHub.addBreadcrumb({
         category: "load",
         level: "info",
       });
@@ -207,7 +203,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
      * want to transform the release injector file.
      */
     transformInclude(id) {
-      sentryHub?.addBreadcrumb({
+      sentryHub.addBreadcrumb({
         category: "transformInclude",
         level: "info",
       });
@@ -244,7 +240,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
      * @returns transformed code + source map
      */
     transform(code) {
-      sentryHub?.addBreadcrumb({
+      sentryHub.addBreadcrumb({
         category: "transform",
         level: "info",
       });
@@ -287,7 +283,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
 
       const release = getReleaseName(options.release);
 
-      sentryHub?.addBreadcrumb({
+      sentryHub.addBreadcrumb({
         category: "buildEnd:start",
         level: "info",
       });
@@ -310,12 +306,12 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
         .catch((e) => {
           //TODO: invoke error handler here
           // https://github.com/getsentry/sentry-webpack-plugin/blob/137503f3ac6fe423b16c5c50379859c86e689017/src/index.js#L540-L547
-          sentryClient?.captureException(e);
+          captureMinimalError(e, sentryHub);
           transaction?.setStatus("cancelled");
           debugLog(e);
         })
         .finally(() => {
-          sentryHub?.addBreadcrumb({
+          sentryHub.addBreadcrumb({
             category: "buildEnd:finish",
             level: "info",
           });

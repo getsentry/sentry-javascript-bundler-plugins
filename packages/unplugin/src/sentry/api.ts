@@ -7,6 +7,8 @@ import * as Sentry from "@sentry/node";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { version as unpluginVersion } from "../../package.json";
+import { captureMinimalError } from "./telemetry";
+import { Hub } from "@sentry/node";
 
 const API_PATH = "/api/0";
 
@@ -20,12 +22,14 @@ export async function createRelease({
   release,
   authToken,
   sentryUrl,
+  sentryHub,
 }: {
   release: string;
   project: string;
   org: string;
   authToken: string;
   sentryUrl: string;
+  sentryHub: Hub;
 }): Promise<void> {
   const requestUrl = `${sentryUrl}${API_PATH}/organizations/${org}/releases/`;
 
@@ -41,7 +45,7 @@ export async function createRelease({
       headers: { Authorization: `Bearer ${authToken}` },
     });
   } catch (e) {
-    Sentry.captureException(e);
+    captureMinimalError(e, sentryHub);
     throw e;
   }
 }
@@ -52,12 +56,14 @@ export async function deleteAllReleaseArtifacts({
   release,
   authToken,
   sentryUrl,
+  sentryHub,
 }: {
   org: string;
   release: string;
   sentryUrl: string;
   authToken: string;
   project: string;
+  sentryHub: Hub;
 }): Promise<void> {
   const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/files/source-maps/?name=${release}`;
 
@@ -68,7 +74,7 @@ export async function deleteAllReleaseArtifacts({
       },
     });
   } catch (e) {
-    Sentry.captureException(e);
+    captureMinimalError(e, sentryHub);
     throw e;
   }
 }
@@ -79,12 +85,14 @@ export async function updateRelease({
   authToken,
   sentryUrl,
   project,
+  sentryHub,
 }: {
   release: string;
   org: string;
   authToken: string;
   sentryUrl: string;
   project: string;
+  sentryHub: Hub;
 }): Promise<void> {
   const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/`;
 
@@ -97,7 +105,7 @@ export async function updateRelease({
       headers: { Authorization: `Bearer ${authToken}` },
     });
   } catch (e) {
-    Sentry.captureException(e);
+    captureMinimalError(e, sentryHub);
     throw e;
   }
 }
@@ -110,6 +118,7 @@ export async function uploadReleaseFile({
   sentryUrl,
   filename,
   fileContent,
+  sentryHub,
 }: {
   org: string;
   release: string;
@@ -118,6 +127,7 @@ export async function uploadReleaseFile({
   project: string;
   filename: string;
   fileContent: string;
+  sentryHub: Hub;
 }) {
   const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/files/`;
 
@@ -133,7 +143,7 @@ export async function uploadReleaseFile({
       },
     });
   } catch (e) {
-    Sentry.captureException(e);
+    captureMinimalError(e, sentryHub);
     throw e;
   }
 }

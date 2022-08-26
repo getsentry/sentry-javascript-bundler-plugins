@@ -26,8 +26,8 @@ export type SentryFacade = {
  * Factory function that provides all necessary Sentry functionality for creating
  * a release on Sentry. This includes uploading source maps and finalizing the release
  */
-export function makeSentryFacade(release: string, options: Options, sentryHub?: Hub): SentryFacade {
-  const span = sentryHub?.getScope()?.getSpan();
+export function makeSentryFacade(release: string, options: Options, sentryHub: Hub): SentryFacade {
+  const span = sentryHub.getScope()?.getSpan();
   return {
     createNewRelease: () => createNewRelease(release, options, sentryHub, span),
     cleanArtifacts: () => cleanArtifacts(release, options, sentryHub, span),
@@ -41,7 +41,7 @@ export function makeSentryFacade(release: string, options: Options, sentryHub?: 
 async function createNewRelease(
   release: string,
   options: Options,
-  sentryHub?: Hub,
+  sentryHub: Hub,
   parentSpan?: Span
 ): Promise<string> {
   const span = addSpanToTransaction(sentryHub, parentSpan, "create-new-release");
@@ -71,6 +71,7 @@ async function createNewRelease(
     org: options.org,
     project: options.project,
     sentryUrl: options.url,
+    sentryHub,
   });
 
   // eslint-disable-next-line no-console
@@ -83,7 +84,7 @@ async function createNewRelease(
 async function uploadSourceMaps(
   release: string,
   options: Options,
-  sentryHub?: Hub,
+  sentryHub: Hub,
   parentSpan?: Span
 ): Promise<string> {
   const span = addSpanToTransaction(sentryHub, parentSpan, "upload-sourceMaps");
@@ -159,6 +160,7 @@ async function uploadSourceMaps(
         sentryUrl: url,
         filename: file.name,
         fileContent: file.content,
+        sentryHub,
       })
     )
   ).then(() => {
@@ -172,7 +174,7 @@ async function uploadSourceMaps(
 async function finalizeRelease(
   release: string,
   options: Options,
-  sentryHub?: Hub,
+  sentryHub: Hub,
   parentSpan?: Span
 ): Promise<string> {
   const span = addSpanToTransaction(sentryHub, parentSpan, "finalize-release");
@@ -193,6 +195,7 @@ async function finalizeRelease(
       release,
       sentryUrl: url,
       project,
+      sentryHub,
     });
     // eslint-disable-next-line no-console
     console.log("[Sentry-plugin] Successfully finalized release.");
@@ -205,7 +208,7 @@ async function finalizeRelease(
 async function cleanArtifacts(
   release: string,
   options: Options,
-  sentryHub?: Hub,
+  sentryHub: Hub,
   parentSpan?: Span
 ): Promise<string> {
   const span = addSpanToTransaction(sentryHub, parentSpan, "clean-artifacts");
@@ -244,6 +247,7 @@ async function cleanArtifacts(
       release,
       sentryUrl: options.url,
       project: options.project,
+      sentryHub,
     });
 
     // eslint-disable-next-line no-console
@@ -258,7 +262,7 @@ async function cleanArtifacts(
 
 async function setCommits(
   /* version: string, */
-  sentryHub?: Hub,
+  sentryHub: Hub,
   parentSpan?: Span
 ): Promise<string> {
   const span = addSpanToTransaction(sentryHub, parentSpan, "set-commits");
@@ -269,7 +273,7 @@ async function setCommits(
 
 async function addDeploy(
   /* version: string, */
-  sentryHub?: Hub,
+  sentryHub: Hub,
   parentSpan?: Span
 ): Promise<string> {
   const span = addSpanToTransaction(sentryHub, parentSpan, "add-deploy");
