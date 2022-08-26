@@ -13,7 +13,7 @@ import {
 import "@sentry/tracing";
 import { addSpanToTransaction, captureMinimalError, makeSentryClient } from "./sentry/telemetry";
 import { Span, Transaction } from "@sentry/types";
-import Logger from "./sentry/logger";
+import sentryLogger from "./sentry/logger";
 
 const defaultOptions: Omit<Options, "include"> = {
   //TODO: add default options here as we port over options from the webpack plugin
@@ -86,7 +86,7 @@ const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
  */
 const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) => {
   const options = { ...defaultOptions, ...originalOptions };
-  const logger = new Logger(options);
+  const logger = sentryLogger(options);
 
   //TODO: We can get rid of this variable once we have internal plugin options
   const telemetryEnabled = options.telemetry === true;
@@ -130,7 +130,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
         name: "plugin-execution",
       });
       releaseInjectionSpan = addSpanToTransaction(
-        { hub: sentryHub, parentSpan: transaction },
+        { hub: sentryHub, parentSpan: transaction, logger },
         "release-injection",
         "release-injection"
       );
@@ -271,7 +271,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
       const releasePipelineSpan =
         transaction &&
         addSpanToTransaction(
-          { hub: sentryHub, parentSpan: transaction },
+          { hub: sentryHub, parentSpan: transaction, logger },
           "release-creation",
           "release-creation-pipeline"
         );
@@ -289,7 +289,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
       //     That's good for them but a hassle for us. Let's try to normalize this into one data type
       //     (I vote IncludeEntry[]) and continue with that down the line
 
-      const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan };
+      const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan, logger };
 
       createNewRelease(release, options, ctx)
         .then(() => cleanArtifacts(release, options, ctx))

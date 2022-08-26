@@ -8,7 +8,6 @@
 
 import { Options, BuildContext } from "../types";
 import { createRelease, deleteAllReleaseArtifacts, uploadReleaseFile, updateRelease } from "./api";
-import Logger from "./logger";
 import { getFiles } from "./sourcemaps";
 import { addSpanToTransaction } from "./telemetry";
 
@@ -17,21 +16,20 @@ export async function createNewRelease(
   options: Options,
   ctx: BuildContext
 ): Promise<string> {
-  const logger = new Logger(options);
   const span = addSpanToTransaction(ctx, "create-new-release");
 
   // TODO: pull these checks out of here and simplify them
   if (options.authToken === undefined) {
-    logger.warn('Missing "authToken" option. Will not create release.');
+    ctx.logger.warn('Missing "authToken" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   } else if (options.org === undefined) {
-    logger.warn('Missing "org" option. Will not create release.');
+    ctx.logger.warn('Missing "org" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   } else if (options.url === undefined) {
-    logger.warn('Missing "url" option. Will not create release.');
+    ctx.logger.warn('Missing "url" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   } else if (options.project === undefined) {
-    logger.warn('Missing "project" option. Will not create release.');
+    ctx.logger.warn('Missing "project" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   }
 
@@ -44,7 +42,7 @@ export async function createNewRelease(
     sentryHub: ctx.hub,
   });
 
-  logger.info("Successfully created release.");
+  ctx.logger.info("Successfully created release.");
 
   span?.finish();
   return Promise.resolve("nothing to do here");
@@ -55,7 +53,6 @@ export async function uploadSourceMaps(
   options: Options,
   ctx: BuildContext
 ): Promise<string> {
-  const logger = new Logger(options);
   const span = addSpanToTransaction(ctx, "upload-sourceMaps");
   // This is what Sentry CLI does:
   //  TODO: 0. Preprocess source maps
@@ -92,26 +89,26 @@ export async function uploadSourceMaps(
 
   // TODO: pull these checks out of here and simplify them
   if (authToken === undefined) {
-    logger.warn('Missing "authToken" option. Will not create release.');
+    ctx.logger.warn('Missing "authToken" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   } else if (org === undefined) {
-    logger.warn('Missing "org" option. Will not create release.');
+    ctx.logger.warn('Missing "org" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   } else if (url === undefined) {
-    logger.warn('Missing "url" option. Will not create release.');
+    ctx.logger.warn('Missing "url" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   } else if (project === undefined) {
-    logger.warn('Missing "project" option. Will not create release.');
+    ctx.logger.warn('Missing "project" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   }
 
-  logger.info("Uploading Sourcemaps.");
+  ctx.logger.info("Uploading Sourcemaps.");
 
   //TODO: Remove this once we have internal options. this property must always be present
   const fileExtensions = ext || [];
   const files = getFiles(include, fileExtensions);
 
-  logger.info(`Found ${files.length} files to upload.`);
+  ctx.logger.info(`Found ${files.length} files to upload.`);
 
   return Promise.all(
     files.map((file) =>
@@ -127,7 +124,7 @@ export async function uploadSourceMaps(
       })
     )
   ).then(() => {
-    logger.info("Successfully uploaded sourcemaps.");
+    ctx.logger.info("Successfully uploaded sourcemaps.");
     span?.finish();
     return "done";
   });
@@ -138,13 +135,12 @@ export async function finalizeRelease(
   options: Options,
   ctx: BuildContext
 ): Promise<string> {
-  const logger = new Logger(options);
   const span = addSpanToTransaction(ctx, "finalize-release");
 
   if (options.finalize) {
     const { authToken, org, url, project } = options;
     if (!authToken || !org || !url || !project) {
-      logger.warn("Missing required option. Will not clean existing artifacts.");
+      ctx.logger.warn("Missing required option. Will not clean existing artifacts.");
       return Promise.resolve("nothing to do here");
     }
 
@@ -157,7 +153,7 @@ export async function finalizeRelease(
       sentryHub: ctx.hub,
     });
 
-    logger.info("Successfully finalized release.");
+    ctx.logger.info("Successfully finalized release.");
   }
 
   span?.finish();
@@ -169,22 +165,21 @@ export async function cleanArtifacts(
   options: Options,
   ctx: BuildContext
 ): Promise<string> {
-  const logger = new Logger(options);
   const span = addSpanToTransaction(ctx, "clean-artifacts");
 
   if (options.cleanArtifacts) {
     // TODO: pull these checks out of here and simplify them
     if (options.authToken === undefined) {
-      logger.warn('Missing "authToken" option. Will not clean existing artifacts.');
+      ctx.logger.warn('Missing "authToken" option. Will not clean existing artifacts.');
       return Promise.resolve("nothing to do here");
     } else if (options.org === undefined) {
-      logger.warn('Missing "org" option. Will not clean existing artifacts.');
+      ctx.logger.warn('Missing "org" option. Will not clean existing artifacts.');
       return Promise.resolve("nothing to do here");
     } else if (options.url === undefined) {
-      logger.warn('Missing "url" option. Will not clean existing artifacts.');
+      ctx.logger.warn('Missing "url" option. Will not clean existing artifacts.');
       return Promise.resolve("nothing to do here");
     } else if (options.project === undefined) {
-      logger.warn('Missing "project" option. Will not clean existing artifacts.');
+      ctx.logger.warn('Missing "project" option. Will not clean existing artifacts.');
       return Promise.resolve("nothing to do here");
     }
 
@@ -197,7 +192,7 @@ export async function cleanArtifacts(
       sentryHub: ctx.hub,
     });
 
-    logger.info("Successfully cleaned previous artifacts.");
+    ctx.logger.info("Successfully cleaned previous artifacts.");
   }
 
   span?.finish();

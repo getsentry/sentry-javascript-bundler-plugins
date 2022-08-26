@@ -2,6 +2,7 @@
 
 import { Hub } from "@sentry/hub";
 import { Span } from "@sentry/tracing";
+import sentryLogger from "../src/sentry/logger";
 
 //TODO: compare types w/ webpack plugin (and sentry-cli?)
 export type Options = {
@@ -108,4 +109,5 @@ type IncludeEntry = {
 export type BuildContext = {
   hub: Hub;
   parentSpan?: Span;
+  logger: ReturnType<typeof sentryLogger>;
 };
