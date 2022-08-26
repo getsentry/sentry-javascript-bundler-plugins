@@ -10,6 +10,7 @@ import { Hub } from "@sentry/node";
 import { Span } from "@sentry/types";
 import { Options } from "../types";
 import { createRelease, deleteAllReleaseArtifacts, uploadReleaseFile, updateRelease } from "./api";
+import Logger from "./logger";
 import { getFiles } from "./sourcemaps";
 import { addSpanToTransaction } from "./telemetry";
 
@@ -44,24 +45,21 @@ async function createNewRelease(
   sentryHub: Hub,
   parentSpan?: Span
 ): Promise<string> {
+  const logger = new Logger(options);
   const span = addSpanToTransaction(sentryHub, parentSpan, "create-new-release");
 
   // TODO: pull these checks out of here and simplify them
   if (options.authToken === undefined) {
-    // eslint-disable-next-line no-console
-    console.log('[Sentry-plugin] WARNING: Missing "authToken" option. Will not create release.');
+    logger.warn('Missing "authToken" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   } else if (options.org === undefined) {
-    // eslint-disable-next-line no-console
-    console.log('[Sentry-plugin] WARNING: Missing "org" option. Will not create release.');
+    logger.warn('Missing "org" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   } else if (options.url === undefined) {
-    // eslint-disable-next-line no-console
-    console.log('[Sentry-plugin] WARNING: Missing "url" option. Will not create release.');
+    logger.warn('Missing "url" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   } else if (options.project === undefined) {
-    // eslint-disable-next-line no-console
-    console.log('[Sentry-plugin] WARNING: Missing "project" option. Will not create release.');
+    logger.warn('Missing "project" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   }
 
@@ -74,8 +72,7 @@ async function createNewRelease(
     sentryHub,
   });
 
-  // eslint-disable-next-line no-console
-  console.log("[Sentry-plugin] Successfully created release.");
+  logger.info("Successfully created release.");
 
   span?.finish();
   return Promise.resolve("nothing to do here");
@@ -87,6 +84,7 @@ async function uploadSourceMaps(
   sentryHub: Hub,
   parentSpan?: Span
 ): Promise<string> {
+  const logger = new Logger(options);
   const span = addSpanToTransaction(sentryHub, parentSpan, "upload-sourceMaps");
   // This is what Sentry CLI does:
   //  TODO: 0. Preprocess source maps
@@ -123,32 +121,26 @@ async function uploadSourceMaps(
 
   // TODO: pull these checks out of here and simplify them
   if (authToken === undefined) {
-    // eslint-disable-next-line no-console
-    console.log('[Sentry-plugin] WARNING: Missing "authToken" option. Will not create release.');
+    logger.warn('Missing "authToken" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   } else if (org === undefined) {
-    // eslint-disable-next-line no-console
-    console.log('[Sentry-plugin] WARNING: Missing "org" option. Will not create release.');
+    logger.warn('Missing "org" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   } else if (url === undefined) {
-    // eslint-disable-next-line no-console
-    console.log('[Sentry-plugin] WARNING: Missing "url" option. Will not create release.');
+    logger.warn('Missing "url" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   } else if (project === undefined) {
-    // eslint-disable-next-line no-console
-    console.log('[Sentry-plugin] WARNING: Missing "project" option. Will not create release.');
+    logger.warn('Missing "project" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   }
 
-  // eslint-disable-next-line no-console
-  console.log("[Sentry-plugin] Uploading Sourcemaps.");
+  logger.info("Uploading Sourcemaps.");
 
   //TODO: Remove this once we have internal options. this property must always be present
   const fileExtensions = ext || [];
   const files = getFiles(include, fileExtensions);
 
-  // eslint-disable-next-line no-console
-  console.log(`[Sentry-plugin] > Found ${files.length} files to upload.`);
+  logger.info(`Found ${files.length} files to upload.`);
 
   return Promise.all(
     files.map((file) =>
@@ -164,8 +156,7 @@ async function uploadSourceMaps(
       })
     )
   ).then(() => {
-    // eslint-disable-next-line no-console
-    console.log("[Sentry-plugin] Successfully uploaded sourcemaps.");
+    logger.info("Successfully uploaded sourcemaps.");
     span?.finish();
     return "done";
   });
@@ -177,15 +168,13 @@ async function finalizeRelease(
   sentryHub: Hub,
   parentSpan?: Span
 ): Promise<string> {
+  const logger = new Logger(options);
   const span = addSpanToTransaction(sentryHub, parentSpan, "finalize-release");
 
   if (options.finalize) {
     const { authToken, org, url, project } = options;
     if (!authToken || !org || !url || !project) {
-      // eslint-disable-next-line no-console
-      console.log(
-        "[Sentry-plugin] WARNING: Missing required option. Will not clean existing artifacts."
-      );
+      logger.warn("Missing required option. Will not clean existing artifacts.");
       return Promise.resolve("nothing to do here");
     }
 
@@ -197,8 +186,8 @@ async function finalizeRelease(
       project,
       sentryHub,
     });
-    // eslint-disable-next-line no-console
-    console.log("[Sentry-plugin] Successfully finalized release.");
+
+    logger.info("Successfully finalized release.");
   }
 
   span?.finish();
@@ -211,33 +200,22 @@ async function cleanArtifacts(
   sentryHub: Hub,
   parentSpan?: Span
 ): Promise<string> {
+  const logger = new Logger(options);
   const span = addSpanToTransaction(sentryHub, parentSpan, "clean-artifacts");
 
   if (options.cleanArtifacts) {
     // TODO: pull these checks out of here and simplify them
     if (options.authToken === undefined) {
-      // eslint-disable-next-line no-console
-      console.log(
-        '[Sentry-plugin] WARNING: Missing "authToken" option. Will not clean existing artifacts.'
-      );
+      logger.warn('Missing "authToken" option. Will not clean existing artifacts.');
       return Promise.resolve("nothing to do here");
     } else if (options.org === undefined) {
-      // eslint-disable-next-line no-console
-      console.log(
-        '[Sentry-plugin] WARNING: Missing "org" option. Will not clean existing artifacts.'
-      );
+      logger.warn('Missing "org" option. Will not clean existing artifacts.');
       return Promise.resolve("nothing to do here");
     } else if (options.url === undefined) {
-      // eslint-disable-next-line no-console
-      console.log(
-        '[Sentry-plugin] WARNING: Missing "url" option. Will not clean existing artifacts.'
-      );
+      logger.warn('Missing "url" option. Will not clean existing artifacts.');
       return Promise.resolve("nothing to do here");
     } else if (options.project === undefined) {
-      // eslint-disable-next-line no-console
-      console.log(
-        '[Sentry-plugin] WARNING: Missing "project" option. Will not clean existing artifacts.'
-      );
+      logger.warn('Missing "project" option. Will not clean existing artifacts.');
       return Promise.resolve("nothing to do here");
     }
 
@@ -250,8 +228,7 @@ async function cleanArtifacts(
       sentryHub,
     });
 
-    // eslint-disable-next-line no-console
-    console.log("[Sentry-plugin] Successfully cleaned previous artifacts.");
+    logger.info("Successfully cleaned previous artifacts.");
   }
 
   span?.finish();

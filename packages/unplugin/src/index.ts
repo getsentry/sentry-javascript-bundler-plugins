@@ -6,6 +6,7 @@ import { makeSentryFacade } from "./sentry/facade";
 import "@sentry/tracing";
 import { addSpanToTransaction, captureMinimalError, makeSentryClient } from "./sentry/telemetry";
 import { Span, Transaction } from "@sentry/types";
+import Logger from "./sentry/logger";
 
 const defaultOptions: Omit<Options, "include"> = {
   //TODO: add default options here as we port over options from the webpack plugin
@@ -78,6 +79,7 @@ const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
  */
 const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) => {
   const options = { ...defaultOptions, ...originalOptions };
+  const logger = new Logger(options);
 
   //TODO: We can get rid of this variable once we have internal plugin options
   const telemetryEnabled = options.telemetry === true;
@@ -88,12 +90,8 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
     options.org
   );
 
-  if (options.telemetry) {
-    // eslint-disable-next-line no-console
-    console.log("[Sentry-plugin]", "Sending error and performance telemetry data to Sentry.");
-    // eslint-disable-next-line no-console
-    console.log("[Sentry-Plugin]", "To disable telemetry, set `options.telemetry` to `false`.");
-  }
+  logger.info("Sending error and performance telemetry data to Sentry.");
+  logger.info("To disable telemetry, set `options.telemetry` to `false`.");
 
   sentryHub.setTags({
     organization: options.org,
@@ -102,13 +100,6 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
   });
 
   sentryHub.setUser({ id: options.org });
-
-  function debugLog(...args: unknown[]) {
-    if (!options.silent) {
-      // eslint-disable-next-line no-console
-      console.log("[Sentry-plugin]", ...args);
-    }
-  }
 
   // This is `nonEntrypointSet` instead of `entrypointSet` because this set is filled in the `resolveId` hook and there
   // we don't have guaranteed access to *absolute* paths of files if they're entrypoints. For non-entrypoints we're
@@ -169,7 +160,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
     },
 
     loadInclude(id) {
-      debugLog(`Called "loadInclude": ${JSON.stringify({ id })}`);
+      logger.info(`Called "loadInclude": ${JSON.stringify({ id })}`);
 
       return id === RELEASE_INJECTOR_ID;
     },
@@ -308,7 +299,8 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
           // https://github.com/getsentry/sentry-webpack-plugin/blob/137503f3ac6fe423b16c5c50379859c86e689017/src/index.js#L540-L547
           captureMinimalError(e, sentryHub);
           transaction?.setStatus("cancelled");
-          debugLog(e);
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          logger.error(e);
         })
         .finally(() => {
           sentryHub.addBreadcrumb({

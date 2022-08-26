@@ -17,7 +17,7 @@ describe("Logger", () => {
   const CASES = ["info", "warn", "error"];
 
   it.each(CASES)("logs (%s)", (a: string) => {
-    const logger = new Logger({ isSilent: false });
+    const logger = new Logger({ silent: false });
     // "info" -> make typescript happy
     logger[a as "info"]("Hey!");
 
@@ -25,7 +25,7 @@ describe("Logger", () => {
   });
 
   it.each(CASES)("does not log (%s)", (a: string) => {
-    const logger = new Logger({ isSilent: false });
+    const logger = new Logger({ silent: false });
     // "info" -> make typescript happy
     logger[a as "info"]("Hey!");
 
