@@ -15,6 +15,9 @@ const defaultOptions: Omit<Options, "include"> = {
   ext: ["js", "map", "jsbundle", "bundle"],
 };
 
+// We prefix the polyfill id with \0 to tell other plugins not to try to load or transform it.
+// This hack is taken straight from https://rollupjs.org/guide/en/#resolveid.
+// This probably doesn't work for all bundlers but for rollup it does.
 const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
 
 /**
