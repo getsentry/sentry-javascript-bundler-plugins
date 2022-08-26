@@ -8,7 +8,7 @@
 
 import { Hub } from "@sentry/node";
 import { Span } from "@sentry/types";
-import { Options, SentryContext } from "../types";
+import { Options, BuildContext } from "../types";
 import { createRelease, deleteAllReleaseArtifacts, uploadReleaseFile, updateRelease } from "./api";
 import { getFiles } from "./sourcemaps";
 import { addSpanToTransaction } from "./telemetry";
@@ -16,7 +16,7 @@ import { addSpanToTransaction } from "./telemetry";
 export async function createNewRelease(
   release: string,
   options: Options,
-  ctx: SentryContext
+  ctx: BuildContext
 ): Promise<string> {
   const span = addSpanToTransaction(ctx, "create-new-release");
 
@@ -58,7 +58,7 @@ export async function createNewRelease(
 export async function uploadSourceMaps(
   release: string,
   options: Options,
-  ctx: SentryContext
+  ctx: BuildContext
 ): Promise<string> {
   const span = addSpanToTransaction(ctx, "upload-sourceMaps");
   // This is what Sentry CLI does:
@@ -147,7 +147,7 @@ export async function uploadSourceMaps(
 export async function finalizeRelease(
   release: string,
   options: Options,
-  ctx: SentryContext
+  ctx: BuildContext
 ): Promise<string> {
   const span = addSpanToTransaction(ctx, "finalize-release");
 
@@ -180,7 +180,7 @@ export async function finalizeRelease(
 export async function cleanArtifacts(
   release: string,
   options: Options,
-  ctx: SentryContext
+  ctx: BuildContext
 ): Promise<string> {
   const span = addSpanToTransaction(ctx, "clean-artifacts");
 
@@ -233,7 +233,7 @@ export async function cleanArtifacts(
 
 export async function setCommits(
   /* version: string, */
-  ctx: SentryContext
+  ctx: BuildContext
 ): Promise<string> {
   const span = addSpanToTransaction(ctx, "set-commits");
 
@@ -243,7 +243,7 @@ export async function setCommits(
 
 export async function addDeploy(
   /* version: string, */
-  ctx: SentryContext
+  ctx: BuildContext
 ): Promise<string> {
   const span = addSpanToTransaction(ctx, "add-deploy");
 

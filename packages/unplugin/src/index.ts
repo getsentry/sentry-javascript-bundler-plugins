@@ -1,7 +1,7 @@
 import { createUnplugin } from "unplugin";
 import MagicString from "magic-string";
 import { getReleaseName } from "./getReleaseName";
-import { Options, SentryContext } from "./types";
+import { Options, BuildContext } from "./types";
 import {
   createNewRelease,
   cleanArtifacts,
@@ -298,7 +298,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
       //     That's good for them but a hassle for us. Let's try to normalize this into one data type
       //     (I vote IncludeEntry[]) and continue with that down the line
 
-      const ctx: SentryContext = { hub: sentryHub, parentSpan: releasePipelineSpan };
+      const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan };
 
       createNewRelease(release, options, ctx)
         .then(() => cleanArtifacts(release, options, ctx))

@@ -90,10 +90,10 @@ type IncludeEntry = {
 */
 
 /**
- * Holds data for Sentry internal purposes
+ * Holds data for internal purposes
  * (e.g. telemetry and logging)
  */
-export type SentryContext = {
+export type BuildContext = {
   hub: Hub;
   parentSpan?: Span;
 };

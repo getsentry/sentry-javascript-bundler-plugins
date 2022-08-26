@@ -9,7 +9,7 @@ import {
 import { Span } from "@sentry/tracing";
 import { AxiosError } from "axios";
 import { version as unpluginVersion } from "../../package.json";
-import { SentryContext } from "../types";
+import { BuildContext } from "../types";
 
 export function makeSentryClient(
   dsn: string,
@@ -49,7 +49,7 @@ export function makeSentryClient(
  * Adds a span to the passed parentSpan or to the current transaction that's on the passed hub's scope.
  */
 export function addSpanToTransaction(
-  ctx: SentryContext,
+  ctx: BuildContext,
   op?: string,
   description?: string
 ): Span | undefined {
