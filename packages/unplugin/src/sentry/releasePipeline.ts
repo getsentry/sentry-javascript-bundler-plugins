@@ -6,8 +6,6 @@
 //           - huge download
 //           - unnecessary functionality
 
-import { Hub } from "@sentry/node";
-import { Span } from "@sentry/types";
 import { Options, BuildContext } from "../types";
 import { createRelease, deleteAllReleaseArtifacts, uploadReleaseFile, updateRelease } from "./api";
 import { getFiles } from "./sourcemaps";
