@@ -12,16 +12,7 @@ const API_PATH = "/api/0";
 
 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
 const USER_AGENT = `sentry-unplugin/${unpluginVersion}`;
-const sentryApiAxiosInstance = axios.create();
-sentryApiAxiosInstance.interceptors.request.use((config) => {
-  return {
-    ...config,
-    headers: {
-      ...config.headers,
-      "User-Agent": USER_AGENT,
-    },
-  };
-});
+const sentryApiAxiosInstance = axios.create({ headers: { "User-Agent": USER_AGENT } });
 
 export async function createRelease({
   org,

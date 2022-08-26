@@ -3,14 +3,9 @@ import MagicString from "magic-string";
 import { getReleaseName } from "./getReleaseName";
 import { Options } from "./types";
 import { makeSentryFacade } from "./sentry/facade";
-import * as Sentry from "@sentry/node";
 import "@sentry/tracing";
-
-Sentry.init({
-  dsn: "https://1298ac2f87bc4aae99d9a9a94ce65b42@o447951.ingest.sentry.io/6681372",
-  tracesSampleRate: 1.0,
-  integrations: [new Sentry.Integrations.Http({ tracing: true })],
-});
+import { addSpanToTransaction, makeSentryClient } from "./sentry/telemetry";
+import { Span, Transaction } from "@sentry/types";
 
 const defaultOptions: Omit<Options, "include"> = {
   //TODO: add default options here as we port over options from the webpack plugin
@@ -21,6 +16,7 @@ const defaultOptions: Omit<Options, "include"> = {
   finalize: true,
   url: "https://sentry.io",
   ext: ["js", "map", "jsbundle", "bundle"],
+  telemetry: true,
 };
 
 // We prefix the polyfill id with \0 to tell other plugins not to try to load or transform it.
@@ -82,8 +78,20 @@ const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
  */
 const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) => {
   const options = { ...defaultOptions, ...originalOptions };
-  Sentry.setTags({ organization: options.org, project: options.project });
-  Sentry.setUser({ id: options.org });
+
+  //TODO: We can get rid of this variable once we have internal plugin options
+  const telemetryEnabled = options.telemetry === true;
+
+  const { client: sentryClient, hub: sentryHub } = makeSentryClient(
+    telemetryEnabled,
+    {
+      dsn: "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
+    },
+    options.org || ""
+  );
+
+  sentryHub?.setTags({ organization: options.org, project: options.project });
+  sentryHub?.setUser({ id: options.org });
 
   function debugLog(...args: unknown[]) {
     if (options?.debugLogging) {
@@ -98,9 +106,30 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
   // file is an entrypoint or a non-entrypoint.
   const nonEntrypointSet = new Set<string>();
 
+  let transaction: Transaction | undefined;
+  let releaseInjectionSpan: Span | undefined;
+
   return {
     name: "sentry-plugin",
     enforce: "pre", // needed for Vite to call resolveId hook
+
+    /**
+     * Responsible for starting the plugin execution transaction and the release injection span
+     */
+    buildStart() {
+      if (sentryHub) {
+        transaction = sentryHub.startTransaction({
+          op: "sentry-unplugin",
+          name: "plugin-execution",
+        });
+        releaseInjectionSpan = addSpanToTransaction(
+          sentryHub,
+          transaction,
+          "release-injection",
+          "release-injection"
+        );
+      }
+    },
 
     /**
      * Responsible for returning the "sentry-release-injector" ID when we encounter it. We return the ID so load is
@@ -114,9 +143,9 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
      * @returns `"sentry-release-injector"` when the imported file is called `"sentry-release-injector"`. Otherwise returns `undefined`.
      */
     resolveId(id, importer, { isEntry }) {
-      Sentry.addBreadcrumb({
+      sentryHub?.addBreadcrumb({
         category: "resolveId",
-        message: JSON.stringify({ id, importer: importer, options: { isEntry } }),
+        message: `isEntry: ${String(isEntry)}`,
         level: "info",
       });
 
@@ -145,9 +174,8 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
      * @returns The global injector code when we load the "sentry-release-injector" module. Otherwise returns `undefined`.
      */
     load(id) {
-      Sentry.addBreadcrumb({
+      sentryHub?.addBreadcrumb({
         category: "load",
-        message: JSON.stringify({ id }),
         level: "info",
       });
 
@@ -167,9 +195,8 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
      * want to transform the release injector file.
      */
     transformInclude(id) {
-      Sentry.addBreadcrumb({
+      sentryHub?.addBreadcrumb({
         category: "transformInclude",
-        message: JSON.stringify({ id }),
         level: "info",
       });
 
@@ -204,10 +231,9 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
      * @param id Always the absolute (fully resolved) path to the module.
      * @returns transformed code + source map
      */
-    transform(code, id) {
-      Sentry.addBreadcrumb({
+    transform(code) {
+      sentryHub?.addBreadcrumb({
         category: "transform",
-        message: JSON.stringify({ code, id }),
         level: "info",
       });
 
@@ -230,19 +256,29 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
         };
       }
     },
+
+    /**
+     * Responsible for executing the sentry release creation pipeline (i.e. creating a release on
+     * Sentry.io, uploading sourcemaps, associating commits and deploys and finalizing the release)
+     */
     buildEnd() {
+      releaseInjectionSpan?.finish();
+      const releasePipelineSpan =
+        sentryHub &&
+        transaction &&
+        addSpanToTransaction(
+          sentryHub,
+          transaction,
+          "release-creation",
+          "release-creation-pipeline"
+        );
+
       const release = getReleaseName(options.release);
 
-      // const transaction = Sentry.startTransaction({ name: "buildEnd", op: "buildEnd" });
-      // Sentry.getCurrentHub().configureScope((scope) => scope.setSpan(transaction));
-
-      Sentry.addBreadcrumb({
+      sentryHub?.addBreadcrumb({
         category: "buildEnd:start",
-        message: `Release: ${release}`,
         level: "info",
       });
-
-      Sentry.setContext("options", options);
 
       //TODO:
       //  1. validate options to see if we get a valid include property, release name, etc.
@@ -250,10 +286,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
       //     That's good for them but a hassle for us. Let's try to normalize this into one data type
       //     (I vote IncludeEntry[]) and continue with that down the line
 
-      const sentryFacade = makeSentryFacade(release, options);
-
-      const transaction = Sentry.startTransaction({ op: "buildEnd", name: "buildEnd" });
-      Sentry.getCurrentHub().configureScope((scope) => scope.setSpan(transaction));
+      const sentryFacade = makeSentryFacade(release, options, sentryHub);
 
       sentryFacade
         .createNewRelease()
@@ -265,18 +298,18 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
         .catch((e) => {
           //TODO: invoke error handler here
           // https://github.com/getsentry/sentry-webpack-plugin/blob/137503f3ac6fe423b16c5c50379859c86e689017/src/index.js#L540-L547
-          Sentry.captureException(e);
-          transaction.setStatus("cancelled");
+          sentryClient?.captureException(e);
+          transaction?.setStatus("cancelled");
           debugLog(e);
         })
         .finally(() => {
-          Sentry.addBreadcrumb({
+          sentryHub?.addBreadcrumb({
             category: "buildEnd:finish",
-            message: `Release: ${release}`,
             level: "info",
           });
-          transaction.setStatus("ok");
-          transaction.finish();
+          releasePipelineSpan?.finish();
+          transaction?.setStatus("ok");
+          transaction?.finish();
         });
     },
   };
