@@ -97,7 +97,12 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
     console.log("[Sentry-Plugin]", "To disable telemetry, set `options.telemetry` to `false`.");
   }
 
-  sentryHub?.setTags({ organization: options.org, project: options.project });
+  sentryHub?.setTags({
+    organization: options.org,
+    project: options.project,
+    bundler: unpluginMetaContext.framework,
+  });
+
   sentryHub?.setUser({ id: options.org });
 
   function debugLog(...args: unknown[]) {
