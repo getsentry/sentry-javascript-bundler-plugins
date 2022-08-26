@@ -30,7 +30,6 @@ jobs:
         with:
           node-version: ${{ env.DEFAULT_NODE_VERSION }}
       - run: yarn --frozen-lockfile
-      - run: yarn build
       - run: yarn check:types
 
   formatting-check:
@@ -54,7 +53,6 @@ jobs:
         with:
           node-version: ${{ env.DEFAULT_NODE_VERSION }}
       - run: yarn --frozen-lockfile
-      - run: yarn build
       - run: yarn test
 
   lint:
@@ -67,5 +65,4 @@ jobs:
         with:
           node-version: ${{ env.DEFAULT_NODE_VERSION }}
       - run: yarn --frozen-lockfile
-      - run: yarn build
       - run: yarn lint

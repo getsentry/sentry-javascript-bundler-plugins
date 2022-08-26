@@ -1,5 +1,5 @@
 {
-  "name": "sentry-unplugin-root",
+  "name": "@sentry/unplugin-root",
   "version": "0.0.0",
   "description": "Root of the sentry unplugin monorepo.",
   "repository": "git@github.com:lforst/sentry-unplugin.git",
@@ -8,18 +8,21 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "lerna run --stream build",
-    "build:watch": "lerna run --parallel build:watch",
-    "check:types": "lerna run --parallel check:types",
-    "test": "lerna run --parallel test",
-    "lint": "lerna run --parallel lint",
+    "build": "nx run-many --target=build --all",
+    "build:watch": "nx run-many --target=build:watch --all",
+    "build:graph": "nx graph",
+    "check:types": "nx run-many --target=check:types --all",
+    "test": "nx run-many --target=test --all",
+    "lint": "nx run-many --target=lint --all",
     "check:formatting": "prettier --check .",
     "fix:formatting": "prettier --write .",
     "prepare": "husky install"
   },
   "devDependencies": {
+    "@nrwl/cli": "14.5.10",
+    "@nrwl/workspace": "14.5.10",
+    "nx": "14.5.10",
     "husky": "^8.0.0",
-    "lerna": "3.13.4",
     "prettier": "^2.7.1",
     "pretty-quick": "^3.1.3"
   }
