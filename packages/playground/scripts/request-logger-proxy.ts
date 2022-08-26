@@ -40,7 +40,7 @@ app.use(function (req, res, next) {
   res.end = function (chunk) {
     if (chunk) resBody.push(chunk);
 
-    const resLog = `Response headers: ${JSON.stringify(
+    const resLog = `Response status: ${res.statusCode}\nResponse headers: ${JSON.stringify(
       res.getHeaders(),
       null,
       2
