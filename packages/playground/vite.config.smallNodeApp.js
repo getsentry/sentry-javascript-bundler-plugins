@@ -22,7 +22,6 @@ export default defineConfig({
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
       debug: true,
-      debugLogging: true,
       release: "0.0.10",
       include: "out/vite-smallNodeApp",
       cleanArtifacts: true,

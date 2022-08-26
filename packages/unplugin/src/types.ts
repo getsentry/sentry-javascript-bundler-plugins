@@ -1,8 +1,6 @@
 //TODO: JsDoc for all properties
 //TODO: compare types w/ webpack plugin (and sentry-cli?)
 export type Options = {
-  debugLogging?: boolean;
-
   /* --- authentication/identification: */
   org?: string;
   project?: string;
@@ -46,7 +44,7 @@ export type Options = {
 
   // dryRun?: boolean,
   debug?: boolean;
-  // silent?: boolean,
+  silent?: boolean;
   cleanArtifacts?: boolean;
   // errorHandler?: (err: Error, invokeErr: function(): void, compilation: unknown) => void,
   // setCommits?: {

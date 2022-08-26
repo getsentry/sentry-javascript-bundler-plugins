@@ -76,7 +76,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
   const options = { ...defaultOptions, ...originalOptions };
 
   function debugLog(...args: unknown[]) {
-    if (options?.debugLogging) {
+    if (!options.silent) {
       // eslint-disable-next-line no-console
       console.log("[Sentry-plugin]", ...args);
     }
