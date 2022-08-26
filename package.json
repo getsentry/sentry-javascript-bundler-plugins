@@ -1,5 +1,5 @@
 {
-  "name": "@sentry/unplugin-root",
+  "name": "@sentry/sentry-unplugin-root",
   "version": "0.0.0",
   "description": "Root of the sentry unplugin monorepo.",
   "repository": "git@github.com:lforst/sentry-unplugin.git",
