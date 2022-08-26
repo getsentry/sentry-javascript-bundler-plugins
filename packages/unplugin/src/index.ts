@@ -306,12 +306,20 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
         .then(() => setCommits(ctx)) // this is a noop for now
         .then(() => finalizeRelease(release, options, ctx))
         .then(() => addDeploy(ctx)) // this is a noop for now
-        .catch((e) => {
-          //TODO: invoke error handler here
-          // https://github.com/getsentry/sentry-webpack-plugin/blob/137503f3ac6fe423b16c5c50379859c86e689017/src/index.js#L540-L547
+        .then(() => {
+          transaction?.setStatus("ok");
+        })
+        .catch((e: Error) => {
           captureMinimalError(e, sentryHub);
           transaction?.setStatus("cancelled");
+
           debugLog(e);
+
+          if (options.errorHandler) {
+            options.errorHandler(e);
+          } else {
+            throw e;
+          }
         })
         .finally(() => {
           sentryHub.addBreadcrumb({
@@ -319,7 +327,6 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
             level: "info",
           });
           releasePipelineSpan?.finish();
-          transaction?.setStatus("ok");
           transaction?.finish();
         });
     },
