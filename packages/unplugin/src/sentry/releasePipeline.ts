@@ -6,35 +6,18 @@
 //           - huge download
 //           - unnecessary functionality
 
-import { Options } from "../types";
+import { Options, BuildContext } from "../types";
 import { createRelease, deleteAllReleaseArtifacts, uploadReleaseFile, updateRelease } from "./api";
 import { getFiles } from "./sourcemaps";
+import { addSpanToTransaction } from "./telemetry";
 
-export type SentryFacade = {
-  createNewRelease: () => Promise<string>;
-  cleanArtifacts: () => Promise<string>;
-  uploadSourceMaps: () => Promise<string>;
-  setCommits: () => Promise<string>;
-  finalizeRelease: () => Promise<string>;
-  addDeploy: () => Promise<string>;
-};
+export async function createNewRelease(
+  release: string,
+  options: Options,
+  ctx: BuildContext
+): Promise<string> {
+  const span = addSpanToTransaction(ctx, "create-new-release");
 
-/**
- * Factory function that provides all necessary Sentry functionality for creating
- * a release on Sentry. This includes uploading source maps and finalizing the release
- */
-export function makeSentryFacade(release: string, options: Options): SentryFacade {
-  return {
-    createNewRelease: () => createNewRelease(release, options),
-    cleanArtifacts: () => cleanArtifacts(release, options),
-    uploadSourceMaps: () => uploadSourceMaps(release, options),
-    setCommits: () => setCommits(/* release */),
-    finalizeRelease: () => finalizeRelease(release, options),
-    addDeploy: () => addDeploy(/* release */),
-  };
-}
-
-async function createNewRelease(release: string, options: Options): Promise<string> {
   // TODO: pull these checks out of here and simplify them
   if (options.authToken === undefined) {
     // eslint-disable-next-line no-console
@@ -60,15 +43,22 @@ async function createNewRelease(release: string, options: Options): Promise<stri
     org: options.org,
     project: options.project,
     sentryUrl: options.url,
+    sentryHub: ctx.hub,
   });
 
   // eslint-disable-next-line no-console
   console.log("[Sentry-plugin] Successfully created release.");
 
+  span?.finish();
   return Promise.resolve("nothing to do here");
 }
 
-async function uploadSourceMaps(release: string, options: Options): Promise<string> {
+export async function uploadSourceMaps(
+  release: string,
+  options: Options,
+  ctx: BuildContext
+): Promise<string> {
+  const span = addSpanToTransaction(ctx, "upload-sourceMaps");
   // This is what Sentry CLI does:
   //  TODO: 0. Preprocess source maps
   //           - (Out of scope for now)
@@ -84,7 +74,6 @@ async function uploadSourceMaps(release: string, options: Options): Promise<stri
   //           - don't upload more than 20k files
   //           - upload files concurrently
   //           - 2 options: chunked upload (multiple files per chunk) or single file upload
-
   const {
     include,
     ext,
@@ -142,16 +131,24 @@ async function uploadSourceMaps(release: string, options: Options): Promise<stri
         sentryUrl: url,
         filename: file.name,
         fileContent: file.content,
+        sentryHub: ctx.hub,
       })
     )
   ).then(() => {
     // eslint-disable-next-line no-console
     console.log("[Sentry-plugin] Successfully uploaded sourcemaps.");
+    span?.finish();
     return "done";
   });
 }
 
-async function finalizeRelease(release: string, options: Options): Promise<string> {
+export async function finalizeRelease(
+  release: string,
+  options: Options,
+  ctx: BuildContext
+): Promise<string> {
+  const span = addSpanToTransaction(ctx, "finalize-release");
+
   if (options.finalize) {
     const { authToken, org, url, project } = options;
     if (!authToken || !org || !url || !project) {
@@ -168,16 +165,23 @@ async function finalizeRelease(release: string, options: Options): Promise<strin
       release,
       sentryUrl: url,
       project,
+      sentryHub: ctx.hub,
     });
-
     // eslint-disable-next-line no-console
     console.log("[Sentry-plugin] Successfully finalized release.");
   }
 
+  span?.finish();
   return Promise.resolve("nothing to do here");
 }
 
-async function cleanArtifacts(release: string, options: Options): Promise<string> {
+export async function cleanArtifacts(
+  release: string,
+  options: Options,
+  ctx: BuildContext
+): Promise<string> {
+  const span = addSpanToTransaction(ctx, "clean-artifacts");
+
   if (options.cleanArtifacts) {
     // TODO: pull these checks out of here and simplify them
     if (options.authToken === undefined) {
@@ -212,20 +216,35 @@ async function cleanArtifacts(release: string, options: Options): Promise<string
       release,
       sentryUrl: options.url,
       project: options.project,
+      sentryHub: ctx.hub,
     });
 
     // eslint-disable-next-line no-console
     console.log("[Sentry-plugin] Successfully cleaned previous artifacts.");
   }
+
+  span?.finish();
   return Promise.resolve("nothing to do here");
 }
 
 // TODO: Stuff we worry about later:
 
-async function setCommits(/* version: string */): Promise<string> {
+export async function setCommits(
+  /* version: string, */
+  ctx: BuildContext
+): Promise<string> {
+  const span = addSpanToTransaction(ctx, "set-commits");
+
+  span?.finish();
   return Promise.resolve("Noop");
 }
 
-async function addDeploy(/* version: string */): Promise<string> {
+export async function addDeploy(
+  /* version: string, */
+  ctx: BuildContext
+): Promise<string> {
+  const span = addSpanToTransaction(ctx, "add-deploy");
+
+  span?.finish();
   return Promise.resolve("Noop");
 }
