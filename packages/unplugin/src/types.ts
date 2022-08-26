@@ -44,7 +44,7 @@ export type Options = {
   // vcsRemote: string,
   // customHeader: string,
 
-  // dryRun?: boolean,
+  dryRun?: boolean;
   debug?: boolean;
   // silent?: boolean,
   cleanArtifacts?: boolean;

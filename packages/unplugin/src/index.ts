@@ -208,6 +208,17 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
     },
     buildEnd() {
       const release = getReleaseName(options.release);
+
+      if (options.dryRun) {
+        debugLog("DRY Run Mode");
+
+        if (options.release) {
+          debugLog(`Proposed release: ${options.release}`);
+        }
+
+        return;
+      }
+
       //TODO:
       //  1. validate options to see if we get a valid include property, release name, etc.
       //  2. normalize the include property: Users can pass string | string [] | IncludeEntry[].
