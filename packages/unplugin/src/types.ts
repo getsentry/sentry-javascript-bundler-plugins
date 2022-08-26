@@ -42,7 +42,7 @@ export type Options = {
 
   /* --- other unimportant (for now) stuff- properties: */
   // vcsRemote: string,
-  // customHeader: string,
+  customHeaders?: Record<string, string>;
 
   // dryRun?: boolean,
   debug?: boolean;

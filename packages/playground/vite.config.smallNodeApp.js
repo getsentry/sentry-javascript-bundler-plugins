@@ -23,9 +23,10 @@ export default defineConfig({
       project: process.env.SENTRY_PROJECT,
       debug: true,
       debugLogging: true,
-      release: "0.0.10",
+      release: "vladan@0.0.11",
       include: "out/vite-smallNodeApp",
       cleanArtifacts: true,
+      customHeaders: { custom: "header" },
     }),
   ],
 });

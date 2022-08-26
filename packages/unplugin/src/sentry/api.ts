@@ -11,16 +11,17 @@ const API_PATH = "/api/0";
 
 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
 const USER_AGENT = `sentry-unplugin/${unpluginVersion}`;
-const sentryApiAxiosInstance = axios.create();
-sentryApiAxiosInstance.interceptors.request.use((config) => {
-  return {
-    ...config,
+const sentryApiAxiosInstance = (props: {
+  authToken: string;
+  customHeaders?: Record<string, string>;
+}) =>
+  axios.create({
     headers: {
-      ...config.headers,
+      ...props.customHeaders,
       "User-Agent": USER_AGENT,
+      Authorization: `Bearer ${props.authToken}`,
     },
-  };
-});
+  });
 
 export async function createRelease({
   org,
@@ -28,12 +29,14 @@ export async function createRelease({
   release,
   authToken,
   sentryUrl,
+  customHeaders,
 }: {
   release: string;
   project: string;
   org: string;
   authToken: string;
   sentryUrl: string;
+  customHeaders?: Record<string, string>;
 }): Promise<void> {
   const requestUrl = `${sentryUrl}${API_PATH}/organizations/${org}/releases/`;
 
@@ -45,9 +48,7 @@ export async function createRelease({
   };
 
   try {
-    await sentryApiAxiosInstance.post(requestUrl, releasePayload, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
+    await sentryApiAxiosInstance({ authToken, customHeaders }).post(requestUrl, releasePayload);
   } catch (e) {
     // TODO: Maybe do some more sopthisticated error handling here
     throw new Error("Something went wrong while creating a release");
@@ -60,17 +61,19 @@ export async function deleteAllReleaseArtifacts({
   release,
   authToken,
   sentryUrl,
+  customHeaders,
 }: {
   org: string;
   release: string;
   sentryUrl: string;
   authToken: string;
   project: string;
+  customHeaders?: Record<string, string>;
 }): Promise<void> {
   const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/files/source-maps/?name=${release}`;
 
   try {
-    await sentryApiAxiosInstance.delete(requestUrl, {
+    await sentryApiAxiosInstance({ authToken, customHeaders }).delete(requestUrl, {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -87,12 +90,14 @@ export async function updateRelease({
   authToken,
   sentryUrl,
   project,
+  customHeaders,
 }: {
   release: string;
   org: string;
   authToken: string;
   sentryUrl: string;
   project: string;
+  customHeaders?: Record<string, string>;
 }): Promise<void> {
   const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/`;
 
@@ -101,7 +106,7 @@ export async function updateRelease({
   };
 
   try {
-    await sentryApiAxiosInstance.put(requestUrl, releasePayload, {
+    await sentryApiAxiosInstance({ authToken, customHeaders }).put(requestUrl, releasePayload, {
       headers: { Authorization: `Bearer ${authToken}` },
     });
   } catch (e) {
@@ -114,18 +119,20 @@ export async function uploadReleaseFile({
   org,
   project,
   release,
-  authToken,
   sentryUrl,
   filename,
   fileContent,
+  authToken,
+  customHeaders,
 }: {
   org: string;
   release: string;
   sentryUrl: string;
-  authToken: string;
   project: string;
   filename: string;
   fileContent: string;
+  authToken: string;
+  customHeaders?: Record<string, string>;
 }) {
   const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/files/`;
 
@@ -134,7 +141,7 @@ export async function uploadReleaseFile({
   form.append("file", Buffer.from(fileContent, "utf-8"), { filename });
 
   try {
-    await sentryApiAxiosInstance.post(requestUrl, form, {
+    await sentryApiAxiosInstance({ authToken, customHeaders }).post(requestUrl, form, {
       headers: {
         Authorization: `Bearer ${authToken}`,
         "Content-Type": "multipart/form-data",

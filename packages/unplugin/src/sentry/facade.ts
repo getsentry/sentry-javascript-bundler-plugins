@@ -60,6 +60,7 @@ async function createNewRelease(release: string, options: Options): Promise<stri
     org: options.org,
     project: options.project,
     sentryUrl: options.url,
+    customHeaders: options.customHeaders,
   });
 
   // eslint-disable-next-line no-console
@@ -142,6 +143,7 @@ async function uploadSourceMaps(release: string, options: Options): Promise<stri
         sentryUrl: url,
         filename: file.name,
         fileContent: file.content,
+        customHeaders: options.customHeaders,
       })
     )
   ).then(() => {
@@ -168,6 +170,7 @@ async function finalizeRelease(release: string, options: Options): Promise<strin
       release,
       sentryUrl: url,
       project,
+      customHeaders: options.customHeaders,
     });
 
     // eslint-disable-next-line no-console
@@ -212,6 +215,7 @@ async function cleanArtifacts(release: string, options: Options): Promise<string
       release,
       sentryUrl: options.url,
       project: options.project,
+      customHeaders: options.customHeaders,
     });
 
     // eslint-disable-next-line no-console
