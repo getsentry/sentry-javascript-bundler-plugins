@@ -11,7 +11,6 @@ export type Options = {
   project?: string;
   authToken?: string;
   url?: string;
-  configFile?: string;
 
   /* --- release properties: */
   release?: string;
