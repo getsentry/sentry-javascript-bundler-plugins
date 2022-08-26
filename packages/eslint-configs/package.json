@@ -1,6 +1,7 @@
 {
-  "name": "eslint-config-local",
+  "name": "@sentry-internal/eslint-config",
   "version": "0.0.0",
+  "license": "MIT",
   "private": true,
   "peerDependencies": {
     "eslint": "^8.14.0"
