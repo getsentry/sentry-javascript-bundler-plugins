@@ -1,5 +1,6 @@
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
+import replace from "@rollup/plugin-replace";
 import babel from "@rollup/plugin-babel";
 import packageJson from "./package.json";
 import json from "@rollup/plugin-json";
@@ -16,6 +17,9 @@ export default {
     resolve({ extensions, preferBuiltins: true }),
     commonjs(),
     json(),
+    replace({
+      __PACKAGE_VERSION__: JSON.stringify(packageJson.version),
+    }),
     babel({
       extensions,
       babelHelpers: "bundled",

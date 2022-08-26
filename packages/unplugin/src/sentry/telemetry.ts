@@ -8,7 +8,6 @@ import {
 } from "@sentry/node";
 import { Span } from "@sentry/tracing";
 import { AxiosError } from "axios";
-import { version as unpluginVersion } from "../../package.json";
 import { BuildContext } from "../types";
 
 export function makeSentryClient(
@@ -23,7 +22,7 @@ export function makeSentryClient(
     tracesSampleRate: telemetryEnabled ? 1.0 : 0.0,
     sampleRate: telemetryEnabled ? 1.0 : 0.0,
 
-    release: `${org ? `${org}@` : ""}${unpluginVersion}`,
+    release: __PACKAGE_VERSION__,
     integrations: [new Integrations.Http({ tracing: true })],
     tracePropagationTargets: ["sentry.io/api"],
 
@@ -34,6 +33,12 @@ export function makeSentryClient(
   });
 
   const hub = new Hub(client);
+
+  hub.configureScope((scope) => {
+    if (org) {
+      scope.setTag("org", org);
+    }
+  });
 
   //TODO: This call is problematic because as soon as we set our hub as the current hub
   //      we might interfere with other plugins that use Sentry. However, for now, we'll
