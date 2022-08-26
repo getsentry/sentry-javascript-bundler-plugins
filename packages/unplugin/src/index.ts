@@ -305,7 +305,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
         .then(() => sentryFacade.addDeploy()) // this is a noop for now
         .then(() => {
           transaction?.setStatus("ok");
-        }) // this is a noop for now
+        })
         .catch((e: Error) => {
           captureMinimalError(e, sentryHub);
           transaction?.setStatus("cancelled");
