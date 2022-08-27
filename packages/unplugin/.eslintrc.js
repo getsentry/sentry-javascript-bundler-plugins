@@ -9,6 +9,9 @@ module.exports = {
     tsconfigRootDir: __dirname,
     project: ["./src/tsconfig.json", "./test/tsconfig.json"],
   },
+  globals: {
+    __PACKAGE_VERSION__: "readonly",
+  },
   env: {
     node: true,
   },

@@ -1,18 +1,11 @@
-import axios from "axios";
-
-import FormData from "form-data";
-
-// We need to ignore the import because the package.json is not part of the TS project as configured in tsconfig.json
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { version as unpluginVersion } from "../../package.json";
-import { captureMinimalError } from "./telemetry";
 import { Hub } from "@sentry/node";
+import axios from "axios";
+import FormData from "form-data";
+import { captureMinimalError } from "./telemetry";
 
 const API_PATH = "/api/0";
+const USER_AGENT = `sentry-unplugin/${__PACKAGE_VERSION__}`;
 
-// eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-unsafe-member-access
-const USER_AGENT = `sentry-unplugin/${unpluginVersion}`;
 const sentryApiAxiosInstance = axios.create({ headers: { "User-Agent": USER_AGENT } });
 
 export async function createRelease({
