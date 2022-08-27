@@ -2,7 +2,7 @@
 
 import { Hub } from "@sentry/hub";
 import { Span } from "@sentry/tracing";
-import sentryLogger from "../src/sentry/logger";
+import sentryLogger from "./sentry/logger";
 
 //TODO: compare types w/ webpack plugin (and sentry-cli?)
 export type Options = {
