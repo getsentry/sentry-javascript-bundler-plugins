@@ -1,6 +1,6 @@
 {
   "name": "@sentry/sentry-unplugin",
-  "version": "0.0.1",
+  "version": "2.0.0-alpha.0",
   "description": "Official Sentry unplugin",
   "repository": "git://github.com/getsentry/sentry-unplugin.git",
   "homepage": "https://github.com/getsentry/sentry-unplugin",
@@ -26,7 +26,8 @@
     "check:types:src": "tsc --project ./src/tsconfig.json --noEmit",
     "check:types:test": "tsc --project ./test/tsconfig.json --noEmit",
     "test": "jest",
-    "lint": "eslint ./src ./test"
+    "lint": "eslint ./src ./test",
+    "bump:version": "yarn version --no-git-tag-version --new-version"
   },
   "dependencies": {
     "@sentry/node": "^7.11.1",

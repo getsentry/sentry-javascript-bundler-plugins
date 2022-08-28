@@ -1,6 +1,9 @@
 {
   "name": "@sentry-internal/sentry-unplugin-tsconfig",
-  "version": "0.0.0",
+  "version": "2.0.0-alpha.0",
+  "scripts": {
+    "bump:version": "yarn version --no-git-tag-version --new-version"
+  },
   "license": "MIT",
   "private": true
 }

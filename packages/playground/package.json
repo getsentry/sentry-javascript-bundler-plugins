@@ -1,6 +1,6 @@
 {
   "name": "@sentry-internal/unplugin-playground",
-  "version": "0.0.0",
+  "version": "2.0.0-alpha.0",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -11,7 +11,8 @@
     "build:webpack5": "node build-webpack5.js",
     "build:esbuild": "node build-esbuild.js",
     "build:smallNodeApp": "vite build --config vite.config.smallNodeApp.js",
-    "start:proxyLogger": "ts-node scripts/request-logger-proxy.ts"
+    "start:proxyLogger": "ts-node scripts/request-logger-proxy.ts",
+    "bump:version": "yarn version --no-git-tag-version --new-version"
   },
   "dependencies": {
     "@sentry/integrations": "^7.11.1",

@@ -1,6 +1,6 @@
 {
   "name": "@sentry/rollup-plugin",
-  "version": "0.0.1",
+  "version": "2.0.0-alpha.0",
   "description": "Official Sentry Rollup plugin",
   "repository": "git://github.com/getsentry/sentry-unplugin.git",
   "homepage": "https://github.com/getsentry/sentry-unplugin/tree/main/packages/rollup-plugin",
@@ -33,7 +33,8 @@
     "check:types:src": "tsc --project ./src/tsconfig.json --noEmit",
     "check:types:test": "tsc --project ./test/tsconfig.json --noEmit",
     "test": "jest",
-    "lint": "eslint ./src ./test"
+    "lint": "eslint ./src ./test",
+    "bump:version": "yarn version --no-git-tag-version --new-version"
   },
   "dependencies": {
     "@sentry/sentry-unplugin": "0.0.1"
@@ -46,12 +47,12 @@
     "@rollup/plugin-commonjs": "22.0.1",
     "@rollup/plugin-json": "4.1.0",
     "@rollup/plugin-node-resolve": "13.3.0",
+    "@sentry-internal/eslint-config": "*",
+    "@sentry-internal/sentry-unplugin-tsconfig": "*",
     "@swc/core": "^1.2.205",
     "@swc/jest": "^0.2.21",
     "@types/jest": "^28.1.3",
     "@types/node": "^18.6.3",
-    "@sentry-internal/eslint-config": "*",
-    "@sentry-internal/sentry-unplugin-tsconfig": "*",
     "eslint": "^8.18.0",
     "jest": "^28.1.1",
     "npm-run-all": "^4.1.5",
