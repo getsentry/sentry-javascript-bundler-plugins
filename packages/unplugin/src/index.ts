@@ -97,8 +97,10 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
 
   const logger = sentryLogger({ options, hub: sentryHub });
 
-  logger.info("Sending error and performance telemetry data to Sentry.");
-  logger.info("To disable telemetry, set `options.telemetry` to `false`.");
+  if (telemetryEnabled) {
+    logger.info("Sending error and performance telemetry data to Sentry.");
+    logger.info("To disable telemetry, set `options.telemetry` to `false`.");
+  }
 
   sentryHub.setTags({
     organization: options.org,
