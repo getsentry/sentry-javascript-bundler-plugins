@@ -1,12 +1,19 @@
 import { Hub } from "@sentry/node";
 import axios from "axios";
 import FormData from "form-data";
+import { Options } from "../types";
 import { captureMinimalError } from "./telemetry";
 
 const API_PATH = "/api/0";
 const USER_AGENT = `sentry-unplugin/${__PACKAGE_VERSION__}`;
 
-const sentryApiAxiosInstance = axios.create({ headers: { "User-Agent": USER_AGENT } });
+const sentryApiAxiosInstance = ({
+  authToken,
+  customHeaders,
+}: Required<Pick<Options, "authToken">> & Pick<Options, "customHeaders">) =>
+  axios.create({
+    headers: { ...customHeaders, "User-Agent": USER_AGENT, Authorization: `Bearer ${authToken}` },
+  });
 
 export async function createRelease({
   org,
@@ -15,6 +22,7 @@ export async function createRelease({
   authToken,
   sentryUrl,
   sentryHub,
+  customHeaders,
 }: {
   release: string;
   project: string;
@@ -22,6 +30,7 @@ export async function createRelease({
   authToken: string;
   sentryUrl: string;
   sentryHub: Hub;
+  customHeaders?: Record<string, string>;
 }): Promise<void> {
   const requestUrl = `${sentryUrl}${API_PATH}/organizations/${org}/releases/`;
 
@@ -33,7 +42,7 @@ export async function createRelease({
   };
 
   try {
-    await sentryApiAxiosInstance.post(requestUrl, releasePayload, {
+    await sentryApiAxiosInstance({ authToken, customHeaders }).post(requestUrl, releasePayload, {
       headers: { Authorization: `Bearer ${authToken}` },
     });
   } catch (e) {
@@ -49,6 +58,7 @@ export async function deleteAllReleaseArtifacts({
   authToken,
   sentryUrl,
   sentryHub,
+  customHeaders,
 }: {
   org: string;
   release: string;
@@ -56,11 +66,12 @@ export async function deleteAllReleaseArtifacts({
   authToken: string;
   project: string;
   sentryHub: Hub;
+  customHeaders?: Record<string, string>;
 }): Promise<void> {
   const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/files/source-maps/?name=${release}`;
 
   try {
-    await sentryApiAxiosInstance.delete(requestUrl, {
+    await sentryApiAxiosInstance({ authToken, customHeaders }).delete(requestUrl, {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -78,6 +89,7 @@ export async function updateRelease({
   sentryUrl,
   project,
   sentryHub,
+  customHeaders,
 }: {
   release: string;
   org: string;
@@ -85,6 +97,7 @@ export async function updateRelease({
   sentryUrl: string;
   project: string;
   sentryHub: Hub;
+  customHeaders?: Record<string, string>;
 }): Promise<void> {
   const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/`;
 
@@ -93,7 +106,7 @@ export async function updateRelease({
   };
 
   try {
-    await sentryApiAxiosInstance.put(requestUrl, releasePayload, {
+    await sentryApiAxiosInstance({ authToken, customHeaders }).put(requestUrl, releasePayload, {
       headers: { Authorization: `Bearer ${authToken}` },
     });
   } catch (e) {
@@ -111,6 +124,7 @@ export async function uploadReleaseFile({
   filename,
   fileContent,
   sentryHub,
+  customHeaders,
 }: {
   org: string;
   release: string;
@@ -120,6 +134,7 @@ export async function uploadReleaseFile({
   filename: string;
   fileContent: string;
   sentryHub: Hub;
+  customHeaders?: Record<string, string>;
 }) {
   const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/files/`;
 
@@ -128,7 +143,7 @@ export async function uploadReleaseFile({
   form.append("file", Buffer.from(fileContent, "utf-8"), { filename });
 
   try {
-    await sentryApiAxiosInstance.post(requestUrl, form, {
+    await sentryApiAxiosInstance({ authToken, customHeaders }).post(requestUrl, form, {
       headers: {
         Authorization: `Bearer ${authToken}`,
         "Content-Type": "multipart/form-data",
