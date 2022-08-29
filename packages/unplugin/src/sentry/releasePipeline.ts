@@ -40,6 +40,7 @@ export async function createNewRelease(
     project: options.project,
     sentryUrl: options.url,
     sentryHub: ctx.hub,
+    customHeaders: options.customHeaders,
   });
 
   ctx.logger.info("Successfully created release.");
@@ -121,6 +122,7 @@ export async function uploadSourceMaps(
         filename: file.name,
         fileContent: file.content,
         sentryHub: ctx.hub,
+        customHeaders: options.customHeaders,
       })
     )
   ).then(() => {
@@ -151,6 +153,7 @@ export async function finalizeRelease(
       sentryUrl: url,
       project,
       sentryHub: ctx.hub,
+      customHeaders: options.customHeaders,
     });
 
     ctx.logger.info("Successfully finalized release.");
@@ -190,6 +193,7 @@ export async function cleanArtifacts(
       sentryUrl: options.url,
       project: options.project,
       sentryHub: ctx.hub,
+      customHeaders: options.customHeaders,
     });
 
     ctx.logger.info("Successfully cleaned previous artifacts.");
