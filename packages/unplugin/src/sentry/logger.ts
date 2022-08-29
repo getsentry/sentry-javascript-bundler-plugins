@@ -6,7 +6,7 @@ interface LoggerI {
   hub: Hub;
 }
 export default function logger(props: LoggerI) {
-  const signature = "[Sentry-unplugin]";
+  const prefix = "[Sentry-unplugin]";
 
   function addBreadcrumb(level: SeverityLevel, message: string) {
     props.hub.addBreadcrumb({
@@ -17,10 +17,11 @@ export default function logger(props: LoggerI) {
   }
 
   return {
+    prefix,
     info(message: string) {
       if (!props.options.silent) {
         // eslint-disable-next-line no-console
-        console.info(signature, message);
+        console.info(prefix, message);
       }
 
       addBreadcrumb("info", message);
@@ -28,7 +29,7 @@ export default function logger(props: LoggerI) {
     warn(message: string) {
       if (!props.options.silent) {
         // eslint-disable-next-line no-console
-        console.warn(signature, message);
+        console.warn(prefix, message);
       }
 
       addBreadcrumb("warning", message);
@@ -36,7 +37,7 @@ export default function logger(props: LoggerI) {
     error(message: string) {
       if (!props.options.silent) {
         // eslint-disable-next-line no-console
-        console.error(signature, message);
+        console.error(prefix, message);
       }
 
       addBreadcrumb("error", message);

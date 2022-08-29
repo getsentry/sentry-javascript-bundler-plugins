@@ -23,13 +23,13 @@ describe("Logger", () => {
     },
   };
 
-  const mockedHub = jest.spyOn(hub, "addBreadcrumb");
+  const mockedAddBreadcrumb = jest.spyOn(hub, "addBreadcrumb");
 
   afterEach(() => {
     info.mockReset();
     warn.mockReset();
     error.mockReset();
-    mockedHub.mockReset();
+    mockedAddBreadcrumb.mockReset();
   });
 
   const CASES = ["info", "warn", "error"];
@@ -39,8 +39,8 @@ describe("Logger", () => {
     // "info" -> make typescript happy
     logger[a as "info"]("Hey!");
 
-    expect(spy[a as "info"]).toHaveBeenCalledWith("[Sentry-unplugin]", "Hey!");
-    expect(mockedHub).toHaveBeenCalledWith({
+    expect(spy[a as "info"]).toHaveBeenCalledWith(logger.prefix, "Hey!");
+    expect(mockedAddBreadcrumb).toHaveBeenCalledWith({
       category: "logger",
       level: a === "warn" ? "warning" : a,
       message: "Hey!",
@@ -52,8 +52,8 @@ describe("Logger", () => {
     // "info" -> make typescript happy
     logger[a as "info"]("Hey!");
 
-    expect(spy[a as "info"]).not.toHaveBeenCalledWith("[Sentry-unplugin]", "Hey!");
-    expect(mockedHub).toHaveBeenCalledWith({
+    expect(spy[a as "info"]).not.toHaveBeenCalledWith(logger.prefix, "Hey!");
+    expect(mockedAddBreadcrumb).toHaveBeenCalledWith({
       category: "logger",
       level: a === "warn" ? "warning" : a,
       message: "Hey!",
