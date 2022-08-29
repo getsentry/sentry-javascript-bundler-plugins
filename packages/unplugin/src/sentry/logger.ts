@@ -1,17 +1,15 @@
-import { makeSentryClient } from "../sentry/telemetry";
 import { Options } from "../types";
 import { SeverityLevel } from "@sentry/node";
-
-export default function logger(props: Pick<Options, "silent" | "telemetry" | "org">) {
+import { Hub } from "@sentry/node";
+interface LoggerI {
+  options: Pick<Options, "silent" | "org">;
+  hub: Hub;
+}
+export default function logger(props: LoggerI) {
   const signature = "[Sentry-unplugin]";
-  const sentryClient = makeSentryClient(
-    "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
-    !!props.telemetry,
-    props.org
-  );
 
   function addBreadcrumb(level: SeverityLevel, message: string) {
-    sentryClient.hub.addBreadcrumb({
+    props.hub.addBreadcrumb({
       category: "logger",
       level,
       message,
@@ -20,7 +18,7 @@ export default function logger(props: Pick<Options, "silent" | "telemetry" | "or
 
   return {
     info(message: string) {
-      if (!props.silent) {
+      if (!props.options.silent) {
         // eslint-disable-next-line no-console
         console.info(signature, message);
       }
@@ -28,7 +26,7 @@ export default function logger(props: Pick<Options, "silent" | "telemetry" | "or
       addBreadcrumb("info", message);
     },
     warn(message: string) {
-      if (!props.silent) {
+      if (!props.options.silent) {
         // eslint-disable-next-line no-console
         console.warn(signature, message);
       }
@@ -36,7 +34,7 @@ export default function logger(props: Pick<Options, "silent" | "telemetry" | "or
       addBreadcrumb("warning", message);
     },
     error(message: string) {
-      if (!props.silent) {
+      if (!props.options.silent) {
         // eslint-disable-next-line no-console
         console.error(signature, message);
       }

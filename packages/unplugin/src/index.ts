@@ -85,7 +85,6 @@ const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
  */
 const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) => {
   const options = { ...defaultOptions, ...originalOptions };
-  const logger = sentryLogger(options);
 
   //TODO: We can get rid of this variable once we have internal plugin options
   const telemetryEnabled = options.telemetry === true;
@@ -95,6 +94,8 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
     telemetryEnabled,
     options.org
   );
+
+  const logger = sentryLogger({ options, hub: sentryHub });
 
   logger.info("Sending error and performance telemetry data to Sentry.");
   logger.info("To disable telemetry, set `options.telemetry` to `false`.");
