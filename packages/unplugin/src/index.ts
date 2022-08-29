@@ -13,6 +13,7 @@ import {
 import "@sentry/tracing";
 import { addSpanToTransaction, captureMinimalError, makeSentryClient } from "./sentry/telemetry";
 import { Span, Transaction } from "@sentry/types";
+import sentryLogger from "./sentry/logger";
 
 const defaultOptions: Omit<Options, "include"> = {
   //TODO: add default options here as we port over options from the webpack plugin
@@ -94,11 +95,11 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
     options.org
   );
 
-  if (options.telemetry) {
-    // eslint-disable-next-line no-console
-    console.log("[Sentry-plugin]", "Sending error and performance telemetry data to Sentry.");
-    // eslint-disable-next-line no-console
-    console.log("[Sentry-Plugin]", "To disable telemetry, set `options.telemetry` to `false`.");
+  const logger = sentryLogger({ options, hub: sentryHub });
+
+  if (telemetryEnabled) {
+    logger.info("Sending error and performance telemetry data to Sentry.");
+    logger.info("To disable telemetry, set `options.telemetry` to `false`.");
   }
 
   sentryHub.setTags({
@@ -108,13 +109,6 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
   });
 
   sentryHub.setUser({ id: options.org });
-
-  function debugLog(...args: unknown[]) {
-    if (options?.debugLogging) {
-      // eslint-disable-next-line no-console
-      console.log("[Sentry-plugin]", ...args);
-    }
-  }
 
   // This is `nonEntrypointSet` instead of `entrypointSet` because this set is filled in the `resolveId` hook and there
   // we don't have guaranteed access to *absolute* paths of files if they're entrypoints. For non-entrypoints we're
@@ -138,7 +132,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
         name: "plugin-execution",
       });
       releaseInjectionSpan = addSpanToTransaction(
-        { hub: sentryHub, parentSpan: transaction },
+        { hub: sentryHub, parentSpan: transaction, logger },
         "release-injection",
         "release-injection"
       );
@@ -174,7 +168,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
     },
 
     loadInclude(id) {
-      debugLog(`Called "loadInclude": ${JSON.stringify({ id })}`);
+      logger.info(`Called "loadInclude": ${JSON.stringify({ id })}`);
 
       return id === RELEASE_INJECTOR_ID;
     },
@@ -279,7 +273,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
       const releasePipelineSpan =
         transaction &&
         addSpanToTransaction(
-          { hub: sentryHub, parentSpan: transaction },
+          { hub: sentryHub, parentSpan: transaction, logger },
           "release-creation",
           "release-creation-pipeline"
         );
@@ -297,7 +291,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
       //     That's good for them but a hassle for us. Let's try to normalize this into one data type
       //     (I vote IncludeEntry[]) and continue with that down the line
 
-      const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan };
+      const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan, logger };
 
       createNewRelease(release, options, ctx)
         .then(() => cleanArtifacts(release, options, ctx))
@@ -312,7 +306,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
           captureMinimalError(e, sentryHub);
           transaction?.setStatus("cancelled");
 
-          debugLog(e);
+          logger.error(e.message);
 
           if (options.errorHandler) {
             options.errorHandler(e);
