@@ -3,11 +3,14 @@ const jestPackageJson = require("jest/package.json");
 /** @type {import('eslint').ESLint.Options} */
 module.exports = {
   root: true,
-  extends: ["local/jest", "local/base"],
+  extends: ["@sentry-internal/eslint-config/jest", "@sentry-internal/eslint-config/base"],
   ignorePatterns: [".eslintrc.js", "dist", "jest.config.js", "rollup.config.js"],
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ["./src/tsconfig.json", "./test/tsconfig.json"],
+  },
+  globals: {
+    __PACKAGE_VERSION__: "readonly",
   },
   env: {
     node: true,

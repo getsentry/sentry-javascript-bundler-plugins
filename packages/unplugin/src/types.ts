@@ -1,14 +1,16 @@
 //TODO: JsDoc for all properties
+
+import { Hub } from "@sentry/hub";
+import { Span } from "@sentry/tracing";
+import sentryLogger from "./sentry/logger";
+
 //TODO: compare types w/ webpack plugin (and sentry-cli?)
 export type Options = {
-  debugLogging?: boolean;
-
   /* --- authentication/identification: */
   org?: string;
   project?: string;
   authToken?: string;
   url?: string;
-  configFile?: string;
 
   /* --- release properties: */
   release?: string;
@@ -42,13 +44,27 @@ export type Options = {
 
   /* --- other unimportant (for now) stuff- properties: */
   // vcsRemote: string,
-  // customHeader: string,
+  customHeaders?: Record<string, string>;
 
   // dryRun?: boolean,
   debug?: boolean;
-  // silent?: boolean,
+  silent?: boolean;
   cleanArtifacts?: boolean;
-  // errorHandler?: (err: Error, invokeErr: function(): void, compilation: unknown) => void,
+
+  /**
+   * When an error occurs during rlease creation or sourcemaps upload, the plugin will call this function.
+   *
+   * By default, the plugin will simply throw an error, thereby stopping the bundling process. If an `errorHandler` callback is provided, compilation will continue, unless an error is thrown in the provided callback.
+   *
+   * To allow compilation to continue but still emit a warning, set this option to the following:
+   *
+   * ```js
+   * (err) => {
+   *   console.warn(err);
+   * }
+   * ```
+   */
+  errorHandler?: (err: Error) => void;
   // setCommits?: {
   //   repo?: string,
   //   commit?: string,
@@ -64,6 +80,18 @@ export type Options = {
   //   name?: string,
   //   url?: string,
   // }
+
+  /**
+   * If set to true, internal plugin errors and performance data will be sent to Sentry.
+   *
+   * At Sentry we like to use Sentry ourselves to deliver faster and more stable products.
+   * We're very careful of what we're sending. We won't collect anything other than error
+   * and high-level performance data. We will never collect your code or any details of the
+   * projects in which you're using this plugin.
+   *
+   * Defaults to true
+   */
+  telemetry?: boolean;
 };
 
 /*
@@ -72,3 +100,13 @@ type IncludeEntry = {
   //TODO: what about the other entries??
 };
 */
+
+/**
+ * Holds data for internal purposes
+ * (e.g. telemetry and logging)
+ */
+export type BuildContext = {
+  hub: Hub;
+  parentSpan?: Span;
+  logger: ReturnType<typeof sentryLogger>;
+};

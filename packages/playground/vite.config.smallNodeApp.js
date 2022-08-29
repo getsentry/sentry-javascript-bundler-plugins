@@ -1,5 +1,5 @@
 // @ts-check
-import { sentryVitePlugin } from "@sentry/unplugin";
+import { sentryVitePlugin } from "@sentry/sentry-unplugin";
 import { defineConfig } from "vite";
 import * as path from "path";
 
@@ -22,9 +22,8 @@ export default defineConfig({
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
       debug: true,
-      debugLogging: true,
       release: "my_fancy_application",
-      dist: "1.3.9",
+      dist: "1.4.0",
       include: "out/vite-smallNodeApp",
       cleanArtifacts: true,
     }),

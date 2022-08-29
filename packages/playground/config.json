@@ -4,6 +4,5 @@
   "project": "some-proj",
   "authToken": "some-auth-token",
   "include": "/dist",
-  "debugLogging": true,
   "debug": true
 }
