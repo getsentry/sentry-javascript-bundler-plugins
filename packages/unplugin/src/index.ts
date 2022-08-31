@@ -13,7 +13,7 @@ import {
 import "@sentry/tracing";
 import { addSpanToTransaction, captureMinimalError, makeSentryClient } from "./sentry/telemetry";
 import { Span, Transaction } from "@sentry/types";
-import sentryLogger from "./sentry/logger";
+import { createLogger } from "./sentry/logger";
 
 const defaultOptions: Omit<Options, "include"> = {
   //TODO: add default options here as we port over options from the webpack plugin
@@ -95,7 +95,11 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
     options.org
   );
 
-  const logger = sentryLogger({ options, hub: sentryHub });
+  const logger = createLogger({
+    hub: sentryHub,
+    prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
+    silent: options.silent,
+  });
 
   if (telemetryEnabled) {
     logger.info("Sending error and performance telemetry data to Sentry.");

@@ -1,19 +1,8 @@
-// import {makeSentryClient} from "../src/sentry/telemetry"
 import { Hub } from "@sentry/node";
-import sentryLogger from "../src/sentry/logger";
+import { createLogger } from "../src/sentry/logger";
 
 describe("Logger", () => {
-  const info = jest.spyOn(console, "info").mockImplementation(() => {
-    return;
-  });
-  const warn = jest.spyOn(console, "warn").mockImplementation(() => {
-    return;
-  });
-  const error = jest.spyOn(console, "error").mockImplementation(() => {
-    return;
-  });
-
-  const spy = { info, warn, error };
+  const consoleLogSpy = jest.spyOn(console, "log").mockImplementation(() => undefined);
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -26,37 +15,63 @@ describe("Logger", () => {
   const mockedAddBreadcrumb = jest.spyOn(hub, "addBreadcrumb");
 
   afterEach(() => {
-    info.mockReset();
-    warn.mockReset();
-    error.mockReset();
+    consoleLogSpy.mockReset();
     mockedAddBreadcrumb.mockReset();
   });
 
-  const CASES = ["info", "warn", "error"];
+  it(".info() should log correctly", () => {
+    const prefix = "[some-prefix]";
+    const logger = createLogger({ hub, prefix });
+    logger.info("Hey!");
 
-  it.each(CASES)("logs (%s)", (a: string) => {
-    const logger = sentryLogger({ options: { silent: false }, hub });
-    // "info" -> make typescript happy
-    logger[a as "info"]("Hey!");
-
-    expect(spy[a as "info"]).toHaveBeenCalledWith(logger.prefix, "Hey!");
+    expect(consoleLogSpy).toHaveBeenCalledWith("[some-prefix] Hey!");
     expect(mockedAddBreadcrumb).toHaveBeenCalledWith({
       category: "logger",
-      level: a === "warn" ? "warning" : a,
+      level: "info",
       message: "Hey!",
     });
   });
 
-  it.each(CASES)("does not log (%s)", (a: string) => {
-    const logger = sentryLogger({ options: { silent: true }, hub });
-    // "info" -> make typescript happy
-    logger[a as "info"]("Hey!");
+  it(".warn() should log correctly", () => {
+    const prefix = "[some-prefix]";
+    const logger = createLogger({ hub, prefix });
+    logger.warn("Hey!");
 
-    expect(spy[a as "info"]).not.toHaveBeenCalledWith(logger.prefix, "Hey!");
+    expect(consoleLogSpy).toHaveBeenCalledWith("[some-prefix] Warning! Hey!");
     expect(mockedAddBreadcrumb).toHaveBeenCalledWith({
       category: "logger",
-      level: a === "warn" ? "warning" : a,
+      level: "warning",
       message: "Hey!",
+    });
+  });
+
+  it(".error() should log correctly", () => {
+    const prefix = "[some-prefix]";
+    const logger = createLogger({ hub, prefix });
+    logger.error("Hey!");
+
+    expect(consoleLogSpy).toHaveBeenCalledWith("[some-prefix] Error: Hey!");
+    expect(mockedAddBreadcrumb).toHaveBeenCalledWith({
+      category: "logger",
+      level: "error",
+      message: "Hey!",
+    });
+  });
+
+  describe("doesn't log when `silent` option is `true`", () => {
+    it.each(["info", "warn", "error"] as const)(".%s()", (loggerMethod) => {
+      const prefix = "[some-prefix]";
+      const logger = createLogger({ silent: true, hub, prefix });
+
+      logger[loggerMethod]("Hey!");
+
+      expect(consoleLogSpy).not.toHaveBeenCalled();
+
+      expect(mockedAddBreadcrumb).toHaveBeenCalledWith({
+        category: "logger",
+        level: expect.stringMatching(/.*/) as string,
+        message: "Hey!",
+      });
     });
   });
 });

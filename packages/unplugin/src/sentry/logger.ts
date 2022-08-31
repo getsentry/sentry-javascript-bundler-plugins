@@ -1,15 +1,14 @@
-import { Options } from "../types";
-import { SeverityLevel } from "@sentry/node";
-import { Hub } from "@sentry/node";
-interface LoggerI {
-  options: Pick<Options, "silent" | "org">;
-  hub: Hub;
-}
-export default function logger(props: LoggerI) {
-  const prefix = "[Sentry-unplugin]";
+import { SeverityLevel, Hub } from "@sentry/node";
 
+interface LoggerOptions {
+  silent?: boolean;
+  hub: Hub;
+  prefix: string;
+}
+
+export function createLogger(options: LoggerOptions) {
   function addBreadcrumb(level: SeverityLevel, message: string) {
-    props.hub.addBreadcrumb({
+    options.hub.addBreadcrumb({
       category: "logger",
       level,
       message,
@@ -17,27 +16,26 @@ export default function logger(props: LoggerI) {
   }
 
   return {
-    prefix,
     info(message: string) {
-      if (!props.options.silent) {
+      if (!options?.silent) {
         // eslint-disable-next-line no-console
-        console.info(prefix, message);
+        console.log(`${options.prefix} ${message}`);
       }
 
       addBreadcrumb("info", message);
     },
     warn(message: string) {
-      if (!props.options.silent) {
+      if (!options?.silent) {
         // eslint-disable-next-line no-console
-        console.warn(prefix, message);
+        console.log(`${options.prefix} Warning! ${message}`);
       }
 
       addBreadcrumb("warning", message);
     },
     error(message: string) {
-      if (!props.options.silent) {
+      if (!options?.silent) {
         // eslint-disable-next-line no-console
-        console.error(prefix, message);
+        console.log(`${options.prefix} Error: ${message}`);
       }
 
       addBreadcrumb("error", message);
