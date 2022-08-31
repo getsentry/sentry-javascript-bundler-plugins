@@ -27,7 +27,7 @@ export function createLogger(options: LoggerOptions) {
     warn(message: string) {
       if (!options?.silent) {
         // eslint-disable-next-line no-console
-        console.log(`${options.prefix} Warning: ${message}`);
+        console.log(`${options.prefix} Warning! ${message}`);
       }
 
       addBreadcrumb("warning", message);
