@@ -37,7 +37,7 @@ describe("Logger", () => {
     const logger = createLogger({ hub, prefix });
     logger.warn("Hey!");
 
-    expect(consoleLogSpy).toHaveBeenCalledWith("[some-prefix] Warning: Hey!");
+    expect(consoleLogSpy).toHaveBeenCalledWith("[some-prefix] Warning! Hey!");
     expect(mockedAddBreadcrumb).toHaveBeenCalledWith({
       category: "logger",
       level: "warning",
