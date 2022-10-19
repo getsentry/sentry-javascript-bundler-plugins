@@ -4,9 +4,9 @@
   </a>
 </p>
 
-# Sentry Webpack Plugin
+# Sentry Webpack Plugin (WIP)
 
-**DISCLAIMER: This package is work in progress and not production ready. Use with caution. We're happy to receive your feedback!**
+**WARNING: This package is work in progress! Use with caution and do not yet use it in production. We're happy to receive your feedback!**
 
 A Webpack plugin that provides release management features for Sentry:
 
