@@ -6,9 +6,9 @@
 
 # Sentry Unplugin (WIP)
 
-**WARNING: This project is work in progress! Do not yet use it in production. We're happy to receive your feedback!**
+**WARNING: This package is work in progress! Do not yet use it in production. We're happy to receive your feedback!**
 
-Universal Sentry plugin for various JavaScript bundlers. Based on [unjs/uplugin](https://github.com/unjs/unplugin). Currently supports Rollup, Vite, esbuild, Webpack 4 and Webpack 5.
+Core package containing the bundler-agnostic functionality used by the bundler plugins.
 
 Check out the individual packages for more information and examples:
 
