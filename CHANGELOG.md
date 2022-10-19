@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- "You miss 100 percent of the chances you don't take. — Wayne Gretzky" — Michael Scott
+- "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
 ## 0.0.0-alpha.0
 
