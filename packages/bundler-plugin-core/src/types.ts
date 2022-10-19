@@ -7,9 +7,35 @@ import { createLogger } from "./sentry/logger";
 //TODO: compare types w/ webpack plugin (and sentry-cli?)
 export type Options = {
   /* --- authentication/identification: */
+  /**
+   * The slug of the Sentry organization associated with the app.
+   *
+   * This value can also be specified via `process.env.SENTRY_ORG` (TODO, can it?)
+   */
   org?: string;
+
+  /**
+   * The slug of the Sentry project associated with the app.
+   *
+   * This value can also be specified via `process.env.SENTRY_ORG` (TODO, can it?)
+   */
   project?: string;
+
+  /**
+   * The authentication token to use for all communication with Sentry.
+   * Can be obtained from https://sentry.io/settings/account/api/auth-tokens/.
+   * Required scopes: project:releases (and org:read if setCommits option is used).
+   *
+   * This value an also be specified via `process.env.SENTRY_AUTH_TOKEN` (TODO, can it?).
+   */
   authToken?: string;
+
+  /**
+   * The base URL of your Sentry instance.
+   * Defaults to https://sentry.io/, which is the correct value for SAAS customers.
+   *
+   * This value an also be specified via `process.env.SENTRY_URL` (TODO, can it?).
+   */
   url?: string;
 
   /* --- release properties: */
@@ -30,7 +56,12 @@ export type Options = {
   finalize?: boolean;
 
   /* --- source maps properties: */
-  include: string; // | Array<string | IncludeEntry>;
+  /**
+   * One or more paths that Sentry CLI should scan recursively for sources.
+   * It will upload all .map files and match associated .js files.
+   * Each path can be given as a string or an object with path-specific options
+   */
+  include: string | IncludeEntry | Array<string | IncludeEntry>;
   // ignoreFile: string
   // ignore: string | string[]
   ext?: string[];
@@ -44,6 +75,9 @@ export type Options = {
 
   /* --- other unimportant (for now) stuff- properties: */
   // vcsRemote: string,
+  /**
+   * A header added to all outgoing requests. A string in the format header-key: header-value
+   */
   customHeaders?: Record<string, string>;
 
   // dryRun?: boolean,
@@ -94,12 +128,10 @@ export type Options = {
   telemetry?: boolean;
 };
 
-/*
 type IncludeEntry = {
   paths: string[];
   //TODO: what about the other entries??
 };
-*/
 
 /**
  * Holds data for internal purposes
