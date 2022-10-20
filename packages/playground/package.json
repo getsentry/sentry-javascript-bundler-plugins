@@ -1,5 +1,5 @@
 {
-  "name": "@sentry-internal/unplugin-playground",
+  "name": "@sentry-internal/bundler-plugin-playground",
   "version": "0.0.0-alpha.0",
   "license": "MIT",
   "private": true,

@@ -2,7 +2,7 @@
   "name": "@sentry/bundler-plugins",
   "version": "0.0.0",
   "description": "Sentry Bundler Plugins Monorepo.",
-  "repository": "git@github.com:getsentry/sentry-unplugin.git",
+  "repository": "git@github.com:getsentry/bundler-plugins.git",
   "private": true,
   "workspaces": [
     "packages/*"

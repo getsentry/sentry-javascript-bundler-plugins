@@ -132,13 +132,13 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
      */
     buildStart() {
       transaction = sentryHub.startTransaction({
-        op: "sentry-unplugin",
-        name: "plugin-execution",
+        op: "function.plugin",
+        name: "Sentry Bundler Plugin execution",
       });
       releaseInjectionSpan = addSpanToTransaction(
         { hub: sentryHub, parentSpan: transaction, logger },
-        "release-injection",
-        "release-injection"
+        "function.plugin.inject_release",
+        "Release injection"
       );
     },
 
@@ -278,8 +278,8 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
         transaction &&
         addSpanToTransaction(
           { hub: sentryHub, parentSpan: transaction, logger },
-          "release-creation",
-          "release-creation-pipeline"
+          "function.plugin.release",
+          "Release pipeline"
         );
 
       const release = getReleaseName(options.release);

@@ -1,5 +1,5 @@
 {
-  "name": "@sentry-internal/sentry-unplugin-tsconfig",
+  "name": "@sentry-internal/sentry-bundler-plugin-tsconfig",
   "version": "0.0.0-alpha.0",
   "license": "MIT",
   "private": true
