@@ -4,7 +4,7 @@
   </a>
 </p>
 
-# Sentry Unplugin (WIP)
+# Sentry Bundler Plugin Core
 
 **WARNING: This package is work in progress! Do not yet use it in production. We're happy to receive your feedback!**
 
@@ -19,14 +19,12 @@ Check out the individual packages for more information and examples:
 
 ### Features
 
-The Sentry Unplugin take care of Sentry-related tasks at build time of your JavaScript projects. It supports the following features:
+The Sentry bundler plugin core package contains the following functionality:
 
 - Sourcemap upload
 - Release creation in Sentry
 - Automatic release name discovery (based on CI environment - Vercel, AWS, Heroku, CircleCI, or current Git SHA)
 - Automatically associate errors with releases (Release injection)
-
-The Sentry Unplugin can be used as a replacement of [Sentry CLI](https://docs.sentry.io/learn/cli/) for these tasks.
 
 ### More information
 
