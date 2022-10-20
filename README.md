@@ -4,11 +4,11 @@
   </a>
 </p>
 
-# Sentry Unplugin (WIP)
+# Sentry Bundler Plugins (WIP)
 
 **WARNING: This project is work in progress! Do not yet use it in production. We're happy to receive your feedback!**
 
-Universal Sentry plugin for various JavaScript bundlers. Based on [unjs/uplugin](https://github.com/unjs/unplugin). Currently supports Rollup, Vite, esbuild, Webpack 4 and Webpack 5.
+Universal Sentry plugin for various JavaScript bundlers. Based on [unjs/uplugin](https://github.com/getsentry/bundler-plugins). Currently supports Rollup, Vite, esbuild, Webpack 4 and Webpack 5.
 
 Check out the individual packages for more information and examples:
 
@@ -19,14 +19,14 @@ Check out the individual packages for more information and examples:
 
 ### Features
 
-The Sentry Unplugin take care of Sentry-related tasks at build time of your JavaScript projects. It supports the following features:
+The Sentry Bundler Plugins take care of Sentry-related tasks at build time of your JavaScript projects. It supports the following features:
 
 - Sourcemap upload
 - Release creation in Sentry
 - Automatic release name discovery (based on CI environment - Vercel, AWS, Heroku, CircleCI, or current Git SHA)
 - Automatically associate errors with releases (Release injection)
 
-The Sentry Unplugin can be used as a replacement of [Sentry CLI](https://docs.sentry.io/learn/cli/) for these tasks.
+The Sentry Bundler Plugins can be used as a replacement of [Sentry CLI](https://docs.sentry.io/learn/cli/) for these tasks.
 
 ### More information
 

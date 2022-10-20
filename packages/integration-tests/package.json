@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@sentry-internal/eslint-config": "0.0.0-alpha.0",
-    "@sentry-internal/sentry-unplugin-tsconfig": "0.0.0-alpha.0",
+    "@sentry-internal/sentry-bundler-plugin-tsconfig": "0.0.0-alpha.0",
     "@sentry/bundler-plugin-core": "0.0.0-alpha.0",
     "@swc/jest": "^0.2.21",
     "@types/jest": "^28.1.3",
