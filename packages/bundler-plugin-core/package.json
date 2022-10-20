@@ -47,7 +47,7 @@
     "@rollup/plugin-node-resolve": "13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
     "@sentry-internal/eslint-config": "0.0.0-alpha.0",
-    "@sentry-internal/sentry-unplugin-tsconfig": "0.0.0-alpha.0",
+    "@sentry-internal/sentry-bundler-plugin-tsconfig": "0.0.0-alpha.0",
     "@swc/core": "^1.2.205",
     "@swc/jest": "^0.2.21",
     "@types/jest": "^28.1.3",
