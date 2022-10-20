@@ -12,10 +12,10 @@ Universal Sentry plugin for various JavaScript bundlers. Based on [unjs/uplugin]
 
 Check out the individual packages for more information and examples:
 
-- [Rollup](https://github.com/getsentry/sentry-unplugin/tree/main/packages/rollup-plugin)
-- [Vite](https://github.com/getsentry/sentry-unplugin/tree/main/packages/vite-plugin)
-- [esbuild](https://github.com/getsentry/sentry-unplugin/tree/main/packages/esbuild-plugin)
-- [Webpack](https://github.com/getsentry/sentry-unplugin/tree/main/packages/webpack-plugin)
+- [Rollup](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/rollup-plugin)
+- [Vite](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/vite-plugin)
+- [esbuild](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/esbuild-plugin)
+- [Webpack](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/webpack-plugin)
 
 ### Features
 
