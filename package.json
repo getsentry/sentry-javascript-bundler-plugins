@@ -11,6 +11,7 @@
     "build": "nx run-many --target=build --all",
     "build:watch": "nx run-many --target=build:watch --all",
     "build:graph": "nx graph",
+    "build:npm": "nx run-many --target=build:npm --all",
     "check:types": "nx run-many --target=check:types --all",
     "test": "nx run-many --target=test --all",
     "lint": "nx run-many --target=lint --all",
