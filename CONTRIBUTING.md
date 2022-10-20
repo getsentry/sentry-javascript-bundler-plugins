@@ -28,10 +28,8 @@ With that, the repo is fully set up and you are ready to run all commands.
 
 Since we are using [`TypeScript`](https://www.typescriptlang.org/), you need to transpile the code to JavaScript to be able to use it. From the top level of the repo, there are three commands available:
 
-- `yarn build`, which runs a one-time build (transpiling and type checking) of every package
-- `yarn build:rollup`, which runs just runs transpiling and bundling on every package
-- `yarn build:types`, which runs just runs type checking on every package
-- `yarn build(:*)?:watch`, which runs the commands listed above in whatch mode, meaning the command is re-executed after every file change
+- `yarn build`, which runs a one-time build (transpiling and type generation) of every package
+- `yarn build:watch`, which runs the command listed above in watch mode, meaning the command is re-executed after every file change
 
 ## Adding Tests
 
