@@ -1,6 +1,6 @@
 {
   "name": "@sentry/sentry-unplugin",
-  "version": "0.0.1",
+  "version": "0.0.0-alpha.0",
   "description": "Official Sentry unplugin",
   "repository": "git://github.com/getsentry/sentry-unplugin.git",
   "homepage": "https://github.com/getsentry/sentry-unplugin",
@@ -45,8 +45,8 @@
     "@rollup/plugin-json": "4.1.0",
     "@rollup/plugin-node-resolve": "13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
-    "@sentry-internal/eslint-config": "*",
-    "@sentry-internal/sentry-unplugin-tsconfig": "*",
+    "@sentry-internal/eslint-config": "0.0.0-alpha.0",
+    "@sentry-internal/sentry-unplugin-tsconfig": "0.0.0-alpha.0",
     "@swc/core": "^1.2.205",
     "@swc/jest": "^0.2.21",
     "@types/jest": "^28.1.3",

@@ -1,6 +1,6 @@
 {
   "name": "@sentry-internal/unplugin-playground",
-  "version": "0.0.0",
+  "version": "0.0.0-alpha.0",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -16,7 +16,7 @@
   "dependencies": {
     "@sentry/integrations": "^7.11.1",
     "@sentry/node": "^7.11.1",
-    "@sentry/sentry-unplugin": "*",
+    "@sentry/sentry-unplugin": "0.0.0-alpha.0",
     "@types/express": "^4.17.13",
     "@types/http-proxy": "^1.17.9",
     "esbuild": "0.14.49",

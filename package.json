@@ -21,8 +21,9 @@
   "devDependencies": {
     "@nrwl/cli": "14.5.10",
     "@nrwl/workspace": "14.5.10",
-    "nx": "14.5.10",
     "husky": "^8.0.0",
+    "lerna": "^6.0.1",
+    "nx": "14.5.10",
     "prettier": "^2.7.1",
     "pretty-quick": "^3.1.3"
   }
