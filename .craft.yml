@@ -1,16 +1,21 @@
 github:
   owner: getsentry
-  repo: sentry-unplugin
+  repo: bundler-plugins
 changelogPolicy: simple
 preReleaseCommand: bash scripts/craft-pre-release.sh
 requireNames:
-  - /^sentry-sentry-unplugin-*.tgz$/
+  - /^sentry-bundler-plugin-core--*.tgz$/
   - /^sentry-esbuild-plugin-*.tgz$/
   - /^sentry-rollup-plugin-*.tgz$/
   - /^sentry-vite-plugin-*.tgz$/
-  - /^sentry-sentry-webpack-plugin-*.tgz$/
+  # TODO: Comment in when we replace the webpack plugin
+  # - /^sentry-webpack-plugin-*.tgz$/
 targets:
   - name: github
     includeNames: /^sentry-.*.tgz$/
+    # TODO: Remove once we replace the webpack plugin
+    excludeNames: /^sentry-webpack-plugin-*.tgz$/
   - name: npm
     includeNames: /^sentry-.*.tgz$/
+    # TODO: Remove once we replace the webpack plugin
+    excludeNames: /^sentry-webpack-plugin-*.tgz$/
