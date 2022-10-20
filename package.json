@@ -1,8 +1,8 @@
 {
   "name": "@sentry/bundler-plugins",
   "version": "0.0.0",
-  "description": "Root of the sentry unplugin monorepo.",
-  "repository": "git@github.com:lforst/sentry-unplugin.git",
+  "description": "Sentry Bundler Plugins Monorepo.",
+  "repository": "git@github.com:getsentry/sentry-unplugin.git",
   "private": true,
   "workspaces": [
     "packages/*"
