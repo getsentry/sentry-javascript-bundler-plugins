@@ -2,8 +2,8 @@
   "name": "@sentry/esbuild-plugin",
   "version": "0.0.0-alpha.0",
   "description": "Official Sentry esbuild plugin",
-  "repository": "git@github.com:getsentry/bundler-plugins.git",
-  "homepage": "https://github.com/getsentry/bundler-plugins/tree/main/packages/esbuild-plugin",
+  "repository": "git@github.com:getsentry/sentry-javascript-bundler-plugins.git",
+  "homepage": "https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/esbuild-plugin",
   "author": "Sentry",
   "license": "MIT",
   "keywords": [

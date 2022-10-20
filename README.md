@@ -8,14 +8,14 @@
 
 **WARNING: This project is work in progress! Do not yet use it in production. We're happy to receive your feedback!**
 
-Universal Sentry plugin for various JavaScript bundlers. Based on [unjs/uplugin](https://github.com/getsentry/bundler-plugins). Currently supports Rollup, Vite, esbuild, Webpack 4 and Webpack 5.
+Universal Sentry plugin for various JavaScript bundlers. Based on [unjs/uplugin](https://github.com/unjs/unplugin). Currently supports Rollup, Vite, esbuild, Webpack 4 and Webpack 5.
 
 Check out the individual packages for more information and examples:
 
-- [Rollup](https://github.com/getsentry/bundler-plugins/tree/main/packages/rollup-plugin)
-- [Vite](https://github.com/getsentry/bundler-plugins/tree/main/packages/vite-plugin)
-- [esbuild](https://github.com/getsentry/bundler-plugins/tree/main/packages/esbuild-plugin)
-- [Webpack](https://github.com/getsentry/bundler-plugins/tree/main/packages/webpack-plugin)
+- [Rollup](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/rollup-plugin)
+- [Vite](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/vite-plugin)
+- [esbuild](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/esbuild-plugin)
+- [Webpack](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/webpack-plugin)
 
 ### Features
 
