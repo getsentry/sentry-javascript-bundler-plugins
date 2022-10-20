@@ -1,7 +1,7 @@
 {
   "name": "@sentry/bundler-plugin-core",
   "version": "0.0.0-alpha.0",
-  "description": "Official Sentry unplugin",
+  "description": "Sentry Bundler Plugin Core",
   "repository": "git://github.com/getsentry/sentry-unplugin.git",
   "homepage": "https://github.com/getsentry/sentry-unplugin",
   "author": "Sentry",

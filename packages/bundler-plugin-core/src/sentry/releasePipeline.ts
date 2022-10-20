@@ -16,7 +16,7 @@ export async function createNewRelease(
   options: Options,
   ctx: BuildContext
 ): Promise<string> {
-  const span = addSpanToTransaction(ctx, "create-new-release");
+  const span = addSpanToTransaction(ctx, "function.plugin.create_release");
 
   // TODO: pull these checks out of here and simplify them
   if (options.authToken === undefined) {
@@ -54,7 +54,7 @@ export async function uploadSourceMaps(
   options: Options,
   ctx: BuildContext
 ): Promise<string> {
-  const span = addSpanToTransaction(ctx, "upload-sourceMaps");
+  const span = addSpanToTransaction(ctx, "function.plugin.upload_sourcemaps");
   // This is what Sentry CLI does:
   //  TODO: 0. Preprocess source maps
   //           - (Out of scope for now)
@@ -137,7 +137,7 @@ export async function finalizeRelease(
   options: Options,
   ctx: BuildContext
 ): Promise<string> {
-  const span = addSpanToTransaction(ctx, "finalize-release");
+  const span = addSpanToTransaction(ctx, "function.plugin.finalize_release");
 
   if (options.finalize) {
     const { authToken, org, url, project } = options;
@@ -168,7 +168,7 @@ export async function cleanArtifacts(
   options: Options,
   ctx: BuildContext
 ): Promise<string> {
-  const span = addSpanToTransaction(ctx, "clean-artifacts");
+  const span = addSpanToTransaction(ctx, "function.plugin.clean_artifacts");
 
   if (options.cleanArtifacts) {
     // TODO: pull these checks out of here and simplify them
@@ -209,7 +209,7 @@ export async function setCommits(
   /* version: string, */
   ctx: BuildContext
 ): Promise<string> {
-  const span = addSpanToTransaction(ctx, "set-commits");
+  const span = addSpanToTransaction(ctx, "function.plugin.set_commits");
 
   span?.finish();
   return Promise.resolve("Noop");
@@ -219,7 +219,7 @@ export async function addDeploy(
   /* version: string, */
   ctx: BuildContext
 ): Promise<string> {
-  const span = addSpanToTransaction(ctx, "add-deploy");
+  const span = addSpanToTransaction(ctx, "function.plugin.add_deploy");
 
   span?.finish();
   return Promise.resolve("Noop");
