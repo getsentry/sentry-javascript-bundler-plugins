@@ -3,11 +3,11 @@ github:
   repo: bundler-plugins
 changelogPolicy: simple
 preReleaseCommand: bash scripts/craft-pre-release.sh
-# requireNames:
-# - /^sentry-bundler-plugin-core--*.tgz$/
-# - /^sentry-esbuild-plugin-*.tgz$/
-# - /^sentry-rollup-plugin-*.tgz$/
-# - /^sentry-vite-plugin-*.tgz$/
+requireNames:
+  - /^sentry-bundler-plugin-core-*.tgz$/
+  - /^sentry-esbuild-plugin-*.tgz$/
+  - /^sentry-rollup-plugin-*.tgz$/
+  - /^sentry-vite-plugin-*.tgz$/
 # TODO: Comment in when we replace the webpack plugin
 # - /^sentry-webpack-plugin-*.tgz$/
 targets:
