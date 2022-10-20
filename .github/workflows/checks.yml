@@ -2,10 +2,13 @@ name: Checks
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - release/**
   pull_request:
 
 env:
+  # We pin the exact version to enforce reproducable builds with node + npm.
   DEFAULT_NODE_VERSION: "16.15.1"
 
 jobs:
@@ -66,3 +69,36 @@ jobs:
           node-version: ${{ env.DEFAULT_NODE_VERSION }}
       - run: yarn --frozen-lockfile
       - run: yarn lint
+
+  artifacts:
+    needs: build
+    name: Upload Artifacts
+    runs-on: ubuntu-latest
+    # Build artifacts are only needed for releasing workflow.
+    # TODO comment back in
+    # if: startsWith(github.ref, 'refs/heads/release/')
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.DEFAULT_NODE_VERSION }}
+      # - name: Check dependency cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ${{ env.CACHED_DEPENDENCY_PATHS }}
+      #     key: ${{ needs.job_build.outputs.dependency_cache_key }}
+      # - name: Check build cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ${{ env.CACHED_BUILD_PATHS }}
+      #     key: ${{ env.BUILD_CACHE_KEY }}
+      - run: yarn --frozen-lockfile
+      - name: pack
+        run: yarn build:npm
+      - name: archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.sha }}
+          path: |
+            ${{ github.workspace }}/packages/*/dist/**
+            ${{ github.workspace }}/packages/**/*.tgz
