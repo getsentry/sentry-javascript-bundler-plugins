@@ -13,9 +13,5 @@ requireNames:
 targets:
   - name: github
     includeNames: /^sentry-.*.tgz$/
-    # TODO: Remove once we replace the webpack plugin
-    excludeNames: /^sentry-webpack-plugin-*.tgz$/
   - name: npm
     includeNames: /^sentry-.*.tgz$/
-    # TODO: Remove once we replace the webpack plugin
-    excludeNames: /^sentry-webpack-plugin-*.tgz$/
