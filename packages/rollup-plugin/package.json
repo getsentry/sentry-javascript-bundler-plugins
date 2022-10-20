@@ -29,6 +29,7 @@
     "build:rollup:watch": "rollup --config rollup.config.js --watch --no-watch.clearScreen",
     "build:types": "tsc --project types.tsconfig.json",
     "build:types:watch": "tsc --project types.tsconfig.json --watch --preserveWatchOutput",
+    "build:npm": "npm pack",
     "check:types": "run-p check:types:src check:types:test",
     "check:types:src": "tsc --project ./src/tsconfig.json --noEmit",
     "check:types:test": "tsc --project ./test/tsconfig.json --noEmit",
@@ -36,7 +37,7 @@
     "lint": "eslint ./src ./test"
   },
   "dependencies": {
-    "@sentry/sentry-unplugin": "0.0.0-alpha.0"
+    "@sentry/bundler-plugin-core": "0.0.0-alpha.0"
   },
   "devDependencies": {
     "@babel/core": "7.18.5",

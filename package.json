@@ -1,8 +1,8 @@
 {
-  "name": "@sentry/sentry-unplugin-root",
+  "name": "@sentry/bundler-plugins",
   "version": "0.0.0",
-  "description": "Root of the sentry unplugin monorepo.",
-  "repository": "git@github.com:lforst/sentry-unplugin.git",
+  "description": "Sentry Bundler Plugins Monorepo.",
+  "repository": "git@github.com:getsentry/sentry-unplugin.git",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -11,6 +11,7 @@
     "build": "nx run-many --target=build --all",
     "build:watch": "nx run-many --target=build:watch --all",
     "build:graph": "nx graph",
+    "build:npm": "nx run-many --target=build:npm --all",
     "check:types": "nx run-many --target=check:types --all",
     "test": "nx run-many --target=test --all",
     "lint": "nx run-many --target=lint --all",

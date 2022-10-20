@@ -24,6 +24,9 @@
     },
     "check:types": {
       "dependsOn": ["^build"]
+    },
+    "build:npm": {
+      "dependsOn": ["build", "^build"]
     }
   }
 }

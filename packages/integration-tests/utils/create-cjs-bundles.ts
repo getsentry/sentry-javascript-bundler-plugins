@@ -10,7 +10,7 @@ import {
   sentryVitePlugin,
   sentryWebpackPlugin,
   Options,
-} from "@sentry/sentry-unplugin";
+} from "@sentry/bundler-plugin-core";
 
 export function createCjsBundles(
   entrypoints: { [name: string]: string },

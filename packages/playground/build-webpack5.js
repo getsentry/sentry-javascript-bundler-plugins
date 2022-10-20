@@ -1,7 +1,7 @@
 // @ts-check
 const path = require("path");
 const webpack5 = require("webpack");
-const { sentryWebpackPlugin } = require("@sentry/sentry-unplugin");
+const { sentryWebpackPlugin } = require("@sentry/bundler-plugin-core");
 
 const placeHolderOptions = require("./config.json");
 
