@@ -1,2 +1,2 @@
-export { sentryVitePlugin as default } from "@sentry/sentry-unplugin";
-export type { Options } from "@sentry/sentry-unplugin";
+export { sentryVitePlugin as default } from "@sentry/bundler-plugin-core";
+export type { Options } from "@sentry/bundler-plugin-core";

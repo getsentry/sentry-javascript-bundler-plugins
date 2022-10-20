@@ -1,5 +1,5 @@
 {
-  "name": "@sentry/sentry-unplugin",
+  "name": "@sentry/bundler-plugin-core",
   "version": "0.0.0-alpha.0",
   "description": "Official Sentry unplugin",
   "repository": "git://github.com/getsentry/sentry-unplugin.git",
