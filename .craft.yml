@@ -1,0 +1,16 @@
+github:
+  owner: getsentry
+  repo: sentry-unplugin
+changelogPolicy: simple
+preReleaseCommand: bash scripts/craft-pre-release.sh
+requireNames:
+  - /^sentry-sentry-unplugin-*.tgz$/
+  - /^sentry-esbuild-plugin-*.tgz$/
+  - /^sentry-rollup-plugin-*.tgz$/
+  - /^sentry-vite-plugin-*.tgz$/
+  - /^sentry-sentry-webpack-plugin-*.tgz$/
+targets:
+  - name: github
+    includeNames: /^sentry-.*.tgz$/
+  - name: npm
+    includeNames: /^sentry-.*.tgz$/
