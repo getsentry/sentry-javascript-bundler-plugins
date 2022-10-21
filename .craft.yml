@@ -1,6 +1,6 @@
 github:
   owner: getsentry
-  repo: bundler-plugins
+  repo: sentry-javascript-bundler-plugins
 changelogPolicy: simple
 preReleaseCommand: bash scripts/craft-pre-release.sh
 requireNames:
