@@ -1,11 +1,11 @@
-//TODO: JsDoc for all properties
-
 import { Hub } from "@sentry/hub";
 import { Span } from "@sentry/tracing";
 import { createLogger } from "./sentry/logger";
 
-//TODO: compare types w/ webpack plugin (and sentry-cli?)
-export type Options = {
+/**
+ * The main options object holding all plugin options available to users
+ */
+export type Options = Omit<IncludeEntry, "paths"> & {
   /* --- authentication/identification: */
 
   /**
@@ -119,8 +119,12 @@ export type Options = {
    * The format should be `header-key: header-value`.
    *
    * This value an also be specified via `process.env.CUSTOM_HEADER` (TODO, can it?).
+   *
+   * TODO: This is currently different from the webpack plugin. There, this property is
+   *       called `customHeader` and it only accepts one header as a string.
+   *       Change in follow-up PR.
    */
-  customHeaders?: string;
+  customHeaders?: Record<string, string>;
 
   /**
    * Attempts a dry run (useful for dev environments).
@@ -242,7 +246,7 @@ type IncludeEntry = {
    * URL suffix to add to the end of all filenames.
    * Useful for appending query parameters.
    */
-  urlSuffix: string;
+  urlSuffix?: string;
 
   /**
    * When paired with the `rewrite`, this will remove a prefix from filename references inside of

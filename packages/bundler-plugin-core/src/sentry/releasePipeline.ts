@@ -107,7 +107,8 @@ export async function uploadSourceMaps(
 
   //TODO: Remove this once we have internal options. this property must always be present
   const fileExtensions = ext || [];
-  const files = getFiles(include, fileExtensions);
+  //TODO: handle include property properly and remove this def. wrong type cast
+  const files = getFiles(include as string, fileExtensions);
 
   ctx.logger.info(`Found ${files.length} files to upload.`);
 
