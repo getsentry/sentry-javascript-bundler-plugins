@@ -32,6 +32,14 @@ export type Options = {
   authToken?: string;
 
   /**
+   * Authentication token for API, interchangeable with `authToken`.
+   * This value will update `SENTRY_API_KEY` env variable.
+   * TODO: This is not mentioned in the readme, only in the webpack plugin code
+   *       Is this a deprecated field? If yes, then let's get rid of it
+   */
+  apiKey?: string;
+
+  /**
    * The base URL of your Sentry instance.
    * Defaults to https://sentry.io/, which is the correct value for SAAS customers.
    *
@@ -86,16 +94,6 @@ export type Options = {
    * Each path can be given as a string or an object with path-specific options
    */
   include: string | IncludeEntry | Array<string | IncludeEntry>;
-
-  // ignoreFile: string
-  // ignore: string | string[]
-  ext?: string[];
-  // urlPrefix: string,
-  // urlSuffix: string,
-  // stripPrefix?: boolean,
-  // stripCommonPrefix?: boolean,
-  // sourceMapReference?: boolean,
-  // rewrite?: boolean,
 
   /**
    * When `true`, attempts source map validation before upload if rewriting is not enabled.
@@ -167,7 +165,9 @@ export type Options = {
   /**
    * When an error occurs during rlease creation or sourcemaps upload, the plugin will call this function.
    *
-   * By default, the plugin will simply throw an error, thereby stopping the bundling process. If an `errorHandler` callback is provided, compilation will continue, unless an error is thrown in the provided callback.
+   * By default, the plugin will simply throw an error, thereby stopping the bundling process.
+   * If an `errorHandler` callback is provided, compilation will continue, unless an error is
+   * thrown in the provided callback.
    *
    * To allow compilation to continue but still emit a warning, set this option to the following:
    *
@@ -203,8 +203,77 @@ export type Options = {
 };
 
 type IncludeEntry = {
+  /**
+   * One or more paths to scan for files to upload.
+   */
   paths: string[];
-  //TODO: what about the other entries??
+
+  /**
+   * One or more paths to ignore during upload.
+   * Overrides entries in ignoreFile file.
+   *
+   * Defaults to `['node_modules']` if neither `ignoreFile` nor `ignore` is set.
+   */
+  ignore?: string | string[];
+
+  /**
+   * Path to a file containing list of files/directories to ignore.
+   *
+   * Can point to `.gitignore` or anything with the same format.
+   */
+  ignoreFile?: string;
+
+  /**
+   * Array of file extensions of files to be collected for the file upload.
+   *
+   * By default the following file extensions are processed: js, map, jsbundle and bundle.
+   */
+  ext?: string[];
+
+  /**
+   * URL prefix to add to the beginning of all filenames.
+   * Defaults to '~/' but you might want to set this to the full URL.
+   *
+   * This is also useful if your files are stored in a sub folder. eg: url-prefix '~/static/js'.
+   */
+  urlPrefix?: string;
+
+  /**
+   * URL suffix to add to the end of all filenames.
+   * Useful for appending query parameters.
+   */
+  urlSuffix: string;
+
+  /**
+   * When paired with the `rewrite`, this will remove a prefix from filename references inside of
+   * sourcemaps. For instance you can use this to remove a path that is build machine specific.
+   * Note that this will NOT change the names of uploaded files.
+   */
+  stripPrefix?: string[];
+
+  /**
+   * When paired with rewrite, this will add `~` to the stripPrefix array.
+   *
+   * Defaults to false.
+   */
+  stripCommonPrefix?: boolean;
+
+  /**
+   * Determines whether sentry-cli should attempt to link minified files with their corresponding maps.
+   * By default, it will match files and maps based on name, and add a Sourcemap header to each minified file
+   * for which it finds a map. Can be disabled if all minified files contain sourceMappingURL.
+   *
+   * Defaults to true.
+   */
+  sourceMapReference?: boolean;
+
+  /**
+   * Enables rewriting of matching source maps so that indexed maps are flattened and missing sources
+   * are inlined if possible.
+   *
+   * Defaults to true
+   */
+  rewrite?: boolean;
 };
 
 type SetCommitsOptions = {
