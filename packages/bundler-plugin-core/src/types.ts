@@ -7,6 +7,7 @@ import { createLogger } from "./sentry/logger";
 //TODO: compare types w/ webpack plugin (and sentry-cli?)
 export type Options = {
   /* --- authentication/identification: */
+
   /**
    * The slug of the Sentry organization associated with the app.
    *
@@ -39,8 +40,24 @@ export type Options = {
   url?: string;
 
   /* --- release properties: */
+
+  /**
+   * Unique identifier for the release.
+   *
+   * Defaults to the output of the sentry-cli releases propose-version command,
+   * which automatically detects values for Cordova, Heroku, AWS CodeBuild, CircleCI,
+   * Xcode, and Gradle, and otherwise uses HEAD's commit SHA. (For HEAD option,
+   * requires access to git CLI and for the root directory to be a valid repository).
+   *
+   * This value can also be specified via process.env.SENTRY_RELEASE.
+   */
   release?: string;
-  // dist: string,
+
+  /**
+   * 	Unique identifier for the distribution, used to further segment your release.
+   *  Usually your build number.
+   */
+  dist?: string;
 
   /**
    * Filter for bundle entry points that should contain the provided release. By default, the release will be injected
@@ -53,37 +70,99 @@ export type Options = {
    */
   entries?: (string | RegExp)[] | RegExp | string | ((filePath: string) => boolean);
 
+  /**
+   * Determines if the Sentry release record should be automatically finalized
+   * (meaning a date_released timestamp is added) after artifact upload.
+   *
+   * Defaults to `true`.
+   */
   finalize?: boolean;
 
   /* --- source maps properties: */
+
   /**
    * One or more paths that Sentry CLI should scan recursively for sources.
    * It will upload all .map files and match associated .js files.
    * Each path can be given as a string or an object with path-specific options
    */
   include: string | IncludeEntry | Array<string | IncludeEntry>;
+
   // ignoreFile: string
   // ignore: string | string[]
   ext?: string[];
   // urlPrefix: string,
   // urlSuffix: string,
-  // validate: boolean
   // stripPrefix?: boolean,
   // stripCommonPrefix?: boolean,
   // sourceMapReference?: boolean,
   // rewrite?: boolean,
 
-  /* --- other unimportant (for now) stuff- properties: */
-  // vcsRemote: string,
   /**
-   * A header added to all outgoing requests. A string in the format header-key: header-value
+   * When `true`, attempts source map validation before upload if rewriting is not enabled.
+   * It will spot a variety of issues with source maps and cancel the upload if any are found.
+   *
+   * Defaults to `false` as this can cause false positives.
    */
-  customHeaders?: Record<string, string>;
+  validate?: boolean;
 
-  // dryRun?: boolean,
+  /* --- other unimportant (for now) stuff- properties: */
+
+  /**
+   * Version control system remote name.
+   *
+   * Defaults to 'origin'.
+   *
+   * This value an also be specified via `process.env.SENTRY_VCS_REMOTE` (TODO, can it?).
+   */
+  vcsRemote?: string;
+
+  /**
+   * A header added to every outgoing network request.
+   * The format should be `header-key: header-value`.
+   *
+   * This value an also be specified via `process.env.CUSTOM_HEADER` (TODO, can it?).
+   */
+  customHeaders?: string;
+
+  /**
+   * Attempts a dry run (useful for dev environments).
+   *
+   * Defaults to `false`, but may be automatically set to `true` in development environments
+   * by some framework integrations (Next.JS, possibly others).
+   */
+  dryRun?: boolean;
+
+  /**
+   * Print useful debug information.
+   *
+   * Defaults to `false`.
+   */
   debug?: boolean;
+
+  /**
+   * Suppresses all logs.
+   *
+   * Defaults to `false`.
+   */
   silent?: boolean;
+
+  /**
+   * Remove all the artifacts in the release before the upload.
+   *
+   * Defaults to `false`.
+   */
   cleanArtifacts?: boolean;
+
+  /**
+   * TODO: Can we get rid of this?
+   *
+   * Path to Sentry CLI config properties, as described in
+   * https://docs.sentry.io/product/cli/configuration/#configuration-file.
+   *
+   * By default, the config file is looked for upwards from the current path,
+   * and defaults from ~/.sentryclirc are always loaded
+   */
+  configFile?: string;
 
   /**
    * When an error occurs during rlease creation or sourcemaps upload, the plugin will call this function.
@@ -99,21 +178,16 @@ export type Options = {
    * ```
    */
   errorHandler?: (err: Error) => void;
-  // setCommits?: {
-  //   repo?: string,
-  //   commit?: string,
-  //   previousCommit?: string,
-  //   auto?: boolean,
-  //   ignoreMissing?: boolean
-  // },
-  // deploy?: {
-  //   env: string,
-  //   started?: number,
-  //   finished?: number,
-  //   time?: number,
-  //   name?: string,
-  //   url?: string,
-  // }
+
+  /**
+   * Adds commits to Sentry.
+   */
+  setCommits?: SetCommitsOptions;
+
+  /**
+   * Creates a new release deployment in Sentry.
+   */
+  deploy?: DeployOptions;
 
   /**
    * If set to true, internal plugin errors and performance data will be sent to Sentry.
@@ -131,6 +205,84 @@ export type Options = {
 type IncludeEntry = {
   paths: string[];
   //TODO: what about the other entries??
+};
+
+type SetCommitsOptions = {
+  /**
+   * Automatically sets `commit` and `previousCommit`. Sets `commit` to `HEAD`
+   * and `previousCommit` as described in the option's documentation.
+   *
+   * If you set this to `true`, manually specified `commit` and `previousCommit`
+   * options will be overridden. It is best to not specify them at all if you
+   * set this option to `true`.
+   */
+  auto?: boolean;
+
+  /**
+   * The full repo name as defined in Sentry.
+   *
+   * Required if `auto` option is not `true`.
+   */
+  repo?: string;
+
+  /**
+   * The current (last) commit in the release.
+   *
+   * Required if `auto` option is not `true`.
+   */
+  commit?: string;
+
+  /**
+   * The commit before the beginning of this release (in other words,
+   * the last commit of the previous release).
+   *
+   * Defaults to the last commit of the previous release in Sentry.
+   *
+   * If there was no previous release, the last 10 commits will be used.
+   */
+  previousCommit?: string;
+
+  /**
+   * If the flag is to `true` and the previous release commit was not found
+   * in the repository, we create a release with the default commits count
+   * instead of failing the command.
+   *
+   * Defaults to `false`.
+   */
+  ignoreMissing?: boolean;
+};
+
+type DeployOptions = {
+  /**
+   * Environment for this release. Values that make sense here would
+   * be `production` or `staging`.
+   */
+  env: string;
+
+  /**
+   * Deployment start time in Unix timestamp (in seconds) or ISO 8601 format.
+   */
+  started?: number;
+
+  /**
+   * Deployment finish time in Unix timestamp (in seconds) or ISO 8601 format.
+   */
+  finished?: number;
+
+  /**
+   * Deployment duration (in seconds). Can be used instead of started and finished.
+   */
+  time?: number;
+
+  /**
+   * Human readable name for the deployment.
+   */
+  name?: string;
+
+  /**
+   * URL that points to the deployment.
+   */
+  url?: string;
 };
 
 /**
