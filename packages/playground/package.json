@@ -11,6 +11,10 @@
     "build:webpack5": "node build-webpack5.js",
     "build:esbuild": "node build-esbuild.js",
     "build:smallNodeApp": "vite build --config vite.config.smallNodeApp.js",
+    "clean": "run-s clean:build",
+    "clean:all": "run-p clean:deps",
+    "clean:build": "rimraf ./out",
+    "clean:deps": "rimraf node_modules",
     "start:proxyLogger": "ts-node scripts/request-logger-proxy.ts"
   },
   "dependencies": {
@@ -22,7 +26,6 @@
     "esbuild": "0.14.49",
     "express": "^4.18.1",
     "http-proxy": "^1.18.1",
-    "npm-run-all": "4.1.5",
     "rollup": "2.77.0",
     "vite": "3.0.0",
     "webpack": "5.74.0",

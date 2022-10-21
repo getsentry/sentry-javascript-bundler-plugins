@@ -16,5 +16,9 @@
   },
   "devDependencies": {
     "eslint": "^8.14.0"
+  },
+  "scripts": {
+    "clean:all": "run-s clean:deps",
+    "clean:deps": "rimraf node_modules"
   }
 }
