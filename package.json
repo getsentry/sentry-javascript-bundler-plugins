@@ -2,7 +2,8 @@
   "name": "@sentry/sentry-javascript-bundler-plugins",
   "version": "0.0.0",
   "description": "Sentry Bundler Plugins Monorepo.",
-  "repository": "git@github.com:getsentry/sentry-javascript-bundler-plugins.git",
+  "repository": "git://github.com/getsentry/sentry-javascript-bundler-plugins.git",
+  "homepage": "https://github.com/getsentry/sentry-javascript-bundler-plugins",
   "private": true,
   "workspaces": [
     "packages/*"
