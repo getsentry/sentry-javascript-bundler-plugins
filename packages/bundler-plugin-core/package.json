@@ -2,8 +2,8 @@
   "name": "@sentry/bundler-plugin-core",
   "version": "0.0.1-alpha.0",
   "description": "Sentry Bundler Plugin Core",
-  "repository": "git://github.com/getsentry/sentry-unplugin.git",
-  "homepage": "https://github.com/getsentry/sentry-unplugin",
+  "repository": "git://github.com/getsentry/sentry-javascript-bundler-plugins.git",
+  "homepage": "https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/bundler-plugin-core",
   "author": "Sentry",
   "license": "MIT",
   "publishConfig": {
