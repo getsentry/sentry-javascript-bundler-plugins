@@ -14,6 +14,8 @@
     "build:graph": "nx graph",
     "build:npm": "nx run-many --target=build:npm --all",
     "check:types": "nx run-many --target=check:types --all",
+    "clean": "nx run-many --target=clean --all",
+    "clean:all": "nx run-many --target=clean:all --all && yarn",
     "test": "nx run-many --target=test --all",
     "lint": "nx run-many --target=lint --all",
     "check:formatting": "prettier --check .",

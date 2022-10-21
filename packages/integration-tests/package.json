@@ -8,7 +8,11 @@
     "test:setup": "ts-node scripts/run-fixture-setups.ts",
     "test:jest": "jest",
     "lint": "eslint .",
-    "check:types": "tsc --project ./tsconfig.json --noEmit"
+    "check:types": "tsc --project ./tsconfig.json --noEmit",
+    "clean": "run-s clean:build",
+    "clean:all": "run-p clean clean:deps",
+    "clean:build": "rimraf ./fixtures/*/out",
+    "clean:deps": "rimraf node_modules"
   },
   "dependencies": {
     "@sentry-internal/eslint-config": "0.0.1-alpha.0",

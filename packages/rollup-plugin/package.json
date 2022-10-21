@@ -33,6 +33,10 @@
     "check:types": "run-p check:types:src check:types:test",
     "check:types:src": "tsc --project ./src/tsconfig.json --noEmit",
     "check:types:test": "tsc --project ./test/tsconfig.json --noEmit",
+    "clean": "run-s clean:build",
+    "clean:all": "run-p clean clean:deps",
+    "clean:build": "rimraf ./dist *.tgz",
+    "clean:deps": "rimraf node_modules",
     "test": "jest",
     "lint": "eslint ./src ./test"
   },
