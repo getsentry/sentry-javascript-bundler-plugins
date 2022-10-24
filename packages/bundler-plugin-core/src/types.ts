@@ -11,39 +11,31 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   /**
    * The slug of the Sentry organization associated with the app.
    *
-   * This value can also be specified via `process.env.SENTRY_ORG` (TODO, can it?)
+   * This is a required field.
    */
-  org?: string;
+  org: string;
 
   /**
    * The slug of the Sentry project associated with the app.
    *
-   * This value can also be specified via `process.env.SENTRY_ORG` (TODO, can it?)
+   * This is a required field.
    */
-  project?: string;
+  project: string;
 
   /**
    * The authentication token to use for all communication with Sentry.
    * Can be obtained from https://sentry.io/settings/account/api/auth-tokens/.
    * Required scopes: project:releases (and org:read if setCommits option is used).
    *
-   * This value an also be specified via `process.env.SENTRY_AUTH_TOKEN` (TODO, can it?).
+   * This is a required field.
    */
-  authToken?: string;
+  authToken: string;
 
   /**
-   * Authentication token for API, interchangeable with `authToken`.
-   * This value will update `SENTRY_API_KEY` env variable.
-   * TODO: This is not mentioned in the readme, only in the webpack plugin code
-   *       Is this a deprecated field? If yes, then let's get rid of it
-   */
-  apiKey?: string;
-
-  /**
-   * The base URL of your Sentry instance.
-   * Defaults to https://sentry.io/, which is the correct value for SAAS customers.
+   * The base URL of your Sentry instance. Use this if you are using a self-hosted
+   * or Sentry instance other than sentry.io.
    *
-   * This value an also be specified via `process.env.SENTRY_URL` (TODO, can it?).
+   * Defaults to https://sentry.io/, which is the correct value for SAAS customers.
    */
   url?: string;
 
@@ -56,8 +48,6 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * which automatically detects values for Cordova, Heroku, AWS CodeBuild, CircleCI,
    * Xcode, and Gradle, and otherwise uses HEAD's commit SHA. (For HEAD option,
    * requires access to git CLI and for the root directory to be a valid repository).
-   *
-   * This value can also be specified via process.env.SENTRY_RELEASE.
    */
   release?: string;
 
@@ -92,6 +82,8 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * One or more paths that Sentry CLI should scan recursively for sources.
    * It will upload all .map files and match associated .js files.
    * Each path can be given as a string or an object with path-specific options
+   *
+   * This is a required field.
    */
   include: string | IncludeEntry | Array<string | IncludeEntry>;
 
@@ -109,16 +101,12 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * Version control system remote name.
    *
    * Defaults to 'origin'.
-   *
-   * This value an also be specified via `process.env.SENTRY_VCS_REMOTE` (TODO, can it?).
    */
   vcsRemote?: string;
 
   /**
    * A header added to every outgoing network request.
    * The format should be `header-key: header-value`.
-   *
-   * This value an also be specified via `process.env.CUSTOM_HEADER` (TODO, can it?).
    *
    * TODO: This is currently different from the webpack plugin. There, this property is
    *       called `customHeader` and it only accepts one header as a string.
