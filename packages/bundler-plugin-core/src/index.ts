@@ -272,7 +272,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
      * Responsible for executing the sentry release creation pipeline (i.e. creating a release on
      * Sentry.io, uploading sourcemaps, associating commits and deploys and finalizing the release)
      */
-    buildEnd() {
+    writeBundle() {
       releaseInjectionSpan?.finish();
       const releasePipelineSpan =
         transaction &&
