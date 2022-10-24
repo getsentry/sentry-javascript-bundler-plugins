@@ -52,8 +52,8 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   release?: string;
 
   /**
-   * 	Unique identifier for the distribution, used to further segment your release.
-   *  Usually your build number.
+   * Unique identifier for the distribution, used to further segment your release.
+   * Usually your build number.
    */
   dist?: string;
 
