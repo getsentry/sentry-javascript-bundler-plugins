@@ -114,16 +114,12 @@ function normalizeIncludeEntry(
   userOptions: UserOptions,
   includeEntry: UserIncludeEntry
 ): InternalIncludeEntry {
-  const ignore =
-    includeEntry.ignore === undefined
-      ? []
-      : Array.isArray(includeEntry.ignore)
-      ? includeEntry.ignore
-      : [includeEntry.ignore];
+  const ignoreOption = includeEntry.ignore ?? userOptions.ignore ?? [];
+  const ignore = Array.isArray(ignoreOption) ? ignoreOption : [ignoreOption];
 
   return {
     paths: includeEntry.paths,
-    ignore: ignore ?? userOptions.ignore,
+    ignore,
     ignoreFile: includeEntry.ignoreFile ?? userOptions.ignoreFile,
     ext: includeEntry.ext ?? userOptions.ext ?? ["js", "map", "jsbundle", "bundle"],
     urlPrefix: includeEntry.urlPrefix ?? userOptions.urlPrefix,
