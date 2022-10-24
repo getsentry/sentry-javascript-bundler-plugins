@@ -1,3 +1,4 @@
+import { Options } from "@sentry/bundler-plugin-core";
 import * as path from "path";
 import { createCjsBundles } from "../../utils/create-cjs-bundles";
 
@@ -9,4 +10,4 @@ createCjsBundles({ entrypoint1: entryPoint1Path, entrypoint2: entryPoint2Path },
   release: "I AM A RELEASE!",
   include: outputDir,
   entries: entryPoint1Path,
-});
+} as Options);

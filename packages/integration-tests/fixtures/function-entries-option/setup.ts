@@ -1,3 +1,4 @@
+import { Options } from "@sentry/bundler-plugin-core";
 import * as path from "path";
 import { createCjsBundles } from "../../utils/create-cjs-bundles";
 
@@ -14,5 +15,5 @@ createCjsBundles(
     include: outputDir,
     entries: (entrypointPath) =>
       entrypointPath === entryPoint1Path || entrypointPath === entryPoint3Path,
-  }
+  } as Options
 );
