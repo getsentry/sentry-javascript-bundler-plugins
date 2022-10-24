@@ -15,7 +15,7 @@ import {
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
   outFolder: string,
-  sentryUnpluginOptions: Options
+  sentryUnpluginOptions: Partial<Options>
 ): void {
   void vite.build({
     clearScreen: false,
@@ -29,13 +29,13 @@ export function createCjsBundles(
         },
       },
     },
-    plugins: [sentryVitePlugin(sentryUnpluginOptions)],
+    plugins: [sentryVitePlugin(sentryUnpluginOptions as Options)],
   });
 
   void rollup
     .rollup({
       input: entrypoints,
-      plugins: [sentryRollupPlugin(sentryUnpluginOptions)],
+      plugins: [sentryRollupPlugin(sentryUnpluginOptions as Options)],
     })
     .then((bundle) =>
       bundle.write({
@@ -48,7 +48,7 @@ export function createCjsBundles(
   void esbuild.build({
     entryPoints: entrypoints,
     outdir: path.join(outFolder, "esbuild"),
-    plugins: [sentryEsbuildPlugin(sentryUnpluginOptions)],
+    plugins: [sentryEsbuildPlugin(sentryUnpluginOptions as Options)],
     minify: true,
     bundle: true,
     format: "cjs",
@@ -64,7 +64,7 @@ export function createCjsBundles(
         libraryTarget: "commonjs",
       },
       target: "node", // needed for webpack 4 so we can access node api
-      plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
+      plugins: [sentryWebpackPlugin(sentryUnpluginOptions as Options)],
     },
     (err) => {
       if (err) {
@@ -84,7 +84,7 @@ export function createCjsBundles(
         },
       },
       mode: "production",
-      plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
+      plugins: [sentryWebpackPlugin(sentryUnpluginOptions as Options)],
     },
     (err) => {
       if (err) {

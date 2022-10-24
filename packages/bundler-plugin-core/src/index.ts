@@ -15,7 +15,7 @@ import { addSpanToTransaction, captureMinimalError, makeSentryClient } from "./s
 import { Span, Transaction } from "@sentry/types";
 import { createLogger } from "./sentry/logger";
 
-const defaultOptions: Omit<Options, "include"> = {
+const defaultOptions: Omit<Options, "include" | "org" | "authToken" | "project"> = {
   //TODO: add default options here as we port over options from the webpack plugin
   // validate: false
   debug: false,
