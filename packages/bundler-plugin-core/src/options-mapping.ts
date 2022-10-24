@@ -26,11 +26,11 @@ type OptionalInternalOptions = Partial<
 >;
 
 type NormalizedInternalOptions = {
-  entries: (string | RegExp)[] | ((filePath: string) => boolean);
+  entries: (string | RegExp)[] | ((filePath: string) => boolean) | undefined;
   include: InternalIncludeEntry[];
 };
 
-type InternalOptions = RequiredInternalOptions &
+export type InternalOptions = RequiredInternalOptions &
   OptionalInternalOptions &
   NormalizedInternalOptions;
 
@@ -48,9 +48,9 @@ type InternalIncludeEntry = RequiredInternalIncludeEntry &
   };
 
 export function normalizeUserOptions(userOptions: UserOptions): InternalOptions {
-  let entries: (string | RegExp)[] | ((filePath: string) => boolean);
+  let entries: (string | RegExp)[] | ((filePath: string) => boolean) | undefined;
   if (userOptions.entries === undefined) {
-    entries = [/.*/];
+    entries = undefined;
   } else if (typeof userOptions.entries === "function" || Array.isArray(userOptions.entries)) {
     entries = userOptions.entries;
   } else {

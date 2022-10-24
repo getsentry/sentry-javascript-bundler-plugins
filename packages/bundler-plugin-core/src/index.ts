@@ -75,12 +75,9 @@ const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
 const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
   const internalOptions = normalizeUserOptions(options);
 
-  //TODO: We can get rid of this variable once we have internal plugin options
-  const telemetryEnabled = internalOptions.telemetry === true;
-
   const { hub: sentryHub } = makeSentryClient(
     "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
-    telemetryEnabled,
+    internalOptions.telemetry,
     internalOptions.org
   );
 
@@ -90,7 +87,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     silent: internalOptions.silent,
   });
 
-  if (telemetryEnabled) {
+  if (internalOptions.telemetry) {
     logger.info("Sending error and performance telemetry data to Sentry.");
     logger.info("To disable telemetry, set `options.telemetry` to `false`.");
   }
@@ -206,11 +203,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
           return internalOptions.entries(id);
         }
 
-        const arrayifiedEntriesOption = Array.isArray(internalOptions.entries)
-          ? internalOptions.entries
-          : [internalOptions.entries];
-
-        return arrayifiedEntriesOption.some((entry) => {
+        return internalOptions.entries.some((entry) => {
           if (entry instanceof RegExp) {
             return entry.test(id);
           } else {
@@ -284,11 +277,11 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
       const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan, logger };
 
-      createNewRelease(internalOptions.release, internalOptions, ctx)
-        .then(() => cleanArtifacts(internalOptions.release, internalOptions, ctx))
-        .then(() => uploadSourceMaps(internalOptions.release, internalOptions, ctx))
+      createNewRelease(internalOptions, ctx)
+        .then(() => cleanArtifacts(internalOptions, ctx))
+        .then(() => uploadSourceMaps(internalOptions, ctx))
         .then(() => setCommits(ctx)) // this is a noop for now
-        .then(() => finalizeRelease(internalOptions.release, internalOptions, ctx))
+        .then(() => finalizeRelease(internalOptions, ctx))
         .then(() => addDeploy(ctx)) // this is a noop for now
         .then(() => {
           transaction?.setStatus("ok");
