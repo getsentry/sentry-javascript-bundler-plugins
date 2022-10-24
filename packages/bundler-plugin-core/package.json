@@ -39,7 +39,7 @@
     "axios": "^0.27.2",
     "form-data": "^4.0.0",
     "magic-string": "0.26.2",
-    "unplugin": "0.9.4"
+    "unplugin": "0.10.1"
   },
   "devDependencies": {
     "@babel/core": "7.18.5",

@@ -80,7 +80,7 @@ const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
  *
  * Source maps upload:
  *
- * The sentry-unplugin will also take care of uploading source maps to Sentry. This is all done in the `buildEnd` hook.
+ * The sentry-unplugin will also take care of uploading source maps to Sentry. This is all done in the `writeBundle` hook.
  * TODO: elaborate a bit on how sourcemaps upload works
  */
 const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) => {
@@ -272,7 +272,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
      * Responsible for executing the sentry release creation pipeline (i.e. creating a release on
      * Sentry.io, uploading sourcemaps, associating commits and deploys and finalizing the release)
      */
-    buildEnd() {
+    writeBundle() {
       releaseInjectionSpan?.finish();
       const releasePipelineSpan =
         transaction &&
@@ -285,7 +285,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
       const release = getReleaseName(options.release);
 
       sentryHub.addBreadcrumb({
-        category: "buildEnd:start",
+        category: "writeBundle:start",
         level: "info",
       });
 
@@ -320,7 +320,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
         })
         .finally(() => {
           sentryHub.addBreadcrumb({
-            category: "buildEnd:finish",
+            category: "writeBundle:finish",
             level: "info",
           });
           releasePipelineSpan?.finish();
