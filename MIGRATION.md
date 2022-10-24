@@ -4,7 +4,7 @@ This document serves as a migration guide, documenting all breaking changes betw
 
 ## [Unreleased] Upgrading from 1.x to 2.x
 
-Version 2 of `@sentry/webpack-plugin` is a complete rewrite of version 1. Version 2 no longer required `sentry-cli` underneath, which means that the plugin no longer downloads a binary but implements all its functinality natively.
+Version 2 of `@sentry/webpack-plugin` is a complete rewrite of version 1. Version 2 no longer requires `sentry-cli` underneath, meaning the plugin no longer downloads a binary but implements all its functionality natively.
 
 ### Initialization and Required Values
 
