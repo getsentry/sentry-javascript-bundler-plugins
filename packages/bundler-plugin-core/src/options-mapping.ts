@@ -72,7 +72,9 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     userInclude = [userOptions.include];
   }
 
-  const include = userInclude.map((userIncludeEntry) => normalizeIncludeEntry(userIncludeEntry));
+  const include = userInclude.map((userIncludeEntry) =>
+    normalizeIncludeEntry(userOptions, userIncludeEntry)
+  );
 
   return {
     org: userOptions.org,
@@ -104,7 +106,14 @@ function convertIncludePathToIncludeEntry(includePath: string): UserIncludeEntry
   };
 }
 
-function normalizeIncludeEntry(includeEntry: UserIncludeEntry): InternalIncludeEntry {
+/**
+ * Besides array-ifying the `ignore` option, this function hoists top level options into the items of the `include`
+ * option. This is to simplify the handling of of the `include` items later on.
+ */
+function normalizeIncludeEntry(
+  userOptions: UserOptions,
+  includeEntry: UserIncludeEntry
+): InternalIncludeEntry {
   const ignore =
     includeEntry.ignore === undefined
       ? []
@@ -114,14 +123,14 @@ function normalizeIncludeEntry(includeEntry: UserIncludeEntry): InternalIncludeE
 
   return {
     paths: includeEntry.paths,
-    ignore,
-    ignoreFile: includeEntry.ignoreFile,
-    ext: includeEntry.ext ?? ["js", "map", "jsbundle", "bundle"],
-    urlPrefix: includeEntry.urlPrefix,
-    urlSuffix: includeEntry.urlSuffix,
-    stripPrefix: includeEntry.stripPrefix,
-    stripCommonPrefix: includeEntry.stripCommonPrefix ?? false,
-    sourceMapReference: includeEntry.sourceMapReference ?? true,
-    rewrite: includeEntry.rewrite ?? true,
+    ignore: ignore ?? userOptions.ignore,
+    ignoreFile: includeEntry.ignoreFile ?? userOptions.ignoreFile,
+    ext: includeEntry.ext ?? userOptions.ext ?? ["js", "map", "jsbundle", "bundle"],
+    urlPrefix: includeEntry.urlPrefix ?? userOptions.urlPrefix,
+    urlSuffix: includeEntry.urlSuffix ?? userOptions.urlSuffix,
+    stripPrefix: includeEntry.stripPrefix ?? userOptions.stripPrefix,
+    stripCommonPrefix: includeEntry.stripCommonPrefix ?? userOptions.stripCommonPrefix ?? false,
+    sourceMapReference: includeEntry.sourceMapReference ?? userOptions.sourceMapReference ?? true,
+    rewrite: includeEntry.rewrite ?? userOptions.rewrite ?? true,
   };
 }
