@@ -27,9 +27,9 @@ sentryWebpackPlugin({
 
 ### Removal of Implicit Environment Variable Usage
 
-Version 2 of the Webpack plugin removes the implicit passing of plugin parameters via environment variables. Previously, it was possible to specify values as environment variables, such as SENTRY_AUTH_TOKEN, but to never mention them in the plugin init options. In this version, you'll have to specify these values in the options. Note that this makes certain option fields explicitly required now which were previously only implicitly required.
+Version 2 of the Webpack plugin removes the implicit passing of plugin parameters via environment variables. Previously, it was possible to specify values as environment variables, such as SENTRY_AUTH_TOKEN, but to never mention them in the plugin init options. In this version, you'll have to specify these values in the options. Note that this makes certain option fields explicitly required now which were previously only implicitly required (see [Initialization and Required Values](#initialization-and-required-values)).
 
 ### Removal of `configFile` option
 
 Previously, you could set the `configFile` option when initializing the plugin to point `sentry-cli` to its `.sentryclirc` config. Because `sentry-cli` is no longer part of the plugin, this is option was removed.
-If you previously used this option, make sure to specify all required options when intializing the plugin (see )
+If you previously used this option, make sure to specify all required options when intializing the plugin (see [Initialization and Required Values](#initialization-and-required-values)).
