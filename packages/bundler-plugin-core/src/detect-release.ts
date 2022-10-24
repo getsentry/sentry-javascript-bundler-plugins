@@ -9,11 +9,7 @@ function getGitBranchHead(): string | undefined {
   }
 }
 
-export function getReleaseName(releaseName?: string): string {
-  if (releaseName) {
-    return releaseName;
-  }
-
+export function detectRelease(): string {
   // Env var SENTRY_RELEASE takes presendace over other env vars listed below
   // this is why we are looking for it before proceeding with others
   if (process.env["SENTRY_RELEASE"]) {
@@ -39,6 +35,8 @@ export function getReleaseName(releaseName?: string): string {
   if (gitBranchHead) {
     return gitBranchHead;
   } else {
-    throw new Error("Could not return a release name");
+    throw new Error(
+      'Could not automatically determine release name. Please provide a release identifier via the "release" option.'
+    );
   }
 }

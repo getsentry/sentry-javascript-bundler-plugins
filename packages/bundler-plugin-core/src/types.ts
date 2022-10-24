@@ -183,7 +183,7 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   telemetry?: boolean;
 };
 
-type IncludeEntry = {
+export type IncludeEntry = {
   /**
    * One or more paths to scan for files to upload.
    */
