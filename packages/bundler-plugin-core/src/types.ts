@@ -144,17 +144,6 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   cleanArtifacts?: boolean;
 
   /**
-   * TODO: Can we get rid of this?
-   *
-   * Path to Sentry CLI config properties, as described in
-   * https://docs.sentry.io/product/cli/configuration/#configuration-file.
-   *
-   * By default, the config file is looked for upwards from the current path,
-   * and defaults from ~/.sentryclirc are always loaded
-   */
-  configFile?: string;
-
-  /**
    * When an error occurs during rlease creation or sourcemaps upload, the plugin will call this function.
    *
    * By default, the plugin will simply throw an error, thereby stopping the bundling process.
