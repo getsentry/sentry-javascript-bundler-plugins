@@ -6,14 +6,14 @@
 //           - huge download
 //           - unnecessary functionality
 
-import { Options, BuildContext } from "../types";
+import { InternalOptions } from "../options-mapping";
+import { BuildContext } from "../types";
 import { createRelease, deleteAllReleaseArtifacts, uploadReleaseFile, updateRelease } from "./api";
-import { getFiles } from "./sourcemaps";
+import { getFiles, FileRecord } from "./sourcemaps";
 import { addSpanToTransaction } from "./telemetry";
 
 export async function createNewRelease(
-  release: string,
-  options: Options,
+  options: InternalOptions,
   ctx: BuildContext
 ): Promise<string> {
   const span = addSpanToTransaction(ctx, "function.plugin.create_release");
@@ -34,7 +34,7 @@ export async function createNewRelease(
   }
 
   await createRelease({
-    release,
+    release: options.release,
     authToken: options.authToken,
     org: options.org,
     project: options.project,
@@ -50,8 +50,7 @@ export async function createNewRelease(
 }
 
 export async function uploadSourceMaps(
-  release: string,
-  options: Options,
+  options: InternalOptions,
   ctx: BuildContext
 ): Promise<string> {
   const span = addSpanToTransaction(ctx, "function.plugin.upload_sourcemaps");
@@ -70,56 +69,42 @@ export async function uploadSourceMaps(
   //           - don't upload more than 20k files
   //           - upload files concurrently
   //           - 2 options: chunked upload (multiple files per chunk) or single file upload
-  const {
-    include,
-    ext,
-    // ignore,
-    // ignoreFile,
-    // rewrite,
-    // sourceMapReference,
-    // stripPrefix,
-    // stripCommonPrefix,
-    // validate,
-    // urlPrefix,
-    // urlSuffix,
-    org,
-    project,
-    authToken,
-    url,
-  } = options;
 
   // TODO: pull these checks out of here and simplify them
-  if (authToken === undefined) {
+  if (options.authToken === undefined) {
     ctx.logger.warn('Missing "authToken" option. Will not create release.');
     return Promise.resolve("nothing to do here");
-  } else if (org === undefined) {
+  } else if (options.org === undefined) {
     ctx.logger.warn('Missing "org" option. Will not create release.');
     return Promise.resolve("nothing to do here");
-  } else if (url === undefined) {
+  } else if (options.url === undefined) {
     ctx.logger.warn('Missing "url" option. Will not create release.');
     return Promise.resolve("nothing to do here");
-  } else if (project === undefined) {
+  } else if (options.project === undefined) {
     ctx.logger.warn('Missing "project" option. Will not create release.');
     return Promise.resolve("nothing to do here");
   }
 
   ctx.logger.info("Uploading Sourcemaps.");
 
-  //TODO: Remove this once we have internal options. this property must always be present
-  const fileExtensions = ext || [];
-  //TODO: handle include property properly and remove this def. wrong type cast
-  const files = getFiles(include as string, fileExtensions);
+  const files: FileRecord[] = [];
+  options.include.forEach((includeEntry) => {
+    includeEntry.paths.forEach((path) => {
+      //TODO: handle include property properly
+      files.push(...getFiles(path, includeEntry.ext));
+    });
+  });
 
   ctx.logger.info(`Found ${files.length} files to upload.`);
 
   return Promise.all(
     files.map((file) =>
       uploadReleaseFile({
-        org,
-        project,
-        release,
-        authToken,
-        sentryUrl: url,
+        org: options.org,
+        project: options.project,
+        release: options.release,
+        authToken: options.authToken,
+        sentryUrl: options.url,
         filename: file.name,
         fileContent: file.content,
         sentryHub: ctx.hub,
@@ -134,8 +119,7 @@ export async function uploadSourceMaps(
 }
 
 export async function finalizeRelease(
-  release: string,
-  options: Options,
+  options: InternalOptions,
   ctx: BuildContext
 ): Promise<string> {
   const span = addSpanToTransaction(ctx, "function.plugin.finalize_release");
@@ -150,7 +134,7 @@ export async function finalizeRelease(
     await updateRelease({
       authToken,
       org,
-      release,
+      release: options.release,
       sentryUrl: url,
       project,
       sentryHub: ctx.hub,
@@ -164,11 +148,7 @@ export async function finalizeRelease(
   return Promise.resolve("nothing to do here");
 }
 
-export async function cleanArtifacts(
-  release: string,
-  options: Options,
-  ctx: BuildContext
-): Promise<string> {
+export async function cleanArtifacts(options: InternalOptions, ctx: BuildContext): Promise<string> {
   const span = addSpanToTransaction(ctx, "function.plugin.clean_artifacts");
 
   if (options.cleanArtifacts) {
@@ -190,7 +170,7 @@ export async function cleanArtifacts(
     await deleteAllReleaseArtifacts({
       authToken: options.authToken,
       org: options.org,
-      release,
+      release: options.release,
       sentryUrl: options.url,
       project: options.project,
       sentryHub: ctx.hub,

@@ -1,6 +1,5 @@
 import { createUnplugin } from "unplugin";
 import MagicString from "magic-string";
-import { getReleaseName } from "./getReleaseName";
 import { Options, BuildContext } from "./types";
 import {
   createNewRelease,
@@ -14,17 +13,7 @@ import "@sentry/tracing";
 import { addSpanToTransaction, captureMinimalError, makeSentryClient } from "./sentry/telemetry";
 import { Span, Transaction } from "@sentry/types";
 import { createLogger } from "./sentry/logger";
-
-const defaultOptions: Omit<Options, "include" | "org" | "authToken" | "project"> = {
-  //TODO: add default options here as we port over options from the webpack plugin
-  // validate: false
-  debug: false,
-  cleanArtifacts: false,
-  finalize: true,
-  url: "https://sentry.io",
-  ext: ["js", "map", "jsbundle", "bundle"],
-  telemetry: true,
-};
+import { normalizeUserOptions } from "./options-mapping";
 
 // We prefix the polyfill id with \0 to tell other plugins not to try to load or transform it.
 // This hack is taken straight from https://rollupjs.org/guide/en/#resolveid.
@@ -83,36 +72,33 @@ const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
  * The sentry-unplugin will also take care of uploading source maps to Sentry. This is all done in the `writeBundle` hook.
  * TODO: elaborate a bit on how sourcemaps upload works
  */
-const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) => {
-  const options = { ...defaultOptions, ...originalOptions };
-
-  //TODO: We can get rid of this variable once we have internal plugin options
-  const telemetryEnabled = options.telemetry === true;
+const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
+  const internalOptions = normalizeUserOptions(options);
 
   const { hub: sentryHub } = makeSentryClient(
     "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
-    telemetryEnabled,
-    options.org
+    internalOptions.telemetry,
+    internalOptions.org
   );
 
   const logger = createLogger({
     hub: sentryHub,
     prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
-    silent: options.silent,
+    silent: internalOptions.silent,
   });
 
-  if (telemetryEnabled) {
+  if (internalOptions.telemetry) {
     logger.info("Sending error and performance telemetry data to Sentry.");
     logger.info("To disable telemetry, set `options.telemetry` to `false`.");
   }
 
   sentryHub.setTags({
-    organization: options.org,
-    project: options.project,
+    organization: internalOptions.org,
+    project: internalOptions.project,
     bundler: unpluginMetaContext.framework,
   });
 
-  sentryHub.setUser({ id: options.org });
+  sentryHub.setUser({ id: internalOptions.org });
 
   // This is `nonEntrypointSet` instead of `entrypointSet` because this set is filled in the `resolveId` hook and there
   // we don't have guaranteed access to *absolute* paths of files if they're entrypoints. For non-entrypoints we're
@@ -191,7 +177,7 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
       });
 
       if (id === RELEASE_INJECTOR_ID) {
-        return generateGlobalInjectorCode({ release: getReleaseName(options.release) });
+        return generateGlobalInjectorCode({ release: internalOptions.release });
       } else {
         return undefined;
       }
@@ -211,17 +197,13 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
         level: "info",
       });
 
-      if (options.entries) {
+      if (internalOptions.entries) {
         // If there's an `entries` option transform (ie. inject the release varible) when the file path matches the option.
-        if (typeof options.entries === "function") {
-          return options.entries(id);
+        if (typeof internalOptions.entries === "function") {
+          return internalOptions.entries(id);
         }
 
-        const arrayifiedEntriesOption = Array.isArray(options.entries)
-          ? options.entries
-          : [options.entries];
-
-        return arrayifiedEntriesOption.some((entry) => {
+        return internalOptions.entries.some((entry) => {
           if (entry instanceof RegExp) {
             return entry.test(id);
           } else {
@@ -282,8 +264,6 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
           "Release pipeline"
         );
 
-      const release = getReleaseName(options.release);
-
       sentryHub.addBreadcrumb({
         category: "writeBundle:start",
         level: "info",
@@ -297,11 +277,11 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
 
       const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan, logger };
 
-      createNewRelease(release, options, ctx)
-        .then(() => cleanArtifacts(release, options, ctx))
-        .then(() => uploadSourceMaps(release, options, ctx))
+      createNewRelease(internalOptions, ctx)
+        .then(() => cleanArtifacts(internalOptions, ctx))
+        .then(() => uploadSourceMaps(internalOptions, ctx))
         .then(() => setCommits(ctx)) // this is a noop for now
-        .then(() => finalizeRelease(release, options, ctx))
+        .then(() => finalizeRelease(internalOptions, ctx))
         .then(() => addDeploy(ctx)) // this is a noop for now
         .then(() => {
           transaction?.setStatus("ok");
@@ -312,8 +292,8 @@ const unplugin = createUnplugin<Options>((originalOptions, unpluginMetaContext) 
 
           logger.error(e.message);
 
-          if (options.errorHandler) {
-            options.errorHandler(e);
+          if (internalOptions.errorHandler) {
+            internalOptions.errorHandler(e);
           } else {
             throw e;
           }
