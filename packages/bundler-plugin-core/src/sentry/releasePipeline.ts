@@ -91,11 +91,34 @@ export async function uploadSourceMaps(
   options.include.forEach((includeEntry) => {
     includeEntry.paths.forEach((path) => {
       //TODO: handle include property properly
-      files.push(...getFiles(path, includeEntry.ext));
+      files.push(...getFiles(path, includeEntry));
     });
   });
 
   ctx.logger.info(`Found ${files.length} files to upload.`);
+
+  // Check if there would be duplicate artifacts and throw if there are any.
+  const duplicateArtifacts = new Set<string>();
+  const fileSet = new Set<string>();
+  files.forEach((file) => {
+    if (fileSet.has(file.name)) {
+      duplicateArtifacts.add(file.name);
+    } else {
+      fileSet.add(file.name);
+    }
+  });
+  if (duplicateArtifacts.size > 0) {
+    const artifactsList: string[] = [];
+    duplicateArtifacts.forEach((artifact) => {
+      artifactsList.push(`- "${artifact}"`);
+    });
+    ctx.logger.error(
+      `The following artifacts were identified more than once. Use the "urlPrefix" or "urlSuffix" options to tell them apart or adjust your "include" and "ignore" settings.\n${artifactsList.join(
+        "\n"
+      )}`
+    );
+    throw new Error();
+  }
 
   return Promise.all(
     files.map((file) =>

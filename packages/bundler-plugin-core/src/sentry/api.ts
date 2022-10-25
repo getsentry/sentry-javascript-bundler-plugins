@@ -4,7 +4,7 @@ import FormData from "form-data";
 import { Options } from "../types";
 import { captureMinimalError } from "./telemetry";
 
-const API_PATH = "/api/0";
+const API_PATH = "api/0";
 const USER_AGENT = `sentry-bundler-plugin/${__PACKAGE_VERSION__}`;
 
 const sentryApiAxiosInstance = ({
