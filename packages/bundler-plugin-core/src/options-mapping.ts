@@ -42,7 +42,7 @@ type OptionalInternalIncludeEntry = Partial<
   Pick<UserIncludeEntry, "ignoreFile" | "urlPrefix" | "urlSuffix" | "stripPrefix">
 >;
 
-type InternalIncludeEntry = RequiredInternalIncludeEntry &
+export type InternalIncludeEntry = RequiredInternalIncludeEntry &
   OptionalInternalIncludeEntry & {
     ignore: string[];
   };
