@@ -90,7 +90,6 @@ export async function uploadSourceMaps(
   const files: FileRecord[] = [];
   options.include.forEach((includeEntry) => {
     includeEntry.paths.forEach((path) => {
-      //TODO: handle include property properly
       files.push(...getFiles(path, includeEntry));
     });
   });

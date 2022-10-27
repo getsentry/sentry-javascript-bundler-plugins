@@ -20,7 +20,7 @@ describe("normalizeUserOptions()", () => {
       finalize: true,
       include: [
         {
-          ext: ["js", "map", "jsbundle", "bundle"],
+          ext: [".js", ".map", ".jsbundle", ".bundle"],
           ignore: [],
           paths: ["./out"],
           rewrite: true,
@@ -51,7 +51,8 @@ describe("normalizeUserOptions()", () => {
       rewrite: true,
       sourceMapReference: false,
       stripCommonPrefix: true,
-      ext: ["js", "map", "foo"],
+      // It is intentional that only foo has a `.`. We're expecting all extensions to be prefixed with a dot.
+      ext: ["js", "map", ".foo"],
     };
 
     expect(normalizeUserOptions(userOptions)).toEqual({
@@ -63,7 +64,7 @@ describe("normalizeUserOptions()", () => {
       finalize: true,
       include: [
         {
-          ext: ["js", "map", "foo"],
+          ext: [".js", ".map", ".foo"],
           ignore: ["./files"],
           paths: ["./output", "./files"],
           rewrite: true,

@@ -8,11 +8,13 @@ export type FileRecord = {
   content: string;
 };
 
-export function getFiles(fpath: string, includeEntry: InternalIncludeEntry): FileRecord[] {
+export function getFiles(includePath: string, includeEntry: InternalIncludeEntry): FileRecord[] {
   let fileStat: Stats;
-  const p = path.isAbsolute(fpath) ? fpath : path.resolve(process.cwd(), fpath);
+  const absolutePath = path.isAbsolute(includePath)
+    ? includePath
+    : path.resolve(process.cwd(), includePath);
   try {
-    fileStat = fs.statSync(p);
+    fileStat = fs.statSync(absolutePath);
   } catch (e) {
     return [];
   }
@@ -24,24 +26,23 @@ export function getFiles(fpath: string, includeEntry: InternalIncludeEntry): Fil
   }[];
 
   if (fileStat.isFile()) {
-    files = [{ absolutePath: p, relativePath: path.basename(p) }];
+    files = [{ absolutePath, relativePath: path.basename(absolutePath) }];
   } else if (fileStat.isDirectory()) {
     files = glob
-      .sync(path.join(p, "**"), {
+      .sync(path.join(absolutePath, "**"), {
         nodir: true,
         absolute: true,
       })
-      .map((globPath) => ({ absolutePath: globPath, relativePath: globPath.slice(p.length + 1) }));
+      .map((globPath) => ({
+        absolutePath: globPath,
+        relativePath: globPath.slice(absolutePath.length + 1),
+      }));
   } else {
     return [];
   }
 
-  const dotPrefixedAllowedExtensions = includeEntry.ext.map(
-    (extension) => `.${extension.replace(/^\./, "")}`
-  );
-
   const filteredFiles = files.filter(({ absolutePath }) => {
-    return dotPrefixedAllowedExtensions.includes(path.extname(absolutePath));
+    return includeEntry.ext.includes(path.extname(absolutePath));
   });
 
   // TODO ignore files
