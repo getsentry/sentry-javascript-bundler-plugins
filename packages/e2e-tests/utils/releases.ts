@@ -1,6 +1,10 @@
 import { AxiosError } from "axios";
 import { BUNDLERS } from "./bundlers";
-import { makeDeleteReleaseRequest, makeGetReleasesRequest } from "./sentry-api";
+import {
+  deleteReleaseFromSentry,
+  getReleaseFileFromSentry,
+  getReleaseFilesFromSentry,
+} from "./sentry-api";
 
 import fs from "fs";
 import path from "path";
@@ -26,7 +30,7 @@ export function deleteAllReleases(release: string) {
     BUNDLERS.map(async (bundler) => {
       const bundlerRelease = `${release}-${bundler}`;
       try {
-        const response = await makeDeleteReleaseRequest(bundlerRelease);
+        const response = await deleteReleaseFromSentry(bundlerRelease);
         return response;
       } catch (e) {
         if ((e as AxiosError).response?.status === 404) {
@@ -62,13 +66,12 @@ export function getReferenceFiles(bundler: string, testDirecory: string): Releas
 }
 
 async function getReleaseFiles(release: string): Promise<ReleaseFilesData[]> {
-  const response = await makeGetReleasesRequest(release);
-  const data = response.data;
-  return data;
+  const response = await getReleaseFilesFromSentry(release);
+  return response.data;
 }
 
 async function getReleaseFile(release: string, fileEntry: ReleaseFilesData): Promise<ReleaseFile> {
-  const response = await makeGetReleasesRequest(release, fileEntry.id);
+  const response = await getReleaseFileFromSentry(release, fileEntry.id);
   const data = response.data;
 
   return {
