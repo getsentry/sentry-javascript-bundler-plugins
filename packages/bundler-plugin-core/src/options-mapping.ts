@@ -117,11 +117,15 @@ function normalizeIncludeEntry(
   const ignoreOption = includeEntry.ignore ?? userOptions.ignore ?? [];
   const ignore = Array.isArray(ignoreOption) ? ignoreOption : [ignoreOption];
 
+  // We're prefixing all entries in the `ext` option with a `.` (if it isn't already) to align with Node.js' `path.extname()`
+  const ext = includeEntry.ext ?? userOptions.ext ?? ["js", "map", "jsbundle", "bundle"];
+  const dotPrefixedExt = ext.map((extension) => `.${extension.replace(/^\./, "")}`);
+
   return {
     paths: includeEntry.paths,
     ignore,
     ignoreFile: includeEntry.ignoreFile ?? userOptions.ignoreFile,
-    ext: includeEntry.ext ?? userOptions.ext ?? ["js", "map", "jsbundle", "bundle"],
+    ext: dotPrefixedExt,
     urlPrefix: includeEntry.urlPrefix ?? userOptions.urlPrefix,
     urlSuffix: includeEntry.urlSuffix ?? userOptions.urlSuffix,
     stripPrefix: includeEntry.stripPrefix ?? userOptions.stripPrefix,
