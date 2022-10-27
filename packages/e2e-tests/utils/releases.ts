@@ -67,12 +67,12 @@ export function getReferenceFiles(bundler: string, testDirecory: string): Releas
 
 async function getReleaseFiles(release: string): Promise<ReleaseFilesData[]> {
   const response = await getReleaseFilesFromSentry(release);
-  return response.data;
+  return response.data as ReleaseFilesData[];
 }
 
 async function getReleaseFile(release: string, fileEntry: ReleaseFilesData): Promise<ReleaseFile> {
   const response = await getReleaseFileFromSentry(release, fileEntry.id);
-  const data = response.data;
+  const data = response.data as ReleaseFile;
 
   return {
     name: fileEntry.name,

@@ -17,7 +17,7 @@ export async function getReleaseFilesFromSentry(release: string) {
 /**
  * Sends a request to the Sentry API to GET a specific release file of a given release name and fileId
  */
-export async function getReleaseFileFromSentry(release: string, fileId?: string) {
+export async function getReleaseFileFromSentry(release: string, fileId: string) {
   return axios.get(
     `https://sentry.io/api/0/projects/${SENTRY_TEST_ORG_SLUG}/${SENTRY_TEST_PROJECT}/releases/${release}/files/${fileId}/?download=1`,
     { headers: getSentryApiHeaders() }

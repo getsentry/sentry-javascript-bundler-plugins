@@ -15,6 +15,11 @@ export function createCjsBundles(
   outFolder: string,
   sentryUnpluginOptions: Options
 ): void {
+  if (!sentryUnpluginOptions.release) {
+    console.error("Config has no release set, aborting");
+    return;
+  }
+
   void vite.build({
     clearScreen: false,
     build: {
@@ -32,7 +37,7 @@ export function createCjsBundles(
       sentryVitePlugin({
         ...sentryUnpluginOptions,
         release: `${sentryUnpluginOptions.release}-vite`,
-        include: `${sentryUnpluginOptions.include}/vite`,
+        include: `${sentryUnpluginOptions.include as string}/vite`,
       }),
     ],
   });
@@ -44,7 +49,7 @@ export function createCjsBundles(
         sentryRollupPlugin({
           ...sentryUnpluginOptions,
           release: `${sentryUnpluginOptions.release}-rollup`,
-          include: `${sentryUnpluginOptions.include}/rollup`,
+          include: `${sentryUnpluginOptions.include as string}/rollup`,
         }),
       ],
     })
@@ -65,7 +70,7 @@ export function createCjsBundles(
       sentryEsbuildPlugin({
         ...sentryUnpluginOptions,
         release: `${sentryUnpluginOptions.release}-esbuild`,
-        include: `${sentryUnpluginOptions.include}/esbuild`,
+        include: `${sentryUnpluginOptions.include as string}/esbuild`,
       }),
     ],
     minify: true,
@@ -88,7 +93,7 @@ export function createCjsBundles(
         sentryWebpackPlugin({
           ...sentryUnpluginOptions,
           release: `${sentryUnpluginOptions.release}-webpack4`,
-          include: `${sentryUnpluginOptions.include}/webpack4`,
+          include: `${sentryUnpluginOptions.include as string}/webpack4`,
         }),
       ],
     },
@@ -115,7 +120,7 @@ export function createCjsBundles(
         sentryWebpackPlugin({
           ...sentryUnpluginOptions,
           release: `${sentryUnpluginOptions.release}-webpack5`,
-          include: `${sentryUnpluginOptions.include}/webpack5`,
+          include: `${sentryUnpluginOptions.include as string}/webpack5`,
         }),
       ],
     },
