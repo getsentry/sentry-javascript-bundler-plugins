@@ -28,7 +28,9 @@ export function getFiles(includePath: string, includeEntry: InternalIncludeEntry
   if (fileStat.isFile()) {
     files = [{ absolutePath, relativePath: path.basename(absolutePath) }];
   } else if (fileStat.isDirectory()) {
-    const absoluteIgnores = includeEntry.ignore.map((e) => path.join(absolutePath, e));
+    const absoluteIgnores = includeEntry.ignore.map((ignoreEntry) =>
+      path.join(process.cwd(), ignoreEntry)
+    );
 
     files = glob
       .sync(path.join(absolutePath, "**"), {
