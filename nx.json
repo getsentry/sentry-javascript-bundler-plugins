@@ -23,9 +23,6 @@
     "test": {
       "dependsOn": ["^build"]
     },
-    "test:e2e": {
-      "dependsOn": ["^build"]
-    },
     "check:types": {
       "dependsOn": ["^build"]
     },
