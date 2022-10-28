@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "test:e2e": "run-s test:setup test:jest",
+    "test": "run-s test:setup test:jest",
     "test:setup": "ts-node scripts/run-scenario-setups.ts",
     "test:jest": "jest",
     "check:types": "tsc --project ./tsconfig.json --noEmit",
