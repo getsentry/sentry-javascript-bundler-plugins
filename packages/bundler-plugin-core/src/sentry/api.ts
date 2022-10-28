@@ -32,7 +32,7 @@ export async function createRelease({
   sentryHub: Hub;
   customHeaders?: Record<string, string>;
 }): Promise<void> {
-  const requestUrl = `${sentryUrl}${API_PATH}/organizations/${org}/releases/`;
+  const requestUrl = `${sentryUrl}/${API_PATH}/organizations/${org}/releases/`;
 
   const releasePayload = {
     version: release,
@@ -68,7 +68,7 @@ export async function deleteAllReleaseArtifacts({
   sentryHub: Hub;
   customHeaders?: Record<string, string>;
 }): Promise<void> {
-  const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/files/source-maps/?name=${release}`;
+  const requestUrl = `${sentryUrl}/${API_PATH}/projects/${org}/${project}/files/source-maps/?name=${release}`;
 
   try {
     await sentryApiAxiosInstance({ authToken, customHeaders }).delete(requestUrl, {
@@ -99,7 +99,7 @@ export async function updateRelease({
   sentryHub: Hub;
   customHeaders?: Record<string, string>;
 }): Promise<void> {
-  const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/`;
+  const requestUrl = `${sentryUrl}/${API_PATH}/projects/${org}/${project}/releases/${release}/`;
 
   const releasePayload = {
     dateReleased: new Date().toISOString(),
@@ -136,7 +136,7 @@ export async function uploadReleaseFile({
   sentryHub: Hub;
   customHeaders?: Record<string, string>;
 }) {
-  const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/files/`;
+  const requestUrl = `${sentryUrl}/${API_PATH}/projects/${org}/${project}/releases/${release}/files/`;
 
   const form = new FormData();
   form.append("name", filename);

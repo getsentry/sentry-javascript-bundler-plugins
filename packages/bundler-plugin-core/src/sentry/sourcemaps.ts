@@ -28,10 +28,13 @@ export function getFiles(includePath: string, includeEntry: InternalIncludeEntry
   if (fileStat.isFile()) {
     files = [{ absolutePath, relativePath: path.basename(absolutePath) }];
   } else if (fileStat.isDirectory()) {
+    const absoluteIgnores = includeEntry.ignore.map((e) => path.join(absolutePath, e));
+
     files = glob
       .sync(path.join(absolutePath, "**"), {
         nodir: true,
         absolute: true,
+        ignore: absoluteIgnores,
       })
       .map((globPath) => ({
         absolutePath: globPath,
