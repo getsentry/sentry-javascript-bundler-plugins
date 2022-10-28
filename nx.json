@@ -8,7 +8,8 @@
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "lint", "test"]
+        "cacheableOperations": ["build", "lint", "test"],
+        "parallel": 10
       }
     }
   },
@@ -20,6 +21,9 @@
       "dependsOn": ["^build", "build"]
     },
     "test": {
+      "dependsOn": ["^build"]
+    },
+    "test:e2e": {
       "dependsOn": ["^build"]
     },
     "check:types": {
