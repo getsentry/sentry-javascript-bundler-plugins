@@ -101,8 +101,7 @@ jobs:
     name: Upload Artifacts
     runs-on: ubuntu-latest
     # Build artifacts are only needed for releasing workflow.
-    # TODO comment back in
-    # if: startsWith(github.ref, 'refs/heads/release/')
+    if: startsWith(github.ref, 'refs/heads/release/')
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
