@@ -3,56 +3,35 @@ import fs, { Stats } from "fs";
 import glob from "glob";
 import { InternalIncludeEntry } from "../options-mapping";
 
-import parseIgnoreFile from "parse-gitignore";
+import ignore, { Ignore } from "ignore";
 
 export type FileRecord = {
   name: string;
   content: string;
 };
 
+type FileNameRecord = {
+  absolutePath: string;
+  // Contains relative paths without leading `.` (e.g. "foo/bar.js" or "asdf\\a\\b.js.map")
+  relativePath: string;
+  // Holds the path of the file relative to the CWD (used for ignore matching)
+  relativeCwdPath: string;
+};
+
 export function getFiles(includePath: string, includeEntry: InternalIncludeEntry): FileRecord[] {
-  let fileStat: Stats;
-  const absolutePath = path.isAbsolute(includePath)
-    ? includePath
-    : path.resolve(process.cwd(), includePath);
-  try {
-    fileStat = fs.statSync(absolutePath);
-  } catch (e) {
+  // Start with getting all files for the given includePath. If there are non, we can bail at this point.
+  const files = collectAllFiles(includePath);
+  if (!files.length) {
     return [];
   }
 
-  let files: {
-    absolutePath: string;
-    // Contains relative paths without leading `.` (e.g. "foo/bar.js" or "asdf\\a\\b.js.map")
-    relativePath: string;
-  }[];
-
-  if (fileStat.isFile()) {
-    files = [{ absolutePath, relativePath: path.basename(absolutePath) }];
-  } else if (fileStat.isDirectory()) {
-    const absoluteIgnores = getIgnoreEntries(includeEntry);
-
-    files = glob
-      .sync(path.join(absolutePath, "**"), {
-        nodir: true,
-        absolute: true,
-        ignore: absoluteIgnores,
-      })
-      .map((globPath) => ({
-        absolutePath: globPath,
-        relativePath: globPath.slice(absolutePath.length + 1),
-      }));
-  } else {
-    return [];
-  }
-
-  const filteredFiles = files.filter(({ absolutePath }) => {
-    return includeEntry.ext.includes(path.extname(absolutePath));
-  });
+  const ignore = getIgnoreRules(includeEntry);
+  const filteredFiles = files
+    .filter(({ relativeCwdPath }) => !ignore.ignores(relativeCwdPath))
+    .filter(({ absolutePath }) => includeEntry.ext.includes(path.extname(absolutePath)));
 
   // TODO do sourcemap rewriting?
   // TODO do sourcefile rewriting? (adding source map reference to bottom - search for "guess_sourcemap_reference")
-
   return filteredFiles.map(({ absolutePath, relativePath }) => {
     const content = fs.readFileSync(absolutePath, { encoding: "utf-8" });
     return {
@@ -65,46 +44,61 @@ export function getFiles(includePath: string, includeEntry: InternalIncludeEntry
   });
 }
 
-function convertWindowsPathToPosix(windowsPath: string): string {
-  return windowsPath.split(path.sep).join(path.posix.sep);
-}
+/**
+ * Collects all (unfiltered) files from @param includePath
+ * @param includePath
+ * @returns an array of files
+ */
+function collectAllFiles(includePath: string): FileNameRecord[] {
+  let fileStat: Stats;
 
-function getIgnoreEntries(includeEntry: InternalIncludeEntry): InternalIncludeEntry["ignore"] {
-  const absoluteIgnores = includeEntry.ignore.map((ignoreEntry) => {
-    if (ignoreEntry.startsWith("!")) {
-      return `!${path.join(process.cwd(), ignoreEntry.replace(/^!/, ""))}`;
-    }
-    return path.join(process.cwd(), ignoreEntry);
-  });
-
-  const absoluteIgnoreFileIgnores = getIgnoreEntriesFromIgnoreFile(includeEntry.ignoreFile);
-
-  return [...absoluteIgnores, ...absoluteIgnoreFileIgnores];
-}
-
-function getIgnoreEntriesFromIgnoreFile(ignoreFile: InternalIncludeEntry["ignoreFile"]): string[] {
-  // This is what parse-gitignore actually returns after version 2.0.0
-  // (including a few other properties we don't need).
-  // Using this as a type until the library updates its type declarations.
-  type ParseIgnoreReturn = {
-    patterns: string[];
-  };
-
-  if (!ignoreFile) {
+  const absolutePath = path.isAbsolute(includePath)
+    ? includePath
+    : path.resolve(process.cwd(), includePath);
+  try {
+    fileStat = fs.statSync(absolutePath);
+  } catch (e) {
     return [];
   }
 
-  // The parse-gitignore library's types declaration file was not updated to v2.0.0.
-  // Hence, we have to override its return value (and ignore the linter who rightfully complains)
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  const fileContent = parseIgnoreFile(fs.readFileSync(ignoreFile)) as unknown as ParseIgnoreReturn;
-  const patterns = fileContent.patterns;
+  let files: FileNameRecord[];
 
-  return patterns.map((ignoreEntry) => {
-    const ignoreFileDir = path.dirname(path.resolve(ignoreFile));
-    if (ignoreEntry.startsWith("!")) {
-      return `!${path.join(ignoreFileDir, ignoreEntry.replace(/^!/, ""))}`;
-    }
-    return path.join(path.join(ignoreFileDir, ignoreEntry));
-  });
+  if (fileStat.isFile()) {
+    files = [
+      {
+        absolutePath,
+        relativePath: path.basename(absolutePath),
+        relativeCwdPath: path.relative(process.cwd(), absolutePath),
+      },
+    ];
+  } else if (fileStat.isDirectory()) {
+    files = glob
+      .sync(path.join(absolutePath, "**"), {
+        nodir: true,
+        absolute: true,
+      })
+      .map((globPath) => ({
+        absolutePath: globPath,
+        relativePath: globPath.slice(absolutePath.length + 1),
+        relativeCwdPath: path.relative(process.cwd(), globPath),
+      }));
+  } else {
+    return [];
+  }
+
+  return files;
+}
+
+function getIgnoreRules(includeEntry: InternalIncludeEntry): Ignore {
+  const ig = ignore();
+  if (includeEntry.ignoreFile) {
+    const ignoreFileContent = fs.readFileSync(includeEntry.ignoreFile).toString();
+    ig.add(ignoreFileContent);
+  }
+  ig.add(includeEntry.ignore);
+  return ig;
+}
+
+function convertWindowsPathToPosix(windowsPath: string): string {
+  return windowsPath.split(path.sep).join(path.posix.sep);
 }
