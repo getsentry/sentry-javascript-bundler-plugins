@@ -17,14 +17,16 @@ export default defineConfig({
   },
   plugins: [
     sentryVitePlugin({
-      url: process.env.SENTRY_URL,
-      authToken: process.env.SENTRY_AUTH_TOKEN,
-      org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN || "",
+      org: process.env.SENTRY_ORG || "",
+      project: process.env.SENTRY_PROJECT || "",
       debug: true,
-      release: "0.0.11",
+      release: "0.0.14",
       include: "out/vite-smallNodeApp",
       cleanArtifacts: true,
+      // ignore: ["out/*", "!out/vite-smallNodeApp/index.js.map"],
+      ignore: ["!out/vite-smallNodeApp/index.js.map"],
+      ignoreFile: ".sentryignore",
     }),
   ],
 });
