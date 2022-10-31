@@ -114,7 +114,7 @@ function normalizeIncludeEntry(
   userOptions: UserOptions,
   includeEntry: UserIncludeEntry
 ): InternalIncludeEntry {
-  const ignoreOption = includeEntry.ignore ?? userOptions.ignore ?? [];
+  const ignoreOption = includeEntry.ignore ?? userOptions.ignore ?? ["node_modules"];
   const ignore = Array.isArray(ignoreOption) ? ignoreOption : [ignoreOption];
 
   // We're prefixing all entries in the `ext` option with a `.` (if it isn't already) to align with Node.js' `path.extname()`

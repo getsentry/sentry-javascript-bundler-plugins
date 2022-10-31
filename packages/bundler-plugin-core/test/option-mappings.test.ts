@@ -21,7 +21,7 @@ describe("normalizeUserOptions()", () => {
       include: [
         {
           ext: [".js", ".map", ".jsbundle", ".bundle"],
-          ignore: [],
+          ignore: ["node_modules"],
           paths: ["./out"],
           rewrite: true,
           sourceMapReference: true,
