@@ -19,7 +19,7 @@ type FileNameRecord = {
 };
 
 export function getFiles(includePath: string, includeEntry: InternalIncludeEntry): FileRecord[] {
-  // Start with getting all files for the given includePath. If there are non, we can bail at this point.
+  // Start with getting all (unfiltered) files for the given includePath.
   const files = collectAllFiles(includePath);
   if (!files.length) {
     return [];
@@ -89,14 +89,18 @@ function collectAllFiles(includePath: string): FileNameRecord[] {
   return files;
 }
 
+/**
+ * Adds rules specified in `ignore` and `ignoreFile` to the ignore rule
+ * checker and returns the checker for further use.
+ */
 function getIgnoreRules(includeEntry: InternalIncludeEntry): Ignore {
-  const ig = ignore();
+  const ignoreChecker = ignore();
   if (includeEntry.ignoreFile) {
     const ignoreFileContent = fs.readFileSync(includeEntry.ignoreFile).toString();
-    ig.add(ignoreFileContent);
+    ignoreChecker.add(ignoreFileContent);
   }
-  ig.add(includeEntry.ignore);
-  return ig;
+  ignoreChecker.add(includeEntry.ignore);
+  return ignoreChecker;
 }
 
 function convertWindowsPathToPosix(windowsPath: string): string {
