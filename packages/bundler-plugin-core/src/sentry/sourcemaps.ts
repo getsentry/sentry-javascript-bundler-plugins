@@ -61,10 +61,8 @@ function collectAllFiles(includePath: string): FileNameRecord[] {
     return [];
   }
 
-  let files: FileNameRecord[];
-
   if (fileStat.isFile()) {
-    files = [
+    return [
       {
         absolutePath,
         relativePath: path.basename(absolutePath),
@@ -72,7 +70,7 @@ function collectAllFiles(includePath: string): FileNameRecord[] {
       },
     ];
   } else if (fileStat.isDirectory()) {
-    files = glob
+    return glob
       .sync(path.join(absolutePath, "**"), {
         nodir: true,
         absolute: true,
@@ -85,8 +83,6 @@ function collectAllFiles(includePath: string): FileNameRecord[] {
   } else {
     return [];
   }
-
-  return files;
 }
 
 /**
