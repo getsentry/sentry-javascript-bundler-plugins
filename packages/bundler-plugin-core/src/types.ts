@@ -107,12 +107,8 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   /**
    * A header added to every outgoing network request.
    * The format should be `header-key: header-value`.
-   *
-   * TODO: This is currently different from the webpack plugin. There, this property is
-   *       called `customHeader` and it only accepts one header as a string.
-   *       Change in follow-up PR.
    */
-  customHeaders?: Record<string, string>;
+  customHeader?: string;
 
   /**
    * Attempts a dry run (useful for dev environments).
