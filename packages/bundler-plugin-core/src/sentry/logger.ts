@@ -6,7 +6,14 @@ interface LoggerOptions {
   prefix: string;
 }
 
-export function createLogger(options: LoggerOptions) {
+export type Logger = {
+  info(message: string, ...params: unknown[]): void;
+  warn(message: string, ...params: unknown[]): void;
+  error(message: string, ...params: unknown[]): void;
+  debug(message: string, ...params: unknown[]): void;
+};
+
+export function createLogger(options: LoggerOptions): Logger {
   function addBreadcrumb(level: SeverityLevel, message: string) {
     options.hub.addBreadcrumb({
       category: "logger",
@@ -16,29 +23,38 @@ export function createLogger(options: LoggerOptions) {
   }
 
   return {
-    info(message: string) {
+    info(message: string, ...params: unknown[]) {
       if (!options?.silent) {
         // eslint-disable-next-line no-console
-        console.log(`${options.prefix} ${message}`);
+        console.log(`${options.prefix} Info: ${message}`, ...params);
       }
 
       addBreadcrumb("info", message);
     },
-    warn(message: string) {
+    warn(message: string, ...params: unknown[]) {
       if (!options?.silent) {
         // eslint-disable-next-line no-console
-        console.log(`${options.prefix} Warning! ${message}`);
+        console.log(`${options.prefix} Warning: ${message}`, ...params);
       }
 
       addBreadcrumb("warning", message);
     },
-    error(message: string) {
+    error(message: string, ...params: unknown[]) {
       if (!options?.silent) {
         // eslint-disable-next-line no-console
-        console.log(`${options.prefix} Error: ${message}`);
+        console.log(`${options.prefix} Error: ${message}`, ...params);
       }
 
       addBreadcrumb("error", message);
+    },
+
+    debug(message: string, ...params: unknown[]) {
+      if (!options?.silent) {
+        // eslint-disable-next-line no-console
+        console.log(`${options.prefix} Debug: ${message}`, ...params);
+      }
+
+      addBreadcrumb("debug", message);
     },
   };
 }
