@@ -1,7 +1,7 @@
 import { Hub } from "@sentry/node";
 import axios from "axios";
 import FormData from "form-data";
-import { Options } from "../types";
+import { InternalOptions } from "../options-mapping";
 import { captureMinimalError } from "./telemetry";
 
 const API_PATH = "api/0";
@@ -9,10 +9,10 @@ const USER_AGENT = `sentry-bundler-plugin/${__PACKAGE_VERSION__}`;
 
 const sentryApiAxiosInstance = ({
   authToken,
-  customHeaders,
-}: Required<Pick<Options, "authToken">> & Pick<Options, "customHeaders">) =>
+  customHeader,
+}: Required<Pick<InternalOptions, "authToken">> & Pick<InternalOptions, "customHeader">) =>
   axios.create({
-    headers: { ...customHeaders, "User-Agent": USER_AGENT, Authorization: `Bearer ${authToken}` },
+    headers: { ...customHeader, "User-Agent": USER_AGENT, Authorization: `Bearer ${authToken}` },
   });
 
 export async function createRelease({
@@ -22,7 +22,7 @@ export async function createRelease({
   authToken,
   sentryUrl,
   sentryHub,
-  customHeaders,
+  customHeader,
 }: {
   release: string;
   project: string;
@@ -30,7 +30,7 @@ export async function createRelease({
   authToken: string;
   sentryUrl: string;
   sentryHub: Hub;
-  customHeaders?: Record<string, string>;
+  customHeader: Record<string, string>;
 }): Promise<void> {
   const requestUrl = `${sentryUrl}${API_PATH}/organizations/${org}/releases/`;
 
@@ -42,7 +42,7 @@ export async function createRelease({
   };
 
   try {
-    await sentryApiAxiosInstance({ authToken, customHeaders }).post(requestUrl, releasePayload, {
+    await sentryApiAxiosInstance({ authToken, customHeader }).post(requestUrl, releasePayload, {
       headers: { Authorization: `Bearer ${authToken}` },
     });
   } catch (e) {
@@ -58,7 +58,7 @@ export async function deleteAllReleaseArtifacts({
   authToken,
   sentryUrl,
   sentryHub,
-  customHeaders,
+  customHeader,
 }: {
   org: string;
   release: string;
@@ -66,12 +66,12 @@ export async function deleteAllReleaseArtifacts({
   authToken: string;
   project: string;
   sentryHub: Hub;
-  customHeaders?: Record<string, string>;
+  customHeader: Record<string, string>;
 }): Promise<void> {
   const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/files/source-maps/?name=${release}`;
 
   try {
-    await sentryApiAxiosInstance({ authToken, customHeaders }).delete(requestUrl, {
+    await sentryApiAxiosInstance({ authToken, customHeader }).delete(requestUrl, {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -89,7 +89,7 @@ export async function updateRelease({
   sentryUrl,
   project,
   sentryHub,
-  customHeaders,
+  customHeader,
 }: {
   release: string;
   org: string;
@@ -97,7 +97,7 @@ export async function updateRelease({
   sentryUrl: string;
   project: string;
   sentryHub: Hub;
-  customHeaders?: Record<string, string>;
+  customHeader: Record<string, string>;
 }): Promise<void> {
   const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/`;
 
@@ -106,7 +106,7 @@ export async function updateRelease({
   };
 
   try {
-    await sentryApiAxiosInstance({ authToken, customHeaders }).put(requestUrl, releasePayload, {
+    await sentryApiAxiosInstance({ authToken, customHeader }).put(requestUrl, releasePayload, {
       headers: { Authorization: `Bearer ${authToken}` },
     });
   } catch (e) {
@@ -124,7 +124,7 @@ export async function uploadReleaseFile({
   filename,
   fileContent,
   sentryHub,
-  customHeaders,
+  customHeader,
 }: {
   org: string;
   release: string;
@@ -134,7 +134,7 @@ export async function uploadReleaseFile({
   filename: string;
   fileContent: string;
   sentryHub: Hub;
-  customHeaders?: Record<string, string>;
+  customHeader: Record<string, string>;
 }) {
   const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/files/`;
 
@@ -143,7 +143,7 @@ export async function uploadReleaseFile({
   form.append("file", Buffer.from(fileContent, "utf-8"), { filename });
 
   try {
-    await sentryApiAxiosInstance({ authToken, customHeaders }).post(requestUrl, form, {
+    await sentryApiAxiosInstance({ authToken, customHeader }).post(requestUrl, form, {
       headers: {
         Authorization: `Bearer ${authToken}`,
         "Content-Type": "multipart/form-data",

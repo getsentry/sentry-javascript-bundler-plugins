@@ -12,7 +12,6 @@ type RequiredInternalOptions = Required<
     | "finalize"
     | "validate"
     | "vcsRemote"
-    | "customHeaders"
     | "dryRun"
     | "debug"
     | "silent"
@@ -28,6 +27,7 @@ type OptionalInternalOptions = Partial<
 type NormalizedInternalOptions = {
   entries: (string | RegExp)[] | ((filePath: string) => boolean) | undefined;
   include: InternalIncludeEntry[];
+  customHeader: Record<string, string>;
 };
 
 export type InternalOptions = RequiredInternalOptions &
@@ -85,7 +85,7 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     finalize: userOptions.finalize ?? true,
     validate: userOptions.validate ?? false,
     vcsRemote: userOptions.vcsRemote ?? "origin",
-    customHeaders: userOptions.customHeaders ?? {},
+    customHeader: normalizeCustomHeader(userOptions.customHeader),
     dryRun: userOptions.dryRun ?? false,
     debug: userOptions.debug ?? false,
     silent: userOptions.silent ?? false,
@@ -133,4 +133,14 @@ function normalizeIncludeEntry(
     sourceMapReference: includeEntry.sourceMapReference ?? userOptions.sourceMapReference ?? true,
     rewrite: includeEntry.rewrite ?? userOptions.rewrite ?? true,
   };
+}
+
+function normalizeCustomHeader(
+  userCustomHeader: UserOptions["customHeader"]
+): InternalOptions["customHeader"] {
+  if (!userCustomHeader || !userCustomHeader.includes(":")) {
+    return {};
+  }
+  const [key, value] = userCustomHeader.split(/:(.*)/, 2).map((s) => s.trim()) as [string, string];
+  return { [key]: value };
 }
