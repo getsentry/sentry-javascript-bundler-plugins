@@ -34,6 +34,7 @@
     "lint": "eslint ./src ./test"
   },
   "dependencies": {
+    "@sentry/cli": "^1.74.6",
     "@sentry/node": "^7.11.1",
     "@sentry/tracing": "^7.11.1",
     "axios": "^0.27.2",

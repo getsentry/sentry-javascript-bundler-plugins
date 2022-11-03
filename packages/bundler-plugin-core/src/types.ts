@@ -177,6 +177,15 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * Defaults to true
    */
   telemetry?: boolean;
+
+  /**
+   * Path to Sentry CLI config properties, as described in
+   * https://docs.sentry.io/product/cli/configuration/#configuration-file.
+   *
+   * By default, the config file is looked for upwards from the current path, and
+   * defaults from ~/.sentryclirc are always loaded
+   */
+  configFile?: string;
 };
 
 export type IncludeEntry = {
