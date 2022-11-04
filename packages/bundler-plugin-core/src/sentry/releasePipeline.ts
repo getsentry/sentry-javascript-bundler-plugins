@@ -8,8 +8,7 @@
 
 import { InternalOptions } from "../options-mapping";
 import { BuildContext } from "../types";
-import { createRelease, deleteAllReleaseArtifacts, uploadReleaseFile, updateRelease } from "./api";
-import { getFiles, FileRecord } from "./sourcemaps";
+import { createRelease, deleteAllReleaseArtifacts, updateRelease } from "./api";
 import { addSpanToTransaction } from "./telemetry";
 
 export async function createNewRelease(
