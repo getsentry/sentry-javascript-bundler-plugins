@@ -8,7 +8,7 @@ describe("getSentryCLI", () => {
     expect(cli).toBeInstanceOf(SentryCli);
   });
 
-  it("returns a valid CLI instance if dryRun is set to true", () => {
+  it("returns a dry run CLI stub if `dryRun` is set to true", () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
     const cli = getSentryCli({ dryRun: true } as any, {} as any);
     expect(cli).not.toBeInstanceOf(SentryCli);
