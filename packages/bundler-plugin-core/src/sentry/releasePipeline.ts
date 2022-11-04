@@ -69,6 +69,9 @@ export async function uploadSourceMaps(options: InternalOptions, ctx: BuildConte
   ctx.logger.info("Uploading Sourcemaps.");
 
   await ctx.cli.releases.uploadSourceMaps(options.release, { include: options.include });
+
+  ctx.logger.info("Successfully uploaded Sourcemaps.");
+
   span?.finish();
 }
 
