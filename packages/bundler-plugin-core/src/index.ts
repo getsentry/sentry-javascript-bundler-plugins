@@ -14,7 +14,6 @@ import { addSpanToTransaction, captureMinimalError, makeSentryClient } from "./s
 import { Span, Transaction } from "@sentry/types";
 import { createLogger } from "./sentry/logger";
 import { normalizeUserOptions } from "./options-mapping";
-import SentryCli from "@sentry/cli";
 
 // We prefix the polyfill id with \0 to tell other plugins not to try to load or transform it.
 // This hack is taken straight from https://rollupjs.org/guide/en/#resolveid.
