@@ -21,7 +21,7 @@ type RequiredInternalOptions = Required<
 >;
 
 type OptionalInternalOptions = Partial<
-  Pick<UserOptions, "dist" | "errorHandler" | "setCommits" | "deploy">
+  Pick<UserOptions, "dist" | "errorHandler" | "setCommits" | "deploy" | "configFile">
 >;
 
 type NormalizedInternalOptions = {
@@ -97,6 +97,7 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     deploy: userOptions.deploy,
     entries,
     include,
+    configFile: userOptions.configFile,
   };
 }
 

@@ -19,41 +19,47 @@ describe("Logger", () => {
     mockedAddBreadcrumb.mockReset();
   });
 
-  it(".info() should log correctly", () => {
+  it.each([
+    ["info", "Info"],
+    ["warn", "Warning"],
+    ["error", "Error"],
+    ["debug", "Debug"],
+  ] as const)(".%s() should log correctly", (loggerMethod, logLevel) => {
     const prefix = "[some-prefix]";
     const logger = createLogger({ hub, prefix });
-    logger.info("Hey!");
 
-    expect(consoleLogSpy).toHaveBeenCalledWith("[some-prefix] Hey!");
+    logger[loggerMethod]("Hey!");
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(`[some-prefix] ${logLevel}: Hey!`);
     expect(mockedAddBreadcrumb).toHaveBeenCalledWith({
       category: "logger",
-      level: "info",
+      level: logLevel.toLowerCase(),
       message: "Hey!",
     });
   });
 
-  it(".warn() should log correctly", () => {
+  it.each([
+    ["info", "Info"],
+    ["warn", "Warning"],
+    ["error", "Error"],
+    ["debug", "Debug"],
+  ] as const)(".%s() should log multiple params correctly", (loggerMethod, logLevel) => {
     const prefix = "[some-prefix]";
     const logger = createLogger({ hub, prefix });
-    logger.warn("Hey!");
 
-    expect(consoleLogSpy).toHaveBeenCalledWith("[some-prefix] Warning! Hey!");
+    logger[loggerMethod]("Hey!", "this", "is", "a test with", 5, "params");
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      `[some-prefix] ${logLevel}: Hey!`,
+      "this",
+      "is",
+      "a test with",
+      5,
+      "params"
+    );
     expect(mockedAddBreadcrumb).toHaveBeenCalledWith({
       category: "logger",
-      level: "warning",
-      message: "Hey!",
-    });
-  });
-
-  it(".error() should log correctly", () => {
-    const prefix = "[some-prefix]";
-    const logger = createLogger({ hub, prefix });
-    logger.error("Hey!");
-
-    expect(consoleLogSpy).toHaveBeenCalledWith("[some-prefix] Error: Hey!");
-    expect(mockedAddBreadcrumb).toHaveBeenCalledWith({
-      category: "logger",
-      level: "error",
+      level: logLevel.toLowerCase(),
       message: "Hey!",
     });
   });
