@@ -1,6 +1,5 @@
 import { Hub } from "@sentry/node";
 import axios from "axios";
-import FormData from "form-data";
 import { InternalOptions } from "../options-mapping";
 import { captureMinimalError } from "./telemetry";
 
