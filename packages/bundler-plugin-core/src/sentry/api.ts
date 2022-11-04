@@ -80,36 +80,3 @@ export async function deleteAllReleaseArtifacts({
     throw e;
   }
 }
-
-export async function updateRelease({
-  release,
-  org,
-  authToken,
-  sentryUrl,
-  project,
-  sentryHub,
-  customHeader,
-}: {
-  release: string;
-  org: string;
-  authToken: string;
-  sentryUrl: string;
-  project: string;
-  sentryHub: Hub;
-  customHeader: Record<string, string>;
-}): Promise<void> {
-  const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/`;
-
-  const releasePayload = {
-    dateReleased: new Date().toISOString(),
-  };
-
-  try {
-    await sentryApiAxiosInstance({ authToken, customHeader }).put(requestUrl, releasePayload, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
-  } catch (e) {
-    captureMinimalError(e, sentryHub);
-    throw e;
-  }
-}

@@ -8,7 +8,7 @@
 
 import { InternalOptions } from "../options-mapping";
 import { BuildContext } from "../types";
-import { createRelease, deleteAllReleaseArtifacts, updateRelease } from "./api";
+import { createRelease, deleteAllReleaseArtifacts } from "./api";
 import { addSpanToTransaction } from "./telemetry";
 
 export async function createNewRelease(
@@ -75,34 +75,15 @@ export async function uploadSourceMaps(options: InternalOptions, ctx: BuildConte
   span?.finish();
 }
 
-export async function finalizeRelease(
-  options: InternalOptions,
-  ctx: BuildContext
-): Promise<string> {
+export async function finalizeRelease(options: InternalOptions, ctx: BuildContext): Promise<void> {
   const span = addSpanToTransaction(ctx, "function.plugin.finalize_release");
 
   if (options.finalize) {
-    const { authToken, org, url, project } = options;
-    if (!authToken || !org || !url || !project) {
-      ctx.logger.warn("Missing required option. Will not clean existing artifacts.");
-      return Promise.resolve("nothing to do here");
-    }
-
-    await updateRelease({
-      authToken,
-      org,
-      release: options.release,
-      sentryUrl: url,
-      project,
-      sentryHub: ctx.hub,
-      customHeader: options.customHeader,
-    });
-
+    await ctx.cli.releases.finalize(options.release);
     ctx.logger.info("Successfully finalized release.");
   }
 
   span?.finish();
-  return Promise.resolve("nothing to do here");
 }
 
 export async function cleanArtifacts(options: InternalOptions, ctx: BuildContext): Promise<string> {
