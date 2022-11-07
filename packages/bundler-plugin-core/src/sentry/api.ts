@@ -1,6 +1,5 @@
 import { Hub } from "@sentry/node";
 import axios from "axios";
-import FormData from "form-data";
 import { InternalOptions } from "../options-mapping";
 import { captureMinimalError } from "./telemetry";
 
@@ -108,46 +107,6 @@ export async function updateRelease({
   try {
     await sentryApiAxiosInstance({ authToken, customHeader }).put(requestUrl, releasePayload, {
       headers: { Authorization: `Bearer ${authToken}` },
-    });
-  } catch (e) {
-    captureMinimalError(e, sentryHub);
-    throw e;
-  }
-}
-
-export async function uploadReleaseFile({
-  org,
-  project,
-  release,
-  authToken,
-  sentryUrl,
-  filename,
-  fileContent,
-  sentryHub,
-  customHeader,
-}: {
-  org: string;
-  release: string;
-  sentryUrl: string;
-  authToken: string;
-  project: string;
-  filename: string;
-  fileContent: string;
-  sentryHub: Hub;
-  customHeader: Record<string, string>;
-}) {
-  const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/releases/${release}/files/`;
-
-  const form = new FormData();
-  form.append("name", filename);
-  form.append("file", Buffer.from(fileContent, "utf-8"), { filename });
-
-  try {
-    await sentryApiAxiosInstance({ authToken, customHeader }).post(requestUrl, form, {
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-        "Content-Type": "multipart/form-data",
-      },
     });
   } catch (e) {
     captureMinimalError(e, sentryHub);
