@@ -49,34 +49,3 @@ export async function createRelease({
     throw e;
   }
 }
-
-export async function deleteAllReleaseArtifacts({
-  org,
-  project,
-  release,
-  authToken,
-  sentryUrl,
-  sentryHub,
-  customHeader,
-}: {
-  org: string;
-  release: string;
-  sentryUrl: string;
-  authToken: string;
-  project: string;
-  sentryHub: Hub;
-  customHeader: Record<string, string>;
-}): Promise<void> {
-  const requestUrl = `${sentryUrl}${API_PATH}/projects/${org}/${project}/files/source-maps/?name=${release}`;
-
-  try {
-    await sentryApiAxiosInstance({ authToken, customHeader }).delete(requestUrl, {
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
-    });
-  } catch (e) {
-    captureMinimalError(e, sentryHub);
-    throw e;
-  }
-}
