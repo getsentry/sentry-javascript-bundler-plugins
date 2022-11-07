@@ -1,5 +1,6 @@
 import { Hub } from "@sentry/hub";
 import { Span } from "@sentry/tracing";
+import { SentryCLILike } from "./sentry/cli";
 import { createLogger } from "./sentry/logger";
 
 /**
@@ -348,4 +349,5 @@ export type BuildContext = {
   hub: Hub;
   parentSpan?: Span;
   logger: ReturnType<typeof createLogger>;
+  cli: SentryCLILike;
 };

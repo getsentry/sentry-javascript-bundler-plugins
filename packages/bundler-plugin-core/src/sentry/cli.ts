@@ -3,7 +3,7 @@ import { InternalOptions } from "../options-mapping";
 import { Logger } from "./logger";
 
 type SentryDryRunCLI = { releases: Omit<SentryCliReleases, "listDeploys" | "execute"> };
-type SentryCLILike = SentryCli | SentryDryRunCLI;
+export type SentryCLILike = SentryCli | SentryDryRunCLI;
 
 /**
  * Creates a new Sentry CLI instance.
@@ -22,6 +22,7 @@ export function getSentryCli(internalOptions: InternalOptions, logger: Logger): 
   });
 
   if (internalOptions.dryRun) {
+    logger.info("In DRY RUN Mode");
     return getDryRunCLI(cli, logger);
   }
 

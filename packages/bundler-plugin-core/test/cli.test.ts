@@ -8,9 +8,11 @@ describe("getSentryCLI", () => {
     expect(cli).toBeInstanceOf(SentryCli);
   });
 
-  it("returns a valid CLI instance if dryRun is set to true", () => {
+  it("returns a dry run CLI stub if `dryRun` is set to true", () => {
+    const logger = { info: jest.fn() };
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-    const cli = getSentryCli({ dryRun: true } as any, {} as any);
+    const cli = getSentryCli({ dryRun: true } as any, logger as any);
+    expect(logger.info).toHaveBeenCalledWith(expect.stringMatching("DRY RUN"));
     expect(cli).not.toBeInstanceOf(SentryCli);
   });
 });

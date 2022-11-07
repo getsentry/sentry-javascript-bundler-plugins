@@ -14,6 +14,7 @@ import { addSpanToTransaction, captureMinimalError, makeSentryClient } from "./s
 import { Span, Transaction } from "@sentry/types";
 import { createLogger } from "./sentry/logger";
 import { normalizeUserOptions } from "./options-mapping";
+import { getSentryCli } from "./sentry/cli";
 
 // We prefix the polyfill id with \0 to tell other plugins not to try to load or transform it.
 // This hack is taken straight from https://rollupjs.org/guide/en/#resolveid.
@@ -87,6 +88,8 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     silent: internalOptions.silent,
   });
 
+  const cli = getSentryCli(internalOptions, logger);
+
   if (internalOptions.telemetry) {
     logger.info("Sending error and performance telemetry data to Sentry.");
     logger.info("To disable telemetry, set `options.telemetry` to `false`.");
@@ -116,13 +119,17 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     /**
      * Responsible for starting the plugin execution transaction and the release injection span
      */
-    buildStart() {
+    async buildStart() {
+      if (!internalOptions.release) {
+        internalOptions.release = await cli.releases.proposeVersion();
+      }
+
       transaction = sentryHub.startTransaction({
         op: "function.plugin",
         name: "Sentry Bundler Plugin execution",
       });
       releaseInjectionSpan = addSpanToTransaction(
-        { hub: sentryHub, parentSpan: transaction, logger },
+        { hub: sentryHub, parentSpan: transaction, logger, cli },
         "function.plugin.inject_release",
         "Release injection"
       );
@@ -259,7 +266,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       const releasePipelineSpan =
         transaction &&
         addSpanToTransaction(
-          { hub: sentryHub, parentSpan: transaction, logger },
+          { hub: sentryHub, parentSpan: transaction, logger, cli },
           "function.plugin.release",
           "Release pipeline"
         );
@@ -275,7 +282,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       //     That's good for them but a hassle for us. Let's try to normalize this into one data type
       //     (I vote IncludeEntry[]) and continue with that down the line
 
-      const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan, logger };
+      const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan, logger, cli };
 
       createNewRelease(internalOptions, ctx)
         .then(() => cleanArtifacts(internalOptions, ctx))

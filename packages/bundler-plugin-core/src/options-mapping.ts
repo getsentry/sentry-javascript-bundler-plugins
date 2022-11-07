@@ -1,4 +1,3 @@
-import { detectRelease } from "./detect-release";
 import { IncludeEntry as UserIncludeEntry, Options as UserOptions } from "./types";
 
 type RequiredInternalOptions = Required<
@@ -81,7 +80,7 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     project: userOptions.project,
     authToken: userOptions.authToken,
     url: userOptions.url ?? "https://sentry.io/",
-    release: userOptions.release ?? detectRelease(),
+    release: userOptions.release ?? "",
     finalize: userOptions.finalize ?? true,
     validate: userOptions.validate ?? false,
     vcsRemote: userOptions.vcsRemote ?? "origin",
