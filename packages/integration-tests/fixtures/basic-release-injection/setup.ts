@@ -8,4 +8,5 @@ const outputDir = path.resolve(__dirname, "./out");
 createCjsBundles({ index: entryPointPath }, outputDir, {
   release: "I AM A RELEASE!",
   include: outputDir,
+  dryRun: true,
 } as Options);

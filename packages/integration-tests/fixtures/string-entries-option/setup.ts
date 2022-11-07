@@ -10,4 +10,5 @@ createCjsBundles({ entrypoint1: entryPoint1Path, entrypoint2: entryPoint2Path },
   release: "I AM A RELEASE!",
   include: outputDir,
   entries: entryPoint1Path,
+  dryRun: true,
 } as Options);

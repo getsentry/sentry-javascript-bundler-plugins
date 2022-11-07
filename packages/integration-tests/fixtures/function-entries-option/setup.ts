@@ -15,5 +15,6 @@ createCjsBundles(
     include: outputDir,
     entries: (entrypointPath) =>
       entrypointPath === entryPoint1Path || entrypointPath === entryPoint3Path,
+    dryRun: true,
   } as Options
 );
