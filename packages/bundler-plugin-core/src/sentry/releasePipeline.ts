@@ -115,6 +115,7 @@ export async function setCommits(options: InternalOptions, ctx: BuildContext): P
         ignoreMissing,
         ignoreEmpty,
       });
+      ctx.logger.info("Successfully set commits.");
     } else {
       ctx.logger.error(
         "Couldn't set commits - neither the `auto` nor the `repo` and `commit` options were specified!",

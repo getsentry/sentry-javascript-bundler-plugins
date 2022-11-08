@@ -21,7 +21,7 @@ export default defineConfig({
       org: process.env.SENTRY_ORG || "",
       project: process.env.SENTRY_PROJECT || "",
       debug: true,
-      release: "0.0.14-smallNodeApp",
+      release: "0.0.14",
       include: "out/vite-smallNodeApp",
       cleanArtifacts: true,
       // ignore: ["out/*", "!out/vite-smallNodeApp/index.js.map"],
