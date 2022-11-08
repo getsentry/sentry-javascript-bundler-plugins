@@ -8,44 +8,31 @@
 
 import { InternalOptions } from "../options-mapping";
 import { BuildContext } from "../types";
-import { createRelease } from "./api";
 import { addSpanToTransaction } from "./telemetry";
 
-export async function createNewRelease(
-  options: InternalOptions,
-  ctx: BuildContext
-): Promise<string> {
+export async function createNewRelease(options: InternalOptions, ctx: BuildContext): Promise<void> {
   const span = addSpanToTransaction(ctx, "function.plugin.create_release");
 
   // TODO: pull these checks out of here and simplify them
   if (options.authToken === undefined) {
     ctx.logger.warn('Missing "authToken" option. Will not create release.');
-    return Promise.resolve("nothing to do here");
+    return;
   } else if (options.org === undefined) {
     ctx.logger.warn('Missing "org" option. Will not create release.');
-    return Promise.resolve("nothing to do here");
+    return;
   } else if (options.url === undefined) {
     ctx.logger.warn('Missing "url" option. Will not create release.');
-    return Promise.resolve("nothing to do here");
+    return;
   } else if (options.project === undefined) {
     ctx.logger.warn('Missing "project" option. Will not create release.');
-    return Promise.resolve("nothing to do here");
+    return;
   }
 
-  await createRelease({
-    release: options.release,
-    authToken: options.authToken,
-    org: options.org,
-    project: options.project,
-    sentryUrl: options.url,
-    sentryHub: ctx.hub,
-    customHeader: options.customHeader,
-  });
+  await ctx.cli.releases.new(options.release);
 
   ctx.logger.info("Successfully created release.");
 
   span?.finish();
-  return Promise.resolve("nothing to do here");
 }
 
 export async function uploadSourceMaps(options: InternalOptions, ctx: BuildContext): Promise<void> {
