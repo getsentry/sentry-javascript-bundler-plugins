@@ -27,6 +27,10 @@ export default defineConfig({
       // ignore: ["out/*", "!out/vite-smallNodeApp/index.js.map"],
       ignore: ["!out/vite-smallNodeApp/index.js.map"],
       ignoreFile: ".sentryignore",
+      setCommits: {
+        auto: true,
+        ignoreMissing: true,
+      },
     }),
   ],
 });

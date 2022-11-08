@@ -287,7 +287,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       createNewRelease(internalOptions, ctx)
         .then(() => cleanArtifacts(internalOptions, ctx))
         .then(() => uploadSourceMaps(internalOptions, ctx))
-        .then(() => setCommits(ctx)) // this is a noop for now
+        .then(() => setCommits(internalOptions, ctx))
         .then(() => finalizeRelease(internalOptions, ctx))
         .then(() => addDeploy(ctx)) // this is a noop for now
         .then(() => {

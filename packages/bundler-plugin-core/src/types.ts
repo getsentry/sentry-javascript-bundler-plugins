@@ -277,14 +277,14 @@ type SetCommitsOptions = {
   /**
    * The full repo name as defined in Sentry.
    *
-   * Required if `auto` option is not `true`.
+   * Required if `auto` option is not set to `true`.
    */
   repo?: string;
 
   /**
    * The current (last) commit in the release.
    *
-   * Required if `auto` option is not `true`.
+   * Required if `auto` option is not set to `true`.
    */
   commit?: string;
 
@@ -306,6 +306,14 @@ type SetCommitsOptions = {
    * Defaults to `false`.
    */
   ignoreMissing?: boolean;
+
+  /**
+   * If this flag is set, the setCommits step will not fail and just exit
+   * silently if no new commits for a given release have been found.
+   *
+   * Defaults to `false`.
+   */
+  ignoreEmpty?: boolean;
 };
 
 type DeployOptions = {

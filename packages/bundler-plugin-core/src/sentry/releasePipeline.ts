@@ -100,16 +100,31 @@ export async function cleanArtifacts(options: InternalOptions, ctx: BuildContext
   span?.finish();
 }
 
-// TODO: Stuff we worry about later:
-
-export async function setCommits(
-  /* version: string, */
-  ctx: BuildContext
-): Promise<string> {
+export async function setCommits(options: InternalOptions, ctx: BuildContext): Promise<void> {
   const span = addSpanToTransaction(ctx, "function.plugin.set_commits");
 
+  if (options.setCommits) {
+    const { auto, repo, commit, previousCommit, ignoreMissing, ignoreEmpty } = options.setCommits;
+
+    if (auto || (repo && commit)) {
+      await ctx.cli.releases.setCommits(options.release, {
+        commit,
+        previousCommit,
+        repo,
+        auto,
+        ignoreMissing,
+        ignoreEmpty,
+      });
+      ctx.logger.info("Successfully set commits.");
+    } else {
+      ctx.logger.error(
+        "Couldn't set commits - neither the `auto` nor the `repo` and `commit` options were specified!",
+        "Make sure to either set `auto` to `true` or to manually set `repo` and `commit`."
+      );
+    }
+  }
+
   span?.finish();
-  return Promise.resolve("Noop");
 }
 
 export async function addDeploy(
