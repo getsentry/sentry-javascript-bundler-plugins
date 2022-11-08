@@ -2,7 +2,7 @@ import SentryCli, { SentryCliReleases } from "@sentry/cli";
 import { InternalOptions } from "../options-mapping";
 import { Logger } from "./logger";
 
-type SentryDryRunCLI = { releases: Omit<SentryCliReleases, "listDeploys" | "execute"> };
+type SentryDryRunCLI = { releases: Omit<SentryCliReleases, "listDeploys"> };
 export type SentryCLILike = SentryCli | SentryDryRunCLI;
 
 /**
@@ -56,6 +56,10 @@ function getDryRunCLI(cli: SentryCli, logger: Logger): SentryDryRunCLI {
       newDeploy: (release: string, config: unknown) => {
         logger.info("Calling deploy with:\n", config);
         return Promise.resolve(release);
+      },
+      execute: (args: string[], live: boolean) => {
+        logger.info("Executing", args, "live:", live);
+        return Promise.resolve("");
       },
     },
   };

@@ -8,7 +8,7 @@
 
 import { InternalOptions } from "../options-mapping";
 import { BuildContext } from "../types";
-import { createRelease, deleteAllReleaseArtifacts } from "./api";
+import { createRelease } from "./api";
 import { addSpanToTransaction } from "./telemetry";
 
 export async function createNewRelease(
@@ -86,40 +86,31 @@ export async function finalizeRelease(options: InternalOptions, ctx: BuildContex
   span?.finish();
 }
 
-export async function cleanArtifacts(options: InternalOptions, ctx: BuildContext): Promise<string> {
+export async function cleanArtifacts(options: InternalOptions, ctx: BuildContext): Promise<void> {
   const span = addSpanToTransaction(ctx, "function.plugin.clean_artifacts");
 
   if (options.cleanArtifacts) {
     // TODO: pull these checks out of here and simplify them
     if (options.authToken === undefined) {
       ctx.logger.warn('Missing "authToken" option. Will not clean existing artifacts.');
-      return Promise.resolve("nothing to do here");
+      return;
     } else if (options.org === undefined) {
       ctx.logger.warn('Missing "org" option. Will not clean existing artifacts.');
-      return Promise.resolve("nothing to do here");
+      return;
     } else if (options.url === undefined) {
       ctx.logger.warn('Missing "url" option. Will not clean existing artifacts.');
-      return Promise.resolve("nothing to do here");
+      return;
     } else if (options.project === undefined) {
       ctx.logger.warn('Missing "project" option. Will not clean existing artifacts.');
-      return Promise.resolve("nothing to do here");
+      return;
     }
 
-    await deleteAllReleaseArtifacts({
-      authToken: options.authToken,
-      org: options.org,
-      release: options.release,
-      sentryUrl: options.url,
-      project: options.project,
-      sentryHub: ctx.hub,
-      customHeader: options.customHeader,
-    });
+    await ctx.cli.releases.execute(["releases", "files", options.release, "delete", "--all"], true);
 
     ctx.logger.info("Successfully cleaned previous artifacts.");
   }
 
   span?.finish();
-  return Promise.resolve("nothing to do here");
 }
 
 // TODO: Stuff we worry about later:
