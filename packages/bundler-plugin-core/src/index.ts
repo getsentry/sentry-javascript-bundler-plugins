@@ -289,10 +289,8 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         .then(() => uploadSourceMaps(internalOptions, ctx))
         .then(() => setCommits(internalOptions, ctx))
         .then(() => finalizeRelease(internalOptions, ctx))
-        .then(() => addDeploy(ctx)) // this is a noop for now
-        .then(() => {
-          transaction?.setStatus("ok");
-        })
+        .then(() => addDeploy(internalOptions, ctx))
+        .then(() => transaction?.setStatus("ok"))
         .catch((e: Error) => {
           captureMinimalError(e, sentryHub);
           transaction?.setStatus("cancelled");
