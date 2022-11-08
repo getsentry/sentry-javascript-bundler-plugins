@@ -12,13 +12,15 @@ export type SentryCLILike = SentryCli | SentryDryRunCLI;
  * that makes no-ops out of most CLI operations
  */
 export function getSentryCli(internalOptions: InternalOptions, logger: Logger): SentryCLILike {
+  const { silent, org, project, authToken, url, vcsRemote, customHeader } = internalOptions;
   const cli = new SentryCli(internalOptions.configFile, {
-    silent: internalOptions.silent,
-    org: internalOptions.org,
-    project: internalOptions.project,
-    authToken: internalOptions.authToken,
-    url: internalOptions.url,
-    vcsRemote: internalOptions.vcsRemote,
+    silent,
+    org,
+    project,
+    authToken,
+    url,
+    vcsRemote,
+    customHeader,
   });
 
   if (internalOptions.dryRun) {
