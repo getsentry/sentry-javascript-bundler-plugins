@@ -21,12 +21,16 @@ export default defineConfig({
       org: process.env.SENTRY_ORG || "",
       project: process.env.SENTRY_PROJECT || "",
       debug: true,
-      release: "0.0.14",
+      release: "0.0.14-smallNodeApp",
       include: "out/vite-smallNodeApp",
       cleanArtifacts: true,
       // ignore: ["out/*", "!out/vite-smallNodeApp/index.js.map"],
       ignore: ["!out/vite-smallNodeApp/index.js.map"],
       ignoreFile: ".sentryignore",
+      setCommits: {
+        auto: true,
+        ignoreMissing: true,
+      },
     }),
   ],
 });
