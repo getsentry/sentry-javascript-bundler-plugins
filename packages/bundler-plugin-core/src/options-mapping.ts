@@ -9,7 +9,6 @@ type RequiredInternalOptions = Required<
     | "url"
     | "release"
     | "finalize"
-    | "validate"
     | "vcsRemote"
     | "dryRun"
     | "debug"
@@ -36,7 +35,10 @@ export type InternalOptions = RequiredInternalOptions &
   NormalizedInternalOptions;
 
 type RequiredInternalIncludeEntry = Required<
-  Pick<UserIncludeEntry, "paths" | "ext" | "stripCommonPrefix" | "sourceMapReference" | "rewrite">
+  Pick<
+    UserIncludeEntry,
+    "paths" | "ext" | "stripCommonPrefix" | "sourceMapReference" | "rewrite" | "validate"
+  >
 >;
 
 type OptionalInternalIncludeEntry = Partial<
@@ -84,7 +86,6 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     url: userOptions.url ?? "https://sentry.io/",
     release: userOptions.release ?? "",
     finalize: userOptions.finalize ?? true,
-    validate: userOptions.validate ?? false,
     vcsRemote: userOptions.vcsRemote ?? "origin",
     customHeader: userOptions.customHeader,
     dryRun: userOptions.dryRun ?? false,
@@ -134,5 +135,6 @@ function normalizeIncludeEntry(
     stripCommonPrefix: includeEntry.stripCommonPrefix ?? userOptions.stripCommonPrefix ?? false,
     sourceMapReference: includeEntry.sourceMapReference ?? userOptions.sourceMapReference ?? true,
     rewrite: includeEntry.rewrite ?? userOptions.rewrite ?? true,
+    validate: includeEntry.validate ?? userOptions.validate ?? false,
   };
 }

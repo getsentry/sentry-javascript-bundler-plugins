@@ -26,7 +26,7 @@ describe("Logger", () => {
     ["debug", "Debug"],
   ] as const)(".%s() should log correctly", (loggerMethod, logLevel) => {
     const prefix = "[some-prefix]";
-    const logger = createLogger({ hub, prefix });
+    const logger = createLogger({ hub, prefix, silent: false, debug: true });
 
     logger[loggerMethod]("Hey!");
 
@@ -45,7 +45,7 @@ describe("Logger", () => {
     ["debug", "Debug"],
   ] as const)(".%s() should log multiple params correctly", (loggerMethod, logLevel) => {
     const prefix = "[some-prefix]";
-    const logger = createLogger({ hub, prefix });
+    const logger = createLogger({ hub, prefix, silent: false, debug: true });
 
     logger[loggerMethod]("Hey!", "this", "is", "a test with", 5, "params");
 
@@ -65,9 +65,9 @@ describe("Logger", () => {
   });
 
   describe("doesn't log when `silent` option is `true`", () => {
-    it.each(["info", "warn", "error"] as const)(".%s()", (loggerMethod) => {
+    it.each(["info", "warn", "error", "debug"] as const)(".%s()", (loggerMethod) => {
       const prefix = "[some-prefix]";
-      const logger = createLogger({ silent: true, hub, prefix });
+      const logger = createLogger({ hub, prefix, silent: true, debug: true });
 
       logger[loggerMethod]("Hey!");
 

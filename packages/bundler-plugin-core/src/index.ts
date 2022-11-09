@@ -86,6 +86,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     hub: sentryHub,
     prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
     silent: internalOptions.silent,
+    debug: internalOptions.debug,
   });
 
   const cli = getSentryCli(internalOptions, logger);
