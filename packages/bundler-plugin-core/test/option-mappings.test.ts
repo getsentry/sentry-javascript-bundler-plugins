@@ -14,7 +14,6 @@ describe("normalizeUserOptions()", () => {
     expect(normalizeUserOptions(userOptions)).toEqual({
       authToken: "my-auth-token",
       cleanArtifacts: false,
-      customHeader: {},
       debug: false,
       dryRun: false,
       finalize: true,
@@ -58,7 +57,6 @@ describe("normalizeUserOptions()", () => {
     expect(normalizeUserOptions(userOptions)).toEqual({
       authToken: "my-auth-token",
       cleanArtifacts: false,
-      customHeader: {},
       debug: false,
       dryRun: false,
       finalize: true,
@@ -81,20 +79,5 @@ describe("normalizeUserOptions()", () => {
       validate: false,
       vcsRemote: "origin",
     });
-  });
-
-  test("should convert string customHeader to internal representation", () => {
-    const userOptions: Options = {
-      org: "my-org",
-      project: "my-project",
-      authToken: "my-auth-token",
-      release: "my-release",
-      include: "dist",
-      customHeader: "customKey: CustomValue",
-    };
-
-    expect(normalizeUserOptions(userOptions)).toEqual(
-      expect.objectContaining({ customHeader: { customKey: "CustomValue" } })
-    );
   });
 });
