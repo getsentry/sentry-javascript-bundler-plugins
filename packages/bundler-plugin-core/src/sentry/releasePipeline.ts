@@ -55,6 +55,8 @@ export async function uploadSourceMaps(options: InternalOptions, ctx: BuildConte
 
   ctx.logger.info("Uploading Sourcemaps.");
 
+  // Since our internal include entries contain all top-level sourcemaps options,
+  // we only need to pass the include option here.
   await ctx.cli.releases.uploadSourceMaps(options.release, { include: options.include });
 
   ctx.logger.info("Successfully uploaded Sourcemaps.");
