@@ -3,13 +3,8 @@ import { IncludeEntry as UserIncludeEntry, Options as UserOptions } from "./type
 type RequiredInternalOptions = Required<
   Pick<
     UserOptions,
-    | "org"
-    | "project"
-    | "authToken"
-    | "url"
     | "release"
     | "finalize"
-    | "vcsRemote"
     | "dryRun"
     | "debug"
     | "silent"
@@ -22,7 +17,17 @@ type RequiredInternalOptions = Required<
 type OptionalInternalOptions = Partial<
   Pick<
     UserOptions,
-    "dist" | "errorHandler" | "setCommits" | "deploy" | "configFile" | "customHeader"
+    | "org"
+    | "project"
+    | "authToken"
+    | "url"
+    | "vcsRemote"
+    | "dist"
+    | "errorHandler"
+    | "setCommits"
+    | "deploy"
+    | "configFile"
+    | "customHeader"
   >
 >;
 
@@ -52,20 +57,71 @@ export type InternalIncludeEntry = RequiredInternalIncludeEntry &
   };
 
 export function normalizeUserOptions(userOptions: UserOptions): InternalOptions {
-  let entries: (string | RegExp)[] | ((filePath: string) => boolean) | undefined;
-  if (userOptions.entries === undefined) {
-    entries = undefined;
-  } else if (typeof userOptions.entries === "function" || Array.isArray(userOptions.entries)) {
-    entries = userOptions.entries;
+  const entries = normalizeEntries(userOptions.entries);
+  const include = normalizeInclude(userOptions);
+
+  return {
+    // Strictly required options
+    include,
+
+    // These options must be set b/c we need them for release injection
+    // They can also be set as environment variables. Technically, they
+    // could be set in the config file but this would be too late for
+    // release injection
+    org: userOptions.org ?? process.env["SENTRY_ORG"],
+    project: userOptions.project ?? process.env["SENTRY_PROJECT"],
+    release: userOptions.release ?? process.env["SENTRY_RELEASE"] ?? "",
+
+    // These options and can also be set via env variables or config file
+    // but are only passed to Sentry CLI. They could remain undefined
+    // because the config file is only read by the CLI
+    authToken: userOptions.authToken ?? process.env["SENTRY_AUTH_TOKEN"],
+    customHeader: userOptions.customHeader ?? process.env["CUSTOM_HEADER"],
+    url: userOptions.url ?? process.env["SENTRY_URL"] ?? "https://sentry.io/",
+    vcsRemote: userOptions.vcsRemote ?? process.env["SENTRY_VCS_REMOTE"] ?? "origin",
+
+    // Options with default values
+    finalize: userOptions.finalize ?? true,
+    cleanArtifacts: userOptions.cleanArtifacts ?? false,
+    dryRun: userOptions.dryRun ?? false,
+    debug: userOptions.debug ?? false,
+    silent: userOptions.silent ?? false,
+    telemetry: userOptions.telemetry ?? true,
+    injectReleasesMap: userOptions.injectReleasesMap ?? false,
+
+    // Optional options
+    setCommits: userOptions.setCommits,
+    deploy: userOptions.deploy,
+    entries,
+    dist: userOptions.dist,
+    errorHandler: userOptions.errorHandler,
+    configFile: userOptions.configFile,
+  };
+}
+
+/**
+ * Converts the user-facing `entries` option to the internal `entries` option
+ */
+function normalizeEntries(
+  userEntries: UserOptions["entries"]
+): (string | RegExp)[] | ((filePath: string) => boolean) | undefined {
+  if (userEntries === undefined) {
+    return undefined;
+  } else if (typeof userEntries === "function" || Array.isArray(userEntries)) {
+    return userEntries;
   } else {
-    entries = [userOptions.entries];
+    return [userEntries];
   }
+}
+
+function normalizeInclude(userOptions: UserOptions): InternalIncludeEntry[] {
+  const rawUserInclude = userOptions.include;
 
   let userInclude: UserIncludeEntry[];
-  if (typeof userOptions.include === "string") {
-    userInclude = [convertIncludePathToIncludeEntry(userOptions.include)];
-  } else if (Array.isArray(userOptions.include)) {
-    userInclude = userOptions.include.map((potentialIncludeEntry) => {
+  if (typeof rawUserInclude === "string") {
+    userInclude = [convertIncludePathToIncludeEntry(rawUserInclude)];
+  } else if (Array.isArray(rawUserInclude)) {
+    userInclude = rawUserInclude.map((potentialIncludeEntry) => {
       if (typeof potentialIncludeEntry === "string") {
         return convertIncludePathToIncludeEntry(potentialIncludeEntry);
       } else {
@@ -73,36 +129,12 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
       }
     });
   } else {
-    userInclude = [userOptions.include];
+    userInclude = [rawUserInclude];
   }
 
-  const include = userInclude.map((userIncludeEntry) =>
+  return userInclude.map((userIncludeEntry) =>
     normalizeIncludeEntry(userOptions, userIncludeEntry)
   );
-
-  return {
-    org: userOptions.org,
-    project: userOptions.project,
-    authToken: userOptions.authToken,
-    url: userOptions.url ?? "https://sentry.io/",
-    release: userOptions.release ?? "",
-    finalize: userOptions.finalize ?? true,
-    vcsRemote: userOptions.vcsRemote ?? "origin",
-    customHeader: userOptions.customHeader,
-    dryRun: userOptions.dryRun ?? false,
-    debug: userOptions.debug ?? false,
-    silent: userOptions.silent ?? false,
-    cleanArtifacts: userOptions.cleanArtifacts ?? false,
-    telemetry: userOptions.telemetry ?? true,
-    dist: userOptions.dist,
-    errorHandler: userOptions.errorHandler,
-    setCommits: userOptions.setCommits,
-    deploy: userOptions.deploy,
-    entries,
-    include,
-    configFile: userOptions.configFile,
-    injectReleasesMap: userOptions.injectReleasesMap ?? false,
-  };
 }
 
 function convertIncludePathToIncludeEntry(includePath: string): UserIncludeEntry {
