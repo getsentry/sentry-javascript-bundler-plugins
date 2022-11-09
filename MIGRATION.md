@@ -51,6 +51,6 @@ The `ignore` and `ignoreFile` options will still allow globbing patterns.
 
 ### Injecting `SENTRY_RELEASES` Map
 
-Previously, the webpack plugin always injected a `SENTRY_RELEASES` map into the global object which would map from `project@org` to the `release` value. In version 2, we made this behaviour opt-in by setting the `injectReleasesMap` option in the plugin options to `true`.
+Previously, the webpack plugin always injected a `SENTRY_RELEASES` variable into the global object which would map from `project@org` to the `release` value. In version 2, we made this behaviour opt-in by setting the `injectReleasesMap` option in the plugin options to `true`.
 
-The purpose was to support module-federated projects or micro frontend setups where multiple projects would want to access the global release variable. However, Sentry SDKs by default never accessed this variable so it would require manual user-intervention to only make use of it. Making this behaviour opt-in decreases the bundle size impact of our plugin for the majority of users.
+The purpose of this option is to support module-federated projects or micro frontend setups where multiple projects would want to access the global release variable. However, Sentry SDKs by default never accessed this variable so it would require manual user-intervention to make use of it. Making this behaviour opt-in decreases the bundle size impact of our plugin for the majority of users.
