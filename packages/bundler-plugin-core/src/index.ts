@@ -187,6 +187,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       if (id === RELEASE_INJECTOR_ID) {
         return generateGlobalInjectorCode({
           release: internalOptions.release,
+          injectReleasesMap: internalOptions.injectReleasesMap,
           org: internalOptions.org,
           project: internalOptions.project,
         });
@@ -326,10 +327,12 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
  */
 function generateGlobalInjectorCode({
   release,
+  injectReleasesMap,
   org,
   project,
 }: {
   release: string;
+  injectReleasesMap: boolean;
   org?: string;
   project?: string;
 }) {
@@ -347,7 +350,7 @@ function generateGlobalInjectorCode({
 
     _global.SENTRY_RELEASE={id:"${release}"};`;
 
-  if (project) {
+  if (injectReleasesMap && project) {
     const key = org ? `${project}@${org}` : project;
     code += `
       _global.SENTRY_RELEASES=_global.SENTRY_RELEASES || {};
