@@ -88,14 +88,6 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    */
   include: string | IncludeEntry | Array<string | IncludeEntry>;
 
-  /**
-   * When `true`, attempts source map validation before upload if rewriting is not enabled.
-   * It will spot a variety of issues with source maps and cancel the upload if any are found.
-   *
-   * Defaults to `false` as this can cause false positives.
-   */
-  validate?: boolean;
-
   /* --- other unimportant (for now) stuff- properties: */
 
   /**
@@ -261,6 +253,14 @@ export type IncludeEntry = {
    * Defaults to true
    */
   rewrite?: boolean;
+
+  /**
+   * When `true`, attempts source map validation before upload if rewriting is not enabled.
+   * It will spot a variety of issues with source maps and cancel the upload if any are found.
+   *
+   * Defaults to `false` as this can cause false positives.
+   */
+  validate?: boolean;
 };
 
 type SetCommitsOptions = {

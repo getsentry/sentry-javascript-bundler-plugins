@@ -25,6 +25,7 @@ describe("normalizeUserOptions()", () => {
           rewrite: true,
           sourceMapReference: true,
           stripCommonPrefix: false,
+          validate: false,
         },
       ],
       org: "my-org",
@@ -33,7 +34,6 @@ describe("normalizeUserOptions()", () => {
       silent: false,
       telemetry: true,
       url: "https://sentry.io/",
-      validate: false,
       vcsRemote: "origin",
     });
   });
@@ -68,6 +68,7 @@ describe("normalizeUserOptions()", () => {
           rewrite: true,
           sourceMapReference: false,
           stripCommonPrefix: true,
+          validate: false,
         },
       ],
       org: "my-org",
@@ -76,7 +77,6 @@ describe("normalizeUserOptions()", () => {
       silent: false,
       telemetry: true,
       url: "https://sentry.io/",
-      validate: false,
       vcsRemote: "origin",
     });
   });
