@@ -15,6 +15,7 @@ type RequiredInternalOptions = Required<
     | "silent"
     | "cleanArtifacts"
     | "telemetry"
+    | "injectReleasesMap"
   >
 >;
 
@@ -100,6 +101,7 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     entries,
     include,
     configFile: userOptions.configFile,
+    injectReleasesMap: userOptions.injectReleasesMap ?? false,
   };
 }
 

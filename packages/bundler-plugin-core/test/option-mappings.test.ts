@@ -35,6 +35,7 @@ describe("normalizeUserOptions()", () => {
       telemetry: true,
       url: "https://sentry.io/",
       vcsRemote: "origin",
+      injectReleasesMap: false,
     });
   });
 
@@ -78,6 +79,7 @@ describe("normalizeUserOptions()", () => {
       telemetry: true,
       url: "https://sentry.io/",
       vcsRemote: "origin",
+      injectReleasesMap: false,
     });
   });
 });

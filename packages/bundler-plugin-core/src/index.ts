@@ -185,7 +185,12 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       });
 
       if (id === RELEASE_INJECTOR_ID) {
-        return generateGlobalInjectorCode({ release: internalOptions.release });
+        return generateGlobalInjectorCode({
+          release: internalOptions.release,
+          injectReleasesMap: internalOptions.injectReleasesMap,
+          org: internalOptions.org,
+          project: internalOptions.project,
+        });
       } else {
         return undefined;
       }
@@ -320,10 +325,20 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
  * Generates code for the "sentry-release-injector" which is responsible for setting the global `SENTRY_RELEASE`
  * variable.
  */
-function generateGlobalInjectorCode({ release }: { release: string }) {
+function generateGlobalInjectorCode({
+  release,
+  injectReleasesMap,
+  org,
+  project,
+}: {
+  release: string;
+  injectReleasesMap: boolean;
+  org?: string;
+  project?: string;
+}) {
   // The code below is mostly ternary operators because it saves bundle size.
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
-  return `
+  let code = `
     var _global =
       typeof window !== 'undefined' ?
         window :
@@ -334,6 +349,16 @@ function generateGlobalInjectorCode({ release }: { release: string }) {
             {};
 
     _global.SENTRY_RELEASE={id:"${release}"};`;
+
+  if (injectReleasesMap && project) {
+    const key = org ? `${project}@${org}` : project;
+    code += `
+      _global.SENTRY_RELEASES=_global.SENTRY_RELEASES || {};
+      _global.SENTRY_RELEASES["${key}"]={id:"${release}"};
+      `;
+  }
+
+  return code;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
