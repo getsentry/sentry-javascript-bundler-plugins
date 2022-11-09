@@ -1,7 +1,8 @@
 import { SeverityLevel, Hub } from "@sentry/node";
 
 interface LoggerOptions {
-  silent?: boolean;
+  silent: boolean;
+  debug: boolean;
   hub: Hub;
   prefix: string;
 }
@@ -24,7 +25,7 @@ export function createLogger(options: LoggerOptions): Logger {
 
   return {
     info(message: string, ...params: unknown[]) {
-      if (!options?.silent) {
+      if (!options.silent) {
         // eslint-disable-next-line no-console
         console.log(`${options.prefix} Info: ${message}`, ...params);
       }
@@ -32,7 +33,7 @@ export function createLogger(options: LoggerOptions): Logger {
       addBreadcrumb("info", message);
     },
     warn(message: string, ...params: unknown[]) {
-      if (!options?.silent) {
+      if (!options.silent) {
         // eslint-disable-next-line no-console
         console.log(`${options.prefix} Warning: ${message}`, ...params);
       }
@@ -40,7 +41,7 @@ export function createLogger(options: LoggerOptions): Logger {
       addBreadcrumb("warning", message);
     },
     error(message: string, ...params: unknown[]) {
-      if (!options?.silent) {
+      if (!options.silent) {
         // eslint-disable-next-line no-console
         console.log(`${options.prefix} Error: ${message}`, ...params);
       }
@@ -49,7 +50,7 @@ export function createLogger(options: LoggerOptions): Logger {
     },
 
     debug(message: string, ...params: unknown[]) {
-      if (!options?.silent) {
+      if (!options.silent && options.debug) {
         // eslint-disable-next-line no-console
         console.log(`${options.prefix} Debug: ${message}`, ...params);
       }
