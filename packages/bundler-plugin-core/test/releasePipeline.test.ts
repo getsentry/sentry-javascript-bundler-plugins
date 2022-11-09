@@ -1,5 +1,5 @@
 import { InternalOptions } from "../src/options-mapping";
-import { setCommits } from "../src/sentry/releasePipeline";
+import { addDeploy, setCommits } from "../src/sentry/releasePipeline";
 import { BuildContext } from "../src/types";
 
 const mockedAddSpanToTxn = jest.fn();
@@ -29,6 +29,7 @@ describe("Release Pipeline", () => {
   const mockedCLI = {
     releases: {
       setCommits: jest.fn(),
+      newDeploy: jest.fn(),
     },
   };
 
@@ -38,7 +39,7 @@ describe("Release Pipeline", () => {
   const ctx = { cli: mockedCLI, logger: mockedLogger };
 
   describe("setCommits", () => {
-    it("doesn't do anything if setCommits option is not specified", async () => {
+    it("doesn't do anything if `setCommits` option is not specified", async () => {
       await setCommits({} as InternalOptions, ctx as unknown as BuildContext);
 
       expect(mockedCLI.releases.setCommits).not.toHaveBeenCalled();
@@ -64,6 +65,46 @@ describe("Release Pipeline", () => {
       );
 
       expect(mockedCLI.releases.setCommits).toHaveBeenCalledWith("1.0.0", { auto: true });
+      expect(mockedAddSpanToTxn).toHaveBeenCalled();
+      expect(mockedChildSpan.finish).toHaveBeenCalled();
+    });
+  });
+
+  describe("addDeploy", () => {
+    it("doesn't do anything if `deploy` option is not specified", async () => {
+      await addDeploy({} as InternalOptions, ctx as unknown as BuildContext);
+
+      expect(mockedCLI.releases.newDeploy).not.toHaveBeenCalled();
+      expect(mockedAddSpanToTxn).toHaveBeenCalled();
+      expect(mockedChildSpan.finish).toHaveBeenCalled();
+    });
+
+    it("logs an error and does nothing if `env` isn't specified", async () => {
+      await addDeploy({ deploy: {} } as InternalOptions, ctx as unknown as BuildContext);
+      expect(mockedCLI.releases.newDeploy).not.toHaveBeenCalled();
+      expect(mockedLogger.error).toHaveBeenLastCalledWith(
+        expect.stringMatching(/Couldn't add deploy.*env/),
+        expect.stringMatching(/env/)
+      );
+      expect(mockedAddSpanToTxn).toHaveBeenCalled();
+      expect(mockedChildSpan.finish).toHaveBeenCalled();
+    });
+
+    it("makes a call to Sentry CLI if the correct options are specified", async () => {
+      const deployOptions = {
+        env: "production",
+        started: 0,
+        finished: 10,
+        name: "myDeployment",
+        url: "https://my-deploy-server.com",
+      };
+
+      await addDeploy(
+        { deploy: deployOptions, release: "1.0.0" } as InternalOptions,
+        ctx as unknown as BuildContext
+      );
+
+      expect(mockedCLI.releases.newDeploy).toHaveBeenCalledWith("1.0.0", deployOptions);
       expect(mockedAddSpanToTxn).toHaveBeenCalled();
       expect(mockedChildSpan.finish).toHaveBeenCalled();
     });

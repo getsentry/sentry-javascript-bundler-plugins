@@ -326,12 +326,12 @@ type DeployOptions = {
   /**
    * Deployment start time in Unix timestamp (in seconds) or ISO 8601 format.
    */
-  started?: number;
+  started?: number | string;
 
   /**
    * Deployment finish time in Unix timestamp (in seconds) or ISO 8601 format.
    */
-  finished?: number;
+  finished?: number | string;
 
   /**
    * Deployment duration (in seconds). Can be used instead of started and finished.

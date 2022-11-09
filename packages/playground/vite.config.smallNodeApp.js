@@ -31,6 +31,10 @@ export default defineConfig({
         auto: true,
         ignoreMissing: true,
       },
+      deploy: {
+        env: "myEnv",
+        time: 10,
+      },
     }),
   ],
 });

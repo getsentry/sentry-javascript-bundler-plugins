@@ -127,12 +127,29 @@ export async function setCommits(options: InternalOptions, ctx: BuildContext): P
   span?.finish();
 }
 
-export async function addDeploy(
-  /* version: string, */
-  ctx: BuildContext
-): Promise<string> {
-  const span = addSpanToTransaction(ctx, "function.plugin.add_deploy");
+export async function addDeploy(options: InternalOptions, ctx: BuildContext): Promise<void> {
+  const span = addSpanToTransaction(ctx, "function.plugin.deploy");
+
+  if (options.deploy) {
+    const { env, started, finished, time, name, url } = options.deploy;
+
+    if (env) {
+      await ctx.cli.releases.newDeploy(options.release, {
+        env,
+        started,
+        finished,
+        time,
+        name,
+        url,
+      });
+      ctx.logger.info("Successfully added deploy.");
+    } else {
+      ctx.logger.error(
+        "Couldn't add deploy - the `env` option was not specified!",
+        "Make sure to set `deploy.env` (e.g. to 'production')."
+      );
+    }
+  }
 
   span?.finish();
-  return Promise.resolve("Noop");
 }
