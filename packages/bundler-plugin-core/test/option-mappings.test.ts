@@ -33,8 +33,6 @@ describe("normalizeUserOptions()", () => {
       release: "my-release",
       silent: false,
       telemetry: true,
-      url: "https://sentry.io/",
-      vcsRemote: "origin",
       injectReleasesMap: false,
     });
   });
@@ -77,8 +75,6 @@ describe("normalizeUserOptions()", () => {
       release: "my-release",
       silent: false,
       telemetry: true,
-      url: "https://sentry.io/",
-      vcsRemote: "origin",
       injectReleasesMap: false,
     });
   });

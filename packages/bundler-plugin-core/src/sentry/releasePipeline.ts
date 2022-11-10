@@ -20,9 +20,6 @@ export async function createNewRelease(options: InternalOptions, ctx: BuildConte
   } else if (options.org === undefined) {
     ctx.logger.warn('Missing "org" option. Will not create release.');
     return;
-  } else if (options.url === undefined) {
-    ctx.logger.warn('Missing "url" option. Will not create release.');
-    return;
   } else if (options.project === undefined) {
     ctx.logger.warn('Missing "project" option. Will not create release.');
     return;
@@ -44,9 +41,6 @@ export async function uploadSourceMaps(options: InternalOptions, ctx: BuildConte
     return Promise.resolve();
   } else if (options.org === undefined) {
     ctx.logger.warn('Missing "org" option. Will not create release.');
-    return Promise.resolve();
-  } else if (options.url === undefined) {
-    ctx.logger.warn('Missing "url" option. Will not create release.');
     return Promise.resolve();
   } else if (options.project === undefined) {
     ctx.logger.warn('Missing "project" option. Will not create release.');
@@ -85,9 +79,6 @@ export async function cleanArtifacts(options: InternalOptions, ctx: BuildContext
       return;
     } else if (options.org === undefined) {
       ctx.logger.warn('Missing "org" option. Will not clean existing artifacts.');
-      return;
-    } else if (options.url === undefined) {
-      ctx.logger.warn('Missing "url" option. Will not clean existing artifacts.');
       return;
     } else if (options.project === undefined) {
       ctx.logger.warn('Missing "project" option. Will not clean existing artifacts.');
