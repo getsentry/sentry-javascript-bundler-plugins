@@ -113,6 +113,20 @@ function normalizeEntries(
   }
 }
 
+/**
+ * Converts the user-facing `include` option to the internal `include` option,
+ * resulting in an array of `InternalIncludeEntry` objects. This later on lets us
+ * work with only one type of include data structure instead of multiple.
+ *
+ * During the process, we hoist top-level include options (e.g. urlPrefix) into each
+ * object if they were not alrady specified in an `IncludeEntry`, making every object
+ * fully self-contained. This is also the reason why we pass the entire options
+ * object and not just `include`.
+ *
+ * @param userOptions the entire user-facing `options` object
+ *
+ * @return an array of `InternalIncludeEntry` objects.
+ */
 function normalizeInclude(userOptions: UserOptions): InternalIncludeEntry[] {
   const rawUserInclude = userOptions.include;
 
