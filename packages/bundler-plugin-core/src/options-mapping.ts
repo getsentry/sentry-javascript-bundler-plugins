@@ -207,6 +207,13 @@ export function validateOptions(options: InternalOptions, logger: Logger): boole
       );
       return false;
     }
+    if (setCommits.auto && setCommits.repo && setCommits) {
+      logger.warn(
+        "The `setCommits` options includes `auto` but also `repo` and `commit`.",
+        "Ignoring `repo` and `commit`.",
+        "Please only set either `auto` or both, `repo` and `commit`."
+      );
+    }
   }
 
   if (options.deploy && !options.deploy.env) {

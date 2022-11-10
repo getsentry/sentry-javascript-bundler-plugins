@@ -47,7 +47,7 @@ describe("Release Pipeline", () => {
       expect(mockedChildSpan.finish).toHaveBeenCalled();
     });
 
-    it("logs an error if neither `auto` nor `repo` && `commit` options are specified", async () => {
+    it.skip("logs an error if neither `auto` nor `repo` && `commit` options are specified", async () => {
       await setCommits({ setCommits: {} } as InternalOptions, ctx as unknown as BuildContext);
       expect(mockedCLI.releases.setCommits).not.toHaveBeenCalled();
       expect(mockedLogger.error).toHaveBeenLastCalledWith(
@@ -79,7 +79,7 @@ describe("Release Pipeline", () => {
       expect(mockedChildSpan.finish).toHaveBeenCalled();
     });
 
-    it("logs an error and does nothing if `env` isn't specified", async () => {
+    it.skip("logs an error and does nothing if `env` isn't specified", async () => {
       await addDeploy({ deploy: {} } as InternalOptions, ctx as unknown as BuildContext);
       expect(mockedCLI.releases.newDeploy).not.toHaveBeenCalled();
       expect(mockedLogger.error).toHaveBeenLastCalledWith(
