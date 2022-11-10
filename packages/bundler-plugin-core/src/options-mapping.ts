@@ -1,4 +1,5 @@
 import { IncludeEntry as UserIncludeEntry, Options as UserOptions } from "./types";
+import { arrayify } from "./utils";
 
 type RequiredInternalOptions = Required<
   Pick<
@@ -106,10 +107,10 @@ function normalizeEntries(
 ): (string | RegExp)[] | ((filePath: string) => boolean) | undefined {
   if (userEntries === undefined) {
     return undefined;
-  } else if (typeof userEntries === "function" || Array.isArray(userEntries)) {
+  } else if (typeof userEntries === "function") {
     return userEntries;
   } else {
-    return [userEntries];
+    return arrayify(userEntries);
   }
 }
 
@@ -128,26 +129,11 @@ function normalizeEntries(
  * @return an array of `InternalIncludeEntry` objects.
  */
 function normalizeInclude(userOptions: UserOptions): InternalIncludeEntry[] {
-  const rawUserInclude = userOptions.include;
-
-  let userInclude: UserIncludeEntry[];
-  if (typeof rawUserInclude === "string") {
-    userInclude = [convertIncludePathToIncludeEntry(rawUserInclude)];
-  } else if (Array.isArray(rawUserInclude)) {
-    userInclude = rawUserInclude.map((potentialIncludeEntry) => {
-      if (typeof potentialIncludeEntry === "string") {
-        return convertIncludePathToIncludeEntry(potentialIncludeEntry);
-      } else {
-        return potentialIncludeEntry;
-      }
-    });
-  } else {
-    userInclude = [rawUserInclude];
-  }
-
-  return userInclude.map((userIncludeEntry) =>
-    normalizeIncludeEntry(userOptions, userIncludeEntry)
-  );
+  return arrayify(userOptions.include)
+    .map((includeItem) =>
+      typeof includeItem === "string" ? convertIncludePathToIncludeEntry(includeItem) : includeItem
+    )
+    .map((userIncludeEntry) => normalizeIncludeEntry(userOptions, userIncludeEntry));
 }
 
 function convertIncludePathToIncludeEntry(includePath: string): UserIncludeEntry {

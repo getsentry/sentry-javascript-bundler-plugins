@@ -36,7 +36,7 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * The base URL of your Sentry instance. Use this if you are using a self-hosted
    * or Sentry instance other than sentry.io.
    *
-   * This value can also be set via the `SENTRY_URL` env variable.s
+   * This value can also be set via the `SENTRY_URL` env variable.
    *
    * Defaults to https://sentry.io/, which is the correct value for SAAS customers.
    */
