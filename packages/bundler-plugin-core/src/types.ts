@@ -12,29 +12,31 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   /**
    * The slug of the Sentry organization associated with the app.
    *
-   * This is a required field.
+   * This value can also be set via the `SENTRY_ORG` env variable.
    */
-  org: string;
+  org?: string;
 
   /**
    * The slug of the Sentry project associated with the app.
    *
-   * This is a required field.
+   * This value can also be set via the `SENTRY_PROJECT` env variable.
    */
-  project: string;
+  project?: string;
 
   /**
    * The authentication token to use for all communication with Sentry.
    * Can be obtained from https://sentry.io/settings/account/api/auth-tokens/.
    * Required scopes: project:releases (and org:read if setCommits option is used).
    *
-   * This is a required field.
+   * This value can also be set via the `SENTRY_AUTH_TOKEN` env variable
    */
-  authToken: string;
+  authToken?: string;
 
   /**
    * The base URL of your Sentry instance. Use this if you are using a self-hosted
    * or Sentry instance other than sentry.io.
+   *
+   * This value can also be set via the `SENTRY_URL` env variable.
    *
    * Defaults to https://sentry.io/, which is the correct value for SAAS customers.
    */
@@ -44,6 +46,8 @@ export type Options = Omit<IncludeEntry, "paths"> & {
 
   /**
    * Unique identifier for the release.
+   *
+   * This value can also be set via the `SENTRY_RELEASE` env variable.
    *
    * Defaults to the output of the sentry-cli releases propose-version command,
    * which automatically detects values for Cordova, Heroku, AWS CodeBuild, CircleCI,
@@ -93,6 +97,8 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   /**
    * Version control system remote name.
    *
+   * This value can also be set via the `SENTRY_VSC_REMOTE` env variable.
+   *
    * Defaults to 'origin'.
    */
   vcsRemote?: string;
@@ -100,6 +106,8 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   /**
    * A header added to every outgoing network request.
    * The format should be `header-key: header-value`.
+   *
+   * This value can also be set via the `CUSTOM_HEADER` env variable.
    */
   customHeader?: string;
 

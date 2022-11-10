@@ -1,15 +1,11 @@
 import { IncludeEntry as UserIncludeEntry, Options as UserOptions } from "./types";
+import { arrayify } from "./utils";
 
 type RequiredInternalOptions = Required<
   Pick<
     UserOptions,
-    | "org"
-    | "project"
-    | "authToken"
-    | "url"
     | "release"
     | "finalize"
-    | "vcsRemote"
     | "dryRun"
     | "debug"
     | "silent"
@@ -22,7 +18,17 @@ type RequiredInternalOptions = Required<
 type OptionalInternalOptions = Partial<
   Pick<
     UserOptions,
-    "dist" | "errorHandler" | "setCommits" | "deploy" | "configFile" | "customHeader"
+    | "org"
+    | "project"
+    | "authToken"
+    | "url"
+    | "vcsRemote"
+    | "dist"
+    | "errorHandler"
+    | "setCommits"
+    | "deploy"
+    | "configFile"
+    | "customHeader"
   >
 >;
 
@@ -52,57 +58,86 @@ export type InternalIncludeEntry = RequiredInternalIncludeEntry &
   };
 
 export function normalizeUserOptions(userOptions: UserOptions): InternalOptions {
-  let entries: (string | RegExp)[] | ((filePath: string) => boolean) | undefined;
-  if (userOptions.entries === undefined) {
-    entries = undefined;
-  } else if (typeof userOptions.entries === "function" || Array.isArray(userOptions.entries)) {
-    entries = userOptions.entries;
-  } else {
-    entries = [userOptions.entries];
-  }
-
-  let userInclude: UserIncludeEntry[];
-  if (typeof userOptions.include === "string") {
-    userInclude = [convertIncludePathToIncludeEntry(userOptions.include)];
-  } else if (Array.isArray(userOptions.include)) {
-    userInclude = userOptions.include.map((potentialIncludeEntry) => {
-      if (typeof potentialIncludeEntry === "string") {
-        return convertIncludePathToIncludeEntry(potentialIncludeEntry);
-      } else {
-        return potentialIncludeEntry;
-      }
-    });
-  } else {
-    userInclude = [userOptions.include];
-  }
-
-  const include = userInclude.map((userIncludeEntry) =>
-    normalizeIncludeEntry(userOptions, userIncludeEntry)
-  );
-
   return {
-    org: userOptions.org,
-    project: userOptions.project,
-    authToken: userOptions.authToken,
-    url: userOptions.url ?? "https://sentry.io/",
-    release: userOptions.release ?? "",
+    // include is the only strictly required option
+    // (normalizeInclude needs all userOptions to access top-level include options)
+    include: normalizeInclude(userOptions),
+
+    // These options must be set b/c we need them for release injection.
+    // They can also be set as environment variables. Technically, they
+    // could be set in the config file but this would be too late for
+    // release injection because we only pass the config file path
+    // to the CLI
+    org: userOptions.org ?? process.env["SENTRY_ORG"],
+    project: userOptions.project ?? process.env["SENTRY_PROJECT"],
+    // Falling back to the empty string here b/c at a later point, we use
+    // Sentry CLI to determine a release if none was specified via options
+    // or env vars. In case we don't find one, we'll bail at that point.
+    release: userOptions.release ?? process.env["SENTRY_RELEASE"] ?? "",
+
+    // Options with default values
     finalize: userOptions.finalize ?? true,
-    vcsRemote: userOptions.vcsRemote ?? "origin",
-    customHeader: userOptions.customHeader,
+    cleanArtifacts: userOptions.cleanArtifacts ?? false,
     dryRun: userOptions.dryRun ?? false,
     debug: userOptions.debug ?? false,
     silent: userOptions.silent ?? false,
-    cleanArtifacts: userOptions.cleanArtifacts ?? false,
     telemetry: userOptions.telemetry ?? true,
-    dist: userOptions.dist,
-    errorHandler: userOptions.errorHandler,
+    injectReleasesMap: userOptions.injectReleasesMap ?? false,
+
+    // These options and can also be set via env variables or the config file.
+    // If they're set in the options, we simply pass them to the CLI constructor.
+    // Sentry CLI will internally query env variables and read its config file if
+    // the passed options are undefined.
+    authToken: userOptions.authToken, // env var: `SENTRY_AUTH_TOKEN`
+    customHeader: userOptions.customHeader, // env var: `CUSTOM_HEADER`
+    url: userOptions.url, // env var: `SENTRY_URL`
+    vcsRemote: userOptions.vcsRemote, // env var: `SENTRY_VSC_REMOTE`
+
+    // Optional options
     setCommits: userOptions.setCommits,
     deploy: userOptions.deploy,
-    entries,
-    include,
+    entries: normalizeEntries(userOptions.entries),
+    dist: userOptions.dist,
+    errorHandler: userOptions.errorHandler,
     configFile: userOptions.configFile,
-    injectReleasesMap: userOptions.injectReleasesMap ?? false,
   };
+}
+
+/**
+ * Converts the user-facing `entries` option to the internal `entries` option
+ */
+function normalizeEntries(
+  userEntries: UserOptions["entries"]
+): (string | RegExp)[] | ((filePath: string) => boolean) | undefined {
+  if (userEntries === undefined) {
+    return undefined;
+  } else if (typeof userEntries === "function") {
+    return userEntries;
+  } else {
+    return arrayify(userEntries);
+  }
+}
+
+/**
+ * Converts the user-facing `include` option to the internal `include` option,
+ * resulting in an array of `InternalIncludeEntry` objects. This later on lets us
+ * work with only one type of include data structure instead of multiple.
+ *
+ * During the process, we hoist top-level include options (e.g. urlPrefix) into each
+ * object if they were not alrady specified in an `IncludeEntry`, making every object
+ * fully self-contained. This is also the reason why we pass the entire options
+ * object and not just `include`.
+ *
+ * @param userOptions the entire user-facing `options` object
+ *
+ * @return an array of `InternalIncludeEntry` objects.
+ */
+function normalizeInclude(userOptions: UserOptions): InternalIncludeEntry[] {
+  return arrayify(userOptions.include)
+    .map((includeItem) =>
+      typeof includeItem === "string" ? convertIncludePathToIncludeEntry(includeItem) : includeItem
+    )
+    .map((userIncludeEntry) => normalizeIncludeEntry(userOptions, userIncludeEntry));
 }
 
 function convertIncludePathToIncludeEntry(includePath: string): UserIncludeEntry {
