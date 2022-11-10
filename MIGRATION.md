@@ -2,52 +2,26 @@
 
 This document serves as a migration guide, documenting all breaking changes between major versions of the Sentry bundler plugins.
 
-## [Unreleased] Upgrading from 1.x to 2.x
+## [Unreleased] Upgrading from 1.x to 2.x (Webpack Plugin Only)
 
-Version 2 of `@sentry/webpack-plugin` is a complete rewrite of version 1.
-Version 2 no longer requires `sentry-cli` underneath, meaning the plugin no longer downloads a binary but implements all its functionality natively.
-
-### Removal of Implicit Environment Variable Usage
-
-Version 2 of the Webpack plugin removes the implicit passing of plugin parameters via environment variables.
-Previously, it was possible to specify values as environment variables, such as SENTRY_AUTH_TOKEN, but to never mention them in the plugin init options.
-In this version, you'll have to specify these values in the options.
-Note that this makes certain option fields explicitly required now which were previously only implicitly required (see [Initialization and Required Values](#initialization-and-required-values)).
+Version 2 of `@sentry/webpack-plugin` is a complete rewrite of version 1, relying on bundler-agnostic code (based on [unjs/unplugin](https://github.com/unjs/unplugin)). While we tried to keep changes to v1 of the webpack plugin minimal, a adjustments are nevertheless necessary:
 
 ### Initialization and Required Values
 
 Previously, to use the plugin, you had to create a new class of the `SentryCLIPlugin` class.
-In version 2, you simply need to call a function and pass the initialization options to it.
-Note that in this new version, more options are now explicitly required. Here's an example:
+In version 2, you simply need to call a function and pass the initialization options to it:
 
 ```js
-// old config + environment variables were set for authToken, org and project
+// old initialization:
 new SentryCliPlugin({
   include: "./dist",
 });
 
-// new config (you can still use env variables but you need to set them explicitly):
+// new initialization:
 sentryWebpackPlugin({
   include: "./dist",
-  authToken: process.env.SENTRY_AUTH_TOKEN,
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
 });
 ```
-
-### Removal of `configFile` option
-
-Previously, you could set the `configFile` option when initializing the plugin to point `sentry-cli` to its `.sentryclirc` config.
-Because `sentry-cli` is no longer part of the plugin, this is option was removed.
-If you previously used this option, make sure to specify all required options when intializing the plugin (see [Initialization and Required Values](#initialization-and-required-values)).
-
-### Removal of globbing
-
-Previously it was possible to glob for files to include in the sourcemap upload (e.g. `include: "./my-build-dir/**"`).
-In version 2 we removed this functionality because it lead to intransparent naming of release artifacts.
-
-Going forward, if you need similar functionality, we recommend providing folder paths in the `include` and `include.paths` options and narrowing down the matched files with the `ignore`, `ignoreFile` or `ext` options.
-The `ignore` and `ignoreFile` options will still allow globbing patterns.
 
 ### Injecting `SENTRY_RELEASES` Map
 
