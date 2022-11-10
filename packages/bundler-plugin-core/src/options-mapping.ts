@@ -57,17 +57,16 @@ export type InternalIncludeEntry = RequiredInternalIncludeEntry &
   };
 
 export function normalizeUserOptions(userOptions: UserOptions): InternalOptions {
-  const entries = normalizeEntries(userOptions.entries);
-  const include = normalizeInclude(userOptions);
-
   return {
-    // Strictly required options
-    include,
+    // include is the only strictly required option
+    // (normalizeInclude needs all userOptions to access top-level include options)
+    include: normalizeInclude(userOptions),
 
-    // These options must be set b/c we need them for release injection
+    // These options must be set b/c we need them for release injection.
     // They can also be set as environment variables. Technically, they
     // could be set in the config file but this would be too late for
-    // release injection
+    // release injection because we only pass the config file path
+    // to the CLI
     org: userOptions.org ?? process.env["SENTRY_ORG"],
     project: userOptions.project ?? process.env["SENTRY_PROJECT"],
     release: userOptions.release ?? process.env["SENTRY_RELEASE"] ?? "",
@@ -92,7 +91,7 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     // Optional options
     setCommits: userOptions.setCommits,
     deploy: userOptions.deploy,
-    entries,
+    entries: normalizeEntries(userOptions.entries),
     dist: userOptions.dist,
     errorHandler: userOptions.errorHandler,
     configFile: userOptions.configFile,
