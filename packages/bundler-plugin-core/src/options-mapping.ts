@@ -70,15 +70,10 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     // to the CLI
     org: userOptions.org ?? process.env["SENTRY_ORG"],
     project: userOptions.project ?? process.env["SENTRY_PROJECT"],
+    // Falling back to the empty string here b/c at a later point, we use
+    // Sentry CLI to determine a release if none was specified via options
+    // or env vars. In case we don't find one, we'll bail at that point.
     release: userOptions.release ?? process.env["SENTRY_RELEASE"] ?? "",
-
-    // These options and can also be set via env variables or config file
-    // but are only passed to Sentry CLI. They could remain undefined
-    // because the config file is only read by the CLI
-    authToken: userOptions.authToken ?? process.env["SENTRY_AUTH_TOKEN"],
-    customHeader: userOptions.customHeader ?? process.env["CUSTOM_HEADER"],
-    url: userOptions.url ?? process.env["SENTRY_URL"] ?? "https://sentry.io/",
-    vcsRemote: userOptions.vcsRemote ?? process.env["SENTRY_VCS_REMOTE"] ?? "origin",
 
     // Options with default values
     finalize: userOptions.finalize ?? true,
@@ -88,6 +83,15 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     silent: userOptions.silent ?? false,
     telemetry: userOptions.telemetry ?? true,
     injectReleasesMap: userOptions.injectReleasesMap ?? false,
+
+    // These options and can also be set via env variables or the config file.
+    // If they're set in the options, we simply pass them to the CLI constructor.
+    // Sentry CLI will internally query env variables and read its config file if
+    // the passed options are undefined.
+    authToken: userOptions.authToken, // env var: `SENTRY_AUTH_TOKEN`
+    customHeader: userOptions.customHeader, // env var: `CUSTOM_HEADER`
+    url: userOptions.url, // env var: `SENTRY_URL`
+    vcsRemote: userOptions.vcsRemote, // env var: `SENTRY_VSC_REMOTE`
 
     // Optional options
     setCommits: userOptions.setCommits,
