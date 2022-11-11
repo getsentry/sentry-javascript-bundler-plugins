@@ -7,6 +7,7 @@ import {
   NodeClient,
 } from "@sentry/node";
 import { Span } from "@sentry/tracing";
+import { InternalOptions } from "../options-mapping";
 import { BuildContext } from "../types";
 
 export function makeSentryClient(
@@ -75,4 +76,33 @@ export function captureMinimalError(error: unknown | Error, hub: Hub) {
   }
 
   hub.captureException(sentryError);
+}
+
+export function addPluginOptionTags(options: InternalOptions, hub: Hub) {
+  const {
+    cleanArtifacts,
+    finalize,
+    setCommits,
+    injectReleasesMap,
+    dryRun,
+    errorHandler,
+    deploy,
+    include,
+  } = options;
+
+  hub.setTags({
+    include: include.length > 1 ? "multiple-entries" : "single-entry",
+    "clean-artifacts": cleanArtifacts,
+    "finalize-release": finalize,
+    "deploy-release": deploy ? true : false,
+    "inject-releases-map": injectReleasesMap,
+    "dry-run": dryRun,
+    "error-handler": errorHandler ? "custom" : "none",
+  });
+
+  if (setCommits) {
+    hub.setTag("set-commits", setCommits.auto ? "auto" : "manual");
+  } else {
+    hub.setTag("set-commits", false);
+  }
 }
