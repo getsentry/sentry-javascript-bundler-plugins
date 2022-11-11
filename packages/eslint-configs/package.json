@@ -20,5 +20,8 @@
   "scripts": {
     "clean:all": "run-s clean:deps",
     "clean:deps": "rimraf node_modules"
+  },
+  "volta": {
+    "extends": "../../package.json"
   }
 }
