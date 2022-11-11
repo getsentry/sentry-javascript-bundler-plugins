@@ -38,5 +38,8 @@
     "vite": "3.0.0",
     "webpack": "5.74.0",
     "webpack4": "npm:webpack@4.46.0"
+  },
+  "volta": {
+    "extends": "../../package.json"
   }
 }
