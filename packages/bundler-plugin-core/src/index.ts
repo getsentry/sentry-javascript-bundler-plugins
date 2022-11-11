@@ -23,7 +23,7 @@ import { Hub } from "@sentry/node";
 const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
 
 /**
- * The sentry-unplugin concerns itself with two things:
+ * The sentry bundler plugin concerns itself with two things:
  * - Release injection
  * - Sourcemaps upload
  *
@@ -71,8 +71,17 @@ const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
  *
  * Source maps upload:
  *
- * The sentry-unplugin will also take care of uploading source maps to Sentry. This is all done in the `writeBundle` hook.
- * TODO: elaborate a bit on how sourcemaps upload works
+ * The sentry bundler plugin will also take care of uploading source maps to Sentry. This is all done in the
+ * `writeBundle` hook. In this hook the sentry-unplugin will execute the release creation pipeline:
+ *
+ * 1. Create a new release
+ * 2. Delete already uploaded artifacts for this release (if `cleanArtifacts` is enabled)
+ * 3. Upload sourcemaps based on `include` and source-map-specific options
+ * 4. Associate a range of commits with the release (if `setCommits` is specified)
+ * 5. Finalize the release (unless `finalize` is disabled)
+ * 6. Add deploy information to the release (if `deploy` is specified)
+ *
+ * This release creation pipeline relies on Sentry CLI to execute the different steps.
  */
 const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
   const internalOptions = normalizeUserOptions(options);
@@ -188,7 +197,6 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
     loadInclude(id) {
       logger.info(`Called "loadInclude": ${JSON.stringify({ id })}`);
-
       return id === RELEASE_INJECTOR_ID;
     },
 
