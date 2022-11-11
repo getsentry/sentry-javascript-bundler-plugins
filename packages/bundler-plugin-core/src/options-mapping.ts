@@ -136,15 +136,9 @@ function normalizeEntries(
 function normalizeInclude(userOptions: UserOptions): InternalIncludeEntry[] {
   return arrayify(userOptions.include)
     .map((includeItem) =>
-      typeof includeItem === "string" ? convertIncludePathToIncludeEntry(includeItem) : includeItem
+      typeof includeItem === "string" ? { paths: [includeItem] } : includeItem
     )
     .map((userIncludeEntry) => normalizeIncludeEntry(userOptions, userIncludeEntry));
-}
-
-function convertIncludePathToIncludeEntry(includePath: string): UserIncludeEntry {
-  return {
-    paths: [includePath],
-  };
 }
 
 /**
