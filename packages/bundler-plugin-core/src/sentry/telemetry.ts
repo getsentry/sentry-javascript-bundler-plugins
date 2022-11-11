@@ -94,14 +94,14 @@ export function addPluginOptionTags(options: InternalOptions, hub: Hub) {
     include: include.length > 1 ? "multiple-entries" : "single-entry",
     "clean-artifacts": cleanArtifacts,
     "finalize-release": finalize,
-    "deploy-release": deploy ? true : false,
+    "add-deploy": deploy ? true : false,
     "inject-releases-map": injectReleasesMap,
     "dry-run": dryRun,
     "error-handler": errorHandler ? "custom" : "none",
   });
 
   if (setCommits) {
-    hub.setTag("set-commits", setCommits.auto ? "auto" : "manual");
+    hub.setTag("set-commits", setCommits.auto === true ? "auto" : "manual");
   } else {
     hub.setTag("set-commits", false);
   }
