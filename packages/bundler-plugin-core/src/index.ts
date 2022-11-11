@@ -115,12 +115,8 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
   }
 
   sentryHub.setTags({
-    organization: internalOptions.org,
-    project: internalOptions.project,
     bundler: unpluginMetaContext.framework,
   });
-
-  sentryHub.setUser({ id: internalOptions.org });
 
   // This is `nonEntrypointSet` instead of `entrypointSet` because this set is filled in the `resolveId` hook and there
   // we don't have guaranteed access to *absolute* paths of files if they're entrypoints. For non-entrypoints we're
