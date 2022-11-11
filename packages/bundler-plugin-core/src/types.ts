@@ -63,13 +63,14 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   dist?: string;
 
   /**
-   * Filter for bundle entry points that should contain the provided release. By default, the release will be injected
-   * into all entry points.
+   * Filter for bundle entry points that should contain the provided release.
    *
    * This option takes a string, a regular expression, or an array containing strings, regular expressions, or both.
    * It's also possible to provide a filter function that takes the absolute path of a processed entrypoint and should
    * return `true` if the release should be injected into the entrypoint and `false` otherwise. String values of this
    * option require a full match with the absolute path of the bundle.
+   *
+   * By default, the release will be injected into all entry points.
    */
   entries?: (string | RegExp)[] | RegExp | string | ((filePath: string) => boolean);
 
@@ -85,14 +86,15 @@ export type Options = Omit<IncludeEntry, "paths"> & {
 
   /**
    * One or more paths that Sentry CLI should scan recursively for sources.
-   * It will upload all .map files and match associated .js files.
+   * It will upload all .map files and match associated .js files. Other file
+   * types can be uploaded by using the `ext` option.
    * Each path can be given as a string or an object with path-specific options
    *
    * This is a required field.
    */
   include: string | IncludeEntry | Array<string | IncludeEntry>;
 
-  /* --- other unimportant (for now) stuff- properties: */
+  /* --- other properties: */
 
   /**
    * Version control system remote name.
@@ -112,7 +114,8 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   customHeader?: string;
 
   /**
-   * Attempts a dry run (useful for dev environments).
+   * Attempts a dry run (useful for dev environments), making release creation
+   * a no-op.
    *
    * Defaults to `false`, but may be automatically set to `true` in development environments
    * by some framework integrations (Next.JS, possibly others).
@@ -158,12 +161,12 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   errorHandler?: (err: Error) => void;
 
   /**
-   * Adds commits to Sentry.
+   * Associates the release with its commits in Sentry.
    */
   setCommits?: SetCommitsOptions;
 
   /**
-   * Creates a new release deployment in Sentry.
+   * Adds deployment information to the release in Sentry.
    */
   deploy?: DeployOptions;
 

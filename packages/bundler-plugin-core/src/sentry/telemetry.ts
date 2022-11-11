@@ -27,8 +27,6 @@ export function makeSentryClient(
 
     stackParser: defaultStackParser,
     transport: makeNodeTransport,
-
-    debug: true,
   });
 
   const hub = new Hub(client);
