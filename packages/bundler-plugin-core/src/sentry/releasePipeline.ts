@@ -6,6 +6,7 @@
 //           - huge download
 //           - unnecessary functionality
 
+import { logger } from "@sentry/utils";
 import { InternalOptions } from "../options-mapping";
 import { BuildContext } from "../types";
 import { addSpanToTransaction } from "./telemetry";
@@ -16,6 +17,20 @@ export async function createNewRelease(options: InternalOptions, ctx: BuildConte
   await ctx.cli.releases.new(options.release);
 
   ctx.logger.info("Successfully created release.");
+  span?.finish();
+}
+
+export async function cleanArtifacts(options: InternalOptions, ctx: BuildContext): Promise<void> {
+  if (!options.cleanArtifacts) {
+    logger.debug("Skipping artifact cleanup.");
+    return;
+  }
+
+  const span = addSpanToTransaction(ctx, "function.plugin.clean_artifacts");
+
+  await ctx.cli.releases.execute(["releases", "files", options.release, "delete", "--all"], true);
+
+  ctx.logger.info("Successfully cleaned previous artifacts.");
   span?.finish();
 }
 
@@ -31,66 +46,60 @@ export async function uploadSourceMaps(options: InternalOptions, ctx: BuildConte
   span?.finish();
 }
 
-export async function finalizeRelease(options: InternalOptions, ctx: BuildContext): Promise<void> {
-  const span = addSpanToTransaction(ctx, "function.plugin.finalize_release");
-
-  if (options.finalize) {
-    await ctx.cli.releases.finalize(options.release);
-    ctx.logger.info("Successfully finalized release.");
-  }
-
-  span?.finish();
-}
-
-export async function cleanArtifacts(options: InternalOptions, ctx: BuildContext): Promise<void> {
-  const span = addSpanToTransaction(ctx, "function.plugin.clean_artifacts");
-
-  if (options.cleanArtifacts) {
-    await ctx.cli.releases.execute(["releases", "files", options.release, "delete", "--all"], true);
-    ctx.logger.info("Successfully cleaned previous artifacts.");
-  }
-
-  span?.finish();
-}
-
 export async function setCommits(options: InternalOptions, ctx: BuildContext): Promise<void> {
+  if (!options.setCommits) {
+    logger.debug("Skipping setting commits to release.");
+    return;
+  }
+
   const span = addSpanToTransaction(ctx, "function.plugin.set_commits");
 
-  if (options.setCommits) {
-    const { auto, repo, commit, previousCommit, ignoreMissing, ignoreEmpty } = options.setCommits;
+  const { auto, repo, commit, previousCommit, ignoreMissing, ignoreEmpty } = options.setCommits;
+  await ctx.cli.releases.setCommits(options.release, {
+    commit,
+    previousCommit,
+    repo,
+    auto,
+    ignoreMissing,
+    ignoreEmpty,
+  });
 
-    await ctx.cli.releases.setCommits(options.release, {
-      commit,
-      previousCommit,
-      repo,
-      auto,
-      ignoreMissing,
-      ignoreEmpty,
-    });
+  ctx.logger.info("Successfully set commits.");
+  span?.finish();
+}
 
-    ctx.logger.info("Successfully set commits.");
+export async function finalizeRelease(options: InternalOptions, ctx: BuildContext): Promise<void> {
+  if (!options.finalize) {
+    logger.debug("Skipping release finalization.");
+    return;
   }
 
+  const span = addSpanToTransaction(ctx, "function.plugin.finalize_release");
+
+  await ctx.cli.releases.finalize(options.release);
+
+  ctx.logger.info("Successfully finalized release.");
   span?.finish();
 }
 
 export async function addDeploy(options: InternalOptions, ctx: BuildContext): Promise<void> {
-  const span = addSpanToTransaction(ctx, "function.plugin.deploy");
-
-  if (options.deploy) {
-    const { env, started, finished, time, name, url } = options.deploy;
-
-    await ctx.cli.releases.newDeploy(options.release, {
-      env,
-      started,
-      finished,
-      time,
-      name,
-      url,
-    });
-
-    ctx.logger.info("Successfully added deploy.");
+  if (!options.deploy) {
+    logger.debug("Skipping adding deploy info to release.");
+    return;
   }
 
+  const span = addSpanToTransaction(ctx, "function.plugin.deploy");
+
+  const { env, started, finished, time, name, url } = options.deploy;
+  await ctx.cli.releases.newDeploy(options.release, {
+    env,
+    started,
+    finished,
+    time,
+    name,
+    url,
+  });
+
+  ctx.logger.info("Successfully added deploy.");
   span?.finish();
 }
