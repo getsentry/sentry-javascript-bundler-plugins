@@ -90,7 +90,13 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     // Sentry CLI will internally query env variables and read its config file if
     // the passed options are undefined.
     authToken: userOptions.authToken, // env var: `SENTRY_AUTH_TOKEN`
-    customHeader: userOptions.customHeader, // env var: `CUSTOM_HEADER`
+
+    // CLI v1 (and the "old" webpack plugin) use `CUSTOM_HEADER`,
+    // but CLI v2 uses `SENTRY_HEADER` (which is also better aligned with other naming)
+    // In the spirit of maximum compatibility, we allow both here.
+    customHeader:
+      userOptions.customHeader ?? process.env["SENTRY_HEADER"] ?? process.env["CUSTOM_HEADER"],
+
     url: userOptions.url, // env var: `SENTRY_URL`
     vcsRemote: userOptions.vcsRemote, // env var: `SENTRY_VSC_REMOTE`
 
