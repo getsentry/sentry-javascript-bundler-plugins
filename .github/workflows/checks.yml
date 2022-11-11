@@ -7,19 +7,13 @@ on:
       - release/**
   pull_request:
 
-env:
-  # We pin the exact version to enforce reproducable builds with node + npm.
-  DEFAULT_NODE_VERSION: "16.15.1"
-
 jobs:
   build:
     name: Build packages
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.DEFAULT_NODE_VERSION }}
+      - uses: volta-cli/action@v3
       - run: yarn --frozen-lockfile
       - run: yarn build
 
@@ -29,9 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.DEFAULT_NODE_VERSION }}
+      - uses: volta-cli/action@v3
       - run: yarn --frozen-lockfile
       - run: yarn check:types
 
@@ -40,9 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.DEFAULT_NODE_VERSION }}
+      - uses: volta-cli/action@v3
       - run: yarn --frozen-lockfile
       - run: yarn check:formatting
 
@@ -52,9 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.DEFAULT_NODE_VERSION }}
+      - uses: volta-cli/action@v3
       - run: yarn --frozen-lockfile
       - run: yarn test:unit
 
@@ -64,9 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.DEFAULT_NODE_VERSION }}
+      - uses: volta-cli/action@v3
       - run: yarn --frozen-lockfile
       - run: yarn test:integration
 
@@ -78,9 +64,7 @@ jobs:
       SENTRY_AUTH_TOKEN: ${{ secrets.E2E_TESTS_SENTRY_AUTH_TOKEN }}
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.DEFAULT_NODE_VERSION }}
+      - uses: volta-cli/action@v3
       - run: yarn --frozen-lockfile
       - run: yarn test:e2e
 
@@ -90,9 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.DEFAULT_NODE_VERSION }}
+      - uses: volta-cli/action@v3
       - run: yarn --frozen-lockfile
       - run: yarn lint
 
@@ -104,9 +86,7 @@ jobs:
     if: startsWith(github.ref, 'refs/heads/release/')
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.DEFAULT_NODE_VERSION }}
+      - uses: volta-cli/action@v3
       # - name: Check dependency cache
       #   uses: actions/cache@v3
       #   with:
