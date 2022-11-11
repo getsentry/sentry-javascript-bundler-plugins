@@ -29,22 +29,22 @@ const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
  *
  * Release injection:
  *
- * Per default the sentry-unpugin will inject a global `SENTRY_RELEASE` variable into the entrypoint of all bundles. On
- * a technical level this is done by appending an import (`import "sentry-release-injector;"`) to all entrypoint files
- * of the user code (see `transformInclude` and `transform` hooks). This import is then resolved by the sentry-unplugin
+ * Per default the sentry bundler plugin will inject a global `SENTRY_RELEASE` variable into the entrypoint of all bundles.
+ * On a technical level this is done by appending an import (`import "sentry-release-injector;"`) to all entrypoint files
+ * of the user code (see `transformInclude` and `transform` hooks). This import is then resolved by the sentry plugin
  * to a virtual module that sets the global variable (see `resolveId` and `load` hooks).
  *
  * The resulting output approximately looks like this:
  *
  * ```text
  *                               entrypoint1.js (user file)
- *  ┌───────────────────┐        ┌─────────────────────────────────────────────────┐
- *  │                   │        │  import { myFunction } from "./my-library.js";  │
- *  │  sentry-unplugin  │        │                                                 │
- *  │                   │        │  const myResult = myFunction();                 │
- *  └---------│---------┘        │  export { myResult };                           │
+ *  ┌─────────────────────────┐  ┌─────────────────────────────────────────────────┐
+ *  │                         │  │  import { myFunction } from "./my-library.js";  │
+ *  │  sentry-bundler-plugin  │  │                                                 │
+ *  │                         │  │  const myResult = myFunction();                 │
+ *  └---------│---------------   │  export { myResult };                           │
  *            │                  │                                                 │
- *            │      injects     │  // injected by sentry-unplugin                 │
+ *            │      injects     │  // injected by sentry plugin                   │
  *            ├───────────────────► import "sentry-release-injector"; ─────────────────────┐
  *            │                  └─────────────────────────────────────────────────┘       │
  *            │                                                                            │
@@ -55,7 +55,7 @@ const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
  *            │                  │    return "Hello world!";                       │       │
  *            │                  │  }                                              │       │
  *            │                  │                                                 │       │
- *            │      injects     │  // injected by sentry-unplugin                 │       │
+ *            │      injects     │  // injected by sentry plugin                   │       │
  *            └───────────────────► import "sentry-release-injector"; ─────────────────────┤
  *                               └─────────────────────────────────────────────────┘       │
  *                                                                                         │
@@ -63,7 +63,7 @@ const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
  *                               sentry-release-injector                                   │
  *                               ┌──────────────────────────────────┐                      │
  *                               │                                  │    is resolved       │
- *                               │  global.SENTRY_RELEASE = { ... } │    by unplugin       │
+ *                               │  global.SENTRY_RELEASE = { ... } │    by plugin         │
  *                               │  // + a little more logic        │<─────────────────────┘
  *                               │                                  │    (only once)
  *                               └──────────────────────────────────┘
@@ -72,7 +72,7 @@ const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
  * Source maps upload:
  *
  * The sentry bundler plugin will also take care of uploading source maps to Sentry. This is all done in the
- * `writeBundle` hook. In this hook the sentry-unplugin will execute the release creation pipeline:
+ * `writeBundle` hook. In this hook the sentry plugin will execute the release creation pipeline:
  *
  * 1. Create a new release
  * 2. Delete already uploaded artifacts for this release (if `cleanArtifacts` is enabled)
@@ -226,11 +226,11 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     },
 
     /**
-     * This hook determines whether we want to transform a module. In the unplugin we want to transform every entrypoint
+     * This hook determines whether we want to transform a module. In the sentry bundler plugin we want to transform every entrypoint
      * unless configured otherwise with the `entries` option.
      *
      * @param id Always the absolute (fully resolved) path to the module.
-     * @returns `true` or `false` depending on whether we want to transform the module. For the sentry-unplugin we only
+     * @returns `true` or `false` depending on whether we want to transform the module. For the sentry bundler plugin we only
      * want to transform the release injector file.
      */
     transformInclude(id) {
