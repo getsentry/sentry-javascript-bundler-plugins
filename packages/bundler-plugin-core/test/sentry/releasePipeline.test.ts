@@ -1,4 +1,4 @@
-import { InternalOptions } from "../src/options-mapping";
+import { InternalOptions } from "../../src/options-mapping";
 import {
   addDeploy,
   cleanArtifacts,
@@ -6,14 +6,14 @@ import {
   finalizeRelease,
   setCommits,
   uploadSourceMaps,
-} from "../src/sentry/releasePipeline";
-import { BuildContext } from "../src/types";
+} from "../../src/sentry/releasePipeline";
+import { BuildContext } from "../../src/types";
 
 const mockedAddSpanToTxn = jest.fn();
 
-jest.mock("../src/sentry/telemetry", () => {
+jest.mock("../../src/sentry/telemetry", () => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const original = jest.requireActual("../src/sentry/telemetry");
+  const original = jest.requireActual("../../src/sentry/telemetry");
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return {

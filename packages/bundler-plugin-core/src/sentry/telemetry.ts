@@ -7,7 +7,6 @@ import {
   NodeClient,
 } from "@sentry/node";
 import { Span } from "@sentry/tracing";
-import { AxiosError } from "axios";
 import { BuildContext } from "../types";
 
 export function makeSentryClient(
@@ -57,16 +56,23 @@ export function addSpanToTransaction(
   return span;
 }
 
-export function captureMinimalError(error: unknown | Error | AxiosError, hub: Hub) {
-  const isAxiosError = error instanceof AxiosError;
-  const sentryError =
-    error instanceof Error
-      ? {
-          name: `${isAxiosError && error.status ? error.status : ""}: ${error.name}`,
-          message: error.message,
-          stack: error.stack,
-        }
-      : {};
+export function captureMinimalError(error: unknown | Error, hub: Hub) {
+  let sentryError;
+
+  if (error && typeof error === "object") {
+    const e = error as { name?: string; message?: string; stack?: string };
+    sentryError = {
+      name: e.name,
+      message: e.message,
+      stack: e.stack,
+    };
+  } else {
+    sentryError = {
+      name: "Error",
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      message: `${error}`,
+    };
+  }
 
   hub.captureException(sentryError);
 }

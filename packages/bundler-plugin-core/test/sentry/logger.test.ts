@@ -1,5 +1,5 @@
 import { Hub } from "@sentry/node";
-import { createLogger } from "../src/sentry/logger";
+import { createLogger } from "../../src/sentry/logger";
 
 describe("Logger", () => {
   const consoleLogSpy = jest.spyOn(console, "log").mockImplementation(() => undefined);

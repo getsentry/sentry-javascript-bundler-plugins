@@ -1,5 +1,5 @@
 import SentryCli from "@sentry/cli";
-import { getSentryCli } from "../src/sentry/cli";
+import { getSentryCli } from "../../src/sentry/cli";
 
 describe("getSentryCLI", () => {
   it("returns a valid CLI instance if dryRun is not specified", () => {
