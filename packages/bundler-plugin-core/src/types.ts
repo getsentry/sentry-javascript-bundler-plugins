@@ -280,31 +280,7 @@ export type IncludeEntry = {
   validate?: boolean;
 };
 
-type SetCommitsOptions = {
-  /**
-   * Automatically sets `commit` and `previousCommit`. Sets `commit` to `HEAD`
-   * and `previousCommit` as described in the option's documentation.
-   *
-   * If you set this to `true`, manually specified `commit` and `previousCommit`
-   * options will be overridden. It is best to not specify them at all if you
-   * set this option to `true`.
-   */
-  auto?: boolean;
-
-  /**
-   * The full repo name as defined in Sentry.
-   *
-   * Required if `auto` option is not set to `true`.
-   */
-  repo?: string;
-
-  /**
-   * The current (last) commit in the release.
-   *
-   * Required if `auto` option is not set to `true`.
-   */
-  commit?: string;
-
+type SetCommitsOptions = (AutoSetCommitsOptions | ManualSetCommitsOptions) & {
   /**
    * The commit before the beginning of this release (in other words,
    * the last commit of the previous release).
@@ -331,6 +307,39 @@ type SetCommitsOptions = {
    * Defaults to `false`.
    */
   ignoreEmpty?: boolean;
+};
+
+type AutoSetCommitsOptions = {
+  /**
+   * Automatically sets `commit` and `previousCommit`. Sets `commit` to `HEAD`
+   * and `previousCommit` as described in the option's documentation.
+   *
+   * If you set this to `true`, manually specified `commit` and `previousCommit`
+   * options will be overridden. It is best to not specify them at all if you
+   * set this option to `true`.
+   */
+  auto: true;
+
+  repo?: undefined;
+  commit?: undefined;
+};
+
+type ManualSetCommitsOptions = {
+  auto?: false | undefined;
+
+  /**
+   * The full repo name as defined in Sentry.
+   *
+   * Required if `auto` option is not set to `true`.
+   */
+  repo: string;
+
+  /**
+   * The current (last) commit in the release.
+   *
+   * Required if `auto` option is not set to `true`.
+   */
+  commit: string;
 };
 
 type DeployOptions = {

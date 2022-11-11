@@ -12,8 +12,7 @@ import { BuildContext } from "../types";
 
 export function makeSentryClient(
   dsn: string,
-  telemetryEnabled: boolean,
-  org?: string
+  telemetryEnabled: boolean
 ): { client: NodeClient; hub: Hub } {
   const client = new NodeClient({
     dsn,
@@ -33,12 +32,6 @@ export function makeSentryClient(
   });
 
   const hub = new Hub(client);
-
-  hub.configureScope((scope) => {
-    if (org) {
-      scope.setTag("org", org);
-    }
-  });
 
   //TODO: This call is problematic because as soon as we set our hub as the current hub
   //      we might interfere with other plugins that use Sentry. However, for now, we'll

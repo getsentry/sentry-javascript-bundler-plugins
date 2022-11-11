@@ -1,3 +1,4 @@
+import { Logger } from "./sentry/logger";
 import { IncludeEntry as UserIncludeEntry, Options as UserOptions } from "./types";
 import { arrayify } from "./utils";
 
@@ -174,4 +175,54 @@ function normalizeIncludeEntry(
     rewrite: includeEntry.rewrite ?? userOptions.rewrite ?? true,
     validate: includeEntry.validate ?? userOptions.validate ?? false,
   };
+}
+
+/**
+ * Validates a few combinations of options that are not checked by Sentry CLI.
+ *
+ * For all other options, we can rely on Sentry CLI to validate them. In fact,
+ * we can't validate them in the plugin because Sentry CLI might pick up options from
+ * its config file.
+ *
+ * @param options the internal options
+ * @param logger the logger
+ *
+ * @returns `true` if the options are valid, `false` otherwise
+ */
+export function validateOptions(options: InternalOptions, logger: Logger): boolean {
+  if (options.injectReleasesMap && !options.org) {
+    logger.error(
+      "The `injectReleasesMap` option was set but it is only supported when the `org` option is also specified.",
+      "Please set the `org` option (you can also set the SENTRY_ORG environment variable) or disable the `injectReleasesMap` option."
+    );
+    return false;
+  }
+
+  const setCommits = options.setCommits;
+  if (setCommits) {
+    if (!setCommits.auto && !(setCommits.repo && setCommits.commit)) {
+      logger.error(
+        "The `setCommits` option was specified but is missing required properties.",
+        "Please set either `auto` or both, `repo` and `commit`."
+      );
+      return false;
+    }
+    if (setCommits.auto && setCommits.repo && setCommits) {
+      logger.warn(
+        "The `setCommits` options includes `auto` but also `repo` and `commit`.",
+        "Ignoring `repo` and `commit`.",
+        "Please only set either `auto` or both, `repo` and `commit`."
+      );
+    }
+  }
+
+  if (options.deploy && !options.deploy.env) {
+    logger.error(
+      "The `deploy` option was specified but is missing the required `env` property.",
+      "Please set the `env` property."
+    );
+    return false;
+  }
+
+  return true;
 }

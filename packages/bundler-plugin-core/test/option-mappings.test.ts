@@ -1,5 +1,5 @@
 import { Options } from "../src";
-import { normalizeUserOptions } from "../src/options-mapping";
+import { InternalOptions, normalizeUserOptions, validateOptions } from "../src/options-mapping";
 
 describe("normalizeUserOptions()", () => {
   test("should return correct value for default input", () => {
@@ -77,5 +77,87 @@ describe("normalizeUserOptions()", () => {
       telemetry: true,
       injectReleasesMap: false,
     });
+  });
+});
+
+describe("validateOptions", () => {
+  const mockedLogger = {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it("should return `false` if `injectRelease` is `true` but org is not provided", () => {
+    const options = { injectReleasesMap: true } as Partial<InternalOptions>;
+
+    expect(validateOptions(options as unknown as InternalOptions, mockedLogger)).toBe(false);
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringMatching(/injectReleasesMap.*org/),
+      expect.stringMatching(/set.*org.*injectReleasesMap/)
+    );
+  });
+
+  it("should return `true` if `injectRelease` is `true` and org is provided", () => {
+    const options = { injectReleasesMap: true, org: "my-org" } as Partial<InternalOptions>;
+
+    expect(validateOptions(options as unknown as InternalOptions, mockedLogger)).toBe(true);
+    expect(mockedLogger.error).not.toHaveBeenCalled();
+  });
+
+  it("should return `false` if `setCommits` is set but neither auto nor manual options are set", () => {
+    const options = { setCommits: {} } as Partial<InternalOptions>;
+
+    expect(validateOptions(options as unknown as InternalOptions, mockedLogger)).toBe(false);
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringMatching(/setCommits.*missing.*properties/),
+      expect.stringMatching(/set.*either.*auto.*repo.*commit/)
+    );
+  });
+
+  it("should return `true` but warn if `setCommits` is set and both auto nor manual options are set", () => {
+    const options = { setCommits: { auto: true, repo: "myRepo", commit: "myCommit" } };
+
+    expect(validateOptions(options as unknown as InternalOptions, mockedLogger)).toBe(true);
+    expect(mockedLogger.error).not.toHaveBeenCalled();
+    expect(mockedLogger.warn).toHaveBeenCalledWith(
+      expect.stringMatching(/setCommits.*auto.*repo.*commit/),
+      expect.stringMatching(/Ignoring.*repo.*commit/),
+      expect.stringMatching(/set.*either.*auto.*repo.*commit/)
+    );
+  });
+
+  it("should return `false` if `deploy`is set but `env` is not provided", () => {
+    const options = { deploy: {} } as Partial<InternalOptions>;
+
+    expect(validateOptions(options as unknown as InternalOptions, mockedLogger)).toBe(false);
+    expect(mockedLogger.error).toHaveBeenCalledWith(
+      expect.stringMatching(/deploy.*missing.*property/),
+      expect.stringMatching(/set.*env/)
+    );
+  });
+
+  it("should return `true` if `deploy`is set and `env` is provided", () => {
+    const options = { deploy: { env: "my-env" } } as Partial<InternalOptions>;
+
+    expect(validateOptions(options as unknown as InternalOptions, mockedLogger)).toBe(true);
+    expect(mockedLogger.error).not.toHaveBeenCalled();
+  });
+
+  it("should return `true` for options without special cases", () => {
+    const options = {
+      org: "my-org",
+      project: "my-project",
+      authToken: "my-auth-token",
+      include: [{}],
+      finalize: true,
+    } as Partial<InternalOptions>;
+
+    expect(validateOptions(options as unknown as InternalOptions, mockedLogger)).toBe(true);
+    expect(mockedLogger.error).not.toHaveBeenCalled();
   });
 });

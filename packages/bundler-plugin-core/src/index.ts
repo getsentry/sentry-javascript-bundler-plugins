@@ -12,9 +12,10 @@ import {
 import "@sentry/tracing";
 import { addSpanToTransaction, captureMinimalError, makeSentryClient } from "./sentry/telemetry";
 import { Span, Transaction } from "@sentry/types";
-import { createLogger } from "./sentry/logger";
-import { normalizeUserOptions } from "./options-mapping";
+import { createLogger, Logger } from "./sentry/logger";
+import { InternalOptions, normalizeUserOptions, validateOptions } from "./options-mapping";
 import { getSentryCli } from "./sentry/cli";
+import { Hub } from "@sentry/node";
 
 // We prefix the polyfill id with \0 to tell other plugins not to try to load or transform it.
 // This hack is taken straight from https://rollupjs.org/guide/en/#resolveid.
@@ -78,8 +79,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
   const { hub: sentryHub } = makeSentryClient(
     "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
-    internalOptions.telemetry,
-    internalOptions.org
+    internalOptions.telemetry
   );
 
   const logger = createLogger({
@@ -88,6 +88,15 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     silent: internalOptions.silent,
     debug: internalOptions.debug,
   });
+
+  if (!validateOptions(internalOptions, logger)) {
+    handleError(
+      new Error("Options were not set correctly. See output above for more details."),
+      logger,
+      internalOptions.errorHandler,
+      sentryHub
+    );
+  }
 
   const cli = getSentryCli(internalOptions, logger);
 
@@ -123,6 +132,18 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     async buildStart() {
       if (!internalOptions.release) {
         internalOptions.release = await cli.releases.proposeVersion();
+      }
+
+      // At this point, we either have determined a release or we have to bail
+      if (!internalOptions.release) {
+        handleError(
+          new Error(
+            "Unable to determine a release name. Make sure to set the `release` option or use an environment that supports auto-detection https://docs.sentry.io/cli/releases/#creating-releases`"
+          ),
+          logger,
+          internalOptions.errorHandler,
+          sentryHub
+        );
       }
 
       transaction = sentryHub.startTransaction({
@@ -282,12 +303,6 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         level: "info",
       });
 
-      //TODO:
-      //  1. validate options to see if we get a valid include property, release name, etc.
-      //  2. normalize the include property: Users can pass string | string [] | IncludeEntry[].
-      //     That's good for them but a hassle for us. Let's try to normalize this into one data type
-      //     (I vote IncludeEntry[]) and continue with that down the line
-
       const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan, logger, cli };
 
       createNewRelease(internalOptions, ctx)
@@ -298,16 +313,8 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         .then(() => addDeploy(internalOptions, ctx))
         .then(() => transaction?.setStatus("ok"))
         .catch((e: Error) => {
-          captureMinimalError(e, sentryHub);
           transaction?.setStatus("cancelled");
-
-          logger.error(e.message);
-
-          if (internalOptions.errorHandler) {
-            internalOptions.errorHandler(e);
-          } else {
-            throw e;
-          }
+          handleError(e, logger, internalOptions.errorHandler, sentryHub);
         })
         .finally(() => {
           sentryHub.addBreadcrumb({
@@ -320,6 +327,25 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     },
   };
 });
+
+function handleError(
+  error: Error,
+  logger: Logger,
+  errorHandler: InternalOptions["errorHandler"],
+  sentryHub?: Hub
+) {
+  logger.error(error.message);
+
+  if (sentryHub) {
+    captureMinimalError(error, sentryHub);
+  }
+
+  if (errorHandler) {
+    errorHandler(error);
+  } else {
+    throw error;
+  }
+}
 
 /**
  * Generates code for the "sentry-release-injector" which is responsible for setting the global `SENTRY_RELEASE`
