@@ -59,17 +59,18 @@ export function addSpanToTransaction(
 export function captureMinimalError(error: unknown | Error, hub: Hub) {
   let sentryError;
 
-  if (typeof error === "object") {
+  if (error && typeof error === "object") {
     const e = error as { name?: string; message?: string; stack?: string };
     sentryError = {
       name: e.name,
       message: e.message,
       stack: e.stack,
     };
-  } else if (typeof error === "string") {
+  } else {
     sentryError = {
       name: "Error",
-      message: error,
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      message: `${error}`,
     };
   }
 
