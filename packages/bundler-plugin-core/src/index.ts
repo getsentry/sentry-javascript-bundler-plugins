@@ -10,7 +10,12 @@ import {
   uploadSourceMaps,
 } from "./sentry/releasePipeline";
 import "@sentry/tracing";
-import { addSpanToTransaction, captureMinimalError, makeSentryClient } from "./sentry/telemetry";
+import {
+  addPluginOptionTags,
+  addSpanToTransaction,
+  captureMinimalError,
+  makeSentryClient,
+} from "./sentry/telemetry";
 import { Span, Transaction } from "@sentry/types";
 import { createLogger, Logger } from "./sentry/logger";
 import { InternalOptions, normalizeUserOptions, validateOptions } from "./options-mapping";
@@ -90,6 +95,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
     internalOptions.telemetry
   );
+  addPluginOptionTags(internalOptions, sentryHub);
 
   const logger = createLogger({
     hub: sentryHub,
