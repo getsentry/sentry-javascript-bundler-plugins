@@ -90,19 +90,30 @@ export function addPluginOptionTags(options: InternalOptions, hub: Hub) {
     include,
   } = options;
 
-  hub.setTags({
-    include: include.length > 1 ? "multiple-entries" : "single-entry",
-    "clean-artifacts": cleanArtifacts,
-    "finalize-release": finalize,
-    "add-deploy": deploy ? true : false,
-    "inject-releases-map": injectReleasesMap,
-    "dry-run": dryRun,
-    "error-handler": errorHandler ? "custom" : "none",
-  });
+  hub.setTag("include", include.length > 1 ? "multiple-entries" : "single-entry");
 
+  // Optional release pipeline steps
+  if (cleanArtifacts) {
+    hub.setTag("clean-artifacts", true);
+  }
   if (setCommits) {
     hub.setTag("set-commits", setCommits.auto === true ? "auto" : "manual");
-  } else {
-    hub.setTag("set-commits", false);
+  }
+  if (finalize) {
+    hub.setTag("finalize-release", true);
+  }
+  if (deploy) {
+    hub.setTag("add-deploy", true);
+  }
+
+  // Miscelaneous options
+  if (dryRun) {
+    hub.setTag("dry-run", true);
+  }
+  if (injectReleasesMap) {
+    hub.setTag("inject-releases-map", true);
+  }
+  if (errorHandler) {
+    hub.setTag("error-handler", "custom");
   }
 }
