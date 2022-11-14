@@ -244,14 +244,14 @@ export type IncludeEntry = {
   urlSuffix?: string;
 
   /**
-   * When paired with the `rewrite`, this will remove a prefix from filename references inside of
+   * When paired with the `rewrite` option, this will remove a prefix from filename references inside of
    * sourcemaps. For instance you can use this to remove a path that is build machine specific.
    * Note that this will NOT change the names of uploaded files.
    */
   stripPrefix?: string[];
 
   /**
-   * When paired with `rewrite`, this will add `~` to the `stripPrefix` array.
+   * When paired with the `rewrite` option, this will add `~` to the `stripPrefix` array.
    *
    * Defaults to `false`.
    */
