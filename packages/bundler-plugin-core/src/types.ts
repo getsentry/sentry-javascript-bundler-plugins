@@ -12,14 +12,14 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   /**
    * The slug of the Sentry organization associated with the app.
    *
-   * This value can also be set via the `SENTRY_ORG` env variable.
+   * This value can also be specified via the `SENTRY_ORG` environment variable.
    */
   org?: string;
 
   /**
    * The slug of the Sentry project associated with the app.
    *
-   * This value can also be set via the `SENTRY_PROJECT` env variable.
+   * This value can also be specified via the `SENTRY_PROJECT` environment variable.
    */
   project?: string;
 
@@ -28,7 +28,7 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * Can be obtained from https://sentry.io/settings/account/api/auth-tokens/.
    * Required scopes: project:releases (and org:read if setCommits option is used).
    *
-   * This value can also be set via the `SENTRY_AUTH_TOKEN` env variable
+   * This value can also be specified via the `SENTRY_AUTH_TOKEN` environment variable.
    */
   authToken?: string;
 
@@ -36,9 +36,9 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * The base URL of your Sentry instance. Use this if you are using a self-hosted
    * or Sentry instance other than sentry.io.
    *
-   * This value can also be set via the `SENTRY_URL` env variable.
+   * This value can also be set via the `SENTRY_URL` environment variable.
    *
-   * Defaults to https://sentry.io/, which is the correct value for SAAS customers.
+   * Defaults to https://sentry.io/, which is the correct value for SaaS customers.
    */
   url?: string;
 
@@ -47,11 +47,11 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   /**
    * Unique identifier for the release.
    *
-   * This value can also be set via the `SENTRY_RELEASE` env variable.
+   * This value can also be specified via the `SENTRY_RELEASE` environment variable.
    *
    * Defaults to the output of the sentry-cli releases propose-version command,
    * which automatically detects values for Cordova, Heroku, AWS CodeBuild, CircleCI,
-   * Xcode, and Gradle, and otherwise uses HEAD's commit SHA. (For HEAD option,
+   * Xcode, and Gradle, and otherwise uses the git `HEAD`'s commit SHA. (the latter
    * requires access to git CLI and for the root directory to be a valid repository).
    */
   release?: string;
@@ -99,7 +99,7 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   /**
    * Version control system remote name.
    *
-   * This value can also be set via the `SENTRY_VSC_REMOTE` env variable.
+   * This value can also be specified via the `SENTRY_VSC_REMOTE` environment variable.
    *
    * Defaults to 'origin'.
    */
@@ -109,7 +109,7 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * A header added to every outgoing network request.
    * The format should be `header-key: header-value`.
    *
-   * This value can also be set via the `CUSTOM_HEADER` env variable.
+   * This value can also be specified via the `CUSTOM_HEADER` environment variable.
    */
   customHeader?: string;
 
@@ -251,9 +251,9 @@ export type IncludeEntry = {
   stripPrefix?: string[];
 
   /**
-   * When paired with rewrite, this will add `~` to the stripPrefix array.
+   * When paired with `rewrite`, this will add `~` to the `stripPrefix` array.
    *
-   * Defaults to false.
+   * Defaults to `false`.
    */
   stripCommonPrefix?: boolean;
 
@@ -296,8 +296,8 @@ type SetCommitsOptions = (AutoSetCommitsOptions | ManualSetCommitsOptions) & {
 
   /**
    * If the flag is to `true` and the previous release commit was not found
-   * in the repository, we create a release with the default commits count
-   * instead of failing the command.
+   * in the repository, the plugin creates a release with the default commits
+   * count instead of failing the command.
    *
    * Defaults to `false`.
    */
