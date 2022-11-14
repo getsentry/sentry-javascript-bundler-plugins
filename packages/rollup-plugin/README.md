@@ -32,6 +32,7 @@ $ yarn add @sentry/rollup-plugin --dev
 ## Usage
 
 ```js
+// rollup.config.js
 import sentryRollupPlugin from "@sentry/rollup-plugin";
 
 export default {

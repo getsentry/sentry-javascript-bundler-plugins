@@ -32,6 +32,7 @@ $ yarn add @sentry/vite-plugin --dev
 ## Usage
 
 ```ts
+// vite.config.ts
 import sentryVitePlugin from "@sentry/vite-plugin";
 
 export default {

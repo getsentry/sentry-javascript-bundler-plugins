@@ -32,6 +32,7 @@ $ yarn add @sentry/esbuild-plugin --dev
 ## Usage
 
 ```js
+// esbuild.config.js
 const sentryEsbuildPlugin = require("@sentry/esbuild-plugin");
 
 require("esbuild").build({

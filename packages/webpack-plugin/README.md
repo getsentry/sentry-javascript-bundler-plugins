@@ -32,6 +32,7 @@ $ yarn add @sentry/webpack-plugin --dev
 ## Usage
 
 ```js
+// webpack.config.js
 const sentryWebpackPlugin = require("@sentry/webpack-plugin");
 
 module.exports = {
