@@ -333,14 +333,14 @@ type ManualSetCommitsOptions = {
   /**
    * The full repo name as defined in Sentry.
    *
-   * Required if `auto` option is not set to `true`.
+   * Required if the `auto` option is not set to `true`.
    */
   repo: string;
 
   /**
    * The current (last) commit in the release.
    *
-   * Required if `auto` option is not set to `true`.
+   * Required if the `auto` option is not set to `true`.
    */
   commit: string;
 };
