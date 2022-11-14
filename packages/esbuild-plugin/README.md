@@ -15,7 +15,42 @@ A esbuild plugin that provides release management features for Sentry:
 - Automatic release name discovery (based on CI environment - Vercel, AWS, Heroku, CircleCI, or current Git SHA)
 - Automatically association of errors with releases (Release injection)
 
-### Configuration
+## Installation
+
+Using npm:
+
+```bash
+$ npm install @sentry/esbuild-plugin --save-dev
+```
+
+Using yarn:
+
+```bash
+$ yarn add @sentry/esbuild-plugin --dev
+```
+
+## Usage
+
+```js
+// esbuild.config.js
+const sentryEsbuildPlugin = require("@sentry/esbuild-plugin");
+
+require("esbuild").build({
+  plugins: [
+    sentryEsbuildPlugin({
+      include: ".",
+      ignore: ["node_modules", "esbuild.config.js"],
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+    }),
+  ],
+});
+```
+
+As an alternative to passing options explicitly, you can also use a `.sentryclirc` file or environment variables as described in https://docs.sentry.io/product/cli/configuration/.
+
+## Configuration
 
 Every plugin takes an options argument with the following properties:
 

@@ -15,7 +15,42 @@ A Vite plugin that provides release management features for Sentry:
 - Automatic release name discovery (based on CI environment - Vercel, AWS, Heroku, CircleCI, or current Git SHA)
 - Automatically association of errors with releases (Release injection)
 
-### Configuration
+## Installation
+
+Using npm:
+
+```bash
+$ npm install @sentry/vite-plugin --save-dev
+```
+
+Using yarn:
+
+```bash
+$ yarn add @sentry/vite-plugin --dev
+```
+
+## Usage
+
+```ts
+// vite.config.ts
+import sentryVitePlugin from "@sentry/vite-plugin";
+
+export default {
+  plugins: [
+    sentryVitePlugin({
+      include: ".",
+      ignore: ["node_modules", "vite.config.ts"],
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+    }),
+  ],
+};
+```
+
+As an alternative to passing options explicitly, you can also use a `.sentryclirc` file or environment variables as described in https://docs.sentry.io/product/cli/configuration/.
+
+## Configuration
 
 Every plugin takes an options argument with the following properties:
 
@@ -34,7 +69,7 @@ Every plugin takes an options argument with the following properties:
 | cleanArtifacts | `boolean`                                                                                 | optional | Remove all existing artifacts in the Sentry release before uploading sourcemaps. Defaults to `false`.                                                                                                                                                                               |
 | errorHandler   | `function(err: Error): void`                                                              | optional | Function that is called when an error occurs during rlease creation or sourcemaps upload. When this function is provided, thrown errors will not cause the process to abort. If you still want to abort the process you can throw an error in the function.                         |
 
-### More information
+## More information
 
 - [Sentry Documentation](https://docs.sentry.io/quickstart/)
 - [Troubleshooting Sourcemaps](https://docs.sentry.io/platforms/javascript/sourcemaps/troubleshooting_js/)
