@@ -61,7 +61,6 @@ describe("captureMinimalError", () => {
 
 describe("addPluginOptionTags", () => {
   const mockedHub = {
-    setTags: jest.fn(),
     setTag: jest.fn(),
   };
 
@@ -75,18 +74,14 @@ describe("addPluginOptionTags", () => {
 
   it("should set include tag according to number of entries (single entry)", () => {
     addPluginOptionTags(defaultOptions as unknown as InternalOptions, mockedHub as unknown as Hub);
-    expect(mockedHub.setTags).toHaveBeenCalledWith(
-      expect.objectContaining({ include: "single-entry" })
-    );
+    expect(mockedHub.setTag).toHaveBeenCalledWith("include", "single-entry");
   });
   it("should set include tag according to number of entries (multiple entries)", () => {
     addPluginOptionTags(
       { include: [{}, {}, {}] } as unknown as InternalOptions,
       mockedHub as unknown as Hub
     );
-    expect(mockedHub.setTags).toHaveBeenCalledWith(
-      expect.objectContaining({ include: "multiple-entries" })
-    );
+    expect(mockedHub.setTag).toHaveBeenCalledWith("include", "multiple-entries");
   });
 
   it("should set deploy tag to true if the deploy option is specified", () => {
@@ -94,13 +89,7 @@ describe("addPluginOptionTags", () => {
       { ...defaultOptions, deploy: { env: "production" } } as unknown as InternalOptions,
       mockedHub as unknown as Hub
     );
-    expect(mockedHub.setTags).toHaveBeenCalledWith(expect.objectContaining({ "add-deploy": true }));
-  });
-  it("should set deploy tag to false if the deploy option is not specified", () => {
-    addPluginOptionTags(defaultOptions as unknown as InternalOptions, mockedHub as unknown as Hub);
-    expect(mockedHub.setTags).toHaveBeenCalledWith(
-      expect.objectContaining({ "add-deploy": false })
-    );
+    expect(mockedHub.setTag).toHaveBeenCalledWith("add-deploy", true);
   });
 
   it("should set errorHandler tag to `custom` if the errorHandler option is specified", () => {
@@ -109,19 +98,10 @@ describe("addPluginOptionTags", () => {
       { ...defaultOptions, errorHandler: () => {} } as unknown as InternalOptions,
       mockedHub as unknown as Hub
     );
-    expect(mockedHub.setTags).toHaveBeenCalledWith(
-      expect.objectContaining({ "error-handler": "custom" })
-    );
-  });
-  it("should set errorHandler tag to `none` if the errorHandler option is not specified", () => {
-    addPluginOptionTags(defaultOptions as unknown as InternalOptions, mockedHub as unknown as Hub);
-    expect(mockedHub.setTags).toHaveBeenCalledWith(
-      expect.objectContaining({ "error-handler": "none" })
-    );
+    expect(mockedHub.setTag).toHaveBeenCalledWith("error-handler", "custom");
   });
 
   it.each([
-    [false, undefined],
     ["auto", { auto: true }],
     ["manual", { repo: "", commit: "" }],
   ])(
@@ -147,13 +127,15 @@ describe("addPluginOptionTags", () => {
       mockedHub as unknown as Hub
     );
 
-    expect(mockedHub.setTags).toHaveBeenCalledWith(
-      expect.objectContaining({
-        "clean-artifacts": true,
-        "finalize-release": true,
-        "inject-releases-map": true,
-        "dry-run": true,
-      })
-    );
+    expect(mockedHub.setTag).toHaveBeenCalledWith("clean-artifacts", true);
+    expect(mockedHub.setTag).toHaveBeenCalledWith("finalize-release", true);
+    expect(mockedHub.setTag).toHaveBeenCalledWith("inject-releases-map", true);
+    expect(mockedHub.setTag).toHaveBeenCalledWith("dry-run", true);
+  });
+
+  it("shouldn't set any tags other than include if no opional options are specified", () => {
+    addPluginOptionTags(defaultOptions as unknown as InternalOptions, mockedHub as unknown as Hub);
+    expect(mockedHub.setTag).toHaveBeenCalledTimes(1);
+    expect(mockedHub.setTag).toHaveBeenCalledWith("include", "single-entry");
   });
 });
