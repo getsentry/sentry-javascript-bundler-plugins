@@ -178,7 +178,7 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * and high-level performance data. We will never collect your code or any details of the
    * projects in which you're using this plugin.
    *
-   * Defaults to true
+   * Defaults to `true`.
    */
   telemetry?: boolean;
 
@@ -196,7 +196,7 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * maps from `{org}@{project}` to the `release` value. This might be helpful for webpack
    * module federation or micro frontend setups.
    *
-   * Defaults to `false`
+   * Defaults to `false`.
    */
   injectReleasesMap?: boolean;
 };
