@@ -58,8 +58,10 @@ export type InternalIncludeEntry = RequiredInternalIncludeEntry &
     ignore: string[];
   };
 
+export const SENTRY_SAAS_URL = "https://sentry.io";
+
 export function normalizeUserOptions(userOptions: UserOptions): InternalOptions {
-  return {
+  const options = {
     // include is the only strictly required option
     // (normalizeInclude needs all userOptions to access top-level include options)
     include: normalizeInclude(userOptions),
@@ -75,6 +77,10 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     // Sentry CLI to determine a release if none was specified via options
     // or env vars. In case we don't find one, we'll bail at that point.
     release: userOptions.release ?? process.env["SENTRY_RELEASE"] ?? "",
+    // We technically don't need the URL for anything release-specific
+    // but we want to make sure that we're only sending Sentry data
+    // of SaaS customers. Hence we want to read it anyway.
+    url: userOptions.url ?? process.env["SENTRY_URL"] ?? SENTRY_SAAS_URL,
 
     // Options with default values
     finalize: userOptions.finalize ?? true,
@@ -97,7 +103,6 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     customHeader:
       userOptions.customHeader ?? process.env["SENTRY_HEADER"] ?? process.env["CUSTOM_HEADER"],
 
-    url: userOptions.url, // env var: `SENTRY_URL`
     vcsRemote: userOptions.vcsRemote, // env var: `SENTRY_VSC_REMOTE`
 
     // Optional options
@@ -108,6 +113,14 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     errorHandler: userOptions.errorHandler,
     configFile: userOptions.configFile,
   };
+
+  // We only want to enable telemetry for SaaS users
+  // This is not the final check (we need to call Sentry CLI at a later point)
+  // but we can already at this point make a first decision.
+  // @see `turnOffTelemetryForSelfHostedSentry` (telemetry.ts) for the second check.
+  options.telemetry = options.telemetry && options.url === SENTRY_SAAS_URL;
+
+  return options;
 }
 
 /**
