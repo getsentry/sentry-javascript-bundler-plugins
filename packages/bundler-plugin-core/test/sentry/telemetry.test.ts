@@ -135,7 +135,8 @@ describe("addPluginOptionTags", () => {
 
   it("shouldn't set any tags other than include if no opional options are specified", () => {
     addPluginOptionTags(defaultOptions as unknown as InternalOptions, mockedHub as unknown as Hub);
-    expect(mockedHub.setTag).toHaveBeenCalledTimes(1);
+    expect(mockedHub.setTag).toHaveBeenCalledTimes(2);
     expect(mockedHub.setTag).toHaveBeenCalledWith("include", "single-entry");
+    expect(mockedHub.setTag).toHaveBeenCalledWith("node", expect.any(String));
   });
 });

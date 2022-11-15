@@ -116,4 +116,6 @@ export function addPluginOptionTags(options: InternalOptions, hub: Hub) {
   if (errorHandler) {
     hub.setTag("error-handler", "custom");
   }
+
+  hub.setTag("node", process.version);
 }
