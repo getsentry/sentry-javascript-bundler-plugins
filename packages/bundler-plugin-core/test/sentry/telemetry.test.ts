@@ -1,49 +1,11 @@
-import { Hub, NodeClient } from "@sentry/node";
+import { Hub } from "@sentry/node";
 import { InternalOptions } from "../../src/options-mapping";
 import { SentryCLILike } from "../../src/sentry/cli";
 import {
   addPluginOptionTags,
   captureMinimalError,
-  makeSentryClient,
   turnOffTelemetryForSelfHostedSentry,
 } from "../../src/sentry/telemetry";
-
-describe("makeSentryClient", () => {
-  const dsn = "https://abc@sentry.io:1234/subpath/123";
-
-  it("should create a client that sends stuff if `telemetry` is enabled and Sentry SaaS is used", () => {
-    const { client } = makeSentryClient(dsn, true, "https://sentry.io");
-    expect(client).toBeInstanceOf(NodeClient);
-    expect(client.getOptions()).toMatchObject({
-      dsn,
-      enabled: true,
-      tracesSampleRate: 1.0,
-      sampleRate: 1.0,
-      release: __PACKAGE_VERSION__,
-      tracePropagationTargets: ["sentry.io/api"],
-    });
-  });
-
-  it.each([
-    [true, "https://selfhostedSentry.io"],
-    [false, "https://sentry.io"],
-    [false, "https://selfhostedSentry.io"],
-  ])(
-    "should create a client that doesnt sends stuff if `telemetry` is `%s` and URL is '%s'",
-    (enabled, url) => {
-      const { client } = makeSentryClient(dsn, enabled, url);
-      expect(client).toBeInstanceOf(NodeClient);
-      expect(client.getOptions()).toMatchObject({
-        dsn,
-        enabled: false,
-        tracesSampleRate: 0,
-        sampleRate: 0,
-        release: __PACKAGE_VERSION__,
-        tracePropagationTargets: ["sentry.io/api"],
-      });
-    }
-  );
-});
 
 describe("turnOffTelemetryForSelfHostedSentry", () => {
   const mockedCLI = {
