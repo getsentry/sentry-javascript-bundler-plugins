@@ -5,10 +5,11 @@ import {
   makeMain,
   makeNodeTransport,
   NodeClient,
+  Span,
 } from "@sentry/node";
-import { Span } from "@sentry/tracing";
-import { InternalOptions } from "../options-mapping";
+import { InternalOptions, SENTRY_SAAS_URL } from "../options-mapping";
 import { BuildContext } from "../types";
+import { SentryCLILike } from "./cli";
 
 export function makeSentryClient(
   dsn: string,
@@ -118,4 +119,29 @@ export function addPluginOptionTags(options: InternalOptions, hub: Hub) {
   }
 
   hub.setTag("node", process.version);
+}
+
+/**
+ * Makes a call to SentryCLI to get the Sentry server URL the CLI uses.
+ *
+ * We need to check and decide to use telemetry based on the CLI's respone to this call
+ * because only at this time we checked a possibly existing .sentryclirc file. This file
+ * could point to another URL than the default URL.
+ */
+export async function turnOffTelemetryForSelfHostedSentry(cli: SentryCLILike, hub: Hub) {
+  const cliInfo = await cli.execute(["info"], false);
+
+  const url = cliInfo
+    ?.split(/(\r\n|\n|\r)/)[0]
+    ?.replace(/^Sentry Server: /, "")
+    ?.trim();
+
+  if (url !== SENTRY_SAAS_URL) {
+    const client = hub.getClient();
+    if (client) {
+      client.getOptions().enabled = false;
+      client.getOptions().tracesSampleRate = 0;
+      client.getOptions().sampleRate = 0;
+    }
+  }
 }

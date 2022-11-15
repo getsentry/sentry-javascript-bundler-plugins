@@ -15,6 +15,7 @@ import {
   addSpanToTransaction,
   captureMinimalError,
   makeSentryClient,
+  turnOffTelemetryForSelfHostedSentry,
 } from "./sentry/telemetry";
 import { Span, Transaction } from "@sentry/types";
 import { createLogger, Logger } from "./sentry/logger";
@@ -108,8 +109,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     handleError(
       new Error("Options were not set correctly. See output above for more details."),
       logger,
-      internalOptions.errorHandler,
-      sentryHub
+      internalOptions.errorHandler
     );
   }
 
@@ -145,6 +145,8 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
      * Responsible for starting the plugin execution transaction and the release injection span
      */
     async buildStart() {
+      await turnOffTelemetryForSelfHostedSentry(cli, sentryHub);
+
       if (!internalOptions.release) {
         internalOptions.release = await cli.releases.proposeVersion();
       }

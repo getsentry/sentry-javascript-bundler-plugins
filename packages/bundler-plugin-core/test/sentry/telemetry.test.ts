@@ -1,6 +1,62 @@
 import { Hub } from "@sentry/node";
 import { InternalOptions } from "../../src/options-mapping";
-import { addPluginOptionTags, captureMinimalError } from "../../src/sentry/telemetry";
+import { SentryCLILike } from "../../src/sentry/cli";
+import {
+  addPluginOptionTags,
+  captureMinimalError,
+  turnOffTelemetryForSelfHostedSentry,
+} from "../../src/sentry/telemetry";
+
+describe("turnOffTelemetryForSelfHostedSentry", () => {
+  const mockedCLI = {
+    execute: jest
+      .fn()
+      .mockImplementation(() => "Sentry Server: https://sentry.io  \nsomeotherstuff\netc"),
+  };
+
+  const options = {
+    enabled: true,
+    tracesSampleRate: 1.0,
+    sampleRate: 1.0,
+  };
+
+  const mockedClient = {
+    getOptions: jest.fn().mockImplementation(() => options),
+  };
+  const mockedHub = {
+    getClient: jest.fn().mockImplementation(() => {
+      return mockedClient;
+    }),
+  };
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    mockedCLI.execute.mockImplementation(
+      () => "Sentry Server: https://sentry.io  \nsomeotherstuff\netc"
+    );
+  });
+
+  it("Should turn telemetry off if CLI returns a URL other than sentry.io", async () => {
+    mockedCLI.execute.mockImplementation(
+      () => "Sentry Server: https://selfhostedSentry.io  \nsomeotherstuff\netc"
+    );
+    await turnOffTelemetryForSelfHostedSentry(
+      mockedCLI as unknown as SentryCLILike,
+      mockedHub as unknown as Hub
+    );
+    expect(mockedHub.getClient).toHaveBeenCalledTimes(1);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    expect(mockedHub.getClient().getOptions).toHaveBeenCalledTimes(3);
+  });
+
+  it("Should do nothing if CLI returns sentry.io as a URL", async () => {
+    await turnOffTelemetryForSelfHostedSentry(
+      mockedCLI as unknown as SentryCLILike,
+      mockedHub as unknown as Hub
+    );
+    expect(mockedHub.getClient).not.toHaveBeenCalled();
+  });
+});
 
 describe("captureMinimalError", () => {
   const mockedHub = {

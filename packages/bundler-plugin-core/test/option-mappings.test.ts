@@ -34,6 +34,7 @@ describe("normalizeUserOptions()", () => {
       silent: false,
       telemetry: true,
       injectReleasesMap: false,
+      url: "https://sentry.io",
     });
   });
 
@@ -76,6 +77,7 @@ describe("normalizeUserOptions()", () => {
       silent: false,
       telemetry: true,
       injectReleasesMap: false,
+      url: "https://sentry.io",
     });
   });
 
@@ -104,6 +106,35 @@ describe("normalizeUserOptions()", () => {
     process.env["SENTRY_HEADER"] = _original_SENTRY_HEADER;
     process.env["CUSTOM_HEADER"] = _original_CUSTOM_HEADER;
   });
+
+  test.each(["https://sentry.io", undefined])(
+    "should enable telemetry if `telemetry` is true and Sentry SaaS URL (%s) is used",
+    (url) => {
+      const options = {
+        include: "",
+        url,
+      };
+
+      expect(normalizeUserOptions(options).telemetry).toBe(true);
+    }
+  );
+
+  test.each([
+    [true, "https://selfhostedSentry.io"],
+    [false, "https://sentry.io"],
+    [false, "https://selfhostedSentry.io"],
+  ])(
+    "should disable telemetry if `telemetry` is %s and Sentry SaaS URL (%s) is used",
+    (telemetry, url) => {
+      const options = {
+        include: "",
+        telemetry,
+        url,
+      };
+
+      expect(normalizeUserOptions(options).telemetry).toBe(false);
+    }
+  );
 });
 
 describe("validateOptions", () => {

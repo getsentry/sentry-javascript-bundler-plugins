@@ -28,8 +28,8 @@ export default defineConfig({
       ignore: ["!out/vite-smallNodeApp/index.js.map"],
       ignoreFile: ".sentryignore",
       setCommits: {
-        repo: "",
-        commit: "",
+        repo: "someRepo",
+        commit: "someCommit",
         ignoreMissing: true,
       },
       deploy: {
