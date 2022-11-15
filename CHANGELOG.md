@@ -6,7 +6,7 @@
 
 ## 0.1.0
 
-This release marks the first official release of the Sentry bundler plugins. As of this release, the plugins support all features of the standalone Sentry Webpack plugin.
+With this release, the Sentry bundler plugins support all features of the standalone Sentry Webpack plugin.
 Please note that breaking changes might still be introduced.
 
 - Re-added Sentry CLI to the project (#85).
