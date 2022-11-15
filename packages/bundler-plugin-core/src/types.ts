@@ -1,4 +1,4 @@
-import { Hub } from "@sentry/hub";
+import { Hub } from "@sentry/core";
 import { Span } from "@sentry/tracing";
 import { SentryCLILike } from "./sentry/cli";
 import { createLogger } from "./sentry/logger";

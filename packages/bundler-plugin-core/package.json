@@ -36,8 +36,8 @@
   },
   "dependencies": {
     "@sentry/cli": "^1.74.6",
-    "@sentry/node": "^7.11.1",
-    "@sentry/tracing": "^7.11.1",
+    "@sentry/node": "^7.19.0",
+    "@sentry/tracing": "^7.19.0",
     "magic-string": "0.26.2",
     "unplugin": "0.10.1"
   },
