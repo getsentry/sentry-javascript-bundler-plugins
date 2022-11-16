@@ -13,7 +13,7 @@ createCjsBundles(
   {
     release: "I AM A RELEASE!",
     include: outputDir,
-    entries: (entrypointPath) =>
+    releaseInjectionTargets: (entrypointPath) =>
       entrypointPath === entryPoint1Path || entrypointPath === entryPoint3Path,
     dryRun: true,
   } as Options

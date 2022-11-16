@@ -9,6 +9,6 @@ const outputDir = path.resolve(__dirname, "./out");
 createCjsBundles({ entrypoint1: entryPoint1Path, entrypoint2: entryPoint2Path }, outputDir, {
   release: "I AM A RELEASE!",
   include: outputDir,
-  entries: entryPoint1Path,
+  releaseInjectionTargets: entryPoint1Path,
   dryRun: true,
 } as Options);

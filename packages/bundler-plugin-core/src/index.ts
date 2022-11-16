@@ -41,7 +41,7 @@ const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".cjs
  * that is part of the bundle. On a technical level this is done by appending an import (`import "sentry-release-injector;"`)
  * to all entrypoint files of the user code (see `transformInclude` and `transform` hooks). This import is then resolved
  * by the sentry plugin to a virtual module that sets the global variable (see `resolveId` and `load` hooks).
- * If a user wants to inject the release into a particular set of modules they can use the `entries` option.
+ * If a user wants to inject the release into a particular set of modules they can use the `releaseInjectionTargets` option.
  *
  * Source maps upload:
  *
@@ -193,7 +193,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
     /**
      * This hook determines whether we want to transform a module. In the sentry bundler plugin we want to transform every entrypoint
-     * unless configured otherwise with the `entries` option.
+     * unless configured otherwise with the `releaseInjectionTargets` option.
      *
      * @param id Always the absolute (fully resolved) path to the module.
      * @returns `true` or `false` depending on whether we want to transform the module. For the sentry bundler plugin we only
@@ -210,13 +210,13 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         return false;
       }
 
-      if (internalOptions.entries) {
-        // If there's an `entries` option transform (ie. inject the release varible) when the file path matches the option.
-        if (typeof internalOptions.entries === "function") {
-          return internalOptions.entries(id);
+      if (internalOptions.releaseInjectionTargets) {
+        // If there's an `releaseInjectionTargets` option transform (ie. inject the release varible) when the file path matches the option.
+        if (typeof internalOptions.releaseInjectionTargets === "function") {
+          return internalOptions.releaseInjectionTargets(id);
         }
 
-        return internalOptions.entries.some((entry) => {
+        return internalOptions.releaseInjectionTargets.some((entry) => {
           if (entry instanceof RegExp) {
             return entry.test(id);
           } else {
@@ -236,7 +236,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
     /**
      * This hook is responsible for injecting the "sentry release injector" imoprt statement into each entrypoint unless
-     * configured otherwise with the `entries` option (logic for that is in the `transformInclude` hook).
+     * configured otherwise with the `releaseInjectionTargets` option (logic for that is in the `transformInclude` hook).
      *
      * @param code Code of the file to transform.
      * @param id Always the absolute (fully resolved) path to the module.
