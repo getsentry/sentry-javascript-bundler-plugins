@@ -6,10 +6,6 @@ import {
   getReleaseFilesFromSentry,
 } from "./sentry-api";
 
-import fs from "fs";
-import path from "path";
-import glob from "glob";
-
 type ReleaseFilesData = {
   id: string;
   name: string;
@@ -49,20 +45,6 @@ export async function getSentryReleaseFiles(release: string): Promise<ReleaseFil
     releaseFileEntries.map((entry) => getReleaseFile(release, entry))
   );
   return releaseFiles;
-}
-
-export function getReferenceFiles(bundler: string, testDirecory: string): ReleaseFile[] {
-  const refFilePath = path.resolve(testDirecory, "ref", bundler);
-  const files = glob.sync(path.join(refFilePath, "**"), {
-    nodir: true,
-    absolute: true,
-  });
-  return files.map((file) => {
-    return {
-      name: path.relative(refFilePath, file),
-      content: fs.readFileSync(file).toString(),
-    };
-  });
 }
 
 async function getReleaseFiles(release: string): Promise<ReleaseFilesData[]> {
