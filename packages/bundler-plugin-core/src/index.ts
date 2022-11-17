@@ -28,6 +28,8 @@ import { Hub } from "@sentry/node";
 // This probably doesn't work for all bundlers but for rollup it does.
 const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
 
+const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".cjs", ".mjs"];
+
 /**
  * The sentry bundler plugin concerns itself with two things:
  * - Release injection
@@ -35,45 +37,11 @@ const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
  *
  * Release injection:
  *
- * Per default the sentry bundler plugin will inject a global `SENTRY_RELEASE` variable into the entrypoint of all bundles.
- * On a technical level this is done by appending an import (`import "sentry-release-injector;"`) to all entrypoint files
- * of the user code (see `transformInclude` and `transform` hooks). This import is then resolved by the sentry plugin
- * to a virtual module that sets the global variable (see `resolveId` and `load` hooks).
- *
- * The resulting output approximately looks like this:
- *
- * ```text
- *                               entrypoint1.js (user file)
- *  ┌─────────────────────────┐  ┌─────────────────────────────────────────────────┐
- *  │                         │  │  import { myFunction } from "./my-library.js";  │
- *  │  sentry-bundler-plugin  │  │                                                 │
- *  │                         │  │  const myResult = myFunction();                 │
- *  └---------│---------------   │  export { myResult };                           │
- *            │                  │                                                 │
- *            │      injects     │  // injected by sentry plugin                   │
- *            ├───────────────────► import "sentry-release-injector"; ─────────────────────┐
- *            │                  └─────────────────────────────────────────────────┘       │
- *            │                                                                            │
- *            │                                                                            │
- *            │                  entrypoint2.js (user file)                                │
- *            │                  ┌─────────────────────────────────────────────────┐       │
- *            │                  │  export function myFunction() {                 │       │
- *            │                  │    return "Hello world!";                       │       │
- *            │                  │  }                                              │       │
- *            │                  │                                                 │       │
- *            │      injects     │  // injected by sentry plugin                   │       │
- *            └───────────────────► import "sentry-release-injector"; ─────────────────────┤
- *                               └─────────────────────────────────────────────────┘       │
- *                                                                                         │
- *                                                                                         │
- *                               sentry-release-injector                                   │
- *                               ┌──────────────────────────────────┐                      │
- *                               │                                  │    is resolved       │
- *                               │  global.SENTRY_RELEASE = { ... } │    by plugin         │
- *                               │  // + a little more logic        │<─────────────────────┘
- *                               │                                  │    (only once)
- *                               └──────────────────────────────────┘
- * ```
+ * Per default the sentry bundler plugin will inject a global `SENTRY_RELEASE` into each JavaScript/TypeScript module
+ * that is part of the bundle. On a technical level this is done by appending an import (`import "sentry-release-injector;"`)
+ * to all entrypoint files of the user code (see `transformInclude` and `transform` hooks). This import is then resolved
+ * by the sentry plugin to a virtual module that sets the global variable (see `resolveId` and `load` hooks).
+ * If a user wants to inject the release into a particular set of modules they can use the `releaseInjectionTargets` option.
  *
  * Source maps upload:
  *
@@ -127,12 +95,6 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
   });
 
   sentryHub.setUser({ id: internalOptions.org });
-
-  // This is `nonEntrypointSet` instead of `entrypointSet` because this set is filled in the `resolveId` hook and there
-  // we don't have guaranteed access to *absolute* paths of files if they're entrypoints. For non-entrypoints we're
-  // guaranteed to have absolute paths - we're then using the paths in later hooks to make decisions about whether a
-  // file is an entrypoint or a non-entrypoint.
-  const nonEntrypointSet = new Set<string>();
 
   let transaction: Transaction | undefined;
   let releaseInjectionSpan: Span | undefined;
@@ -192,10 +154,6 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         level: "info",
       });
 
-      if (!isEntry) {
-        nonEntrypointSet.add(id);
-      }
-
       if (id === RELEASE_INJECTOR_ID) {
         return RELEASE_INJECTOR_ID;
       } else {
@@ -235,7 +193,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
     /**
      * This hook determines whether we want to transform a module. In the sentry bundler plugin we want to transform every entrypoint
-     * unless configured otherwise with the `entries` option.
+     * unless configured otherwise with the `releaseInjectionTargets` option.
      *
      * @param id Always the absolute (fully resolved) path to the module.
      * @returns `true` or `false` depending on whether we want to transform the module. For the sentry bundler plugin we only
@@ -247,28 +205,38 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         level: "info",
       });
 
-      if (internalOptions.entries) {
-        // If there's an `entries` option transform (ie. inject the release varible) when the file path matches the option.
-        if (typeof internalOptions.entries === "function") {
-          return internalOptions.entries(id);
+      // We don't want to transform our injected code.
+      if (id === RELEASE_INJECTOR_ID) {
+        return false;
+      }
+
+      if (internalOptions.releaseInjectionTargets) {
+        // If there's an `releaseInjectionTargets` option transform (ie. inject the release varible) when the file path matches the option.
+        if (typeof internalOptions.releaseInjectionTargets === "function") {
+          return internalOptions.releaseInjectionTargets(id);
         }
 
-        return internalOptions.entries.some((entry) => {
+        return internalOptions.releaseInjectionTargets.some((entry) => {
           if (entry instanceof RegExp) {
             return entry.test(id);
           } else {
             return id === entry;
           }
         });
-      }
+      } else {
+        const pathIsOrdinary = !id.includes("?") && !id.includes("#");
 
-      // We want to transform (release injection) every module except for "sentry-release-injector".
-      return id !== RELEASE_INJECTOR_ID && !nonEntrypointSet.has(id);
+        const pathHasAllowedFileEnding = ALLOWED_TRANSFORMATION_FILE_ENDINGS.some(
+          (allowedFileEnding) => id.endsWith(allowedFileEnding)
+        );
+
+        return pathIsOrdinary && pathHasAllowedFileEnding;
+      }
     },
 
     /**
      * This hook is responsible for injecting the "sentry release injector" imoprt statement into each entrypoint unless
-     * configured otherwise with the `entries` option (logic for that is in the `transformInclude` hook).
+     * configured otherwise with the `releaseInjectionTargets` option (logic for that is in the `transformInclude` hook).
      *
      * @param code Code of the file to transform.
      * @param id Always the absolute (fully resolved) path to the module.
@@ -281,11 +249,11 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       });
 
       // The MagicString library allows us to generate sourcemaps for the changes we make to the user code.
-      const ms: MagicString = new MagicString(code); // Very stupid author's note: For some absurd reason, when we add a JSDoc to this hook, the TS language server starts complaining about `ms` and adding a type annotation helped so that's why it's here. (┛ಠ_ಠ)┛彡┻━┻
+      const ms = new MagicString(code);
 
-      // appending instead of prepending has less probability of mucking with user'sadly
-      // source maps and import statements get to the top anyways
-      ms.append(`import "${RELEASE_INJECTOR_ID}";`);
+      // Appending instead of prepending has less probability of mucking with user's source maps.
+      // Luckily import statements get hoisted to the top anyways.
+      ms.append(`;\nimport "${RELEASE_INJECTOR_ID}";`);
 
       if (unpluginMetaContext.framework === "esbuild") {
         // esbuild + unplugin is buggy at the moment when we return an object with a `map` (sourcemap) property.

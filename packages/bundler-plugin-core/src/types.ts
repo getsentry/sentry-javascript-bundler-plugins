@@ -63,16 +63,19 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   dist?: string;
 
   /**
-   * Filter for bundle entry points that should contain the provided release.
+   * Filter for modules that the release should be injected in.
    *
-   * This option takes a string, a regular expression, or an array containing strings, regular expressions, or both.
-   * It's also possible to provide a filter function that takes the absolute path of a processed entrypoint and should
-   * return `true` if the release should be injected into the entrypoint and `false` otherwise. String values of this
-   * option require a full match with the absolute path of the bundle.
+   * This option takes a string, a regular expression, or an array containing strings,
+   * regular expressions, or both. It's also possible to provide a filter function
+   * that takes the absolute path of a processed module. It should return `true`
+   * if the release should be injected into the module and `false` otherwise. String
+   * values of this option require a full match with the absolute path of the module.
    *
-   * By default, the release will be injected into all entry points.
+   * By default, the release will be injected into all modules - however, bundlers
+   * will include the injected release code only once per entrypoint.
+   * If release injection should be disabled, provide an empty array here.
    */
-  entries?: (string | RegExp)[] | RegExp | string | ((filePath: string) => boolean);
+  releaseInjectionTargets?: (string | RegExp)[] | RegExp | string | ((filePath: string) => boolean);
 
   /**
    * Determines if the Sentry release record should be automatically finalized

@@ -23,6 +23,15 @@ sentryWebpackPlugin({
 });
 ```
 
+### Replacing `entries` option with `releaseInjectionTargets`
+
+Previously, the `entries` option was used to filter for _entrypoints_ that the plugin should inject the release into.
+Releases were only injected into entrypoint files of a bundle.
+In version 2, releases are injected into every module that is part of a bundle.
+Don't worry, your bundler will only include the injected release code once.
+Instead of using the `entries` option to filter for _entrypoints_, the `releaseInjectionTargets` option can now be used to filter for _modules_ that the plugin should inject the release into.
+Matching behaviour stays the same.
+
 ### Injecting `SENTRY_RELEASES` Map
 
 Previously, the webpack plugin always injected a `SENTRY_RELEASES` variable into the global object which would map from `project@org` to the `release` value. In version 2, we made this behaviour opt-in by setting the `injectReleasesMap` option in the plugin options to `true`.

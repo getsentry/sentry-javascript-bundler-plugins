@@ -34,7 +34,7 @@ type OptionalInternalOptions = Partial<
 >;
 
 type NormalizedInternalOptions = {
-  entries: (string | RegExp)[] | ((filePath: string) => boolean) | undefined;
+  releaseInjectionTargets: (string | RegExp)[] | ((filePath: string) => boolean) | undefined;
   include: InternalIncludeEntry[];
 };
 
@@ -108,7 +108,7 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     // Optional options
     setCommits: userOptions.setCommits,
     deploy: userOptions.deploy,
-    entries: normalizeEntries(userOptions.entries),
+    releaseInjectionTargets: normalizeReleaseInjectionTargets(userOptions.releaseInjectionTargets),
     dist: userOptions.dist,
     errorHandler: userOptions.errorHandler,
     configFile: userOptions.configFile,
@@ -124,17 +124,18 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
 }
 
 /**
- * Converts the user-facing `entries` option to the internal `entries` option
+ * Converts the user-facing `releaseInjectionTargets` option to the internal
+ * `releaseInjectionTargets` option
  */
-function normalizeEntries(
-  userEntries: UserOptions["entries"]
+function normalizeReleaseInjectionTargets(
+  userReleaseInjectionTargets: UserOptions["releaseInjectionTargets"]
 ): (string | RegExp)[] | ((filePath: string) => boolean) | undefined {
-  if (userEntries === undefined) {
+  if (userReleaseInjectionTargets === undefined) {
     return undefined;
-  } else if (typeof userEntries === "function") {
-    return userEntries;
+  } else if (typeof userReleaseInjectionTargets === "function") {
+    return userReleaseInjectionTargets;
   } else {
-    return arrayify(userEntries);
+    return arrayify(userReleaseInjectionTargets);
   }
 }
 

@@ -10,7 +10,7 @@ function getFileContents(bundlePath: string): string {
   return fs.readFileSync(bundlePath, { encoding: "utf-8" });
 }
 
-describe("`entries` option should work as expected when given an array of RegEx and strings", () => {
+describe("`releaseInjectionTargets` option should work as expected when given an array of RegEx and strings", () => {
   test("esbuild bundle", () => {
     expect(getBundleOutput(path.join(__dirname, "./out/esbuild/entrypoint1.js"))).toBe(
       "I AM A RELEASE!"
