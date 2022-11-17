@@ -4,6 +4,13 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.2.0
+
+This release replaces the `entries` option with `releaseInjectionTargets` which is a breaking change from previous versions.
+For more information, take a look at the [migration guide](https://github.com/getsentry/sentry-javascript-bundler-plugins/blob/main/MIGRATION.md#replacing-entries-option-with-releaseinjectiontargets).
+
+- feat: Replace `entries` option with `releaseInjectionTargets` (#123)
+
 ## 0.1.0
 
 With this release, the Sentry bundler plugins support all features of the standalone Sentry Webpack plugin.
