@@ -6,8 +6,6 @@
 
 # Sentry Rollup Plugin
 
-**WARNING: This package is work in progress! Use with caution and do not yet use it in production. We're happy to receive your feedback!**
-
 A Rollup plugin that provides release management features for Sentry:
 
 - Sourcemap upload

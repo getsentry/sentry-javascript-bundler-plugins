@@ -4,9 +4,7 @@
   </a>
 </p>
 
-# Sentry Esbuild Plugin (WIP)
-
-**WARNING: This package is work in progress! Use with caution and do not yet use it in production. We're happy to receive your feedback!**
+# Sentry Esbuild Plugin
 
 A esbuild plugin that provides release management features for Sentry:
 
