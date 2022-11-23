@@ -14,25 +14,25 @@ function checkBundle(bundlePath: string): void {
 
 test("esbuild bundle", () => {
   expect.assertions(1);
-  checkBundle(path.join(__dirname, "./out/esbuild/index.js"));
+  checkBundle(path.join(__dirname, "out", "esbuild", "index.js"));
 });
 
 test("rollup bundle", () => {
   expect.assertions(1);
-  checkBundle(path.join(__dirname, "./out/rollup/index.js"));
+  checkBundle(path.join(__dirname, "out", "rollup", "index.js"));
 });
 
 test("vite bundle", () => {
   expect.assertions(1);
-  checkBundle(path.join(__dirname, "./out/vite/index.js"));
+  checkBundle(path.join(__dirname, "out", "vite", "index.js"));
 });
 
 test("webpack 4 bundle", () => {
   expect.assertions(1);
-  checkBundle(path.join(__dirname, "./out/webpack4/index.js"));
+  checkBundle(path.join(__dirname, "out", "webpack4", "index.js"));
 });
 
 test("webpack 5 bundle", () => {
   expect.assertions(1);
-  checkBundle(path.join(__dirname, "./out/webpack5/index.js"));
+  checkBundle(path.join(__dirname, "out", "webpack5", "index.js"));
 });
