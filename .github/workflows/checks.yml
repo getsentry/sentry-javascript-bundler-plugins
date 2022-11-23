@@ -48,7 +48,7 @@ jobs:
 
   test-integration:
     needs: build
-    name: Integration Tests
+    name: "Test (Node ${{ matrix.node-version }}, OS ${{ matrix.os }})"
     strategy:
       fail-fast: false
       matrix:
