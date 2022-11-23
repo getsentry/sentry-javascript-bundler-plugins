@@ -55,9 +55,6 @@ jobs:
         node-version: ["10.24.1", "12.22.12", "14.21.1", "16.18.1", "18.12.1"]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    env:
-      # Needed for webpack4 on Node.js >= 18
-      NODE_OPTIONS: "--openssl-legacy-provider"
     steps:
       - uses: actions/checkout@v3
       - uses: volta-cli/action@v3

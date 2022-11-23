@@ -1,5 +1,6 @@
 import childProcess from "child_process";
 import path from "path";
+import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 /**
  * Runs a node file in a seprate process.
@@ -27,7 +28,7 @@ test("vite bundle", () => {
   checkBundle(path.join(__dirname, "./out/vite/index.js"));
 });
 
-test("webpack 4 bundle", () => {
+testIfNodeMajorVersionIsLessThan18("webpack 4 bundle", () => {
   expect.assertions(1);
   checkBundle(path.join(__dirname, "./out/webpack4/index.js"));
 });

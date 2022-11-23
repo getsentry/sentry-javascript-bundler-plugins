@@ -54,24 +54,27 @@ export function createCjsBundles(
     format: "cjs",
   });
 
-  webpack4(
-    {
-      mode: "production",
-      entry: entrypoints,
-      cache: false,
-      output: {
-        path: path.join(outFolder, "webpack4"),
-        libraryTarget: "commonjs",
+  const nodejsMajorversion = process.version.split(".")[0];
+  if (!nodejsMajorversion || parseInt(nodejsMajorversion) < 18) {
+    webpack4(
+      {
+        mode: "production",
+        entry: entrypoints,
+        cache: false,
+        output: {
+          path: path.join(outFolder, "webpack4"),
+          libraryTarget: "commonjs",
+        },
+        target: "node", // needed for webpack 4 so we can access node api
+        plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
       },
-      target: "node", // needed for webpack 4 so we can access node api
-      plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
-    },
-    (err) => {
-      if (err) {
-        throw err;
+      (err) => {
+        if (err) {
+          throw err;
+        }
       }
-    }
-  );
+    );
+  }
 
   webpack5(
     {

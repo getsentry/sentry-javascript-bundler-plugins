@@ -1,6 +1,7 @@
 import childProcess from "child_process";
 import path from "path";
 import fs from "fs";
+import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 function getBundleOutput(bundlePath: string): string {
   return childProcess.execSync(`node ${bundlePath}`, { encoding: "utf-8" });
@@ -50,14 +51,18 @@ describe("`releaseInjectionTargets` option should work as expected when given a 
     );
   });
 
-  test("webpack 4 bundle", () => {
+  testIfNodeMajorVersionIsLessThan18("webpack 4 bundle", () => {
+    // eslint-disable-next-line jest/no-standalone-expect
     expect(getBundleOutput(path.join(__dirname, "out", "webpack4", "entrypoint1.js"))).toBe(
       "I AM A RELEASE!"
     );
+    // eslint-disable-next-line jest/no-standalone-expect
     expect(getBundleOutput(path.join(__dirname, "out", "webpack4", "entrypoint2.js"))).toBe("");
+    // eslint-disable-next-line jest/no-standalone-expect
     expect(getBundleOutput(path.join(__dirname, "out", "webpack4", "entrypoint3.js"))).toBe(
       "I AM A RELEASE!"
     );
+    // eslint-disable-next-line jest/no-standalone-expect
     expect(
       getFileContents(path.join(__dirname, "out", "webpack4", "entrypoint2.js"))
     ).not.toContain("I AM A RELEASE!");
