@@ -12,25 +12,30 @@ import {
   Options,
 } from "@sentry/bundler-plugin-core";
 
+const nodejsMajorversion = process.version.split(".")[0];
+
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
   outFolder: string,
   sentryUnpluginOptions: Options
 ): void {
-  void vite.build({
-    clearScreen: false,
-    build: {
-      outDir: path.join(outFolder, "vite"),
-      rollupOptions: {
-        input: entrypoints,
-        output: {
-          format: "cjs",
-          entryFileNames: "[name].js",
+  // Vite doesn't work on Node.js versions <= 12
+  if (!nodejsMajorversion || parseInt(nodejsMajorversion) >= 14) {
+    void vite.build({
+      clearScreen: false,
+      build: {
+        outDir: path.join(outFolder, "vite"),
+        rollupOptions: {
+          input: entrypoints,
+          output: {
+            format: "cjs",
+            entryFileNames: "[name].js",
+          },
         },
       },
-    },
-    plugins: [sentryVitePlugin(sentryUnpluginOptions)],
-  });
+      plugins: [sentryVitePlugin(sentryUnpluginOptions)],
+    });
+  }
 
   void rollup
     .rollup({
@@ -54,7 +59,7 @@ export function createCjsBundles(
     format: "cjs",
   });
 
-  const nodejsMajorversion = process.version.split(".")[0];
+  // Webpack 4 doesn't work on Node.js versions >= 18
   if (!nodejsMajorversion || parseInt(nodejsMajorversion) < 18) {
     webpack4(
       {
