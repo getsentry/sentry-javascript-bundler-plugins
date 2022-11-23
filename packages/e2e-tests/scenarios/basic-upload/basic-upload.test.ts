@@ -8,6 +8,12 @@ describe("Simple Sourcemaps Upload (one string include + default options)", () =
 
     const sentryFiles = await getSentryReleaseFiles(release);
 
-    expect(sentryFiles).toMatchSnapshot();
+    // We replace Windows newlines with Unix newlines so we can run this test on windows CI
+    const osNormalizedSentryFiles = sentryFiles.map((sentryFile) => {
+      const copiedSentryFile = { ...sentryFile };
+      copiedSentryFile.content = sentryFile.content.replace("\r\n", "\n");
+    });
+
+    expect(osNormalizedSentryFiles).toMatchSnapshot();
   });
 });
