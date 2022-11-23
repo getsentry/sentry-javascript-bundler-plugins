@@ -220,6 +220,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
           if (entry instanceof RegExp) {
             return entry.test(id);
           } else {
+            console.log("foobar", { id, entry });
             return id === entry;
           }
         });
