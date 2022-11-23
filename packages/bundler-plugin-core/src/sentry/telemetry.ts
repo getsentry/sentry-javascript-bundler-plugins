@@ -1,29 +1,14 @@
 import SentryCli from "@sentry/cli";
 import { defaultStackParser, Hub, makeNodeTransport, NodeClient, Span } from "@sentry/node";
-import { InternalOptions } from "../options-mapping";
+import { InternalOptions, SENTRY_SAAS_URL } from "../options-mapping";
 import { BuildContext } from "../types";
 
 const SENTRY_SAAS_HOSTNAME = "sentry.io";
 
 export function makeSentryClient(
   dsn: string,
-  options: InternalOptions,
-  bundler: "rollup" | "webpack" | "vite" | "esbuild",
   allowedToSendTelemetryPromise: Promise<boolean>
 ): { sentryHub: Hub; sentryClient: NodeClient } {
-  const {
-    org,
-    project,
-    cleanArtifacts,
-    finalize,
-    setCommits,
-    injectReleasesMap,
-    dryRun,
-    errorHandler,
-    deploy,
-    include,
-  } = options;
-
   const client = new NodeClient({
     dsn,
 
@@ -55,43 +40,6 @@ export function makeSentryClient(
   });
 
   const hub = new Hub(client);
-
-  hub.setTag("include", include.length > 1 ? "multiple-entries" : "single-entry");
-
-  // Optional release pipeline steps
-  if (cleanArtifacts) {
-    hub.setTag("clean-artifacts", true);
-  }
-  if (setCommits) {
-    hub.setTag("set-commits", setCommits.auto === true ? "auto" : "manual");
-  }
-  if (finalize) {
-    hub.setTag("finalize-release", true);
-  }
-  if (deploy) {
-    hub.setTag("add-deploy", true);
-  }
-
-  // Miscelaneous options
-  if (dryRun) {
-    hub.setTag("dry-run", true);
-  }
-  if (injectReleasesMap) {
-    hub.setTag("inject-releases-map", true);
-  }
-  if (errorHandler) {
-    hub.setTag("error-handler", "custom");
-  }
-
-  hub.setTag("node", process.version);
-
-  hub.setTags({
-    organization: org,
-    project,
-    bundler,
-  });
-
-  hub.setUser({ id: org });
 
   return { sentryClient: client, sentryHub: hub };
 }
@@ -133,12 +81,75 @@ export function captureMinimalError(error: unknown | Error, hub: Hub) {
   hub.captureException(sentryError);
 }
 
+export function addPluginOptionInformationToHub(
+  options: InternalOptions,
+  hub: Hub,
+  bundler: "rollup" | "webpack" | "vite" | "esbuild"
+) {
+  const {
+    org,
+    project,
+    cleanArtifacts,
+    finalize,
+    setCommits,
+    injectReleasesMap,
+    dryRun,
+    errorHandler,
+    deploy,
+    include,
+  } = options;
+
+  hub.setTag("include", include.length > 1 ? "multiple-entries" : "single-entry");
+
+  // Optional release pipeline steps
+  if (cleanArtifacts) {
+    hub.setTag("clean-artifacts", true);
+  }
+  if (setCommits) {
+    hub.setTag("set-commits", setCommits.auto === true ? "auto" : "manual");
+  }
+  if (finalize) {
+    hub.setTag("finalize-release", true);
+  }
+  if (deploy) {
+    hub.setTag("add-deploy", true);
+  }
+
+  // Miscelaneous options
+  if (dryRun) {
+    hub.setTag("dry-run", true);
+  }
+  if (injectReleasesMap) {
+    hub.setTag("inject-releases-map", true);
+  }
+  if (errorHandler) {
+    hub.setTag("error-handler", "custom");
+  }
+
+  hub.setTag("node", process.version);
+
+  hub.setTags({
+    organization: org,
+    project,
+    bundler,
+  });
+
+  hub.setUser({ id: org });
+}
+
 export async function shouldSendTelemetry(options: InternalOptions): Promise<boolean> {
-  if (!options.telemetry) {
+  const { silent, org, project, authToken, url, vcsRemote, customHeader, dist, telemetry } =
+    options;
+
+  // `options.telemetry` defaults to true
+  if (telemetry === false) {
     return false;
   }
 
-  const { silent, org, project, authToken, url, vcsRemote, customHeader, dist } = options;
+  if (url === SENTRY_SAAS_URL) {
+    return true;
+  }
+
   const cli = new SentryCli(options.configFile, {
     url,
     authToken,
@@ -159,7 +170,7 @@ export async function shouldSendTelemetry(options: InternalOptions): Promise<boo
     cliInfo = await cli.execute(["info"], false);
   } catch (e) {
     throw new Error(
-      'Sentry CLI "info" command failed, make sure you have an auth token configured, your `url` option is correct, and the `url` option uses the https protocol.'
+      'Sentry CLI "info" command failed, make sure you have an auth token configured, and your `url` option is correct.'
     );
   }
 

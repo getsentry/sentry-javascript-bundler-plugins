@@ -11,6 +11,7 @@ import {
 } from "./sentry/releasePipeline";
 import "@sentry/tracing";
 import {
+  addPluginOptionInformationToHub,
   addSpanToTransaction,
   captureMinimalError,
   makeSentryClient,
@@ -63,10 +64,10 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
   const { sentryHub, sentryClient } = makeSentryClient(
     "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
-    internalOptions,
-    unpluginMetaContext.framework,
     allowedToSendTelemetryPromise
   );
+
+  addPluginOptionInformationToHub(internalOptions, sentryHub, unpluginMetaContext.framework);
 
   //TODO: This call is problematic because as soon as we set our hub as the current hub
   //      we might interfere with other plugins that use Sentry. However, for now, we'll
