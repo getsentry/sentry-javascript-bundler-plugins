@@ -6,8 +6,8 @@ import { createCjsBundles } from "../../utils/create-cjs-bundles";
 
 deleteAllReleases(pluginConfig.release || "")
   .then(() => {
-    const entryPointPath = path.resolve(__dirname, "./input/index.js");
-    const outputDir = path.resolve(__dirname, "./out");
+    const entryPointPath = path.resolve(__dirname, "input", "index.js");
+    const outputDir = path.resolve(__dirname, "out");
 
     createCjsBundles({ index: entryPointPath }, outputDir, pluginConfig);
   })

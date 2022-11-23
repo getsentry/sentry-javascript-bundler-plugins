@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     outDir: "./out/vite-smallNodeApp",
     lib: {
-      entry: path.resolve(__dirname, "./src/smallNodeApp.js"),
+      entry: path.resolve(__dirname, "src", "smallNodeApp.js"),
       name: "ExampleBundle",
       fileName: "index",
       formats: ["cjs"],
