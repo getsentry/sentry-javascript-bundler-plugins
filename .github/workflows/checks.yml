@@ -60,7 +60,9 @@ jobs:
       - uses: volta-cli/action@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: yarn --frozen-lockfile
+      # nx uses fs-extra which needs node >= 12 - we can ignore because its a dev dependency
+      # husky uses fs-extra which needs node >= 14 - we can ignore because its a dev dependency
+      - run: yarn --frozen-lockfile --ignore-engines
       - run: yarn test:integration
 
   test-e2e:
