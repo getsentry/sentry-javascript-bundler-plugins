@@ -1,9 +1,6 @@
 import childProcess from "child_process";
 import path from "path";
-import {
-  testIfNodeMajorVersionIsGreaterOrEqual14,
-  testIfNodeMajorVersionIsLessThan18,
-} from "../../utils/testIf";
+import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 /**
  * Runs a node file in a seprate process.
@@ -26,7 +23,7 @@ test("rollup bundle", () => {
   checkBundle(path.join(__dirname, "./out/rollup/index.js"));
 });
 
-testIfNodeMajorVersionIsGreaterOrEqual14("vite bundle", () => {
+test("vite bundle", () => {
   expect.assertions(1);
   checkBundle(path.join(__dirname, "./out/vite/index.js"));
 });

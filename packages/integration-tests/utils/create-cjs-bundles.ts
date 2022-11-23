@@ -19,23 +19,20 @@ export function createCjsBundles(
   outFolder: string,
   sentryUnpluginOptions: Options
 ): void {
-  // Vite doesn't work on Node.js versions <= 12
-  if (!nodejsMajorversion || parseInt(nodejsMajorversion) >= 14) {
-    void vite.build({
-      clearScreen: false,
-      build: {
-        outDir: path.join(outFolder, "vite"),
-        rollupOptions: {
-          input: entrypoints,
-          output: {
-            format: "cjs",
-            entryFileNames: "[name].js",
-          },
+  void vite.build({
+    clearScreen: false,
+    build: {
+      outDir: path.join(outFolder, "vite"),
+      rollupOptions: {
+        input: entrypoints,
+        output: {
+          format: "cjs",
+          entryFileNames: "[name].js",
         },
       },
-      plugins: [sentryVitePlugin(sentryUnpluginOptions)],
-    });
-  }
+    },
+    plugins: [sentryVitePlugin(sentryUnpluginOptions)],
+  });
 
   void rollup
     .rollup({

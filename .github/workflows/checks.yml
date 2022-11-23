@@ -52,7 +52,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ["10.24.1", "12.22.12", "14.21.1", "16.18.1", "18.12.1"]
+        node-version: [
+            # nx uses a `yargs-parser` versision which isn't compatible with node 10
+            # "10.24.1",
+            # vite uses optional chaining which isn't compatible with node 12
+            # "12.22.12",
+            "14.21.1",
+            "16.18.1",
+            "18.12.1",
+          ]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -60,7 +68,6 @@ jobs:
       - uses: volta-cli/action@v3
         with:
           node-version: ${{ matrix.node-version }}
-      # nx uses fs-extra which needs node >= 12 - we can ignore because its a dev dependency
       # husky uses fs-extra which needs node >= 14 - we can ignore because its a dev dependency
       - run: yarn --frozen-lockfile --ignore-engines
       - run: yarn test:integration

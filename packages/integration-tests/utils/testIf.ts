@@ -19,14 +19,3 @@ export const testIfNodeMajorVersionIsLessThan18: jest.It = function () {
   return testIf(!nodejsMajorversion || parseInt(nodejsMajorversion) < 18);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
-
-/**
- * Vite doesn't work for Node.js versions < 14.
- * We can use this function to skip tests on vite.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, no-undef, @typescript-eslint/no-unsafe-assignment
-export const testIfNodeMajorVersionIsGreaterOrEqual14: jest.It = function () {
-  const nodejsMajorversion = process.version.split(".")[0];
-  return testIf(!nodejsMajorversion || parseInt(nodejsMajorversion) >= 14);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-} as any;
