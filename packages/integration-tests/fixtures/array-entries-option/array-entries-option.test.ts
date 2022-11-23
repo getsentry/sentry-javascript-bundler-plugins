@@ -17,10 +17,6 @@ describe("`releaseInjectionTargets` option should work as expected when given an
       "I AM A RELEASE!"
     );
     expect(getBundleOutput(path.join(__dirname, "out", "esbuild", "entrypoint2.js"))).toBe("");
-    console.log(
-      "bündle",
-      fs.readFileSync(path.join(__dirname, "out", "esbuild", "entrypoint3.js"), "utf-8")
-    );
     expect(getBundleOutput(path.join(__dirname, "out", "esbuild", "entrypoint3.js"))).toBe(
       "I AM A RELEASE!"
     );
@@ -47,6 +43,10 @@ describe("`releaseInjectionTargets` option should work as expected when given an
       "I AM A RELEASE!"
     );
     expect(getBundleOutput(path.join(__dirname, "out", "vite", "entrypoint2.js"))).toBe("");
+    console.log(
+      "bündle",
+      fs.readFileSync(path.join(__dirname, "out", "vite", "entrypoint3.js"), "utf-8")
+    );
     expect(getBundleOutput(path.join(__dirname, "out", "vite", "entrypoint3.js"))).toBe(
       "I AM A RELEASE!"
     );
