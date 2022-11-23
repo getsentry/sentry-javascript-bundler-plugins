@@ -11,17 +11,17 @@ import {
 } from "./sentry/releasePipeline";
 import "@sentry/tracing";
 import {
-  addPluginOptionTags,
+  addPluginOptionInformationToHub,
   addSpanToTransaction,
   captureMinimalError,
   makeSentryClient,
-  turnOffTelemetryForSelfHostedSentry,
+  shouldSendTelemetry,
 } from "./sentry/telemetry";
 import { Span, Transaction } from "@sentry/types";
 import { createLogger, Logger } from "./sentry/logger";
 import { InternalOptions, normalizeUserOptions, validateOptions } from "./options-mapping";
 import { getSentryCli } from "./sentry/cli";
-import { Hub } from "@sentry/node";
+import { Hub, makeMain } from "@sentry/node";
 
 // We prefix the polyfill id with \0 to tell other plugins not to try to load or transform it.
 // This hack is taken straight from https://rollupjs.org/guide/en/#resolveid.
@@ -60,11 +60,21 @@ const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".cjs
 const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
   const internalOptions = normalizeUserOptions(options);
 
-  const { hub: sentryHub } = makeSentryClient(
+  const allowedToSendTelemetryPromise = shouldSendTelemetry(internalOptions);
+
+  const { sentryHub, sentryClient } = makeSentryClient(
     "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
-    internalOptions.telemetry
+    allowedToSendTelemetryPromise
   );
-  addPluginOptionTags(internalOptions, sentryHub);
+
+  addPluginOptionInformationToHub(internalOptions, sentryHub, unpluginMetaContext.framework);
+
+  //TODO: This call is problematic because as soon as we set our hub as the current hub
+  //      we might interfere with other plugins that use Sentry. However, for now, we'll
+  //      leave it in because without it, we can't get distributed traces (which are pretty nice)
+  //      Let's keep it until someone complains about interference.
+  //      The ideal solution would be a code change in the JS SDK but it's not a straight-forward fix.
+  makeMain(sentryHub);
 
   const logger = createLogger({
     hub: sentryHub,
@@ -83,18 +93,13 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
   const cli = getSentryCli(internalOptions, logger);
 
-  if (internalOptions.telemetry) {
-    logger.info("Sending error and performance telemetry data to Sentry.");
-    logger.info("To disable telemetry, set `options.telemetry` to `false`.");
-  }
-
-  sentryHub.setTags({
-    organization: internalOptions.org,
-    project: internalOptions.project,
-    bundler: unpluginMetaContext.framework,
+  const releaseNamePromise = new Promise<string>((resolve) => {
+    if (options.release) {
+      resolve(options.release);
+    } else {
+      resolve(cli.releases.proposeVersion());
+    }
   });
-
-  sentryHub.setUser({ id: internalOptions.org });
 
   let transaction: Transaction | undefined;
   let releaseInjectionSpan: Span | undefined;
@@ -107,14 +112,18 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
      * Responsible for starting the plugin execution transaction and the release injection span
      */
     async buildStart() {
-      await turnOffTelemetryForSelfHostedSentry(cli, sentryHub);
+      logger.debug("Called 'buildStart'");
 
-      if (!internalOptions.release) {
-        internalOptions.release = await cli.releases.proposeVersion();
+      const isAllowedToSendToSendTelemetry = await allowedToSendTelemetryPromise;
+      if (isAllowedToSendToSendTelemetry) {
+        logger.info("Sending error and performance telemetry data to Sentry.");
+        logger.info("To disable telemetry, set `options.telemetry` to `false`.");
       }
 
+      const releaseName = await releaseNamePromise;
+
       // At this point, we either have determined a release or we have to bail
-      if (!internalOptions.release) {
+      if (!releaseName) {
         handleError(
           new Error(
             "Unable to determine a release name. Make sure to set the `release` option or use an environment that supports auto-detection https://docs.sentry.io/cli/releases/#creating-releases`"
@@ -129,6 +138,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         op: "function.plugin",
         name: "Sentry Bundler Plugin execution",
       });
+
       releaseInjectionSpan = addSpanToTransaction(
         { hub: sentryHub, parentSpan: transaction, logger, cli },
         "function.plugin.inject_release",
@@ -148,11 +158,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
      * @returns `"sentry-release-injector"` when the imported file is called `"sentry-release-injector"`. Otherwise returns `undefined`.
      */
     resolveId(id, importer, { isEntry }) {
-      sentryHub.addBreadcrumb({
-        category: "resolveId",
-        message: `isEntry: ${String(isEntry)}`,
-        level: "info",
-      });
+      logger.debug('Called "resolveId":', { id, importer, isEntry });
 
       if (id === RELEASE_INJECTOR_ID) {
         return RELEASE_INJECTOR_ID;
@@ -162,7 +168,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     },
 
     loadInclude(id) {
-      logger.info(`Called "loadInclude": ${JSON.stringify({ id })}`);
+      logger.debug('Called "loadInclude":', { id });
       return id === RELEASE_INJECTOR_ID;
     },
 
@@ -173,15 +179,12 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
      * @param id Always the absolute (fully resolved) path to the module.
      * @returns The global injector code when we load the "sentry-release-injector" module. Otherwise returns `undefined`.
      */
-    load(id) {
-      sentryHub.addBreadcrumb({
-        category: "load",
-        level: "info",
-      });
+    async load(id) {
+      logger.debug('Called "load":', { id });
 
       if (id === RELEASE_INJECTOR_ID) {
         return generateGlobalInjectorCode({
-          release: internalOptions.release,
+          release: await releaseNamePromise,
           injectReleasesMap: internalOptions.injectReleasesMap,
           org: internalOptions.org,
           project: internalOptions.project,
@@ -200,10 +203,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
      * want to transform the release injector file.
      */
     transformInclude(id) {
-      sentryHub.addBreadcrumb({
-        category: "transformInclude",
-        level: "info",
-      });
+      logger.debug('Called "transformInclude":', { id });
 
       // We don't want to transform our injected code.
       if (id === RELEASE_INJECTOR_ID) {
@@ -242,11 +242,8 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
      * @param id Always the absolute (fully resolved) path to the module.
      * @returns transformed code + source map
      */
-    transform(code) {
-      sentryHub.addBreadcrumb({
-        category: "transform",
-        level: "info",
-      });
+    transform(code, id) {
+      logger.debug('Called "transform":', { id });
 
       // The MagicString library allows us to generate sourcemaps for the changes we make to the user code.
       const ms = new MagicString(code);
@@ -272,7 +269,9 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
      * Responsible for executing the sentry release creation pipeline (i.e. creating a release on
      * Sentry.io, uploading sourcemaps, associating commits and deploys and finalizing the release)
      */
-    writeBundle() {
+    async writeBundle() {
+      logger.debug('Called "writeBundle"');
+
       releaseInjectionSpan?.finish();
       const releasePipelineSpan =
         transaction &&
@@ -289,45 +288,58 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
       const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan, logger, cli };
 
-      createNewRelease(internalOptions, ctx)
-        .then(() => cleanArtifacts(internalOptions, ctx))
-        .then(() => uploadSourceMaps(internalOptions, ctx))
-        .then(() => setCommits(internalOptions, ctx))
-        .then(() => finalizeRelease(internalOptions, ctx))
-        .then(() => addDeploy(internalOptions, ctx))
-        .then(() => transaction?.setStatus("ok"))
-        .catch((e: Error) => {
-          transaction?.setStatus("cancelled");
-          handleError(e, logger, internalOptions.errorHandler, sentryHub);
-        })
-        .finally(() => {
-          sentryHub.addBreadcrumb({
-            category: "writeBundle:finish",
-            level: "info",
-          });
-          releasePipelineSpan?.finish();
-          transaction?.finish();
+      const releaseName = await releaseNamePromise;
+
+      try {
+        await createNewRelease(internalOptions, ctx, releaseName);
+        await cleanArtifacts(internalOptions, ctx, releaseName);
+        await uploadSourceMaps(internalOptions, ctx, releaseName);
+        await setCommits(internalOptions, ctx, releaseName);
+        await finalizeRelease(internalOptions, ctx, releaseName);
+        await addDeploy(internalOptions, ctx, releaseName);
+        transaction?.setStatus("ok");
+      } catch (e: unknown) {
+        transaction?.setStatus("cancelled");
+        handleError(e, logger, internalOptions.errorHandler, sentryHub);
+      } finally {
+        sentryHub.addBreadcrumb({
+          category: "writeBundle:finish",
+          level: "info",
         });
+        releasePipelineSpan?.finish();
+        transaction?.finish();
+        await sentryClient.flush().then(null, () => {
+          logger.warn("Sending of telemetry failed");
+        });
+      }
     },
   };
 });
 
 function handleError(
-  error: Error,
+  unknownError: unknown,
   logger: Logger,
   errorHandler: InternalOptions["errorHandler"],
   sentryHub?: Hub
 ) {
-  logger.error(error.message);
+  if (unknownError instanceof Error) {
+    logger.error(unknownError.message);
+  } else {
+    logger.error(String(unknownError));
+  }
 
   if (sentryHub) {
-    captureMinimalError(error, sentryHub);
+    captureMinimalError(unknownError, sentryHub);
   }
 
   if (errorHandler) {
-    errorHandler(error);
+    if (unknownError instanceof Error) {
+      errorHandler(unknownError);
+    } else {
+      errorHandler(new Error("An unknown error occured"));
+    }
   } else {
-    throw error;
+    throw unknownError;
   }
 }
 

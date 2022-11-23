@@ -118,23 +118,6 @@ describe("normalizeUserOptions()", () => {
       expect(normalizeUserOptions(options).telemetry).toBe(true);
     }
   );
-
-  test.each([
-    [true, "https://selfhostedSentry.io"],
-    [false, "https://sentry.io"],
-    [false, "https://selfhostedSentry.io"],
-  ])(
-    "should disable telemetry if `telemetry` is %s and Sentry SaaS URL (%s) is used",
-    (telemetry, url) => {
-      const options = {
-        include: "",
-        telemetry,
-        url,
-      };
-
-      expect(normalizeUserOptions(options).telemetry).toBe(false);
-    }
-  );
 });
 
 describe("validateOptions", () => {

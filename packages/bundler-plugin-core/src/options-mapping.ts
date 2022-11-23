@@ -5,7 +5,6 @@ import { arrayify } from "./utils";
 type RequiredInternalOptions = Required<
   Pick<
     UserOptions,
-    | "release"
     | "finalize"
     | "dryRun"
     | "debug"
@@ -113,12 +112,6 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     errorHandler: userOptions.errorHandler,
     configFile: userOptions.configFile,
   };
-
-  // We only want to enable telemetry for SaaS users
-  // This is not the final check (we need to call Sentry CLI at a later point)
-  // but we can already at this point make a first decision.
-  // @see `turnOffTelemetryForSelfHostedSentry` (telemetry.ts) for the second check.
-  options.telemetry = options.telemetry && options.url === SENTRY_SAAS_URL;
 
   return options;
 }

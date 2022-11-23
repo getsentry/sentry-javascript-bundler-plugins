@@ -48,14 +48,12 @@ export function createLogger(options: LoggerOptions): Logger {
 
       addBreadcrumb("error", message);
     },
-
     debug(message: string, ...params: unknown[]) {
       if (!options.silent && options.debug) {
         // eslint-disable-next-line no-console
         console.log(`${options.prefix} Debug: ${message}`, ...params);
+        // We're not creating breadcrumbs for debug logs because it is super spammy
       }
-
-      addBreadcrumb("debug", message);
     },
   };
 }

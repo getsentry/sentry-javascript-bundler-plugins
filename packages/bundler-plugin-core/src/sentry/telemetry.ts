@@ -1,45 +1,47 @@
-import {
-  defaultStackParser,
-  Hub,
-  Integrations,
-  makeMain,
-  makeNodeTransport,
-  NodeClient,
-  Span,
-} from "@sentry/node";
+import SentryCli from "@sentry/cli";
+import { defaultStackParser, Hub, makeNodeTransport, NodeClient, Span } from "@sentry/node";
 import { InternalOptions, SENTRY_SAAS_URL } from "../options-mapping";
 import { BuildContext } from "../types";
-import { SentryCLILike } from "./cli";
+
+const SENTRY_SAAS_HOSTNAME = "sentry.io";
 
 export function makeSentryClient(
   dsn: string,
-  telemetryEnabled: boolean
-): { client: NodeClient; hub: Hub } {
+  allowedToSendTelemetryPromise: Promise<boolean>
+): { sentryHub: Hub; sentryClient: NodeClient } {
   const client = new NodeClient({
     dsn,
 
-    enabled: telemetryEnabled,
-    tracesSampleRate: telemetryEnabled ? 1.0 : 0.0,
-    sampleRate: telemetryEnabled ? 1.0 : 0.0,
+    tracesSampleRate: 1,
+    sampleRate: 1,
 
     release: __PACKAGE_VERSION__,
-    integrations: [new Integrations.Http({ tracing: true })],
+    integrations: [],
     tracePropagationTargets: ["sentry.io/api"],
 
     stackParser: defaultStackParser,
-    transport: makeNodeTransport,
+
+    // We create a transport that stalls sending events until we know that we're allowed to (i.e. when Sentry CLI told
+    // us that the upload URL is the Sentry SaaS URL)
+    transport: (nodeTransportOptions) => {
+      const nodeTransport = makeNodeTransport(nodeTransportOptions);
+      return {
+        flush: (timeout) => nodeTransport.flush(timeout),
+        send: async (request) => {
+          const isAllowedToSend = await allowedToSendTelemetryPromise;
+          if (isAllowedToSend) {
+            return nodeTransport.send(request);
+          } else {
+            return undefined;
+          }
+        },
+      };
+    },
   });
 
   const hub = new Hub(client);
 
-  //TODO: This call is problematic because as soon as we set our hub as the current hub
-  //      we might interfere with other plugins that use Sentry. However, for now, we'll
-  //      leave it in because without it, we can't get distributed traces (which are pretty nice)
-  //      Let's keep it until someone complains about interference.
-  //      The ideal solution would be a code change in the JS SDK but it's not a straight-forward fix.
-  makeMain(hub);
-
-  return { client, hub };
+  return { sentryClient: client, sentryHub: hub };
 }
 
 /**
@@ -79,8 +81,14 @@ export function captureMinimalError(error: unknown | Error, hub: Hub) {
   hub.captureException(sentryError);
 }
 
-export function addPluginOptionTags(options: InternalOptions, hub: Hub) {
+export function addPluginOptionInformationToHub(
+  options: InternalOptions,
+  hub: Hub,
+  bundler: "rollup" | "webpack" | "vite" | "esbuild"
+) {
   const {
+    org,
+    project,
     cleanArtifacts,
     finalize,
     setCommits,
@@ -119,29 +127,65 @@ export function addPluginOptionTags(options: InternalOptions, hub: Hub) {
   }
 
   hub.setTag("node", process.version);
+
+  hub.setTags({
+    organization: org,
+    project,
+    bundler,
+  });
+
+  hub.setUser({ id: org });
 }
 
-/**
- * Makes a call to SentryCLI to get the Sentry server URL the CLI uses.
- *
- * We need to check and decide to use telemetry based on the CLI's respone to this call
- * because only at this time we checked a possibly existing .sentryclirc file. This file
- * could point to another URL than the default URL.
- */
-export async function turnOffTelemetryForSelfHostedSentry(cli: SentryCLILike, hub: Hub) {
-  const cliInfo = await cli.execute(["info"], false);
+export async function shouldSendTelemetry(options: InternalOptions): Promise<boolean> {
+  const { silent, org, project, authToken, url, vcsRemote, customHeader, dist, telemetry, dryRun } =
+    options;
 
-  const url = cliInfo
-    ?.split(/(\r\n|\n|\r)/)[0]
+  // `options.telemetry` defaults to true
+  if (telemetry === false) {
+    return false;
+  }
+
+  if (dryRun) {
+    return false;
+  }
+
+  if (url === SENTRY_SAAS_URL) {
+    return true;
+  }
+
+  const cli = new SentryCli(options.configFile, {
+    url,
+    authToken,
+    org,
+    project,
+    vcsRemote,
+    dist,
+    silent,
+    customHeader,
+  });
+
+  let cliInfo;
+  try {
+    // Makes a call to SentryCLI to get the Sentry server URL the CLI uses.
+    // We need to check and decide to use telemetry based on the CLI's respone to this call
+    // because only at this time we checked a possibly existing .sentryclirc file. This file
+    // could point to another URL than the default URL.
+    cliInfo = await cli.execute(["info"], false);
+  } catch (e) {
+    throw new Error(
+      'Sentry CLI "info" command failed, make sure you have an auth token configured, and your `url` option is correct.'
+    );
+  }
+
+  const cliInfoUrl = cliInfo
+    .split(/(\r\n|\n|\r)/)[0]
     ?.replace(/^Sentry Server: /, "")
     ?.trim();
 
-  if (url !== SENTRY_SAAS_URL) {
-    const client = hub.getClient();
-    if (client) {
-      client.getOptions().enabled = false;
-      client.getOptions().tracesSampleRate = 0;
-      client.getOptions().sampleRate = 0;
-    }
+  if (cliInfoUrl === undefined) {
+    return false;
   }
+
+  return new URL(cliInfoUrl).hostname === SENTRY_SAAS_HOSTNAME;
 }
