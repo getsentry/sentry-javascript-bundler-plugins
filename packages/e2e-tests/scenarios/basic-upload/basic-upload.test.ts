@@ -12,6 +12,7 @@ describe("Simple Sourcemaps Upload (one string include + default options)", () =
     const osNormalizedSentryFiles = sentryFiles.map((sentryFile) => {
       const copiedSentryFile = { ...sentryFile };
       copiedSentryFile.content = sentryFile.content.replace("\r\n", "\n");
+      return copiedSentryFile;
     });
 
     expect(osNormalizedSentryFiles).toMatchSnapshot();

@@ -10,6 +10,8 @@ import sentryWebpackPlugin from "@sentry/webpack-plugin";
 import sentryEsbuildPlugin from "@sentry/esbuild-plugin";
 import sentryRollupPlugin from "@sentry/rollup-plugin";
 
+const nodeMajorVersion = process.version.split(".")[0];
+
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
   outFolder: string,
@@ -78,31 +80,34 @@ export function createCjsBundles(
     format: "cjs",
   });
 
-  webpack4(
-    {
-      devtool: "source-map",
-      mode: "production",
-      entry: entrypoints,
-      cache: false,
-      output: {
-        path: path.join(outFolder, "webpack4"),
-        libraryTarget: "commonjs",
+  // Webpack 4 doesn't work with Node versions >= 17
+  if (nodeMajorVersion && parseInt(nodeMajorVersion) <= 16) {
+    webpack4(
+      {
+        devtool: "source-map",
+        mode: "production",
+        entry: entrypoints,
+        cache: false,
+        output: {
+          path: path.join(outFolder, "webpack4"),
+          libraryTarget: "commonjs",
+        },
+        target: "node", // needed for webpack 4 so we can access node api
+        plugins: [
+          sentryWebpackPlugin({
+            ...sentryUnpluginOptions,
+            release: `${sentryUnpluginOptions.release}-webpack4`,
+            include: `${sentryUnpluginOptions.include as string}/webpack4`,
+          }),
+        ],
       },
-      target: "node", // needed for webpack 4 so we can access node api
-      plugins: [
-        sentryWebpackPlugin({
-          ...sentryUnpluginOptions,
-          release: `${sentryUnpluginOptions.release}-webpack4`,
-          include: `${sentryUnpluginOptions.include as string}/webpack4`,
-        }),
-      ],
-    },
-    (err) => {
-      if (err) {
-        throw err;
+      (err) => {
+        if (err) {
+          throw err;
+        }
       }
-    }
-  );
+    );
+  }
 
   webpack5(
     {
