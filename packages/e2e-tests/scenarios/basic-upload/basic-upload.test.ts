@@ -11,7 +11,7 @@ describe("Simple Sourcemaps Upload (one string include + default options)", () =
     // We replace Windows newlines with Unix newlines so we can run this test on windows CI
     const osNormalizedSentryFiles = sentryFiles.map((sentryFile) => {
       const copiedSentryFile = { ...sentryFile };
-      copiedSentryFile.content = sentryFile.content.replace("\r\n", "\n");
+      copiedSentryFile.content = sentryFile.content.replace(/\r\n/g, "\n");
       return copiedSentryFile;
     });
 
