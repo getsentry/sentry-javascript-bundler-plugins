@@ -4,9 +4,7 @@
   </a>
 </p>
 
-# Sentry Vite Plugin (WIP)
-
-**WARNING: This package is work in progress! Use with caution and do not yet use it in production. We're happy to receive your feedback!**
+# Sentry Vite Plugin
 
 A Vite plugin that provides release management features for Sentry:
 

@@ -6,8 +6,6 @@
 
 # Sentry Bundler Plugin Core
 
-**WARNING: This package is work in progress! Do not yet use it in production. We're happy to receive your feedback!**
-
 Core package containing the bundler-agnostic functionality used by the bundler plugins.
 
 Check out the individual packages for more information and examples:
