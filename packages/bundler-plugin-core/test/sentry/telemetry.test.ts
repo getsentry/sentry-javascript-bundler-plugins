@@ -1,60 +1,37 @@
 import { Hub } from "@sentry/node";
 import { InternalOptions } from "../../src/options-mapping";
-import { SentryCLILike } from "../../src/sentry/cli";
 import {
-  addPluginOptionTags,
+  addPluginOptionInformationToHub,
   captureMinimalError,
-  turnOffTelemetryForSelfHostedSentry,
+  shouldSendTelemetry,
 } from "../../src/sentry/telemetry";
 
-describe("turnOffTelemetryForSelfHostedSentry", () => {
-  const mockedCLI = {
-    execute: jest
-      .fn()
-      .mockImplementation(() => "Sentry Server: https://sentry.io  \nsomeotherstuff\netc"),
-  };
+const mockCliExecute = jest.fn();
+jest.mock(
+  "@sentry/cli",
+  () =>
+    class {
+      execute = mockCliExecute;
+    }
+);
 
-  const options = {
-    enabled: true,
-    tracesSampleRate: 1.0,
-    sampleRate: 1.0,
-  };
-
-  const mockedClient = {
-    getOptions: jest.fn().mockImplementation(() => options),
-  };
-  const mockedHub = {
-    getClient: jest.fn().mockImplementation(() => {
-      return mockedClient;
-    }),
-  };
-
+describe("shouldSendTelemetry", () => {
   afterEach(() => {
     jest.resetAllMocks();
-    mockedCLI.execute.mockImplementation(
-      () => "Sentry Server: https://sentry.io  \nsomeotherstuff\netc"
-    );
   });
 
-  it("Should turn telemetry off if CLI returns a URL other than sentry.io", async () => {
-    mockedCLI.execute.mockImplementation(
+  it("should return false if CLI returns a URL other than sentry.io", async () => {
+    mockCliExecute.mockImplementation(
       () => "Sentry Server: https://selfhostedSentry.io  \nsomeotherstuff\netc"
     );
-    await turnOffTelemetryForSelfHostedSentry(
-      mockedCLI as unknown as SentryCLILike,
-      mockedHub as unknown as Hub
-    );
-    expect(mockedHub.getClient).toHaveBeenCalledTimes(1);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(mockedHub.getClient().getOptions).toHaveBeenCalledTimes(3);
+    expect(await shouldSendTelemetry({} as InternalOptions)).toBe(false);
   });
 
-  it("Should do nothing if CLI returns sentry.io as a URL", async () => {
-    await turnOffTelemetryForSelfHostedSentry(
-      mockedCLI as unknown as SentryCLILike,
-      mockedHub as unknown as Hub
+  it("should return true if CLI returns sentry.io as a URL", async () => {
+    mockCliExecute.mockImplementation(
+      () => "Sentry Server: https://sentry.io  \nsomeotherstuff\netc"
     );
-    expect(mockedHub.getClient).not.toHaveBeenCalled();
+    expect(await shouldSendTelemetry({} as InternalOptions)).toBe(true);
   });
 });
 
@@ -115,9 +92,11 @@ describe("captureMinimalError", () => {
   });
 });
 
-describe("addPluginOptionTags", () => {
+describe("addPluginOptionTagsToHub", () => {
   const mockedHub = {
     setTag: jest.fn(),
+    setTags: jest.fn(),
+    setUser: jest.fn(),
   };
 
   const defaultOptions: Partial<InternalOptions> = {
@@ -129,30 +108,38 @@ describe("addPluginOptionTags", () => {
   });
 
   it("should set include tag according to number of entries (single entry)", () => {
-    addPluginOptionTags(defaultOptions as unknown as InternalOptions, mockedHub as unknown as Hub);
+    addPluginOptionInformationToHub(
+      defaultOptions as unknown as InternalOptions,
+      mockedHub as unknown as Hub,
+      "rollup"
+    );
     expect(mockedHub.setTag).toHaveBeenCalledWith("include", "single-entry");
   });
+
   it("should set include tag according to number of entries (multiple entries)", () => {
-    addPluginOptionTags(
+    addPluginOptionInformationToHub(
       { include: [{}, {}, {}] } as unknown as InternalOptions,
-      mockedHub as unknown as Hub
+      mockedHub as unknown as Hub,
+      "rollup"
     );
     expect(mockedHub.setTag).toHaveBeenCalledWith("include", "multiple-entries");
   });
 
   it("should set deploy tag to true if the deploy option is specified", () => {
-    addPluginOptionTags(
+    addPluginOptionInformationToHub(
       { ...defaultOptions, deploy: { env: "production" } } as unknown as InternalOptions,
-      mockedHub as unknown as Hub
+      mockedHub as unknown as Hub,
+      "rollup"
     );
     expect(mockedHub.setTag).toHaveBeenCalledWith("add-deploy", true);
   });
 
   it("should set errorHandler tag to `custom` if the errorHandler option is specified", () => {
-    addPluginOptionTags(
+    addPluginOptionInformationToHub(
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       { ...defaultOptions, errorHandler: () => {} } as unknown as InternalOptions,
-      mockedHub as unknown as Hub
+      mockedHub as unknown as Hub,
+      "rollup"
     );
     expect(mockedHub.setTag).toHaveBeenCalledWith("error-handler", "custom");
   });
@@ -163,16 +150,17 @@ describe("addPluginOptionTags", () => {
   ])(
     `should set setCommits tag to %s if the setCommits option is %s`,
     (expectedValue, commitOptions) => {
-      addPluginOptionTags(
+      addPluginOptionInformationToHub(
         { ...defaultOptions, setCommits: commitOptions } as unknown as InternalOptions,
-        mockedHub as unknown as Hub
+        mockedHub as unknown as Hub,
+        "rollup"
       );
       expect(mockedHub.setTag).toHaveBeenCalledWith("set-commits", expectedValue);
     }
   );
 
   it("sets all simple tags correctly", () => {
-    addPluginOptionTags(
+    addPluginOptionInformationToHub(
       {
         ...defaultOptions,
         cleanArtifacts: true,
@@ -180,7 +168,8 @@ describe("addPluginOptionTags", () => {
         injectReleasesMap: true,
         dryRun: true,
       } as unknown as InternalOptions,
-      mockedHub as unknown as Hub
+      mockedHub as unknown as Hub,
+      "rollup"
     );
 
     expect(mockedHub.setTag).toHaveBeenCalledWith("clean-artifacts", true);
@@ -190,7 +179,11 @@ describe("addPluginOptionTags", () => {
   });
 
   it("shouldn't set any tags other than include if no opional options are specified", () => {
-    addPluginOptionTags(defaultOptions as unknown as InternalOptions, mockedHub as unknown as Hub);
+    addPluginOptionInformationToHub(
+      defaultOptions as unknown as InternalOptions,
+      mockedHub as unknown as Hub,
+      "rollup"
+    );
     expect(mockedHub.setTag).toHaveBeenCalledTimes(2);
     expect(mockedHub.setTag).toHaveBeenCalledWith("include", "single-entry");
     expect(mockedHub.setTag).toHaveBeenCalledWith("node", expect.any(String));

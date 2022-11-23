@@ -55,10 +55,7 @@ describe("Release Pipeline", () => {
 
   describe("createNewRelease", () => {
     it("makes a call to Sentry CLI's releases creation command", async () => {
-      await createNewRelease(
-        { release: "1.0.0" } as InternalOptions,
-        ctx as unknown as BuildContext
-      );
+      await createNewRelease({} as InternalOptions, ctx as unknown as BuildContext, "1.0.0");
 
       expect(mockedCLI.releases.new).toHaveBeenCalledWith("1.0.0");
       expect(mockedAddSpanToTxn).toHaveBeenCalledWith(ctx, "function.plugin.create_release");
@@ -68,7 +65,7 @@ describe("Release Pipeline", () => {
 
   describe("cleanArtifacts", () => {
     it("doest do anything if cleanArtifacts is not true", async () => {
-      await cleanArtifacts({} as InternalOptions, ctx as unknown as BuildContext);
+      await cleanArtifacts({} as InternalOptions, ctx as unknown as BuildContext, "my-release");
 
       expect(mockedCLI.releases.execute).not.toHaveBeenCalled();
       expect(mockedAddSpanToTxn).not.toHaveBeenCalled();
@@ -77,8 +74,9 @@ describe("Release Pipeline", () => {
 
     it("makes a call to Sentry CLI's artifact removal command if `cleanArtifacts` is set", async () => {
       await cleanArtifacts(
-        { release: "1.0.0", cleanArtifacts: true } as InternalOptions,
-        ctx as unknown as BuildContext
+        { cleanArtifacts: true } as InternalOptions,
+        ctx as unknown as BuildContext,
+        "1.0.0"
       );
 
       expect(mockedCLI.releases.execute).toHaveBeenCalledWith(
@@ -93,11 +91,10 @@ describe("Release Pipeline", () => {
   describe("uploadSourceMaps", () => {
     it("makes a call to Sentry CLI's sourcemaps upload command", async () => {
       const options = {
-        release: "1.0.0",
         include: [{ paths: ["dist"] }],
       } as InternalOptions;
 
-      await uploadSourceMaps(options, ctx as unknown as BuildContext);
+      await uploadSourceMaps(options, ctx as unknown as BuildContext, "1.0.0");
 
       expect(mockedCLI.releases.uploadSourceMaps).toHaveBeenCalledWith("1.0.0", {
         include: [{ paths: ["dist"] }],
@@ -109,7 +106,7 @@ describe("Release Pipeline", () => {
 
   describe("setCommits", () => {
     it("doesn't do anything if `setCommits` option is not specified", async () => {
-      await setCommits({} as InternalOptions, ctx as unknown as BuildContext);
+      await setCommits({} as InternalOptions, ctx as unknown as BuildContext, "1.0.0");
 
       expect(mockedCLI.releases.setCommits).not.toHaveBeenCalled();
       expect(mockedAddSpanToTxn).not.toHaveBeenCalled();
@@ -118,8 +115,9 @@ describe("Release Pipeline", () => {
 
     it("makes a call to Sentry CLI if the correct options are specified", async () => {
       await setCommits(
-        { setCommits: { auto: true }, release: "1.0.0" } as InternalOptions,
-        ctx as unknown as BuildContext
+        { setCommits: { auto: true } } as InternalOptions,
+        ctx as unknown as BuildContext,
+        "1.0.0"
       );
 
       expect(mockedCLI.releases.setCommits).toHaveBeenCalledWith("1.0.0", { auto: true });
@@ -130,7 +128,7 @@ describe("Release Pipeline", () => {
 
   describe("finalizeRelease", () => {
     it("doesn't do anything if `finalize` is not set", async () => {
-      await finalizeRelease({} as InternalOptions, ctx as unknown as BuildContext);
+      await finalizeRelease({} as InternalOptions, ctx as unknown as BuildContext, "1.0.0");
 
       expect(mockedCLI.releases.finalize).not.toHaveBeenCalled();
       expect(mockedAddSpanToTxn).not.toHaveBeenCalled();
@@ -139,8 +137,9 @@ describe("Release Pipeline", () => {
 
     it("makes a call to Sentry CLI's release finalization command if `finalize` is true", async () => {
       await finalizeRelease(
-        { release: "1.0.0", finalize: true } as InternalOptions,
-        ctx as unknown as BuildContext
+        { finalize: true } as InternalOptions,
+        ctx as unknown as BuildContext,
+        "1.0.0"
       );
 
       expect(mockedCLI.releases.finalize).toHaveBeenCalledWith("1.0.0");
@@ -151,7 +150,7 @@ describe("Release Pipeline", () => {
 
   describe("addDeploy", () => {
     it("doesn't do anything if `deploy` option is not specified", async () => {
-      await addDeploy({} as InternalOptions, ctx as unknown as BuildContext);
+      await addDeploy({} as InternalOptions, ctx as unknown as BuildContext, "1.0.0");
 
       expect(mockedCLI.releases.newDeploy).not.toHaveBeenCalled();
       expect(mockedAddSpanToTxn).not.toHaveBeenCalled();
@@ -168,8 +167,9 @@ describe("Release Pipeline", () => {
       };
 
       await addDeploy(
-        { deploy: deployOptions, release: "1.0.0" } as InternalOptions,
-        ctx as unknown as BuildContext
+        { deploy: deployOptions } as InternalOptions,
+        ctx as unknown as BuildContext,
+        "1.0.0"
       );
 
       expect(mockedCLI.releases.newDeploy).toHaveBeenCalledWith("1.0.0", deployOptions);
