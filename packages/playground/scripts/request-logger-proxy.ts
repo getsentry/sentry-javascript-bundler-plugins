@@ -47,7 +47,7 @@ app.use(function (req, res, next) {
     )}\nResponse body:\n${Buffer.concat(resBody).toString()}`;
 
     fs.appendFileSync(
-      path.join(__dirname, `request-logger-logs/${now}.txt`),
+      path.join(__dirname, "request-logger-logs", `${now}.txt`),
       `>>>>>>>>>\n\n${reqLog}\n\n-----------\n\n${resLog}\n\n<<<<<<<<<\n\n`,
       {
         encoding: "utf-8",

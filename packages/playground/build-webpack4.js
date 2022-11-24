@@ -11,7 +11,7 @@ webpack4(
     entry: "./src/entrypoint1.js",
     cache: false,
     output: {
-      path: path.resolve(__dirname, `./out/webpack4`),
+      path: path.resolve(__dirname, "out", "webpack4"),
       filename: "index.js",
       library: "ExampleBundle",
       libraryTarget: "commonjs",

@@ -6,7 +6,7 @@ import * as path from "path";
  */
 export const pluginConfig: Options = {
   release: "basic-upload",
-  include: path.resolve(__dirname, "./out"),
+  include: path.resolve(__dirname, "out"),
   authToken: process.env["SENTRY_AUTH_TOKEN"] || "",
   org: "sentry-sdks",
   project: "js-bundler-plugin-e2e-tests",
