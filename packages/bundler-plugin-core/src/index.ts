@@ -22,6 +22,7 @@ import { createLogger, Logger } from "./sentry/logger";
 import { InternalOptions, normalizeUserOptions, validateOptions } from "./options-mapping";
 import { getSentryCli } from "./sentry/cli";
 import { Hub, makeMain } from "@sentry/node";
+import path from "path";
 
 // We prefix the polyfill id with \0 to tell other plugins not to try to load or transform it.
 // This hack is taken straight from https://rollupjs.org/guide/en/#resolveid.
@@ -205,29 +206,34 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     transformInclude(id) {
       logger.debug('Called "transformInclude":', { id });
 
+      // We normalize the id because vite always passes `id` as a unix style path which causes problems when a user passes
+      // a windows style path to `releaseInjectionTargets`
+      const normalizedId = path.normalize(id);
+
       // We don't want to transform our injected code.
-      if (id === RELEASE_INJECTOR_ID) {
+      if (normalizedId === RELEASE_INJECTOR_ID) {
         return false;
       }
 
       if (internalOptions.releaseInjectionTargets) {
         // If there's an `releaseInjectionTargets` option transform (ie. inject the release varible) when the file path matches the option.
         if (typeof internalOptions.releaseInjectionTargets === "function") {
-          return internalOptions.releaseInjectionTargets(id);
+          return internalOptions.releaseInjectionTargets(normalizedId);
         }
 
         return internalOptions.releaseInjectionTargets.some((entry) => {
           if (entry instanceof RegExp) {
-            return entry.test(id);
+            return entry.test(normalizedId);
           } else {
-            return id === entry;
+            const normalizedEntry = path.normalize(entry);
+            return normalizedId === normalizedEntry;
           }
         });
       } else {
-        const pathIsOrdinary = !id.includes("?") && !id.includes("#");
+        const pathIsOrdinary = !normalizedId.includes("?") && !normalizedId.includes("#");
 
         const pathHasAllowedFileEnding = ALLOWED_TRANSFORMATION_FILE_ENDINGS.some(
-          (allowedFileEnding) => id.endsWith(allowedFileEnding)
+          (allowedFileEnding) => normalizedId.endsWith(allowedFileEnding)
         );
 
         return pathIsOrdinary && pathHasAllowedFileEnding;

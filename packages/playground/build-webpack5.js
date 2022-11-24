@@ -11,7 +11,7 @@ webpack5(
     entry: "./src/entrypoint1.js",
     output: {
       filename: "index.js",
-      path: path.resolve(__dirname, `./out/webpack5`),
+      path: path.resolve(__dirname, "out", "webpack5"),
       library: {
         type: "commonjs",
         name: "ExampleBundle",

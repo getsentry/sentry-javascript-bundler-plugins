@@ -8,7 +8,7 @@ export default defineConfig({
   build: {
     outDir: "./out/vite",
     lib: {
-      entry: path.resolve(__dirname, "./src/entrypoint1.js"),
+      entry: path.resolve(__dirname, "src", "entrypoint1.js"),
       name: "ExampleBundle",
       fileName: "index",
       formats: ["cjs"],

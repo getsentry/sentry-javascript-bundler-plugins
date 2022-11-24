@@ -12,6 +12,8 @@ import {
   Options,
 } from "@sentry/bundler-plugin-core";
 
+const nodejsMajorversion = process.version.split(".")[0];
+
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
   outFolder: string,
@@ -54,24 +56,27 @@ export function createCjsBundles(
     format: "cjs",
   });
 
-  webpack4(
-    {
-      mode: "production",
-      entry: entrypoints,
-      cache: false,
-      output: {
-        path: path.join(outFolder, "webpack4"),
-        libraryTarget: "commonjs",
+  // Webpack 4 doesn't work on Node.js versions >= 18
+  if (!nodejsMajorversion || parseInt(nodejsMajorversion) < 18) {
+    webpack4(
+      {
+        mode: "production",
+        entry: entrypoints,
+        cache: false,
+        output: {
+          path: path.join(outFolder, "webpack4"),
+          libraryTarget: "commonjs",
+        },
+        target: "node", // needed for webpack 4 so we can access node api
+        plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
       },
-      target: "node", // needed for webpack 4 so we can access node api
-      plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
-    },
-    (err) => {
-      if (err) {
-        throw err;
+      (err) => {
+        if (err) {
+          throw err;
+        }
       }
-    }
-  );
+    );
+  }
 
   webpack5(
     {
