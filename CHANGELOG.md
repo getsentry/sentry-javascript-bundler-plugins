@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.2.1
+
+- fix(core): Fix telemetry option logic (#128)
+- fix(core): Normalize `id` and `releaseInjectionTargets` in `transformInclude` (#132)
+
 ## 0.2.0
 
 This release replaces the `entries` option with `releaseInjectionTargets` which is a breaking change from previous versions.
