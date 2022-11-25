@@ -18,10 +18,13 @@ export async function createNewRelease(
 ): Promise<void> {
   const span = addSpanToTransaction(ctx, "function.plugin.create_release");
 
-  await ctx.cli.releases.new(releaseName);
+  try {
+    await ctx.cli.releases.new(releaseName);
+  } finally {
+    span?.finish();
+  }
 
   ctx.logger.info("Successfully created release.");
-  span?.finish();
 }
 
 export async function cleanArtifacts(
@@ -36,10 +39,13 @@ export async function cleanArtifacts(
 
   const span = addSpanToTransaction(ctx, "function.plugin.clean_artifacts");
 
-  await ctx.cli.releases.execute(["releases", "files", releaseName, "delete", "--all"], true);
+  try {
+    await ctx.cli.releases.execute(["releases", "files", releaseName, "delete", "--all"], true);
+  } finally {
+    span?.finish();
+  }
 
   ctx.logger.info("Successfully cleaned previous artifacts.");
-  span?.finish();
 }
 
 export async function uploadSourceMaps(
@@ -52,10 +58,13 @@ export async function uploadSourceMaps(
 
   // Since our internal include entries contain all top-level sourcemaps options,
   // we only need to pass the include option here.
-  await ctx.cli.releases.uploadSourceMaps(releaseName, { include: options.include });
+  try {
+    await ctx.cli.releases.uploadSourceMaps(releaseName, { include: options.include });
+  } finally {
+    span?.finish();
+  }
 
   ctx.logger.info("Successfully uploaded Sourcemaps.");
-  span?.finish();
 }
 
 export async function setCommits(
@@ -71,17 +80,21 @@ export async function setCommits(
   const span = addSpanToTransaction(ctx, "function.plugin.set_commits");
 
   const { auto, repo, commit, previousCommit, ignoreMissing, ignoreEmpty } = options.setCommits;
-  await ctx.cli.releases.setCommits(releaseName, {
-    commit,
-    previousCommit,
-    repo,
-    auto,
-    ignoreMissing,
-    ignoreEmpty,
-  });
+
+  try {
+    await ctx.cli.releases.setCommits(releaseName, {
+      commit,
+      previousCommit,
+      repo,
+      auto,
+      ignoreMissing,
+      ignoreEmpty,
+    });
+  } finally {
+    span?.finish();
+  }
 
   ctx.logger.info("Successfully set commits.");
-  span?.finish();
 }
 
 export async function finalizeRelease(
@@ -96,10 +109,13 @@ export async function finalizeRelease(
 
   const span = addSpanToTransaction(ctx, "function.plugin.finalize_release");
 
-  await ctx.cli.releases.finalize(releaseName);
+  try {
+    await ctx.cli.releases.finalize(releaseName);
+  } finally {
+    span?.finish();
+  }
 
   ctx.logger.info("Successfully finalized release.");
-  span?.finish();
 }
 
 export async function addDeploy(
@@ -115,15 +131,19 @@ export async function addDeploy(
   const span = addSpanToTransaction(ctx, "function.plugin.deploy");
 
   const { env, started, finished, time, name, url } = options.deploy;
-  await ctx.cli.releases.newDeploy(releaseName, {
-    env,
-    started,
-    finished,
-    time,
-    name,
-    url,
-  });
+
+  try {
+    await ctx.cli.releases.newDeploy(releaseName, {
+      env,
+      started,
+      finished,
+      time,
+      name,
+      url,
+    });
+  } finally {
+    span?.finish();
+  }
 
   ctx.logger.info("Successfully added deploy.");
-  span?.finish();
 }
