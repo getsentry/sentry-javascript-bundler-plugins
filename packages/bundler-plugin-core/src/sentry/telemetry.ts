@@ -21,6 +21,16 @@ export function makeSentryClient(
 
     stackParser: defaultStackParser,
 
+    beforeSend: (event) => {
+      delete event.server_name; // Server name might contain PII
+      return event;
+    },
+
+    beforeSendTransaction: (event) => {
+      delete event.server_name; // Server name might contain PII
+      return event;
+    },
+
     // We create a transport that stalls sending events until we know that we're allowed to (i.e. when Sentry CLI told
     // us that the upload URL is the Sentry SaaS URL)
     transport: (nodeTransportOptions) => {
