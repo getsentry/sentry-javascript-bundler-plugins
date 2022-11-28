@@ -7,6 +7,7 @@
 ## 0.2.2
 
 - feat(core): Remove `server_name` from telemetry events (#135)
+- fix: Add definitions in package.json for ESM resolution (#141)
 - fix(core): Finish spans when CLI commands fail (#136)
 - ref(core): Decouple breadcrumb usage from logger (#138)
 - ref(core): Don't record stack traces for telemetry (#137)
