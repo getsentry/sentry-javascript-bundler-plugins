@@ -78,7 +78,6 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
   makeMain(sentryHub);
 
   const logger = createLogger({
-    hub: sentryHub,
     prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
     silent: internalOptions.silent,
     debug: internalOptions.debug,
@@ -119,6 +118,12 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       if (isAllowedToSendToSendTelemetry) {
         logger.info("Sending error and performance telemetry data to Sentry.");
         logger.info("To disable telemetry, set `options.telemetry` to `false`.");
+        sentryHub.addBreadcrumb({ level: "info", message: "Telemetry enabled." });
+      } else {
+        sentryHub.addBreadcrumb({
+          level: "info",
+          message: "Telemetry disabled. This should never show up in a Sentry event.",
+        });
       }
 
       const releaseName = await releaseNamePromise;
