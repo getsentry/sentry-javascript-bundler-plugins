@@ -22,6 +22,10 @@ export function makeSentryClient(
     stackParser: defaultStackParser,
 
     beforeSend: (event) => {
+      event.exception?.values?.forEach((exception) => {
+        delete exception.stacktrace;
+      });
+
       delete event.server_name; // Server name might contain PII
       return event;
     },
@@ -68,27 +72,6 @@ export function addSpanToTransaction(
   hub.configureScope((scope) => scope.setSpan(span));
 
   return span;
-}
-
-export function captureMinimalError(error: unknown | Error, hub: Hub) {
-  let sentryError;
-
-  if (error && typeof error === "object") {
-    const e = error as { name?: string; message?: string; stack?: string };
-    sentryError = {
-      name: e.name,
-      message: e.message,
-      stack: e.stack,
-    };
-  } else {
-    sentryError = {
-      name: "Error",
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      message: `${error}`,
-    };
-  }
-
-  hub.captureException(sentryError);
 }
 
 export function addPluginOptionInformationToHub(

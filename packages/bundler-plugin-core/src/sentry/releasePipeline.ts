@@ -20,6 +20,9 @@ export async function createNewRelease(
 
   try {
     await ctx.cli.releases.new(releaseName);
+  } catch (e) {
+    ctx.hub.captureException(new Error("CLI Error: Creating new release failed"));
+    throw e;
   } finally {
     span?.finish();
   }
@@ -41,6 +44,9 @@ export async function cleanArtifacts(
 
   try {
     await ctx.cli.releases.execute(["releases", "files", releaseName, "delete", "--all"], true);
+  } catch (e) {
+    ctx.hub.captureException(new Error("CLI Error: Deleting release files failed"));
+    throw e;
   } finally {
     span?.finish();
   }
@@ -60,6 +66,9 @@ export async function uploadSourceMaps(
   // we only need to pass the include option here.
   try {
     await ctx.cli.releases.uploadSourceMaps(releaseName, { include: options.include });
+  } catch (e) {
+    ctx.hub.captureException(new Error("CLI Error: Uploading source maps failed"));
+    throw e;
   } finally {
     span?.finish();
   }
@@ -90,6 +99,9 @@ export async function setCommits(
       ignoreMissing,
       ignoreEmpty,
     });
+  } catch (e) {
+    ctx.hub.captureException(new Error("CLI Error: Setting commits failed"));
+    throw e;
   } finally {
     span?.finish();
   }
@@ -111,6 +123,9 @@ export async function finalizeRelease(
 
   try {
     await ctx.cli.releases.finalize(releaseName);
+  } catch (e) {
+    ctx.hub.captureException(new Error("CLI Error: Finalizing release failed"));
+    throw e;
   } finally {
     span?.finish();
   }
@@ -141,6 +156,9 @@ export async function addDeploy(
       name,
       url,
     });
+  } catch (e) {
+    ctx.hub.captureException(new Error("CLI Error: Adding deploy info failed"));
+    throw e;
   } finally {
     span?.finish();
   }

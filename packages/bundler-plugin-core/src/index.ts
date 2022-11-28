@@ -13,7 +13,6 @@ import "@sentry/tracing";
 import {
   addPluginOptionInformationToHub,
   addSpanToTransaction,
-  captureMinimalError,
   makeSentryClient,
   shouldSendTelemetry,
 } from "./sentry/telemetry";
@@ -21,7 +20,7 @@ import { Span, Transaction } from "@sentry/types";
 import { createLogger, Logger } from "./sentry/logger";
 import { InternalOptions, normalizeUserOptions, validateOptions } from "./options-mapping";
 import { getSentryCli } from "./sentry/cli";
-import { Hub, makeMain } from "@sentry/node";
+import { makeMain } from "@sentry/node";
 import path from "path";
 
 // We prefix the polyfill id with \0 to tell other plugins not to try to load or transform it.
@@ -130,8 +129,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
             "Unable to determine a release name. Make sure to set the `release` option or use an environment that supports auto-detection https://docs.sentry.io/cli/releases/#creating-releases`"
           ),
           logger,
-          internalOptions.errorHandler,
-          sentryHub
+          internalOptions.errorHandler
         );
       }
 
@@ -306,7 +304,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         transaction?.setStatus("ok");
       } catch (e: unknown) {
         transaction?.setStatus("cancelled");
-        handleError(e, logger, internalOptions.errorHandler, sentryHub);
+        handleError(e, logger, internalOptions.errorHandler);
       } finally {
         sentryHub.addBreadcrumb({
           category: "writeBundle:finish",
@@ -325,17 +323,12 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 function handleError(
   unknownError: unknown,
   logger: Logger,
-  errorHandler: InternalOptions["errorHandler"],
-  sentryHub?: Hub
+  errorHandler: InternalOptions["errorHandler"]
 ) {
   if (unknownError instanceof Error) {
     logger.error(unknownError.message);
   } else {
     logger.error(String(unknownError));
-  }
-
-  if (sentryHub) {
-    captureMinimalError(unknownError, sentryHub);
   }
 
   if (errorHandler) {
