@@ -4,6 +4,13 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.2.2
+
+- feat(core): Remove `server_name` from telemetry events (#135)
+- fix(core): Finish spans when CLI commands fail (#136)
+- ref(core): Decouple breadcrumb usage from logger (#138)
+- ref(core): Don't record stack traces for telemetry (#137)
+
 ## 0.2.1
 
 - fix(core): Fix telemetry option logic (#128)
