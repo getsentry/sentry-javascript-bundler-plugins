@@ -27,6 +27,7 @@ export async function createNewRelease(
     span?.finish();
   }
 
+  ctx.hub.addBreadcrumb({ level: "info", message: "Successfully created release." });
   ctx.logger.info("Successfully created release.");
 }
 
@@ -51,6 +52,7 @@ export async function cleanArtifacts(
     span?.finish();
   }
 
+  ctx.hub.addBreadcrumb({ level: "info", message: "Successfully cleaned previous artifacts." });
   ctx.logger.info("Successfully cleaned previous artifacts.");
 }
 
@@ -73,7 +75,8 @@ export async function uploadSourceMaps(
     span?.finish();
   }
 
-  ctx.logger.info("Successfully uploaded Sourcemaps.");
+  ctx.hub.addBreadcrumb({ level: "info", message: "Successfully uploaded source maps." });
+  ctx.logger.info("Successfully uploaded source maps.");
 }
 
 export async function setCommits(
@@ -115,6 +118,7 @@ export async function finalizeRelease(
   releaseName: string
 ): Promise<void> {
   if (!options.finalize) {
+    ctx.hub.addBreadcrumb({ level: "info", message: "Skipping release finalization." });
     logger.debug("Skipping release finalization.");
     return;
   }
@@ -130,6 +134,7 @@ export async function finalizeRelease(
     span?.finish();
   }
 
+  ctx.hub.addBreadcrumb({ level: "info", message: "Successfully finalized release." });
   ctx.logger.info("Successfully finalized release.");
 }
 
@@ -139,6 +144,7 @@ export async function addDeploy(
   releaseName: string
 ): Promise<void> {
   if (!options.deploy) {
+    ctx.hub.addBreadcrumb({ level: "info", message: "Skipping adding deploy info to release." });
     logger.debug("Skipping adding deploy info to release.");
     return;
   }
@@ -163,5 +169,6 @@ export async function addDeploy(
     span?.finish();
   }
 
+  ctx.hub.addBreadcrumb({ level: "info", message: "Successfully added deploy." });
   ctx.logger.info("Successfully added deploy.");
 }

@@ -33,6 +33,10 @@ describe("Release Pipeline", () => {
     error: jest.fn(),
   };
 
+  const mockedHub = {
+    addBreadcrumb: jest.fn(),
+  };
+
   const mockedCLI = {
     releases: {
       new: jest.fn(),
@@ -47,7 +51,7 @@ describe("Release Pipeline", () => {
   const mockedChildSpan = { finish: jest.fn() };
   mockedAddSpanToTxn.mockImplementation(() => mockedChildSpan);
 
-  const ctx = { cli: mockedCLI, logger: mockedLogger };
+  const ctx = { cli: mockedCLI, logger: mockedLogger, hub: mockedHub };
 
   beforeEach(() => {
     jest.clearAllMocks();
