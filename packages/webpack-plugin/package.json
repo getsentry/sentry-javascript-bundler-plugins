@@ -1,6 +1,6 @@
 {
   "name": "@sentry/webpack-plugin",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Official Sentry Webpack plugin",
   "repository": "git://github.com/getsentry/sentry-javascript-bundler-plugins.git",
   "homepage": "https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/webpack-plugin",
@@ -46,7 +46,7 @@
     "lint": "eslint ./src ./test"
   },
   "dependencies": {
-    "@sentry/bundler-plugin-core": "0.2.1"
+    "@sentry/bundler-plugin-core": "0.2.2"
   },
   "devDependencies": {
     "@babel/core": "7.18.5",
@@ -56,8 +56,8 @@
     "@rollup/plugin-commonjs": "22.0.1",
     "@rollup/plugin-json": "4.1.0",
     "@rollup/plugin-node-resolve": "13.3.0",
-    "@sentry-internal/eslint-config": "0.2.1",
-    "@sentry-internal/sentry-bundler-plugin-tsconfig": "0.2.1",
+    "@sentry-internal/eslint-config": "0.2.2",
+    "@sentry-internal/sentry-bundler-plugin-tsconfig": "0.2.2",
     "@swc/core": "^1.2.205",
     "@swc/jest": "^0.2.21",
     "@types/jest": "^28.1.3",
