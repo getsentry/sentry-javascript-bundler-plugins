@@ -311,18 +311,23 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         transaction?.setStatus("ok");
       } catch (e: unknown) {
         transaction?.setStatus("cancelled");
+        sentryHub.addBreadcrumb({
+          level: "error",
+          message: "Error during writeBundle",
+        });
         handleError(e, logger, internalOptions.errorHandler, sentryHub);
       } finally {
-        sentryHub.addBreadcrumb({
-          category: "writeBundle:finish",
-          level: "info",
-        });
         releasePipelineSpan?.finish();
         transaction?.finish();
         await sentryClient.flush().then(null, () => {
           logger.warn("Sending of telemetry failed");
         });
       }
+
+      sentryHub.addBreadcrumb({
+        category: "writeBundle:finish",
+        level: "info",
+      });
     },
   };
 });
