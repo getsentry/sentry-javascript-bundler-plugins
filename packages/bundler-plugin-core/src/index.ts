@@ -28,7 +28,7 @@ import path from "path";
 // This probably doesn't work for all bundlers but for rollup it does.
 const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
 
-const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".cjs", ".mjs"];
+const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
 
 /**
  * The sentry bundler plugin concerns itself with two things:
@@ -233,13 +233,14 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
           }
         });
       } else {
+        const isInNodeModules = normalizedId.split(path.sep).includes("node_modules");
         const pathIsOrdinary = !normalizedId.includes("?") && !normalizedId.includes("#");
 
         const pathHasAllowedFileEnding = ALLOWED_TRANSFORMATION_FILE_ENDINGS.some(
           (allowedFileEnding) => normalizedId.endsWith(allowedFileEnding)
         );
 
-        return pathIsOrdinary && pathHasAllowedFileEnding;
+        return !isInNodeModules && pathIsOrdinary && pathHasAllowedFileEnding;
       }
     },
 
