@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.2.3
+
+- fix: Exclude `node_modules` from release injection (#143)
+
 ## 0.2.2
 
 - feat(core): Remove `server_name` from telemetry events (#135)
