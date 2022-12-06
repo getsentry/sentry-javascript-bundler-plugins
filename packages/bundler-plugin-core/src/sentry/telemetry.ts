@@ -7,13 +7,19 @@ const SENTRY_SAAS_HOSTNAME = "sentry.io";
 
 export function makeSentryClient(
   dsn: string,
-  allowedToSendTelemetryPromise: Promise<boolean>
+  allowedToSendTelemetryPromise: Promise<boolean>,
+  userProject: string | undefined
 ): { sentryHub: Hub; sentryClient: NodeClient } {
   const client = new NodeClient({
     dsn,
 
     tracesSampleRate: 1,
     sampleRate: 1,
+
+    // We're also sending the user project in dist because it is an indexed fieldso we can use this data effectively in
+    // a dashboard.
+    // Yes, this is slightly abusing the purpose of this field.
+    dist: userProject,
 
     release: __PACKAGE_VERSION__,
     integrations: [],

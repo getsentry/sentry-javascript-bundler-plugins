@@ -64,7 +64,8 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
   const { sentryHub, sentryClient } = makeSentryClient(
     "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
-    allowedToSendTelemetryPromise
+    allowedToSendTelemetryPromise,
+    internalOptions.project
   );
 
   addPluginOptionInformationToHub(internalOptions, sentryHub, unpluginMetaContext.framework);
