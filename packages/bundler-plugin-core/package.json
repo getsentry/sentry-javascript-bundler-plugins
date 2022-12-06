@@ -44,7 +44,7 @@
     "@sentry/cli": "^1.74.6",
     "@sentry/node": "^7.19.0",
     "@sentry/tracing": "^7.19.0",
-    "magic-string": "0.26.2",
+    "magic-string": "0.27.0",
     "unplugin": "0.10.1"
   },
   "devDependencies": {
