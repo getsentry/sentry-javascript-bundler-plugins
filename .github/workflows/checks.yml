@@ -73,6 +73,11 @@ jobs:
       - run: yarn test:integration
 
   test-e2e:
+    # We only run E2E tests for non-fork PRs because the E2E tests require secrets to work and they can't be accessed from forks
+    # Dependabot PRs sadly also don't have access to secrets, so we skip them as well
+    if:
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      github.actor != 'dependabot[bot]'
     needs: build
     name: E2E Tests
     runs-on: ubuntu-latest
