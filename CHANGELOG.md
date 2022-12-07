@@ -4,6 +4,13 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.2.4
+
+- build(core): Update magic-string due to deprecated dependency (#146)
+- ref(core): Send project as `dist` in telemetry (#148)
+
+Work in this release contributed by @jperelli. Thank you for your contribution!
+
 ## 0.2.3
 
 - fix: Exclude `node_modules` from release injection (#143)
