@@ -1,8 +1,8 @@
 import { Hub } from "@sentry/core";
 import { Span } from "@sentry/tracing";
 import { SentryCLILike } from "./sentry/cli";
+import type { SentryCliOptions } from "@sentry/cli";
 import { createLogger } from "./sentry/logger";
-
 /**
  * The main options object holding all plugin options available to users
  */
@@ -115,6 +115,12 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * This value can also be specified via the `CUSTOM_HEADER` environment variable.
    */
   customHeader?: string;
+
+  /**
+   * Headers added to every outgoing network request.
+   * This value does not set any env variable, and is overridden by customHeader.
+   */
+  headers?: SentryCliOptions["headers"];
 
   /**
    * Attempts a dry run (useful for dev environments), making release creation
