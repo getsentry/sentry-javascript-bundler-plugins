@@ -4,6 +4,14 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.3.0
+
+Note: This release bumps the [`@sentry/cli`](https://www.npmjs.com/package/@sentry/cli) dependency from version `1.x` to version `2.x`.
+
+- feat(core): Add headers option (#153)
+
+Work in this release contributed by @robertcepa. Thank you for your contribution!
+
 ## 0.2.4
 
 - build(core): Update magic-string due to deprecated dependency (#146)
