@@ -117,6 +117,12 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   customHeader?: string;
 
   /**
+   * Headers added to every outgoing network request.
+   * This value does not set any env variable, and is overridden by customHeader.
+   */
+  headers?: Record<string, string>;
+
+  /**
    * Attempts a dry run (useful for dev environments), making release creation
    * a no-op.
    *

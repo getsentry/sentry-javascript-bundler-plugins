@@ -29,6 +29,7 @@ type OptionalInternalOptions = Partial<
     | "deploy"
     | "configFile"
     | "customHeader"
+    | "headers"
   >
 >;
 
@@ -101,6 +102,7 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     // In the spirit of maximum compatibility, we allow both here.
     customHeader:
       userOptions.customHeader ?? process.env["SENTRY_HEADER"] ?? process.env["CUSTOM_HEADER"],
+    headers: userOptions.headers,
 
     vcsRemote: userOptions.vcsRemote, // env var: `SENTRY_VSC_REMOTE`
 
