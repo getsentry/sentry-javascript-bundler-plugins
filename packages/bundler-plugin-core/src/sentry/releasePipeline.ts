@@ -67,7 +67,10 @@ export async function uploadSourceMaps(
   // Since our internal include entries contain all top-level sourcemaps options,
   // we only need to pass the include option here.
   try {
-    await ctx.cli.releases.uploadSourceMaps(releaseName, { include: options.include });
+    await ctx.cli.releases.uploadSourceMaps(releaseName, {
+      include: options.include,
+      dist: options.dist,
+    });
   } catch (e) {
     ctx.hub.captureException(new Error("CLI Error: Uploading source maps failed"));
     throw e;
