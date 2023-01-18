@@ -71,9 +71,8 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * if the release should be injected into the module and `false` otherwise. String
    * values of this option require a full match with the absolute path of the module.
    *
-   * By default, the release will be injected into all modules - however, bundlers
-   * will include the injected release code only once per entrypoint.
-   * If release injection should be disabled, provide an empty array here.
+   * By default, the release will be injected into all entrypoints. If release
+   * injection should be disabled, provide an empty array here.
    */
   releaseInjectionTargets?: (string | RegExp)[] | RegExp | string | ((filePath: string) => boolean);
 
