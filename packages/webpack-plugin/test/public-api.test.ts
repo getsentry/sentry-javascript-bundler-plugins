@@ -1,4 +1,4 @@
-import sentryWebpackPlugin from "../src";
+import { sentryWebpackPlugin } from "../src";
 
 test("Webpack plugin should exist", () => {
   expect(sentryWebpackPlugin).toBeDefined();

@@ -1,4 +1,4 @@
-import sentryEsbuildPlugin from "../src";
+import { sentryEsbuildPlugin } from "../src";
 
 test("Esbuild plugin should exist", () => {
   expect(sentryEsbuildPlugin).toBeDefined();
