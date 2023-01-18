@@ -109,16 +109,7 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   vcsRemote?: string;
 
   /**
-   * A header added to every outgoing network request.
-   * The format should be `header-key: header-value`.
-   *
-   * This value can also be specified via the `CUSTOM_HEADER` environment variable.
-   */
-  customHeader?: string;
-
-  /**
    * Headers added to every outgoing network request.
-   * This value does not set any env variable, and is overridden by customHeader.
    */
   headers?: Record<string, string>;
 

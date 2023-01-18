@@ -137,18 +137,7 @@ export function addPluginOptionInformationToHub(
 }
 
 export async function shouldSendTelemetry(options: InternalOptions): Promise<boolean> {
-  const {
-    silent,
-    org,
-    project,
-    authToken,
-    url,
-    vcsRemote,
-    customHeader,
-    headers,
-    telemetry,
-    dryRun,
-  } = options;
+  const { silent, org, project, authToken, url, vcsRemote, headers, telemetry, dryRun } = options;
 
   // `options.telemetry` defaults to true
   if (telemetry === false) {
@@ -170,7 +159,6 @@ export async function shouldSendTelemetry(options: InternalOptions): Promise<boo
     project,
     vcsRemote,
     silent,
-    customHeader,
     headers,
   });
 

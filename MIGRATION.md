@@ -37,3 +37,8 @@ Matching behaviour stays the same.
 Previously, the webpack plugin always injected a `SENTRY_RELEASES` variable into the global object which would map from `project@org` to the `release` value. In version 2, we made this behaviour opt-in by setting the `injectReleasesMap` option in the plugin options to `true`.
 
 The purpose of this option is to support module-federated projects or micro frontend setups where multiple projects would want to access the global release variable. However, Sentry SDKs by default never accessed this variable so it would require manual user-intervention to make use of it. Making this behaviour opt-in decreases the bundle size impact of our plugin for the majority of users.
+
+### Removal of the `customHeader` option
+
+The `customHeader` was used to attach an additional header to outgoing requests to Sentry when uploading source maps.
+This option has been removed in favor of the `headers` option which allows for attaching multiple headers.
