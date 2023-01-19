@@ -225,8 +225,6 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       // The MagicString library allows us to generate sourcemaps for the changes we make to the user code.
       const ms = new MagicString(code);
 
-      // Appending instead of prepending has less probability of mucking with user's source maps.
-      // Luckily import statements get hoisted to the top anyways.
       ms.prepend(
         generateGlobalInjectorCode({
           release: await releaseNamePromise,
