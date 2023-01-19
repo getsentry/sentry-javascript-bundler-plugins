@@ -28,7 +28,6 @@ type OptionalInternalOptions = Partial<
     | "setCommits"
     | "deploy"
     | "configFile"
-    | "customHeader"
     | "headers"
   >
 >;
@@ -97,11 +96,6 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     // the passed options are undefined.
     authToken: userOptions.authToken, // env var: `SENTRY_AUTH_TOKEN`
 
-    // CLI v1 (and the "old" webpack plugin) use `CUSTOM_HEADER`,
-    // but CLI v2 uses `SENTRY_HEADER` (which is also better aligned with other naming)
-    // In the spirit of maximum compatibility, we allow both here.
-    customHeader:
-      userOptions.customHeader ?? process.env["SENTRY_HEADER"] ?? process.env["CUSTOM_HEADER"],
     headers: userOptions.headers,
 
     vcsRemote: userOptions.vcsRemote, // env var: `SENTRY_VSC_REMOTE`

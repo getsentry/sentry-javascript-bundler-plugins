@@ -38,6 +38,11 @@ Previously, the webpack plugin always injected a `SENTRY_RELEASES` variable into
 
 The purpose of this option is to support module-federated projects or micro frontend setups where multiple projects would want to access the global release variable. However, Sentry SDKs by default never accessed this variable so it would require manual user-intervention to make use of it. Making this behaviour opt-in decreases the bundle size impact of our plugin for the majority of users.
 
+### Removal of the `customHeader` option
+
+The `customHeader` was used to attach an additional header to outgoing requests to Sentry when uploading source maps.
+This option has been removed in favor of the `headers` option which allows for attaching multiple headers.
+
 ## Upgrading from 0.3.x to 0.4.x
 
 ### Replacing default exports with named exports
