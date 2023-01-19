@@ -82,6 +82,13 @@ import type { Options } from "@sentry/rollup-plugin";
 import type { SentryRollupPluginOptions } from "@sentry/rollup-plugin";
 ```
 
+### Behavioral change of `releaseInjectionTargets`
+
+Previously the plugins injected a Sentry release value into every module that was processed.
+This approach caused problems in some cases so moving forward, they will only inject the release value into entrypoints by default.
+
+In case you need more fine grained control over which modules should have a release value, you can use the `releaseInjectionTargets` option.
+
 ### Removal of `customHeader` option
 
 We removed the `customHeader` option in favor of the `headers` option.

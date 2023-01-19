@@ -23,11 +23,6 @@ import { getSentryCli } from "./sentry/cli";
 import { makeMain } from "@sentry/node";
 import path from "path";
 
-// We prefix the polyfill id with \0 to tell other plugins not to try to load or transform it.
-// This hack is taken straight from https://rollupjs.org/guide/en/#resolveid.
-// This probably doesn't work for all bundlers but for rollup it does.
-const RELEASE_INJECTOR_ID = "\0sentry-release-injector";
-
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
 
 /**
@@ -36,17 +31,17 @@ const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs
  * - Sourcemaps upload
  *
  * Release injection:
- *
- * Per default the sentry bundler plugin will inject a global `SENTRY_RELEASE` into each JavaScript/TypeScript module
- * that is part of the bundle. On a technical level this is done by appending an import (`import "sentry-release-injector;"`)
- * to all entrypoint files of the user code (see `transformInclude` and `transform` hooks). This import is then resolved
- * by the sentry plugin to a virtual module that sets the global variable (see `resolveId` and `load` hooks).
- * If a user wants to inject the release into a particular set of modules they can use the `releaseInjectionTargets` option.
+ * Per default the sentry bundler plugin will inject a global `SENTRY_RELEASE` into
+ * each JavaScript/TypeScript entrypoint. On a technical level this is done by identifying
+ * entrypoints in the `resolveId` hook and prepending user code in the `transform` hook.
+ * If a user wants to inject the release into a particular set of modules instead,
+ * they can use the `releaseInjectionTargets` option.
  *
  * Source maps upload:
  *
- * The sentry bundler plugin will also take care of uploading source maps to Sentry. This is all done in the
- * `writeBundle` hook. In this hook the sentry plugin will execute the release creation pipeline:
+ * The sentry bundler plugin will also take care of uploading source maps to Sentry. This
+ * is all done in the `writeBundle` hook. In this hook the sentry plugin will execute the
+ * release creation pipeline:
  *
  * 1. Create a new release
  * 2. Delete already uploaded artifacts for this release (if `cleanArtifacts` is enabled)
@@ -103,6 +98,8 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
   let transaction: Transaction | undefined;
   let releaseInjectionSpan: Span | undefined;
+
+  const absolueEntrypointPaths = new Set<string>();
 
   return {
     name: "sentry-plugin",
@@ -165,38 +162,11 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     resolveId(id, importer, { isEntry }) {
       logger.debug('Called "resolveId":', { id, importer, isEntry });
 
-      if (id === RELEASE_INJECTOR_ID) {
-        return RELEASE_INJECTOR_ID;
-      } else {
-        return undefined;
+      if (isEntry) {
+        absolueEntrypointPaths.add(path.resolve(path.normalize(id)));
       }
-    },
 
-    loadInclude(id) {
-      logger.debug('Called "loadInclude":', { id });
-      return id === RELEASE_INJECTOR_ID;
-    },
-
-    /**
-     * Responsible for "virtually" loading the "sentry-release-injector" module. "Virtual" means that the module is not
-     * read from somewhere on disk but rather just returned via a string.
-     *
-     * @param id Always the absolute (fully resolved) path to the module.
-     * @returns The global injector code when we load the "sentry-release-injector" module. Otherwise returns `undefined`.
-     */
-    async load(id) {
-      logger.debug('Called "load":', { id });
-
-      if (id === RELEASE_INJECTOR_ID) {
-        return generateGlobalInjectorCode({
-          release: await releaseNamePromise,
-          injectReleasesMap: internalOptions.injectReleasesMap,
-          org: internalOptions.org,
-          project: internalOptions.project,
-        });
-      } else {
-        return undefined;
-      }
+      return undefined;
     },
 
     /**
@@ -214,11 +184,6 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       // a windows style path to `releaseInjectionTargets`
       const normalizedId = path.normalize(id);
 
-      // We don't want to transform our injected code.
-      if (normalizedId === RELEASE_INJECTOR_ID) {
-        return false;
-      }
-
       if (internalOptions.releaseInjectionTargets) {
         // If there's an `releaseInjectionTargets` option transform (ie. inject the release varible) when the file path matches the option.
         if (typeof internalOptions.releaseInjectionTargets === "function") {
@@ -233,15 +198,16 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
             return normalizedId === normalizedEntry;
           }
         });
-      } else {
-        const isInNodeModules = normalizedId.split(path.sep).includes("node_modules");
+      } else if (absolueEntrypointPaths.has(normalizedId)) {
         const pathIsOrdinary = !normalizedId.includes("?") && !normalizedId.includes("#");
 
         const pathHasAllowedFileEnding = ALLOWED_TRANSFORMATION_FILE_ENDINGS.some(
           (allowedFileEnding) => normalizedId.endsWith(allowedFileEnding)
         );
 
-        return !isInNodeModules && pathIsOrdinary && pathHasAllowedFileEnding;
+        return pathIsOrdinary && pathHasAllowedFileEnding;
+      } else {
+        return false;
       }
     },
 
@@ -253,15 +219,20 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
      * @param id Always the absolute (fully resolved) path to the module.
      * @returns transformed code + source map
      */
-    transform(code, id) {
+    async transform(code, id) {
       logger.debug('Called "transform":', { id });
 
       // The MagicString library allows us to generate sourcemaps for the changes we make to the user code.
       const ms = new MagicString(code);
 
-      // Appending instead of prepending has less probability of mucking with user's source maps.
-      // Luckily import statements get hoisted to the top anyways.
-      ms.append(`;\nimport "${RELEASE_INJECTOR_ID}";`);
+      ms.prepend(
+        generateGlobalInjectorCode({
+          release: await releaseNamePromise,
+          injectReleasesMap: internalOptions.injectReleasesMap,
+          org: internalOptions.org,
+          project: internalOptions.project,
+        })
+      );
 
       if (unpluginMetaContext.framework === "esbuild") {
         // esbuild + unplugin is buggy at the moment when we return an object with a `map` (sourcemap) property.
@@ -387,8 +358,7 @@ function generateGlobalInjectorCode({
     const key = org ? `${project}@${org}` : project;
     code += `
       _global.SENTRY_RELEASES=_global.SENTRY_RELEASES || {};
-      _global.SENTRY_RELEASES["${key}"]={id:"${release}"};
-      `;
+      _global.SENTRY_RELEASES["${key}"]={id:"${release}"};`;
   }
 
   return code;
