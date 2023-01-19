@@ -1,4 +1,4 @@
-import sentryVitePlugin from "../src";
+import { sentryVitePlugin } from "../src";
 
 test("Vite plugin should exist", () => {
   expect(sentryVitePlugin).toBeDefined();

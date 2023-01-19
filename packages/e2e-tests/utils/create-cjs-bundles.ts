@@ -5,10 +5,11 @@ import { default as webpack4 } from "webpack4";
 import { webpack as webpack5 } from "webpack";
 import * as esbuild from "esbuild";
 
-import sentryVitePlugin, { Options } from "@sentry/vite-plugin";
-import sentryWebpackPlugin from "@sentry/webpack-plugin";
-import sentryEsbuildPlugin from "@sentry/esbuild-plugin";
-import sentryRollupPlugin from "@sentry/rollup-plugin";
+import type { Options } from "@sentry/bundler-plugin-core";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
+import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
+import { sentryEsbuildPlugin } from "@sentry/esbuild-plugin";
+import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
