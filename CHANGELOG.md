@@ -8,13 +8,9 @@
 
 No changes.
 
-The previous release didn't include the `@sentry/webpack-plugin` tarball.
-
 ## 2.0.0-alpha.0
 
-No changes.
-
-Note: This release is the first release of the `@sentry/webpack-plugin` from the [Sentry JavaScript Bundler Plugins repository](https://github.com/getsentry/sentry-javascript-bundler-plugins) with the new [unplugin-based](https://github.com/unjs/unplugin) architecture.
+This release is the first release of the `@sentry/webpack-plugin` from the [Sentry JavaScript Bundler Plugins repository](https://github.com/getsentry/sentry-javascript-bundler-plugins) with the new [unplugin-based](https://github.com/unjs/unplugin) architecture.
 
 If you're updating from `@sentry/webpack-plugin` version `1.x`, please take a look at the [migration guide](https://github.com/getsentry/sentry-javascript-bundler-plugins/blob/main/MIGRATION.md) to learn more about breaking changes.
 
