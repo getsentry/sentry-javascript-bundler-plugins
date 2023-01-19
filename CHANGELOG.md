@@ -4,6 +4,12 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.0.0-alpha.1
+
+No changes.
+
+The previous release didn't include the `@sentry/webpack-plugin` tarball.
+
 ## 2.0.0-alpha.0
 
 No changes.
