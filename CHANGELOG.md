@@ -4,6 +4,12 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.0.0-alpha.0
+
+No changes.
+
+Note: This release is the first release of the `@sentry/webpack-plugin` from the [Sentry JavaScript Bundler Plugins repository](https://github.com/getsentry/sentry-javascript-bundler-plugins) with the new [unplugin-based](https://github.com/unjs/unplugin) architecture.
+
 ## 0.4.0
 
 This release contains breaking changes. Please refer to the [migration guide](https://github.com/getsentry/sentry-javascript-bundler-plugins/blob/main/MIGRATION.md) on how to update from version `0.3.x` to `0.4.x`.
