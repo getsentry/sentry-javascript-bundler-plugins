@@ -45,7 +45,7 @@
     "@sentry/node": "^7.19.0",
     "@sentry/tracing": "^7.19.0",
     "magic-string": "0.27.0",
-    "unplugin": "0.10.1"
+    "unplugin": "1.0.1"
   },
   "devDependencies": {
     "@babel/core": "7.18.5",

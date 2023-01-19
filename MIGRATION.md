@@ -45,6 +45,43 @@ This option has been removed in favor of the `headers` option which allows for a
 
 ## Upgrading from 0.3.x to 0.4.x
 
+### Replacing default exports with named exports
+
+Previously all the plugins were exported as default exports.
+Moving forward, with version `0.4.x` of the plugins, all exports become named exports:
+
+```ts
+import sentryVitePlugin from "@sentry/vite-plugin";
+// becomes
+import { sentryVitePlugin } from "@sentry/vite-plugin";
+
+import sentryEsbuildPlugin from "@sentry/esbuild-plugin";
+// becomes
+import { sentryEsbuildPlugin } from "@sentry/esbuild-plugin";
+
+import sentryRollupPlugin from "@sentry/rollup-plugin";
+// becomes
+import { sentryRollupPlugin } from "@sentry/rollup-plugin";
+```
+
+### Renaming of `Options` type export
+
+The `Options` type was a bit too generic for our taste so we renamed it:
+
+```ts
+import type { Options } from "@sentry/vite-plugin";
+// becomes
+import type { SentryVitePluginOptions } from "@sentry/vite-plugin";
+
+import type { Options } from "@sentry/esbuild-plugin";
+// becomes
+import type { SentryEsbuildPluginOptions } from "@sentry/esbuild-plugin";
+
+import type { Options } from "@sentry/rollup-plugin";
+// becomes
+import type { SentryRollupPluginOptions } from "@sentry/rollup-plugin";
+```
+
 ### Removal of `customHeader` option
 
 We removed the `customHeader` option in favor of the `headers` option.
