@@ -42,3 +42,9 @@ The purpose of this option is to support module-federated projects or micro fron
 
 The `customHeader` was used to attach an additional header to outgoing requests to Sentry when uploading source maps.
 This option has been removed in favor of the `headers` option which allows for attaching multiple headers.
+
+## Upgrading from 0.3.x to 0.4.x
+
+### Removal of `customHeader` option
+
+We removed the `customHeader` option in favor of the `headers` option.
