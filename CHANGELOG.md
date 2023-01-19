@@ -4,6 +4,17 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.4.0
+
+This release contains breaking changes. Please refer to the [migration guide](https://github.com/getsentry/sentry-javascript-bundler-plugins/blob/main/MIGRATION.md) on how to update from version `0.3.x` to `0.4.x`.
+
+- deps(core): Bump unplugin version (#164)
+- ref(core): Only inject release into entrypoints per default (#166) (BREAKING)
+- ref: Remove `customHeader` option (#167) (BREAKING)
+- ref: Turn default exports into named exports (#165) (BREAKING)
+
+Work in this release contributed by @manniL. Thank you for your contribution!
+
 ## 0.3.0
 
 Note: This release bumps the [`@sentry/cli`](https://www.npmjs.com/package/@sentry/cli) dependency from version `1.x` to version `2.x`.
