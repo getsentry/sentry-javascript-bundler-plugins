@@ -10,6 +10,8 @@ No changes.
 
 Note: This release is the first release of the `@sentry/webpack-plugin` from the [Sentry JavaScript Bundler Plugins repository](https://github.com/getsentry/sentry-javascript-bundler-plugins) with the new [unplugin-based](https://github.com/unjs/unplugin) architecture.
 
+If you're updating from webpack plugin version 1.x, please take a look at the migration guide to learn more about breaking changes. 
+
 ## 0.4.0
 
 This release contains breaking changes. Please refer to the [migration guide](https://github.com/getsentry/sentry-javascript-bundler-plugins/blob/main/MIGRATION.md) on how to update from version `0.3.x` to `0.4.x`.
