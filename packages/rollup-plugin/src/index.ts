@@ -1,2 +1,2 @@
-export { sentryRollupPlugin as default } from "@sentry/bundler-plugin-core";
-export type { Options } from "@sentry/bundler-plugin-core";
+export { sentryRollupPlugin } from "@sentry/bundler-plugin-core";
+export type { Options as SentryRollupPluginOptions } from "@sentry/bundler-plugin-core";

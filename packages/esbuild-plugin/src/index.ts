@@ -1,2 +1,2 @@
-export { sentryEsbuildPlugin as default } from "@sentry/bundler-plugin-core";
-export type { Options } from "@sentry/bundler-plugin-core";
+export { sentryEsbuildPlugin } from "@sentry/bundler-plugin-core";
+export type { Options as SentryEsbuildPluginOptions } from "@sentry/bundler-plugin-core";
