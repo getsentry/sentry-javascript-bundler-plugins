@@ -81,32 +81,6 @@ describe("normalizeUserOptions()", () => {
     });
   });
 
-  test("should handle `SENTRY_HEADER` & `CUSTOM_HEADER` env", () => {
-    const userOptions: Options = {
-      org: "my-org",
-      project: "my-project",
-      authToken: "my-auth-token",
-      release: "my-release",
-      include: "./out",
-    };
-
-    const _original_SENTRY_HEADER = process.env["SENTRY_HEADER"];
-    const _original_CUSTOM_HEADER = process.env["CUSTOM_HEADER"];
-
-    expect(normalizeUserOptions(userOptions).customHeader).toBeUndefined();
-
-    process.env["CUSTOM_HEADER"] = "custom-header";
-
-    expect(normalizeUserOptions(userOptions).customHeader).toBe("custom-header");
-
-    process.env["SENTRY_HEADER"] = "sentry-header";
-
-    expect(normalizeUserOptions(userOptions).customHeader).toBe("sentry-header");
-
-    process.env["SENTRY_HEADER"] = _original_SENTRY_HEADER;
-    process.env["CUSTOM_HEADER"] = _original_CUSTOM_HEADER;
-  });
-
   test.each(["https://sentry.io", undefined])(
     "should enable telemetry if `telemetry` is true and Sentry SaaS URL (%s) is used",
     (url) => {
