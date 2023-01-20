@@ -1,2 +1,2 @@
-export { sentryEsbuildPlugin } from "@sentry/bundler-plugin-core";
+export { sentryEsbuildPlugin, sentryCliBinaryExists } from "@sentry/bundler-plugin-core";
 export type { Options as SentryEsbuildPluginOptions } from "@sentry/bundler-plugin-core";

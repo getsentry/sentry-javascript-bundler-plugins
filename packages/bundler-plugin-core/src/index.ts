@@ -10,6 +10,7 @@ import {
   uploadSourceMaps,
 } from "./sentry/releasePipeline";
 import "@sentry/tracing";
+import SentryCli from "@sentry/cli";
 import {
   addPluginOptionInformationToHub,
   addSpanToTransaction,
@@ -22,6 +23,7 @@ import { InternalOptions, normalizeUserOptions, validateOptions } from "./option
 import { getSentryCli } from "./sentry/cli";
 import { makeMain } from "@sentry/node";
 import path from "path";
+import fs from "fs";
 
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
 
@@ -362,6 +364,15 @@ function generateGlobalInjectorCode({
   }
 
   return code;
+}
+
+/**
+ * Determines whether the Sentry CLI binary is in its expected location.
+ * This function is useful since `@sentry/cli` installs the binary via a post-install
+ * script and post-install scripts may not always run. E.g. with `npm i --ignore-scripts`.
+ */
+export function sentryCliBinaryExists(): boolean {
+  return fs.existsSync(SentryCli.getPath());
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
