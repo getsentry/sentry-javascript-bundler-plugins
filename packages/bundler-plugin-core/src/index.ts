@@ -225,7 +225,23 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       // The MagicString library allows us to generate sourcemaps for the changes we make to the user code.
       const ms = new MagicString(code);
 
-      ms.prepend(
+      // We do not want to insert the release injector code before any directives (e.g "use strict";) that come at the beginning of the file.
+      // Tooling like Next.js might complain.
+      const directiveMatch = code.match(/^\s*("[^"]*"|'[^']*')\s*;/);
+
+      let insertionIndex: number;
+      if (directiveMatch === null) {
+        insertionIndex = 0;
+      } else {
+        const [directiveCode] = directiveMatch;
+
+        // If there is a match, `directiveCode` is always defined
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        insertionIndex = directiveCode!.length;
+      }
+
+      ms.prependLeft(
+        insertionIndex,
         generateGlobalInjectorCode({
           release: await releaseNamePromise,
           injectReleasesMap: internalOptions.injectReleasesMap,
