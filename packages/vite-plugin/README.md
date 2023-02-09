@@ -105,7 +105,7 @@ Example:
 
 ```ts
 // vite.config.ts
-import sentryVitePlugin from "@sentry/vite-plugin";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 export default {
   plugins: [
