@@ -101,6 +101,8 @@ const PACKAGES_TO_INCLUDE_VERSION = [
   "gatsby",
   "next",
   "remix",
+  "rollup",
+  "esbuild",
 ];
 
 export function getDependencies(packageJson: PackageJson): {

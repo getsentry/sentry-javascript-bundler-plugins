@@ -28,7 +28,7 @@ function checkBundle(bundlePath: string): void {
         "webpack",
         "webpack4",
       ],
-      depsVersions: { vite: 3, webpack: 5 },
+      depsVersions: { rollup: 2, vite: 3, webpack: 5 },
       nodeVersion: 14,
     })
   );
