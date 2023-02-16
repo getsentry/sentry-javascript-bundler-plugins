@@ -34,6 +34,7 @@ describe("normalizeUserOptions()", () => {
       silent: false,
       telemetry: true,
       injectReleasesMap: false,
+      injectBuildInformation: false,
       url: "https://sentry.io",
     });
   });
@@ -77,6 +78,7 @@ describe("normalizeUserOptions()", () => {
       silent: false,
       telemetry: true,
       injectReleasesMap: false,
+      injectBuildInformation: false,
       url: "https://sentry.io",
     });
   });

@@ -198,6 +198,17 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * Defaults to `false`.
    */
   injectReleasesMap?: boolean;
+
+  /**
+   * If set to true, the plugin will inject an additional `SENTRY_BUILD_INFO` variable.
+   * This contains information about the build, e.g. dependencies, node version and other useful data.
+   *
+   * This is still experimental and subject to change!
+   *
+   * Defaults to `false` for now.
+   * @hidden
+   */
+  injectBuildInformation?: boolean;
 };
 
 export type IncludeEntry = {

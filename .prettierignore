@@ -1,1 +1,2 @@
 packages/e2e-tests/scenarios/*/ref/**/*
+packages/bundler-plugin-core/test/fixtures

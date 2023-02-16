@@ -12,6 +12,7 @@ type RequiredInternalOptions = Required<
     | "cleanArtifacts"
     | "telemetry"
     | "injectReleasesMap"
+    | "injectBuildInformation"
   >
 >;
 
@@ -89,6 +90,7 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     silent: userOptions.silent ?? false,
     telemetry: userOptions.telemetry ?? true,
     injectReleasesMap: userOptions.injectReleasesMap ?? false,
+    injectBuildInformation: userOptions.injectBuildInformation ?? false,
 
     // These options and can also be set via env variables or the config file.
     // If they're set in the options, we simply pass them to the CLI constructor.

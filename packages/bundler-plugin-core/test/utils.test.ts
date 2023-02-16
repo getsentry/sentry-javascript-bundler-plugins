@@ -1,0 +1,171 @@
+import { getDependencies, getPackageJson, parseMajorVersion } from "../src/utils";
+import path from "node:path";
+
+type PackageJson = Record<string, unknown>;
+
+function getCwdFor(dirName: string) {
+  return path.resolve(__dirname + dirName);
+}
+
+describe("getPackageJson", () => {
+  test("it works for this package", () => {
+    const packageJson = getPackageJson();
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const expected = require("../package.json") as PackageJson;
+
+    expect(packageJson).toEqual(expected);
+  });
+
+  test("it works with nested folders with invalid package.json format", () => {
+    const packageJson = getPackageJson({
+      cwd: getCwdFor("/fixtures/deeply-nested-package/deeply/nested"),
+    });
+
+    expect(packageJson).toEqual({ name: "my-deeply-nested-package" });
+  });
+
+  test("it works with nested folders with errors in package.json", () => {
+    const packageJson = getPackageJson({
+      cwd: getCwdFor("/fixtures/nested-error-package/deeply/nested"),
+    });
+
+    expect(packageJson).toEqual({ name: "my-deeply-nested-package" });
+  });
+
+  test("it picks first package.json it finds", () => {
+    const packageJson = getPackageJson({
+      cwd: getCwdFor("/fixtures/nested-package/deeply/nested"),
+    });
+
+    expect(packageJson).toEqual({ name: "my-first-package" });
+  });
+
+  test("it stops after reaching too far", () => {
+    const packageJson = getPackageJson({
+      cwd: getCwdFor("/fixtures/no-valid-package/deeply/nested"),
+      stopAt: process.cwd(),
+    });
+
+    expect(packageJson).toBeUndefined();
+  });
+});
+
+describe("parseMajorVersion", () => {
+  it.each([
+    ["2.0.0", 2],
+    ["12.0.0", 12],
+    ["12.0", 12],
+    ["12", 12],
+    [">12", 12],
+    ["<12", 11],
+    ["<=12", 12],
+    [">=12", 12],
+    [">12.0.0", 12],
+    ["<12.0.0", 11],
+    ["<=12.0.0", 12],
+    [">=12.0.0", 12],
+    [">= 12.0.0", 12],
+    ["<= 12.0.0", 12],
+    ["< 12.0.0", 11],
+    ["< 12.0.1", 12],
+    ["< 12.1", 12],
+    ["< 12.0", 11],
+    ["> 2", 2],
+    ["< 2", 1],
+    ["12.x", 12],
+    ["> 10 < 12", 10],
+  ])("parses %s", (version, expected) => {
+    expect(parseMajorVersion(version)).toBe(expected);
+
+    // Also test with prerelease suffix
+    expect(parseMajorVersion(`${version}-alpha.1`)).toBe(expected);
+
+    // Also test with v prefix
+    expect(parseMajorVersion(`v${version}`)).toBe(expected);
+  });
+});
+
+describe("getDependencies", () => {
+  test("it works without dependencies", () => {
+    const { deps, depsVersions } = getDependencies({});
+
+    expect(deps).toEqual([]);
+    expect(depsVersions).toEqual({});
+  });
+
+  test("it works with only dependencies", () => {
+    const { deps, depsVersions } = getDependencies({
+      dependencies: {
+        dep1: "1",
+        "other-dep": "^2.0.0",
+        dep2: "~3.1.0",
+      },
+    });
+
+    expect(deps).toEqual(["dep1", "dep2", "other-dep"]);
+    expect(depsVersions).toEqual({});
+  });
+
+  test("it works with only devDependencies", () => {
+    const { deps, depsVersions } = getDependencies({
+      devDependencies: {
+        dep1: "1",
+        "other-dep": "^2.0.0",
+        dep2: "~3.1.0",
+      },
+    });
+
+    expect(deps).toEqual(["dep1", "dep2", "other-dep"]);
+    expect(depsVersions).toEqual({});
+  });
+
+  test("it works with both devDependencies & dependencies", () => {
+    const { deps, depsVersions } = getDependencies({
+      devDependencies: {
+        dep1: "1",
+        "other-dep": "^2.0.0",
+        dep2: "~3.1.0",
+      },
+      dependencies: {
+        dep3: "2",
+        "another-dep": "^3.0.0",
+      },
+    });
+
+    expect(deps).toEqual(["another-dep", "dep1", "dep2", "dep3", "other-dep"]);
+    expect(depsVersions).toEqual({});
+  });
+
+  test("it extracts versions of packages we care about", () => {
+    const { deps, depsVersions } = getDependencies({
+      devDependencies: {
+        dep1: "1",
+        webpack: "5.x",
+        react: "^18.2.0",
+        "other-dep": "^2.0.0",
+        dep2: "~3.1.0",
+      },
+      dependencies: {
+        dep3: "2",
+        "another-dep": "^3.0.0",
+        vite: "^3.0.0",
+      },
+    });
+
+    expect(deps).toEqual([
+      "another-dep",
+      "dep1",
+      "dep2",
+      "dep3",
+      "other-dep",
+      "react",
+      "vite",
+      "webpack",
+    ]);
+    expect(depsVersions).toEqual({
+      react: 18,
+      vite: 3,
+      webpack: 5,
+    });
+  });
+});
