@@ -8,5 +8,5 @@ const outputDir = path.resolve(__dirname, "out");
 createCjsBundles({ index: entryPointPath }, outputDir, {
   include: outputDir,
   dryRun: true,
-  injectBuildInformation: true,
+  _experiments: { injectBuildInformation: true },
 } as Options);

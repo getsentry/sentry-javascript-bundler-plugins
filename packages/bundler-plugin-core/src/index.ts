@@ -232,7 +232,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         generateGlobalInjectorCode({
           release: await releaseNamePromise,
           injectReleasesMap: internalOptions.injectReleasesMap,
-          injectBuildInformation: internalOptions.injectBuildInformation,
+          injectBuildInformation: internalOptions._experiments.injectBuildInformation || false,
           org: internalOptions.org,
           project: internalOptions.project,
         })
@@ -371,7 +371,7 @@ function generateGlobalInjectorCode({
     const buildInfo = getBuildInformation();
 
     code += `
-      _global.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)}`;
+      _global.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)};`;
   }
 
   return code;
