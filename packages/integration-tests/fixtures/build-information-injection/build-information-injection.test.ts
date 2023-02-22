@@ -29,7 +29,8 @@ function checkBundle(bundlePath: string): void {
         "webpack4",
       ],
       depsVersions: { rollup: 2, vite: 3, webpack: 5 },
-      nodeVersion: 14,
+      // This will differ based on what env this is run on
+      nodeVersion: expect.any(Number) as number,
     })
   );
 }
