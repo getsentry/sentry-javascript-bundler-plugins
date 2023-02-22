@@ -24,6 +24,7 @@ import { getSentryCli } from "./sentry/cli";
 import { makeMain } from "@sentry/node";
 import path from "path";
 import fs from "fs";
+import { getDependencies, getPackageJson, parseMajorVersion } from "./utils";
 
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
 
@@ -231,6 +232,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         generateGlobalInjectorCode({
           release: await releaseNamePromise,
           injectReleasesMap: internalOptions.injectReleasesMap,
+          injectBuildInformation: internalOptions._experiments.injectBuildInformation || false,
           org: internalOptions.org,
           project: internalOptions.project,
         })
@@ -328,17 +330,19 @@ function handleError(
 }
 
 /**
- * Generates code for the "sentry-release-injector" which is responsible for setting the global `SENTRY_RELEASE`
- * variable.
+ * Generates code for the global injector which is responsible for setting the global
+ * `SENTRY_RELEASE` & `SENTRY_BUILD_INFO` variables.
  */
 function generateGlobalInjectorCode({
   release,
   injectReleasesMap,
+  injectBuildInformation,
   org,
   project,
 }: {
   release: string;
   injectReleasesMap: boolean;
+  injectBuildInformation: boolean;
   org?: string;
   project?: string;
 }) {
@@ -363,7 +367,28 @@ function generateGlobalInjectorCode({
       _global.SENTRY_RELEASES["${key}"]={id:"${release}"};`;
   }
 
+  if (injectBuildInformation) {
+    const buildInfo = getBuildInformation();
+
+    code += `
+      _global.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)};`;
+  }
+
   return code;
+}
+
+export function getBuildInformation() {
+  const packageJson = getPackageJson();
+
+  const { deps, depsVersions } = packageJson
+    ? getDependencies(packageJson)
+    : { deps: [], depsVersions: {} };
+
+  return {
+    deps,
+    depsVersions,
+    nodeVersion: parseMajorVersion(process.version),
+  };
 }
 
 /**

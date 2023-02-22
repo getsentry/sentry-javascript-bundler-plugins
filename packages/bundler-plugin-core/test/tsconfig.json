@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "../src/tsconfig.json",
-  "include": ["../src/**/*", "./**/*"],
+  "include": ["../src/**/*", "./*.ts", "./sentry/**/*"],
   "compilerOptions": {
     "types": ["node", "jest"]
   }
