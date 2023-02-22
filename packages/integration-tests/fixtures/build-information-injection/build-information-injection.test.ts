@@ -10,6 +10,9 @@ import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
  */
 function checkBundle(bundlePath: string): void {
   const processOutput = childProcess.execSync(`node ${bundlePath}`, { encoding: "utf-8" });
+
+  const expectedNodeVersion = parseInt(process.versions.node);
+
   expect(processOutput).toBe(
     JSON.stringify({
       deps: [
@@ -30,7 +33,7 @@ function checkBundle(bundlePath: string): void {
       ],
       depsVersions: { rollup: 2, vite: 3, webpack: 5 },
       // This will differ based on what env this is run on
-      nodeVersion: expect.any(Number) as number,
+      nodeVersion: expectedNodeVersion,
     })
   );
 }
