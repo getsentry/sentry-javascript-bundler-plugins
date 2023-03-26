@@ -10,48 +10,34 @@ const input = ["src/index.ts"];
 
 const extensions = [".js", ".ts"];
 
-export default [
-  {
-    input,
-    external: [...Object.keys(packageJson.dependencies), ...modulePackage.builtinModules],
-    plugins: [
-      resolve({ extensions, preferBuiltins: true }),
-      commonjs(),
-      json(),
-      replace({
-        preventAssignment: true,
-        values: {
-          __PACKAGE_VERSION__: JSON.stringify(packageJson.version),
-        },
-      }),
-      babel({
-        extensions,
-        babelHelpers: "bundled",
-        include: ["src/**/*"],
-      }),
-    ],
-    output: [
-      {
-        file: packageJson.module,
-        format: "esm",
-        exports: "named",
-        sourcemap: true,
-      },
-      {
-        file: packageJson.main,
-        format: "cjs",
-        exports: "named",
-        sourcemap: true,
-      },
-    ],
-  },
-  {
-    input: "src/release-injection-file.ts",
-    output: {
-      file: "dist/release-injection-file.js",
+export default {
+  input,
+  external: [...Object.keys(packageJson.dependencies), ...modulePackage.builtinModules],
+  plugins: [
+    resolve({ extensions, preferBuiltins: true }),
+    commonjs(),
+    json(),
+    replace({
+      __PACKAGE_VERSION__: JSON.stringify(packageJson.version),
+    }),
+    babel({
+      extensions,
+      babelHelpers: "bundled",
+      include: ["src/**/*"],
+    }),
+  ],
+  output: [
+    {
+      file: packageJson.module,
+      format: "esm",
+      exports: "named",
+      sourcemap: true,
+    },
+    {
+      file: packageJson.main,
       format: "cjs",
       exports: "named",
       sourcemap: true,
     },
-  },
-];
+  ],
+};
