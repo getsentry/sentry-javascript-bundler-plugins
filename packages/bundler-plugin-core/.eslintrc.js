@@ -10,6 +10,7 @@ module.exports = {
     "jest.config.js",
     "rollup.config.js",
     "test/fixtures/**/*",
+    "sentry-release-injection-file.js",
   ],
   parserOptions: {
     tsconfigRootDir: __dirname,

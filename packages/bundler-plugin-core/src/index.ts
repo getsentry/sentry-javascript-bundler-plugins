@@ -180,7 +180,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       // a windows style path to `releaseInjectionTargets`
       const normalizedId = path.normalize(id);
 
-      if (id.includes("release-injection-file")) {
+      if (id.includes("sentry-release-injection-file")) {
         return true;
       }
 
@@ -237,7 +237,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       } else {
         // Appending instead of prepending has less probability of mucking with user's source maps.
         // Luckily import statements get hoisted to the top anyways.
-        ms.append(`;\nimport "@sentry/bundler-plugin-core/dist/release-injection-file";`);
+        ms.append(`;\nimport "@sentry/bundler-plugin-core/sentry-release-injection-file";`);
       }
 
       if (unpluginMetaContext.framework === "esbuild") {
