@@ -1,6 +1,4 @@
 // @ts-check
-import commonjs from "@rollup/plugin-commonjs";
-import resolve from "@rollup/plugin-node-resolve";
 import { sentryRollupPlugin } from "@sentry/bundler-plugin-core";
 import placeHolderOptions from "./config.json";
 
@@ -11,8 +9,6 @@ const extensions = [".js"];
 export default {
   input,
   plugins: [
-    resolve({ extensions }),
-    commonjs(),
     sentryRollupPlugin({
       ...placeHolderOptions,
     }),

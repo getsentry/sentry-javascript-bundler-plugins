@@ -241,7 +241,8 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       } else {
         // Appending instead of prepending has less probability of mucking with user's source maps.
         // Luckily import statements get hoisted to the top anyways.
-        ms.append(`;\nimport "${releaseInjectionFilePath}";`); // Needs to be an absolute path because Rollup doesn't bundle stuff in `node_modules` by default when bundling CJS.
+        // The import needs to be an absolute path because Rollup doesn't bundle stuff in `node_modules` by default when bundling CJS (unless the node-resolve-plugin is used).
+        ms.append(`;\nimport "${releaseInjectionFilePath}";`);
       }
 
       if (unpluginMetaContext.framework === "esbuild") {
