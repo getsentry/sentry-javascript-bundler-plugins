@@ -28,8 +28,8 @@ import { getDependencies, getPackageJson, parseMajorVersion } from "./utils";
 
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
 
-const releaseInjectionFilePath = require.resolve(
-  "@sentry/bundler-plugin-core/sentry-release-injection-file"
+const releaseInjectionFilePath = path.normalize(
+  require.resolve("@sentry/bundler-plugin-core/sentry-release-injection-file")
 );
 
 /**
