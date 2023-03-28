@@ -22,15 +22,16 @@ import { createLogger, Logger } from "./sentry/logger";
 import { InternalOptions, normalizeUserOptions, validateOptions } from "./options-mapping";
 import { getSentryCli } from "./sentry/cli";
 import { makeMain } from "@sentry/node";
+import url from "url";
 import path from "path";
 import fs from "fs";
 import { getDependencies, getPackageJson, parseMajorVersion } from "./utils";
 
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
 
-const releaseInjectionFilePath = path.normalize(
+const releaseInjectionFilePath = url.pathToFileURL(
   require.resolve("@sentry/bundler-plugin-core/sentry-release-injection-file")
-);
+).href;
 
 /**
  * The sentry bundler plugin concerns itself with two things:
