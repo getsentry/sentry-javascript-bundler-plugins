@@ -29,6 +29,7 @@ import { getDependencies, getPackageJson, parseMajorVersion } from "./utils";
 
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
 
+// pathToFileURL is necessary for windows
 const releaseInjectionFilePath = url.pathToFileURL(
   require.resolve("@sentry/bundler-plugin-core/sentry-release-injection-file")
 ).href;
