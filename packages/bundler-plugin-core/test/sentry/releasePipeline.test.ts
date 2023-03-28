@@ -93,6 +93,19 @@ describe("Release Pipeline", () => {
   });
 
   describe("uploadSourceMaps", () => {
+    it("doesn't do anything if disableSourceMapsUpload is true", async () => {
+      const options = {
+        disableSourceMapsUpload: true,
+        include: [{ paths: ["dist"] }],
+      } as InternalOptions;
+
+      await uploadSourceMaps(options, ctx as unknown as BuildContext, "1.0.0");
+
+      expect(mockedCLI.releases.uploadSourceMaps).not.toHaveBeenCalled();
+      expect(mockedAddSpanToTxn).not.toHaveBeenCalled();
+      expect(mockedChildSpan.finish).not.toHaveBeenCalled();
+    });
+
     it("makes a call to Sentry CLI's sourcemaps upload command", async () => {
       const options = {
         include: [{ paths: ["dist"] }],

@@ -200,6 +200,24 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   injectReleasesMap?: boolean;
 
   /**
+   * If set to true, the plugin will not inject any release information into the build.
+   * This might be useful if the plugin is only used to upload source maps.
+   *
+   * Defaults to `false`.
+   */
+  disableReleaseInjection?: boolean;
+
+  /**
+   * If set to true, the plugin will not upload any source maps.
+   * This might be useful if, for example, the plugin is run in a pipeline
+   * where only release injection is needed and source maps upload is handled
+   * by another pipeline.
+   *
+   * Defaults to `false`.
+   */
+  disableSourceMapsUpload?: boolean;
+
+  /**
    * These options are considered experimental and subject to change.
    *
    * _experiments.injectBuildInformation:

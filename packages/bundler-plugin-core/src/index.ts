@@ -228,15 +228,17 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       // The MagicString library allows us to generate sourcemaps for the changes we make to the user code.
       const ms = new MagicString(code);
 
-      ms.prepend(
-        generateGlobalInjectorCode({
-          release: await releaseNamePromise,
-          injectReleasesMap: internalOptions.injectReleasesMap,
-          injectBuildInformation: internalOptions._experiments.injectBuildInformation || false,
-          org: internalOptions.org,
-          project: internalOptions.project,
-        })
-      );
+      if (!internalOptions.disableReleaseInjection) {
+        ms.prepend(
+          generateGlobalInjectorCode({
+            release: await releaseNamePromise,
+            injectReleasesMap: internalOptions.injectReleasesMap,
+            injectBuildInformation: internalOptions._experiments.injectBuildInformation || false,
+            org: internalOptions.org,
+            project: internalOptions.project,
+          })
+        );
+      }
 
       if (unpluginMetaContext.framework === "esbuild") {
         // esbuild + unplugin is buggy at the moment when we return an object with a `map` (sourcemap) property.
