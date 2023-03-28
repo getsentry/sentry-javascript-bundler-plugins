@@ -28,6 +28,10 @@ import { getDependencies, getPackageJson, parseMajorVersion } from "./utils";
 
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
 
+const releaseInjectionFilePath = require.resolve(
+  "@sentry/bundler-plugin-core/sentry-release-injection-file"
+);
+
 /**
  * The sentry bundler plugin concerns itself with two things:
  * - Release injection
@@ -237,7 +241,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       } else {
         // Appending instead of prepending has less probability of mucking with user's source maps.
         // Luckily import statements get hoisted to the top anyways.
-        ms.append(`;\nimport "@sentry/bundler-plugin-core/sentry-release-injection-file";`);
+        ms.append(`;\nimport "${releaseInjectionFilePath}";`); // Needs to be an absolute path because Rollup doesn't bundle stuff in `node_modules` by default when bundling CJS.
       }
 
       if (unpluginMetaContext.framework === "esbuild") {
