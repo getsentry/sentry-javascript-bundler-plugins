@@ -225,6 +225,10 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     async transform(code, id) {
       logger.debug('Called "transform":', { id });
 
+      if (!internalOptions.injectRelease) {
+        return;
+      }
+
       // The MagicString library allows us to generate sourcemaps for the changes we make to the user code.
       const ms = new MagicString(code);
 

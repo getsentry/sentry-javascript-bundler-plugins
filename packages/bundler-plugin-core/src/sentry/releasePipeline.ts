@@ -61,6 +61,11 @@ export async function uploadSourceMaps(
   ctx: BuildContext,
   releaseName: string
 ): Promise<void> {
+  if (!options.uploadSourceMaps) {
+    logger.debug("Skipping source maps upload.");
+    return;
+  }
+
   const span = addSpanToTransaction(ctx, "function.plugin.upload_sourcemaps");
   ctx.logger.info("Uploading Sourcemaps.");
 
