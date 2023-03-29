@@ -1,4 +1,4 @@
-import { InternalOptions } from "../../src/options-mapping";
+import { InternalOptions, normalizeUserOptions } from "../../src/options-mapping";
 import {
   addDeploy,
   cleanArtifacts,
@@ -93,16 +93,32 @@ describe("Release Pipeline", () => {
   });
 
   describe("uploadSourceMaps", () => {
-    it("makes a call to Sentry CLI's sourcemaps upload command", async () => {
-      const options = {
+    it("doesn't do anything if uploadSourceMaps option is `false`", async () => {
+      const options = normalizeUserOptions({
+        uploadSourceMaps: false,
         include: [{ paths: ["dist"] }],
-      } as InternalOptions;
+      });
 
       await uploadSourceMaps(options, ctx as unknown as BuildContext, "1.0.0");
 
-      expect(mockedCLI.releases.uploadSourceMaps).toHaveBeenCalledWith("1.0.0", {
+      expect(mockedCLI.releases.uploadSourceMaps).not.toHaveBeenCalled();
+      expect(mockedAddSpanToTxn).not.toHaveBeenCalled();
+      expect(mockedChildSpan.finish).not.toHaveBeenCalled();
+    });
+
+    it("makes a call to Sentry CLI's sourcemaps upload command", async () => {
+      const options = normalizeUserOptions({
         include: [{ paths: ["dist"] }],
       });
+
+      await uploadSourceMaps(options, ctx as unknown as BuildContext, "1.0.0");
+
+      expect(mockedCLI.releases.uploadSourceMaps).toHaveBeenCalledWith(
+        "1.0.0",
+        expect.objectContaining({
+          include: [expect.objectContaining({ paths: ["dist"] })],
+        })
+      );
       expect(mockedAddSpanToTxn).toHaveBeenCalledWith(ctx, "function.plugin.upload_sourcemaps");
       expect(mockedChildSpan.finish).toHaveBeenCalled();
     });
