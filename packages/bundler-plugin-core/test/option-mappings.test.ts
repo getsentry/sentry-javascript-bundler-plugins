@@ -33,9 +33,9 @@ describe("normalizeUserOptions()", () => {
       release: "my-release",
       silent: false,
       telemetry: true,
+      injectRelease: true,
       injectReleasesMap: false,
-      disableReleaseInjection: false,
-      disableSourceMapsUpload: false,
+      uploadSourceMaps: true,
       _experiments: {},
       url: "https://sentry.io",
     });
@@ -79,9 +79,9 @@ describe("normalizeUserOptions()", () => {
       release: "my-release",
       silent: false,
       telemetry: true,
+      injectRelease: true,
       injectReleasesMap: false,
-      disableReleaseInjection: false,
-      disableSourceMapsUpload: false,
+      uploadSourceMaps: true,
       _experiments: {},
       url: "https://sentry.io",
     });

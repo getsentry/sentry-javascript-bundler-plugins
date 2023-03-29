@@ -61,7 +61,7 @@ export async function uploadSourceMaps(
   ctx: BuildContext,
   releaseName: string
 ): Promise<void> {
-  if (options.disableSourceMapsUpload) {
+  if (!options.uploadSourceMaps) {
     logger.debug("Skipping source maps upload.");
     return;
   }

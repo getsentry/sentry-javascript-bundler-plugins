@@ -13,6 +13,8 @@ type RequiredInternalOptions = Required<
     | "telemetry"
     | "injectReleasesMap"
     | "_experiments"
+    | "injectRelease"
+    | "uploadSourceMaps"
   >
 >;
 
@@ -30,8 +32,6 @@ type OptionalInternalOptions = Partial<
     | "deploy"
     | "configFile"
     | "headers"
-    | "disableReleaseInjection"
-    | "disableSourceMapsUpload"
   >
 >;
 
@@ -92,8 +92,8 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     silent: userOptions.silent ?? false,
     telemetry: userOptions.telemetry ?? true,
     injectReleasesMap: userOptions.injectReleasesMap ?? false,
-    disableReleaseInjection: userOptions.disableReleaseInjection ?? false,
-    disableSourceMapsUpload: userOptions.disableSourceMapsUpload ?? false,
+    injectRelease: userOptions.injectRelease ?? true,
+    uploadSourceMaps: userOptions.uploadSourceMaps ?? true,
     _experiments: userOptions._experiments ?? {},
 
     // These options and can also be set via env variables or the config file.

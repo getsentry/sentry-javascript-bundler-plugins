@@ -191,6 +191,13 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   configFile?: string;
 
   /**
+   * Whether the plugin should inject release information into the build.
+   *
+   * Defaults to `true`.
+   */
+  injectRelease?: boolean;
+
+  /**
    * If set to true, the plugin will inject an additional `SENTRY_RELEASES` variable that
    * maps from `{org}@{project}` to the `release` value. This might be helpful for webpack
    * module federation or micro frontend setups.
@@ -200,22 +207,11 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   injectReleasesMap?: boolean;
 
   /**
-   * If set to true, the plugin will not inject any release information into the build.
-   * This might be useful if the plugin is only used to upload source maps.
+   * Whether the plugin should upload source maps to Sentry.
    *
-   * Defaults to `false`.
+   * Defaults to `true`.
    */
-  disableReleaseInjection?: boolean;
-
-  /**
-   * If set to true, the plugin will not upload any source maps.
-   * This might be useful if, for example, the plugin is run in a pipeline
-   * where only release injection is needed and source maps upload is handled
-   * by another pipeline.
-   *
-   * Defaults to `false`.
-   */
-  disableSourceMapsUpload?: boolean;
+  uploadSourceMaps?: boolean;
 
   /**
    * These options are considered experimental and subject to change.
