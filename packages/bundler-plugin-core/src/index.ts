@@ -28,9 +28,8 @@ import { getDependencies, getPackageJson, parseMajorVersion } from "./utils";
 
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
 
-// pathToFileURL is necessary for windows
-const releaseInjectionFilePath = require.resolve(
-  "@sentry/bundler-plugin-core/sentry-release-injection-file"
+const releaseInjectionFilePath = path.normalize(
+  require.resolve("@sentry/bundler-plugin-core/sentry-release-injection-file")
 );
 
 /**
@@ -242,7 +241,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       } else {
         // Appending instead of prepending has less probability of mucking with user's source maps.
         // Luckily import statements get hoisted to the top anyways.
-        // The import needs to be an absolute path because Rollup doesn't bundle stuff in `node_modules` by default when bundling CJS (unless the node-resolve-plugin is used).
+        // The import needs to be an absolute path because Rollup doesn't bundle stuff in `node_modules` by default when bundling CJS (unless the import path is absolute or the node-resolve-plugin is used).
         ms.append(`;\nimport "${releaseInjectionFilePath}";`);
       }
 
