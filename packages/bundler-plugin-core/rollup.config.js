@@ -18,7 +18,10 @@ export default {
     commonjs(),
     json(),
     replace({
-      __PACKAGE_VERSION__: JSON.stringify(packageJson.version),
+      preventAssignment: true,
+      values: {
+        __PACKAGE_VERSION__: JSON.stringify(packageJson.version),
+      },
     }),
     babel({
       extensions,

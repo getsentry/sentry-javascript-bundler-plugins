@@ -28,17 +28,20 @@ import { getDependencies, getPackageJson, parseMajorVersion } from "./utils";
 
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
 
+const releaseInjectionFilePath = require.resolve(
+  "@sentry/bundler-plugin-core/sentry-release-injection-file"
+);
 /**
  * The sentry bundler plugin concerns itself with two things:
  * - Release injection
  * - Sourcemaps upload
  *
  * Release injection:
- * Per default the sentry bundler plugin will inject a global `SENTRY_RELEASE` into
- * each JavaScript/TypeScript entrypoint. On a technical level this is done by identifying
- * entrypoints in the `resolveId` hook and prepending user code in the `transform` hook.
- * If a user wants to inject the release into a particular set of modules instead,
- * they can use the `releaseInjectionTargets` option.
+ * Per default the sentry bundler plugin will inject a global `SENTRY_RELEASE` into each JavaScript/TypeScript module
+ * that is part of the bundle. On a technical level this is done by appending an import (`import "sentry-release-injector;"`)
+ * to all entrypoint files of the user code (see `transformInclude` and `transform` hooks). This import is then resolved
+ * by the sentry plugin to a virtual module that sets the global variable (see `resolveId` and `load` hooks).
+ * If a user wants to inject the release into a particular set of modules they can use the `releaseInjectionTargets` option.
  *
  * Source maps upload:
  *
@@ -102,8 +105,6 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
   let transaction: Transaction | undefined;
   let releaseInjectionSpan: Span | undefined;
 
-  const absolueEntrypointPaths = new Set<string>();
-
   return {
     name: "sentry-plugin",
     enforce: "pre", // needed for Vite to call resolveId hook
@@ -164,11 +165,6 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
      */
     resolveId(id, importer, { isEntry }) {
       logger.debug('Called "resolveId":', { id, importer, isEntry });
-
-      if (isEntry) {
-        absolueEntrypointPaths.add(path.resolve(path.normalize(id)));
-      }
-
       return undefined;
     },
 
@@ -187,6 +183,10 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       // a windows style path to `releaseInjectionTargets`
       const normalizedId = path.normalize(id);
 
+      if (id.includes("sentry-release-injection-file")) {
+        return true;
+      }
+
       if (internalOptions.releaseInjectionTargets) {
         // If there's an `releaseInjectionTargets` option transform (ie. inject the release varible) when the file path matches the option.
         if (typeof internalOptions.releaseInjectionTargets === "function") {
@@ -201,7 +201,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
             return normalizedId === normalizedEntry;
           }
         });
-      } else if (absolueEntrypointPaths.has(normalizedId)) {
+      } else {
         const pathIsOrdinary = !normalizedId.includes("?") && !normalizedId.includes("#");
 
         const pathHasAllowedFileEnding = ALLOWED_TRANSFORMATION_FILE_ENDINGS.some(
@@ -209,8 +209,6 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         );
 
         return pathIsOrdinary && pathHasAllowedFileEnding;
-      } else {
-        return false;
       }
     },
 
@@ -232,15 +230,23 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       // The MagicString library allows us to generate sourcemaps for the changes we make to the user code.
       const ms = new MagicString(code);
 
-      ms.prepend(
-        generateGlobalInjectorCode({
-          release: await releaseNamePromise,
-          injectReleasesMap: internalOptions.injectReleasesMap,
-          injectBuildInformation: internalOptions._experiments.injectBuildInformation || false,
-          org: internalOptions.org,
-          project: internalOptions.project,
-        })
-      );
+      if (code.includes("_sentry_release_injection_file")) {
+        // Appending instead of prepending has less probability of mucking with user's source maps.
+        ms.append(
+          generateGlobalInjectorCode({
+            release: await releaseNamePromise,
+            injectReleasesMap: internalOptions.injectReleasesMap,
+            injectBuildInformation: internalOptions._experiments.injectBuildInformation || false,
+            org: internalOptions.org,
+            project: internalOptions.project,
+          })
+        );
+      } else {
+        // Appending instead of prepending has less probability of mucking with user's source maps.
+        // Luckily import statements get hoisted to the top anyways.
+        // The import needs to be an absolute path because Rollup doesn't bundle stuff in `node_modules` by default when bundling CJS (unless the import path is absolute or the node-resolve-plugin is used).
+        ms.append(`;\nimport "${releaseInjectionFilePath.replace(/\\/g, "\\\\")}";`);
+      }
 
       if (unpluginMetaContext.framework === "esbuild") {
         // esbuild + unplugin is buggy at the moment when we return an object with a `map` (sourcemap) property.
