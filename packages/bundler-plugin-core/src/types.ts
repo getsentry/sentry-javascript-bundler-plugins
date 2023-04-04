@@ -217,14 +217,19 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * These options are considered experimental and subject to change.
    *
    * _experiments.injectBuildInformation:
-   * If set to true, the plugin will inject an additional `SENTRY_BUILD_INFO` variable.
-   * This contains information about the build, e.g. dependencies, node version and other useful data.
    *
    * Defaults to `false`.
-   * @hidden
    */
   _experiments?: {
+    /**
+     * If set to true, the plugin will inject an additional `SENTRY_BUILD_INFO` variable.
+     * This contains information about the build, e.g. dependencies, node version and other useful data.
+     */
     injectBuildInformation?: boolean;
+    /**
+     * Glob paths to files that should get an injected debug ID.
+     */
+    debugIdFiles?: string | string[];
   };
 };
 

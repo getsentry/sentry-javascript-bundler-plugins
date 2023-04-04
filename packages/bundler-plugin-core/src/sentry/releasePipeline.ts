@@ -87,6 +87,51 @@ export async function uploadSourceMaps(
   ctx.logger.info("Successfully uploaded source maps.");
 }
 
+export async function uploadDebugIdSourcemaps(
+  options: InternalOptions,
+  ctx: BuildContext,
+  filesToUpload: string[],
+  releaseName: string
+): Promise<void> {
+  if (!options.uploadSourceMaps) {
+    logger.debug("Skipping source maps upload.");
+    return;
+  }
+
+  const span = addSpanToTransaction(ctx, "function.plugin.upload_debug_id_sourcemaps");
+  ctx.logger.info("Uploading debug ID Sourcemaps.");
+
+  // Since our internal include entries contain all top-level sourcemaps options,
+  // we only need to pass the include option here.
+  try {
+    if (options._experiments.debugIdFiles) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      process.env.SENTRY_FORCE_ARTIFACT_BUNDLES = "1";
+    }
+
+    await ctx.cli.releases.uploadSourceMaps(releaseName, {
+      rewrite: false,
+      include: [{ paths: filesToUpload }],
+      dist: options.dist,
+    });
+
+    if (options._experiments.debugIdFiles) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      process.env.SENTRY_FORCE_ARTIFACT_BUNDLES = undefined;
+    }
+  } catch (e) {
+    ctx.hub.captureException(new Error("CLI Error: Uploading debug ID source maps failed"));
+    throw e;
+  } finally {
+    span?.finish();
+  }
+
+  ctx.hub.addBreadcrumb({ level: "info", message: "Successfully uploaded debug ID source maps." });
+  ctx.logger.info("Successfully uploaded debug ID source maps.");
+}
+
 export async function setCommits(
   options: InternalOptions,
   ctx: BuildContext,
