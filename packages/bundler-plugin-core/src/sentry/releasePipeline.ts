@@ -90,7 +90,7 @@ export async function uploadSourceMaps(
 export async function uploadDebugIdSourcemaps(
   options: InternalOptions,
   ctx: BuildContext,
-  filesToUpload: string[],
+  folderPathToUpload: string,
   releaseName: string
 ): Promise<void> {
   if (!options.uploadSourceMaps) {
@@ -104,23 +104,19 @@ export async function uploadDebugIdSourcemaps(
   // Since our internal include entries contain all top-level sourcemaps options,
   // we only need to pass the include option here.
   try {
-    if (options._experiments.debugIdFiles) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      process.env.SENTRY_FORCE_ARTIFACT_BUNDLES = "1";
-    }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    process.env.SENTRY_FORCE_ARTIFACT_BUNDLES = "1";
 
     await ctx.cli.releases.uploadSourceMaps(releaseName, {
       rewrite: false,
-      include: [{ paths: filesToUpload }],
+      include: [{ paths: [folderPathToUpload] }],
       dist: options.dist,
     });
 
-    if (options._experiments.debugIdFiles) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      process.env.SENTRY_FORCE_ARTIFACT_BUNDLES = undefined;
-    }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    process.env.SENTRY_FORCE_ARTIFACT_BUNDLES = undefined;
   } catch (e) {
     ctx.hub.captureException(new Error("CLI Error: Uploading debug ID source maps failed"));
     throw e;

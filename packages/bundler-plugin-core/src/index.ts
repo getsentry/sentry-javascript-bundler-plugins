@@ -23,6 +23,7 @@ import { createLogger, Logger } from "./sentry/logger";
 import { InternalOptions, normalizeUserOptions, validateOptions } from "./options-mapping";
 import { getSentryCli } from "./sentry/cli";
 import { makeMain } from "@sentry/node";
+import os from "os";
 import path from "path";
 import fs from "fs";
 import crypto from "crypto";
@@ -294,19 +295,26 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
       const releaseName = await releaseNamePromise;
 
+      let tmpUploadFolder: string | undefined;
+
       try {
-        if (internalOptions._experiments.debugIdFiles) {
+        if (internalOptions._experiments.debugIdUpload) {
           const debugIdSourceFilePaths = (
-            await glob(internalOptions._experiments.debugIdFiles, {
+            await glob(internalOptions._experiments.debugIdUpload.include, {
               absolute: true,
               nodir: true,
+              ignore: internalOptions._experiments.debugIdUpload.ignore,
             })
           ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs"));
 
-          const sourceMapPaths: string[] = [];
+          const sourceFileUploadFolder = await util.promisify(fs.mkdtemp)(
+            path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+          );
+
+          tmpUploadFolder = sourceFileUploadFolder;
 
           await Promise.all(
-            debugIdSourceFilePaths.map(async (filePath): Promise<void> => {
+            debugIdSourceFilePaths.map(async (filePath, fileIndex): Promise<void> => {
               let bundleSource;
               try {
                 bundleSource = await util.promisify(fs.readFile)(filePath, {
@@ -320,29 +328,42 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
               }
 
               const debugId = determineDebugIdFromBundleSource(bundleSource);
-              if (debugId) {
-                // await injectDegugIdCommentIntoBundle(filePath, debugId, logger);
 
-                const sourceMapPath = await determineSourceMapPathFromBundleSource(
+              const sourceMapPathPromise = determineSourceMapPathFromBundleSource(
+                bundleSource,
+                filePath,
+                logger
+              );
+
+              let writeSourceFilePromise;
+              let writeSourceMapFilePromise;
+
+              if (debugId) {
+                bundleSource += `\n//# debugId=${debugId}`;
+                writeSourceFilePromise = util.promisify(fs.writeFile)(
+                  path.join(sourceFileUploadFolder, `${fileIndex}.js`),
                   bundleSource,
-                  filePath,
-                  logger
+                  "utf-8"
                 );
 
-                if (sourceMapPath) {
-                  sourceMapPaths.push(sourceMapPath);
-                  await injectDegugIdIntoSourceMap(sourceMapPath, debugId, logger);
-                }
+                writeSourceMapFilePromise = sourceMapPathPromise.then((sourceMapPath): void => {
+                  if (sourceMapPath) {
+                    void copySourceMapWithDebugId(
+                      sourceMapPath,
+                      path.join(sourceFileUploadFolder, `${fileIndex}.js.map`),
+                      debugId,
+                      logger
+                    );
+                  }
+                });
               }
+
+              await writeSourceFilePromise;
+              await writeSourceMapFilePromise;
             })
           );
 
-          await uploadDebugIdSourcemaps(
-            internalOptions,
-            ctx,
-            [...debugIdSourceFilePaths, ...sourceMapPaths],
-            undefined as unknown as string
-          );
+          await uploadDebugIdSourcemaps(internalOptions, ctx, tmpUploadFolder, releaseName);
         }
 
         await createNewRelease(internalOptions, ctx, releaseName);
@@ -360,6 +381,11 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         });
         handleError(e, logger, internalOptions.errorHandler);
       } finally {
+        if (tmpUploadFolder) {
+          fs.rm(tmpUploadFolder, { recursive: true, force: true }, () => {
+            // We don't care if this errors
+          });
+        }
         releasePipelineSpan?.finish();
         transaction?.finish();
         await sentryClient.flush().then(null, () => {
@@ -374,7 +400,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     },
     rollup: {
       renderChunk(code, chunk) {
-        if (options._experiments?.debugIdFiles) {
+        if (options._experiments?.debugIdUpload) {
           return injectDebugIdIntoChunk(code, chunk.fileName);
         } else {
           return null;
@@ -383,7 +409,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     },
     vite: {
       renderChunk(code, chunk) {
-        if (options._experiments?.debugIdFiles) {
+        if (options._experiments?.debugIdUpload) {
           return injectDebugIdIntoChunk(code, chunk.fileName);
         } else {
           return null;
@@ -534,8 +560,9 @@ async function determineSourceMapPathFromBundleSource(
   return undefined;
 }
 
-async function injectDegugIdIntoSourceMap(
+async function copySourceMapWithDebugId(
   sourceMapPath: string,
+  targetPath: string,
   degugId: string,
   logger: Logger
 ): Promise<void> {
@@ -548,27 +575,13 @@ async function injectDegugIdIntoSourceMap(
     map["debug_id"] = degugId;
     map["debugId"] = degugId;
 
-    await util.promisify(fs.writeFile)(sourceMapPath, JSON.stringify(map), {
+    await util.promisify(fs.writeFile)(targetPath, JSON.stringify(map), {
       encoding: "utf8",
     });
   } catch (e) {
     logger.warn(`Failed to inject debug ID into sourcemap: ${sourceMapPath}`);
   }
 }
-
-// async function injectDegugIdCommentIntoBundle(
-//   bundlePath: string,
-//   degugId: string,
-//   logger: Logger
-// ): Promise<void> {
-//   try {
-//     await util.promisify(fs.appendFile)(bundlePath, `//# debugId=${degugId}`, {
-//       encoding: "utf8",
-//     });
-//   } catch (e) {
-//     logger.warn(`Failed to inject debug ID comment into bundle: ${bundlePath}`);
-//   }
-// }
 
 function injectDebugIdIntoChunk(code: string, filename: string) {
   if (filename.endsWith(".js") || filename.endsWith(".mjs")) {

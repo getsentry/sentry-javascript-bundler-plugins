@@ -226,10 +226,22 @@ export type Options = Omit<IncludeEntry, "paths"> & {
      * This contains information about the build, e.g. dependencies, node version and other useful data.
      */
     injectBuildInformation?: boolean;
+
     /**
-     * Glob paths to files that should get an injected debug ID.
+     * Configuration for debug ID upload.
+     *
+     * Note: Currently only functional for Vite and Rollup.
      */
-    debugIdFiles?: string | string[];
+    debugIdUpload?: {
+      /**
+       * Glob paths to files that should get be injected with a debug ID and uploaded.
+       */
+      include: string | string[];
+      /**
+       * Glob paths to files that should be ignored for debug ID injection and upload.
+       */
+      ignore?: string | string[];
+    };
   };
 };
 
