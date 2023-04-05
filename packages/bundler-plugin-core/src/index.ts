@@ -359,11 +359,11 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       renderChunk(code, chunk) {
         if (
           options._experiments?.debugIdUpload &&
-          [".js", ".mjs"].some((ending) => chunk.fileName.endsWith(ending))
+          [".js", ".mjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
         ) {
           return injectDebugIdSnippetIntoChunk(code);
         } else {
-          return null;
+          return null; // returning null means not modifying the chunk at all
         }
       },
     },
@@ -371,11 +371,11 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       renderChunk(code, chunk) {
         if (
           options._experiments?.debugIdUpload &&
-          [".js", ".mjs"].some((ending) => chunk.fileName.endsWith(ending))
+          [".js", ".mjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
         ) {
           return injectDebugIdSnippetIntoChunk(code);
         } else {
-          return null;
+          return null; // returning null means not modifying the chunk at all
         }
       },
     },
