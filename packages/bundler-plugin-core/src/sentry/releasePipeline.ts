@@ -87,6 +87,39 @@ export async function uploadSourceMaps(
   ctx.logger.info("Successfully uploaded source maps.");
 }
 
+export async function uploadDebugIdSourcemaps(
+  options: InternalOptions,
+  ctx: BuildContext,
+  folderPathToUpload: string,
+  releaseName: string
+): Promise<void> {
+  const span = addSpanToTransaction(ctx, "function.plugin.upload_debug_id_sourcemaps");
+  ctx.logger.info("Uploading debug ID Sourcemaps.");
+
+  // Since our internal include entries contain all top-level sourcemaps options,
+  // we only need to pass the include option here.
+  try {
+    await ctx.cli.releases.uploadSourceMaps(releaseName, {
+      include: [
+        {
+          paths: [folderPathToUpload],
+          rewrite: false,
+          dist: options.dist,
+        },
+      ],
+      useArtifactBundle: true,
+    });
+  } catch (e) {
+    ctx.hub.captureException(new Error("CLI Error: Uploading debug ID source maps failed"));
+    throw e;
+  } finally {
+    span?.finish();
+  }
+
+  ctx.hub.addBreadcrumb({ level: "info", message: "Successfully uploaded debug ID source maps." });
+  ctx.logger.info("Successfully uploaded debug ID source maps.");
+}
+
 export async function setCommits(
   options: InternalOptions,
   ctx: BuildContext,

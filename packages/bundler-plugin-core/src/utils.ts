@@ -1,7 +1,8 @@
 import findUp from "find-up";
-import path from "node:path";
-import fs from "node:fs";
-import os from "node:os";
+import path from "path";
+import fs from "fs";
+import os from "os";
+import crypto from "crypto";
 
 /**
  * Checks whether the given input is already an array, and if it isn't, wraps it in one.
@@ -164,4 +165,24 @@ function lookupPackageJson(cwd: string, stopAt: string): PackageJson | undefined
   // Continue up the tree, if we find a fitting package.json
   const newCwd = path.dirname(path.resolve(jsonPath + "/.."));
   return lookupPackageJson(newCwd, stopAt);
+}
+
+/**
+ * Deterministically hashes a string and turns the hash into a uuid.
+ */
+export function stringToUUID(str: string): string {
+  const md5sum = crypto.createHash("md5");
+  md5sum.update(str);
+  const md5Hash = md5sum.digest("hex");
+  return (
+    md5Hash.substring(0, 8) +
+    "-" +
+    md5Hash.substring(8, 12) +
+    "-4" +
+    md5Hash.substring(13, 16) +
+    "-" +
+    md5Hash.substring(16, 20) +
+    "-" +
+    md5Hash.substring(20)
+  ).toLowerCase();
 }

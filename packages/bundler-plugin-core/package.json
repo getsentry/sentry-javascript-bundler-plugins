@@ -36,10 +36,11 @@
     "fix": "eslint ./src ./test --format stylish --fix"
   },
   "dependencies": {
-    "@sentry/cli": "^2.10.0",
+    "@sentry/cli": "^2.17.0",
     "@sentry/node": "^7.19.0",
     "@sentry/tracing": "^7.19.0",
     "find-up": "5.0.0",
+    "glob": "9.3.2",
     "magic-string": "0.27.0",
     "unplugin": "1.0.1"
   },

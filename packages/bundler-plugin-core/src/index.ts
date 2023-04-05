@@ -8,6 +8,7 @@ import {
   finalizeRelease,
   setCommits,
   uploadSourceMaps,
+  uploadDebugIdSourcemaps,
 } from "./sentry/releasePipeline";
 import "@sentry/tracing";
 import SentryCli from "@sentry/cli";
@@ -22,15 +23,20 @@ import { createLogger, Logger } from "./sentry/logger";
 import { InternalOptions, normalizeUserOptions, validateOptions } from "./options-mapping";
 import { getSentryCli } from "./sentry/cli";
 import { makeMain } from "@sentry/node";
+import os from "os";
 import path from "path";
 import fs from "fs";
+import util from "util";
 import { getDependencies, getPackageJson, parseMajorVersion } from "./utils";
+import { glob } from "glob";
+import { injectDebugIdSnippetIntoChunk, prepareBundleForDebugIdUpload } from "./debug-id";
 
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
 
 const releaseInjectionFilePath = require.resolve(
   "@sentry/bundler-plugin-core/sentry-release-injection-file"
 );
+
 /**
  * The sentry bundler plugin concerns itself with two things:
  * - Release injection
@@ -286,7 +292,37 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
       const releaseName = await releaseNamePromise;
 
+      let tmpUploadFolder: string | undefined;
+
       try {
+        if (internalOptions._experiments.debugIdUpload) {
+          const debugIdChunkFilePaths = (
+            await glob(internalOptions._experiments.debugIdUpload.include, {
+              absolute: true,
+              nodir: true,
+              ignore: internalOptions._experiments.debugIdUpload.ignore,
+            })
+          ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs"));
+
+          const sourceFileUploadFolderPromise = util.promisify(fs.mkdtemp)(
+            path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+          );
+
+          await Promise.all(
+            debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
+              await prepareBundleForDebugIdUpload(
+                chunkFilePath,
+                await sourceFileUploadFolderPromise,
+                String(chunkIndex),
+                logger
+              );
+            })
+          );
+
+          tmpUploadFolder = await sourceFileUploadFolderPromise;
+          await uploadDebugIdSourcemaps(internalOptions, ctx, tmpUploadFolder, releaseName);
+        }
+
         await createNewRelease(internalOptions, ctx, releaseName);
         await cleanArtifacts(internalOptions, ctx, releaseName);
         await uploadSourceMaps(internalOptions, ctx, releaseName);
@@ -302,6 +338,11 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         });
         handleError(e, logger, internalOptions.errorHandler);
       } finally {
+        if (tmpUploadFolder) {
+          fs.rm(tmpUploadFolder, { recursive: true, force: true }, () => {
+            // We don't care if this errors
+          });
+        }
         releasePipelineSpan?.finish();
         transaction?.finish();
         await sentryClient.flush().then(null, () => {
@@ -313,6 +354,30 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         category: "writeBundle:finish",
         level: "info",
       });
+    },
+    rollup: {
+      renderChunk(code, chunk) {
+        if (
+          options._experiments?.debugIdUpload &&
+          [".js", ".mjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+        ) {
+          return injectDebugIdSnippetIntoChunk(code);
+        } else {
+          return null; // returning null means not modifying the chunk at all
+        }
+      },
+    },
+    vite: {
+      renderChunk(code, chunk) {
+        if (
+          options._experiments?.debugIdUpload &&
+          [".js", ".mjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+        ) {
+          return injectDebugIdSnippetIntoChunk(code);
+        } else {
+          return null; // returning null means not modifying the chunk at all
+        }
+      },
     },
   };
 });

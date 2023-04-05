@@ -1,5 +1,5 @@
 import { Hub } from "@sentry/node";
-import { InternalOptions } from "../../src/options-mapping";
+import { InternalOptions, normalizeUserOptions } from "../../src/options-mapping";
 import { addPluginOptionInformationToHub, shouldSendTelemetry } from "../../src/sentry/telemetry";
 
 const mockCliExecute = jest.fn();
@@ -38,7 +38,7 @@ describe("addPluginOptionTagsToHub", () => {
     setUser: jest.fn(),
   };
 
-  const defaultOptions: Partial<InternalOptions> = {
+  const defaultOptions = {
     include: [],
   };
 
@@ -48,7 +48,7 @@ describe("addPluginOptionTagsToHub", () => {
 
   it("should set include tag according to number of entries (single entry)", () => {
     addPluginOptionInformationToHub(
-      defaultOptions as unknown as InternalOptions,
+      normalizeUserOptions(defaultOptions),
       mockedHub as unknown as Hub,
       "rollup"
     );
@@ -57,7 +57,7 @@ describe("addPluginOptionTagsToHub", () => {
 
   it("should set include tag according to number of entries (multiple entries)", () => {
     addPluginOptionInformationToHub(
-      { include: [{}, {}, {}] } as unknown as InternalOptions,
+      normalizeUserOptions({ include: ["", "", ""] }),
       mockedHub as unknown as Hub,
       "rollup"
     );
@@ -66,7 +66,7 @@ describe("addPluginOptionTagsToHub", () => {
 
   it("should set deploy tag to true if the deploy option is specified", () => {
     addPluginOptionInformationToHub(
-      { ...defaultOptions, deploy: { env: "production" } } as unknown as InternalOptions,
+      normalizeUserOptions({ ...defaultOptions, deploy: { env: "production" } }),
       mockedHub as unknown as Hub,
       "rollup"
     );
@@ -76,7 +76,7 @@ describe("addPluginOptionTagsToHub", () => {
   it("should set errorHandler tag to `custom` if the errorHandler option is specified", () => {
     addPluginOptionInformationToHub(
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      { ...defaultOptions, errorHandler: () => {} } as unknown as InternalOptions,
+      normalizeUserOptions({ ...defaultOptions, errorHandler: () => {} }),
       mockedHub as unknown as Hub,
       "rollup"
     );
@@ -90,7 +90,8 @@ describe("addPluginOptionTagsToHub", () => {
     `should set setCommits tag to %s if the setCommits option is %s`,
     (expectedValue, commitOptions) => {
       addPluginOptionInformationToHub(
-        { ...defaultOptions, setCommits: commitOptions } as unknown as InternalOptions,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        normalizeUserOptions({ ...defaultOptions, setCommits: commitOptions as any }),
         mockedHub as unknown as Hub,
         "rollup"
       );
@@ -100,13 +101,13 @@ describe("addPluginOptionTagsToHub", () => {
 
   it("sets all simple tags correctly", () => {
     addPluginOptionInformationToHub(
-      {
+      normalizeUserOptions({
         ...defaultOptions,
         cleanArtifacts: true,
         finalize: true,
         injectReleasesMap: true,
         dryRun: true,
-      } as unknown as InternalOptions,
+      }),
       mockedHub as unknown as Hub,
       "rollup"
     );
@@ -119,12 +120,14 @@ describe("addPluginOptionTagsToHub", () => {
 
   it("shouldn't set any tags other than include if no opional options are specified", () => {
     addPluginOptionInformationToHub(
-      defaultOptions as unknown as InternalOptions,
+      normalizeUserOptions(defaultOptions),
       mockedHub as unknown as Hub,
       "rollup"
     );
-    expect(mockedHub.setTag).toHaveBeenCalledTimes(2);
+
+    expect(mockedHub.setTag).toHaveBeenCalledTimes(3);
     expect(mockedHub.setTag).toHaveBeenCalledWith("include", "single-entry");
+    expect(mockedHub.setTag).toHaveBeenCalledWith("finalize-release", true);
     expect(mockedHub.setTag).toHaveBeenCalledWith("node", expect.any(String));
   });
 });

@@ -214,17 +214,34 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   uploadSourceMaps?: boolean;
 
   /**
-   * These options are considered experimental and subject to change.
-   *
-   * _experiments.injectBuildInformation:
-   * If set to true, the plugin will inject an additional `SENTRY_BUILD_INFO` variable.
-   * This contains information about the build, e.g. dependencies, node version and other useful data.
-   *
-   * Defaults to `false`.
-   * @hidden
+   * Options that are considered experimental and subject to change.
    */
   _experiments?: {
+    /**
+     * If set to true, the plugin will inject an additional `SENTRY_BUILD_INFO` variable.
+     * This contains information about the build, e.g. dependencies, node version and other useful data.
+     *
+     * Defaults to `false`.
+     */
     injectBuildInformation?: boolean;
+
+    /**
+     * Configuration for debug ID upload.
+     *
+     * Note: Currently only functional for Vite and Rollup.
+     */
+    debugIdUpload?: {
+      /**
+       * Glob paths to files that should get be injected with a debug ID and uploaded.
+       */
+      include: string | string[];
+      /**
+       * Glob paths to files that should be ignored for debug ID injection and upload.
+       *
+       * Default: `[]`
+       */
+      ignore?: string | string[];
+    };
   };
 };
 

@@ -6,6 +6,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true, // needed to import package.json
     "types": ["node"],
+    "target": "ES6", // needed for some iterator features
     "lib": ["ES2020", "DOM"] // es2020 needed for "new Set()", DOM needed for various bundler types
   }
 }

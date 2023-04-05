@@ -1,4 +1,4 @@
-import { getDependencies, getPackageJson, parseMajorVersion } from "../src/utils";
+import { getDependencies, getPackageJson, parseMajorVersion, stringToUUID } from "../src/utils";
 import path from "node:path";
 
 type PackageJson = Record<string, unknown>;
@@ -167,5 +167,11 @@ describe("getDependencies", () => {
       vite: 3,
       webpack: 5,
     });
+  });
+});
+
+describe("stringToUUID", () => {
+  test("should return a deterministic UUID", () => {
+    expect(stringToUUID("Nothing personnel kid")).toBe("52c7a762-5ddf-49a7-6f16-6874a8cb2512");
   });
 });
