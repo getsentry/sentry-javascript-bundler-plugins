@@ -237,6 +237,8 @@ export type Options = Omit<IncludeEntry, "paths"> & {
       include: string | string[];
       /**
        * Glob paths to files that should be ignored for debug ID injection and upload.
+       *
+       * Default: `[]`
        */
       ignore?: string | string[];
     };
