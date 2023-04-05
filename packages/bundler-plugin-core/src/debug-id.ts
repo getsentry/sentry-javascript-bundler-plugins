@@ -78,8 +78,7 @@ export async function prepareBundleForDebugIdUpload(
     }
   });
 
-  await writeSourceFilePromise;
-  await writeSourceMapFilePromise;
+  return Promise.all([writeSourceFilePromise, writeSourceMapFilePromise]);
 }
 
 /**
