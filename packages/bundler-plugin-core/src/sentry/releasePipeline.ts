@@ -99,10 +99,6 @@ export async function uploadDebugIdSourcemaps(
   // Since our internal include entries contain all top-level sourcemaps options,
   // we only need to pass the include option here.
   try {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    process.env.SENTRY_FORCE_ARTIFACT_BUNDLES = "1";
-
     await ctx.cli.releases.uploadSourceMaps(releaseName, {
       include: [
         {
@@ -111,11 +107,8 @@ export async function uploadDebugIdSourcemaps(
           dist: options.dist,
         },
       ],
+      useArtifactBundle: true,
     });
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    process.env.SENTRY_FORCE_ARTIFACT_BUNDLES = undefined;
   } catch (e) {
     ctx.hub.captureException(new Error("CLI Error: Uploading debug ID source maps failed"));
     throw e;
