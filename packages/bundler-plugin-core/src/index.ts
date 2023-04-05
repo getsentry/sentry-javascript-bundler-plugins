@@ -26,19 +26,16 @@ import { makeMain } from "@sentry/node";
 import os from "os";
 import path from "path";
 import fs from "fs";
-import crypto from "crypto";
 import util from "util";
 import { getDependencies, getPackageJson, parseMajorVersion } from "./utils";
 import { glob } from "glob";
+import { injectDebugIdSnippetIntoChunk, prepareBundleForDebugIdUpload } from "./debug-id";
 
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
 
 const releaseInjectionFilePath = require.resolve(
   "@sentry/bundler-plugin-core/sentry-release-injection-file"
 );
-
-const INJECTOR_CODE =
-  ';!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{},n=(new Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="__SENTRY_DEBUG_ID__",e._sentryDebugIdIdentifier="sdbid-__SENTRY_DEBUG_ID__")}catch(e){}}();';
 
 /**
  * The sentry bundler plugin concerns itself with two things:
@@ -299,7 +296,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
 
       try {
         if (internalOptions._experiments.debugIdUpload) {
-          const debugIdSourceFilePaths = (
+          const debugIdChunkFilePaths = (
             await glob(internalOptions._experiments.debugIdUpload.include, {
               absolute: true,
               nodir: true,
@@ -307,62 +304,22 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
             })
           ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs"));
 
-          const sourceFileUploadFolder = await util.promisify(fs.mkdtemp)(
+          const sourceFileUploadFolderPromise = util.promisify(fs.mkdtemp)(
             path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
           );
 
-          tmpUploadFolder = sourceFileUploadFolder;
-
           await Promise.all(
-            debugIdSourceFilePaths.map(async (filePath, fileIndex): Promise<void> => {
-              let bundleSource;
-              try {
-                bundleSource = await util.promisify(fs.readFile)(filePath, {
-                  encoding: "utf8",
-                });
-              } catch (e) {
-                logger.warn(
-                  `Could not read bundle to determine debug ID and source map: ${filePath}`
-                );
-                return;
-              }
-
-              const debugId = determineDebugIdFromBundleSource(bundleSource);
-
-              const sourceMapPathPromise = determineSourceMapPathFromBundleSource(
-                bundleSource,
-                filePath,
+            debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
+              await prepareBundleForDebugIdUpload(
+                chunkFilePath,
+                await sourceFileUploadFolderPromise,
+                String(chunkIndex),
                 logger
               );
-
-              let writeSourceFilePromise;
-              let writeSourceMapFilePromise;
-
-              if (debugId) {
-                bundleSource += `\n//# debugId=${debugId}`;
-                writeSourceFilePromise = util.promisify(fs.writeFile)(
-                  path.join(sourceFileUploadFolder, `${fileIndex}.js`),
-                  bundleSource,
-                  "utf-8"
-                );
-
-                writeSourceMapFilePromise = sourceMapPathPromise.then((sourceMapPath): void => {
-                  if (sourceMapPath) {
-                    void copySourceMapWithDebugId(
-                      sourceMapPath,
-                      path.join(sourceFileUploadFolder, `${fileIndex}.js.map`),
-                      debugId,
-                      logger
-                    );
-                  }
-                });
-              }
-
-              await writeSourceFilePromise;
-              await writeSourceMapFilePromise;
             })
           );
 
+          tmpUploadFolder = await sourceFileUploadFolderPromise;
           await uploadDebugIdSourcemaps(internalOptions, ctx, tmpUploadFolder, releaseName);
         }
 
@@ -400,8 +357,11 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     },
     rollup: {
       renderChunk(code, chunk) {
-        if (options._experiments?.debugIdUpload) {
-          return injectDebugIdIntoChunk(code, chunk.fileName);
+        if (
+          options._experiments?.debugIdUpload &&
+          [".js", ".mjs"].some((ending) => chunk.fileName.endsWith(ending))
+        ) {
+          return injectDebugIdSnippetIntoChunk(code);
         } else {
           return null;
         }
@@ -409,8 +369,11 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     },
     vite: {
       renderChunk(code, chunk) {
-        if (options._experiments?.debugIdUpload) {
-          return injectDebugIdIntoChunk(code, chunk.fileName);
+        if (
+          options._experiments?.debugIdUpload &&
+          [".js", ".mjs"].some((ending) => chunk.fileName.endsWith(ending))
+        ) {
+          return injectDebugIdSnippetIntoChunk(code);
         } else {
           return null;
         }
@@ -460,7 +423,7 @@ function generateGlobalInjectorCode({
 }) {
   // The code below is mostly ternary operators because it saves bundle size.
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
-  let code = `;
+  let code = `
     var _global =
       typeof window !== 'undefined' ?
         window :
@@ -474,7 +437,7 @@ function generateGlobalInjectorCode({
 
   if (injectReleasesMap && project) {
     const key = org ? `${project}@${org}` : project;
-    code += `;
+    code += `
       _global.SENTRY_RELEASES=_global.SENTRY_RELEASES || {};
       _global.SENTRY_RELEASES["${key}"]={id:"${release}"};`;
   }
@@ -482,7 +445,7 @@ function generateGlobalInjectorCode({
   if (injectBuildInformation) {
     const buildInfo = getBuildInformation();
 
-    code += `;
+    code += `
       _global.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)};`;
   }
 
@@ -501,114 +464,6 @@ export function getBuildInformation() {
     depsVersions,
     nodeVersion: parseMajorVersion(process.version),
   };
-}
-
-function stringToUUID(str: string): string {
-  const md5sum = crypto.createHash("md5");
-  md5sum.update(str);
-  const md5Hash = md5sum.digest("hex");
-  return (
-    md5Hash.substring(0, 8) +
-    "-" +
-    md5Hash.substring(8, 12) +
-    "-4" +
-    md5Hash.substring(13, 16) +
-    "-" +
-    md5Hash.substring(16, 20) +
-    "-" +
-    md5Hash.substring(20)
-  ).toLowerCase();
-}
-
-function determineDebugIdFromBundleSource(bundleSource: string): string | undefined {
-  const match = bundleSource.match(
-    /sdbid-([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})/
-  );
-
-  if (match) {
-    return match[1];
-  } else {
-    return undefined;
-  }
-}
-
-async function determineSourceMapPathFromBundleSource(
-  bundleSource: string,
-  bundlePath: string,
-  logger: Logger
-): Promise<string | undefined> {
-  const sourceMappingUrlMatch = bundleSource.match(/^\/\/# sourceMappingURL=(.*)$/);
-
-  if (sourceMappingUrlMatch) {
-    const sourceMappingUrl = path.normalize(sourceMappingUrlMatch[1] as string);
-    if (path.isAbsolute(sourceMappingUrl)) {
-      return sourceMappingUrl;
-    } else {
-      return path.join(path.dirname(bundlePath), sourceMappingUrl);
-    }
-  }
-
-  try {
-    const adjacentSourceMapFilePath = bundlePath + ".map";
-    await util.promisify(fs.access)(adjacentSourceMapFilePath);
-    return adjacentSourceMapFilePath;
-  } catch (e) {
-    // noop
-  }
-
-  logger.warn(`Could not find source map file: ${bundlePath}`);
-  return undefined;
-}
-
-async function copySourceMapWithDebugId(
-  sourceMapPath: string,
-  targetPath: string,
-  degugId: string,
-  logger: Logger
-): Promise<void> {
-  try {
-    const sourceMapFileContent = await util.promisify(fs.readFile)(sourceMapPath, {
-      encoding: "utf8",
-    });
-
-    const map = JSON.parse(sourceMapFileContent) as Record<string, string>;
-    map["debug_id"] = degugId;
-    map["debugId"] = degugId;
-
-    await util.promisify(fs.writeFile)(targetPath, JSON.stringify(map), {
-      encoding: "utf8",
-    });
-  } catch (e) {
-    logger.warn(`Failed to inject debug ID into sourcemap: ${sourceMapPath}`);
-  }
-}
-
-function injectDebugIdIntoChunk(code: string, filename: string) {
-  if (filename.endsWith(".js") || filename.endsWith(".mjs")) {
-    const debugId = stringToUUID(code);
-    const ms = new MagicString(code);
-
-    const codeToInject = INJECTOR_CODE.replace(/__SENTRY_DEBUG_ID__/g, debugId);
-
-    const commentUseStrictRegex =
-      /^(?:\s*|\/\*(.|\r|\n)*?\*\/|\/\/.*?[\n\r])*(?:"use strict";|'use strict';)?/;
-
-    const match = code.match(commentUseStrictRegex);
-
-    if (match?.[0]) {
-      // Add injected code after any comments or "use strict" at the beginning of the bundle.
-      ms.replace(commentUseStrictRegex, (match) => `${match}${codeToInject}`);
-    } else {
-      ms.prepend(codeToInject);
-    }
-
-    return {
-      code: ms.toString(),
-      map: ms.generateMap(),
-    };
-  }
-
-  return null;
 }
 
 /**

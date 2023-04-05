@@ -93,11 +93,6 @@ export async function uploadDebugIdSourcemaps(
   folderPathToUpload: string,
   releaseName: string
 ): Promise<void> {
-  if (!options.uploadSourceMaps) {
-    logger.debug("Skipping debug ID source maps upload.");
-    return;
-  }
-
   const span = addSpanToTransaction(ctx, "function.plugin.upload_debug_id_sourcemaps");
   ctx.logger.info("Uploading debug ID Sourcemaps.");
 
@@ -109,9 +104,13 @@ export async function uploadDebugIdSourcemaps(
     process.env.SENTRY_FORCE_ARTIFACT_BUNDLES = "1";
 
     await ctx.cli.releases.uploadSourceMaps(releaseName, {
-      rewrite: false,
-      include: [{ paths: [folderPathToUpload] }],
-      dist: options.dist,
+      include: [
+        {
+          paths: [folderPathToUpload],
+          rewrite: false,
+          dist: options.dist,
+        },
+      ],
     });
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
