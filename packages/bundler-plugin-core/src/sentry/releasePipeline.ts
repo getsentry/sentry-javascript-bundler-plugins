@@ -94,7 +94,7 @@ export async function uploadDebugIdSourcemaps(
   releaseName: string
 ): Promise<void> {
   if (!options.uploadSourceMaps) {
-    logger.debug("Skipping source maps upload.");
+    logger.debug("Skipping debug ID source maps upload.");
     return;
   }
 

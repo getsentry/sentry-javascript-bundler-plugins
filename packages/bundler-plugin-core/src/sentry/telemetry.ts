@@ -83,7 +83,7 @@ export function addSpanToTransaction(
 export function addPluginOptionInformationToHub(
   options: InternalOptions,
   hub: Hub,
-  bundler: "rollup" | "webpack" | "vite" | "esbuild" | "rspack"
+  bundler: "rollup" | "webpack" | "vite" | "esbuild"
 ) {
   const {
     org,
