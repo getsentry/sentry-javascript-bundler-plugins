@@ -4,6 +4,16 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.5.0
+
+- feat(core): Add `injectRelease` and `uploadSourceMaps` options (#190)
+- feat(core): Add experimental debug ID based source map upload to Rollup and Vite plugins (#192)
+- feat(core): Import release injection code from each module (#188)
+- feat: Add `_experiments.injectBuildInformation` option (#176)
+- feat: Add `sentryCliBinaryExists` function (#171)
+
+Work in this release contributed by @alexandresoro and @dcyou. Thank you for your contributions!
+
 ## 0.4.0
 
 This release contains breaking changes. Please refer to the [migration guide](https://github.com/getsentry/sentry-javascript-bundler-plugins/blob/main/MIGRATION.md) on how to update from version `0.3.x` to `0.4.x`.
