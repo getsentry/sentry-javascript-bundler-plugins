@@ -6,7 +6,6 @@
     "rootDir": "./src",
     "declaration": true,
     "emitDeclarationOnly": true,
-    "declarationDir": "./dist/types",
-    "skipLibCheck": true
+    "declarationDir": "./dist/types"
   }
 }
