@@ -7,7 +7,7 @@ import { stringToUUID } from "./utils";
 
 // TODO: Find a more elaborate process to generate this. (Maybe with type checking and built-in minification)
 const DEBUG_ID_INJECTOR_SNIPPET =
-  ';!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{},n=(new Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="__SENTRY_DEBUG_ID__",e._sentryDebugIdIdentifier="sdbid-__SENTRY_DEBUG_ID__")}catch(e){}}();';
+  ';!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{},n=(new Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="__SENTRY_DEBUG_ID__",e._sentryDebugIdIdentifier="sentry-dbid-__SENTRY_DEBUG_ID__")}catch(e){}}();';
 
 export function injectDebugIdSnippetIntoChunk(code: string) {
   const debugId = stringToUUID(code); // generate a deterministic debug ID
@@ -89,7 +89,7 @@ export async function prepareBundleForDebugIdUpload(
  */
 function determineDebugIdFromBundleSource(code: string): string | undefined {
   const match = code.match(
-    /sdbid-([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})/
+    /sentry-dbid-([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})/
   );
 
   if (match) {
