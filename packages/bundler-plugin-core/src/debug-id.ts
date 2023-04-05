@@ -139,7 +139,7 @@ async function determineSourceMapPathFromBundle(
 async function prepareSourceMapForDebugIdUpload(
   sourceMapPath: string,
   targetPath: string,
-  degugId: string,
+  debugId: string,
   logger: Logger
 ): Promise<void> {
   try {
@@ -150,8 +150,8 @@ async function prepareSourceMapForDebugIdUpload(
     const map = JSON.parse(sourceMapFileContent) as Record<string, string>;
 
     // For now we write both fields until we know what will become the standard - if ever.
-    map["debug_id"] = degugId;
-    map["debugId"] = degugId;
+    map["debug_id"] = debugId;
+    map["debugId"] = debugId;
 
     await util.promisify(fs.writeFile)(targetPath, JSON.stringify(map), {
       encoding: "utf8",
