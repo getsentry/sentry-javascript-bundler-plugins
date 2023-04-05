@@ -96,6 +96,7 @@ export function addPluginOptionInformationToHub(
     errorHandler,
     deploy,
     include,
+    _experiments,
   } = options;
 
   hub.setTag("include", include.length > 1 ? "multiple-entries" : "single-entry");
@@ -123,6 +124,9 @@ export function addPluginOptionInformationToHub(
   }
   if (errorHandler) {
     hub.setTag("error-handler", "custom");
+  }
+  if (_experiments.debugIdUpload) {
+    hub.setTag("debug-id-upload", true);
   }
 
   hub.setTag("node", process.version);
