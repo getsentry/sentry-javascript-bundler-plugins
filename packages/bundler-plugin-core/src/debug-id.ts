@@ -82,6 +82,12 @@ export async function prepareBundleForDebugIdUpload(
   await writeSourceMapFilePromise;
 }
 
+/**
+ * Looks for a particular string pattern (`sdbid-[debug ID]`) in the bundle
+ * source and extracts the bundle's debug ID from it.
+ *
+ * The string pattern is injected via the debug ID injection snipped.
+ */
 function determineDebugIdFromBundleSource(code: string): string | undefined {
   const match = code.match(
     /sdbid-([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})/
@@ -94,6 +100,11 @@ function determineDebugIdFromBundleSource(code: string): string | undefined {
   }
 }
 
+/**
+ * Applies a set of heuristics to find the source map for a particular bundle.
+ *
+ * @returns the path to the bundle's source map or `undefined` if none could be found.
+ */
 async function determineSourceMapPathFromBundle(
   bundlePath: string,
   bundleSource: string,
@@ -123,6 +134,9 @@ async function determineSourceMapPathFromBundle(
   return undefined;
 }
 
+/**
+ * Reads a source map, injects debug ID fields, and writes the source map to the target path.
+ */
 async function prepareSourceMapForDebugIdUpload(
   sourceMapPath: string,
   targetPath: string,
