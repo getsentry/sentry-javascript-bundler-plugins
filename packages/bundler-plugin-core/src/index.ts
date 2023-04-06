@@ -133,6 +133,12 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         });
       }
 
+      if (process.cwd().match(/\\node_modules\\|\/node_modules\//)) {
+        logger.warn(
+          "Running Sentry plugin from within a `node_modules` folder. Some features may not work."
+        );
+      }
+
       const releaseName = await releaseNamePromise;
 
       // At this point, we either have determined a release or we have to bail
@@ -184,6 +190,10 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
      */
     transformInclude(id) {
       logger.debug('Called "transformInclude":', { id });
+
+      if (id.match(/\\node_modules\\|\/node_modules\//)) {
+        return false; // never transform 3rd party modules
+      }
 
       // We normalize the id because vite always passes `id` as a unix style path which causes problems when a user passes
       // a windows style path to `releaseInjectionTargets`
