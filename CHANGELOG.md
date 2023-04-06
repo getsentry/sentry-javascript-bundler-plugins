@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.5.1
+
+- fix(core): Skip all transformations for 3rd party modules
+
 ## 0.5.0
 
 - feat(core): Add `injectRelease` and `uploadSourceMaps` options (#190)
