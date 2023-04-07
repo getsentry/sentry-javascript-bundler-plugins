@@ -393,6 +393,9 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     },
     webpack(compiler) {
       if (options._experiments?.debugIdUpload) {
+        // Cache inspired by https://github.com/webpack/webpack/pull/15454
+        const cache = new WeakMap<sources.Source, sources.Source>();
+
         compiler.hooks.compilation.tap("sentry-plugin", (compilation) => {
           compilation.hooks.optimizeChunkAssets.tap("sentry-plugin", (chunks) => {
             chunks.forEach((chunk) => {
@@ -407,7 +410,12 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
                   return;
                 }
 
-                compilation.updateAsset(fileName, () => {
+                compilation.updateAsset(fileName, (oldSource) => {
+                  const cached = cache.get(oldSource);
+                  if (cached) {
+                    return cached;
+                  }
+
                   const originalCode = source.source().toString();
 
                   // The source map type is very annoying :(
@@ -425,7 +433,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                   newSourceMap.sourcesContent = originalSourceMap.sourcesContent as string[];
 
-                  return new SourceMapSource(
+                  const newSource = new SourceMapSource(
                     newCode,
                     fileName,
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -434,6 +442,10 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
                     newSourceMap,
                     false
                   ) as sources.Source;
+
+                  cache.set(oldSource, newSource);
+
+                  return newSource;
                 });
               });
             });
