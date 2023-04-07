@@ -30,6 +30,8 @@ import util from "util";
 import { getDependencies, getPackageJson, parseMajorVersion } from "./utils";
 import { glob } from "glob";
 import { injectDebugIdSnippetIntoChunk, prepareBundleForDebugIdUpload } from "./debug-id";
+import { SourceMapSource } from "webpack-sources";
+import type { sources } from "webpack";
 
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
 
@@ -388,6 +390,68 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
           return null; // returning null means not modifying the chunk at all
         }
       },
+    },
+    webpack(compiler) {
+      if (options._experiments?.debugIdUpload) {
+        // Cache inspired by https://github.com/webpack/webpack/pull/15454
+        const cache = new WeakMap<sources.Source, sources.Source>();
+
+        compiler.hooks.compilation.tap("sentry-plugin", (compilation) => {
+          compilation.hooks.optimizeChunkAssets.tap("sentry-plugin", (chunks) => {
+            chunks.forEach((chunk) => {
+              const fileNames = chunk.files;
+              fileNames.forEach((fileName) => {
+                const source = compilation.assets[fileName];
+
+                if (!source) {
+                  logger.warn(
+                    "Unable to access compilation assets. If you see this warning, it is likely a bug in the Sentry webpack plugin. Feel free to open an issue at https://github.com/getsentry/sentry-javascript-bundler-plugins with reproduction steps."
+                  );
+                  return;
+                }
+
+                compilation.updateAsset(fileName, (oldSource) => {
+                  const cached = cache.get(oldSource);
+                  if (cached) {
+                    return cached;
+                  }
+
+                  const originalCode = source.source().toString();
+
+                  // The source map type is very annoying :(
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+                  const originalSourceMap = source.map() as any;
+
+                  const { code: newCode, map: newSourceMap } = injectDebugIdSnippetIntoChunk(
+                    originalCode,
+                    fileName
+                  );
+
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                  newSourceMap.sources = originalSourceMap.sources as string[];
+
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                  newSourceMap.sourcesContent = originalSourceMap.sourcesContent as string[];
+
+                  const newSource = new SourceMapSource(
+                    newCode,
+                    fileName,
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                    originalSourceMap,
+                    originalCode,
+                    newSourceMap,
+                    false
+                  ) as sources.Source;
+
+                  cache.set(oldSource, newSource);
+
+                  return newSource;
+                });
+              });
+            });
+          });
+        });
+      }
     },
   };
 });

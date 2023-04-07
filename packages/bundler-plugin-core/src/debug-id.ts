@@ -9,9 +9,9 @@ import { stringToUUID } from "./utils";
 const DEBUG_ID_INJECTOR_SNIPPET =
   ';!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{},n=(new Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="__SENTRY_DEBUG_ID__",e._sentryDebugIdIdentifier="sentry-dbid-__SENTRY_DEBUG_ID__")}catch(e){}}();';
 
-export function injectDebugIdSnippetIntoChunk(code: string) {
+export function injectDebugIdSnippetIntoChunk(code: string, filename?: string) {
   const debugId = stringToUUID(code); // generate a deterministic debug ID
-  const ms = new MagicString(code);
+  const ms = new MagicString(code, { filename });
 
   const codeToInject = DEBUG_ID_INJECTOR_SNIPPET.replace(/__SENTRY_DEBUG_ID__/g, debugId);
 
