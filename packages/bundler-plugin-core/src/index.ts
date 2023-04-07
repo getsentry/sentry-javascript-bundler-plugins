@@ -307,40 +307,42 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       let tmpUploadFolder: string | undefined;
 
       try {
-        if (internalOptions._experiments.debugIdUpload) {
-          const debugIdChunkFilePaths = (
-            await glob(internalOptions._experiments.debugIdUpload.include, {
-              absolute: true,
-              nodir: true,
-              ignore: internalOptions._experiments.debugIdUpload.ignore,
-            })
-          ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs"));
+        if (!unpluginMetaContext.watchMode) {
+          if (internalOptions._experiments.debugIdUpload) {
+            const debugIdChunkFilePaths = (
+              await glob(internalOptions._experiments.debugIdUpload.include, {
+                absolute: true,
+                nodir: true,
+                ignore: internalOptions._experiments.debugIdUpload.ignore,
+              })
+            ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs"));
 
-          const sourceFileUploadFolderPromise = util.promisify(fs.mkdtemp)(
-            path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
-          );
+            const sourceFileUploadFolderPromise = util.promisify(fs.mkdtemp)(
+              path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+            );
 
-          await Promise.all(
-            debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
-              await prepareBundleForDebugIdUpload(
-                chunkFilePath,
-                await sourceFileUploadFolderPromise,
-                String(chunkIndex),
-                logger
-              );
-            })
-          );
+            await Promise.all(
+              debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
+                await prepareBundleForDebugIdUpload(
+                  chunkFilePath,
+                  await sourceFileUploadFolderPromise,
+                  String(chunkIndex),
+                  logger
+                );
+              })
+            );
 
-          tmpUploadFolder = await sourceFileUploadFolderPromise;
-          await uploadDebugIdSourcemaps(internalOptions, ctx, tmpUploadFolder, releaseName);
+            tmpUploadFolder = await sourceFileUploadFolderPromise;
+            await uploadDebugIdSourcemaps(internalOptions, ctx, tmpUploadFolder, releaseName);
+          }
+
+          await createNewRelease(internalOptions, ctx, releaseName);
+          await cleanArtifacts(internalOptions, ctx, releaseName);
+          await uploadSourceMaps(internalOptions, ctx, releaseName);
+          await setCommits(internalOptions, ctx, releaseName);
+          await finalizeRelease(internalOptions, ctx, releaseName);
+          await addDeploy(internalOptions, ctx, releaseName);
         }
-
-        await createNewRelease(internalOptions, ctx, releaseName);
-        await cleanArtifacts(internalOptions, ctx, releaseName);
-        await uploadSourceMaps(internalOptions, ctx, releaseName);
-        await setCommits(internalOptions, ctx, releaseName);
-        await finalizeRelease(internalOptions, ctx, releaseName);
-        await addDeploy(internalOptions, ctx, releaseName);
         transaction?.setStatus("ok");
       } catch (e: unknown) {
         transaction?.setStatus("cancelled");
