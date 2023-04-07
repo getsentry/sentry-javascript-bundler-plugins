@@ -348,7 +348,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         transaction?.setStatus("cancelled");
         sentryHub.addBreadcrumb({
           level: "error",
-          message: "Error during source map upload",
+          message: "Error during writeBundle",
         });
         handleError(e, logger, internalOptions.errorHandler);
       } finally {
