@@ -228,7 +228,7 @@ export type Options = Omit<IncludeEntry, "paths"> & {
     /**
      * Configuration for debug ID upload.
      *
-     * Note: Currently only functional for Vite and Rollup.
+     * Note: Currently only functional for Vite, Webpack and Rollup.
      */
     debugIdUpload?: {
       /**
