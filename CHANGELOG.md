@@ -10,6 +10,8 @@
 - fix(core): Don't exclude release injection module (#200)
 - ref(core): Don't interact with Sentry in watch-mode (#199)
 
+Work in this release contributed by @hakubo. Thank you for your contribution!
+
 ## 0.5.1
 
 - fix(core): Skip all transformations for 3rd party modules
