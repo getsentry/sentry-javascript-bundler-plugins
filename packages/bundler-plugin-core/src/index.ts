@@ -193,6 +193,10 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
     transformInclude(id) {
       logger.debug('Called "transformInclude":', { id });
 
+      if (id.includes("sentry-release-injection-file")) {
+        return true;
+      }
+
       if (id.match(/\\node_modules\\|\/node_modules\//)) {
         return false; // never transform 3rd party modules
       }
@@ -200,10 +204,6 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       // We normalize the id because vite always passes `id` as a unix style path which causes problems when a user passes
       // a windows style path to `releaseInjectionTargets`
       const normalizedId = path.normalize(id);
-
-      if (id.includes("sentry-release-injection-file")) {
-        return true;
-      }
 
       if (internalOptions.releaseInjectionTargets) {
         // If there's an `releaseInjectionTargets` option transform (ie. inject the release varible) when the file path matches the option.
