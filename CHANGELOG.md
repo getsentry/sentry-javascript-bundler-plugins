@@ -4,6 +4,12 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.6.0
+
+- feat(webpack): Add debug ID injection to the webpack plugin (#198)
+- fix(core): Don't exclude release injection module (#200)
+- ref(core): Don't interact with Sentry in watch-mode (#199)
+
 ## 0.5.1
 
 - fix(core): Skip all transformations for 3rd party modules
