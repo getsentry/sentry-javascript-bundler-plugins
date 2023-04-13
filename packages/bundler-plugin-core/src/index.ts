@@ -321,7 +321,7 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
                 nodir: true,
                 ignore: internalOptions._experiments.debugIdUpload.ignore,
               })
-            ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs") || p.endsWith(".cjs"));
+            ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs"));
 
             if (unpluginMetaContext.framework === "esbuild") {
               await Promise.all(
@@ -403,7 +403,7 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
       renderChunk(code, chunk) {
         if (
           options._experiments?.debugIdUpload &&
-          [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+          [".js", ".mjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
         ) {
           return injectDebugIdSnippetIntoChunk(code);
         } else {
@@ -415,7 +415,7 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
       renderChunk(code, chunk) {
         if (
           options._experiments?.debugIdUpload &&
-          [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+          [".js", ".mjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
         ) {
           return injectDebugIdSnippetIntoChunk(code);
         } else {
@@ -488,15 +488,17 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
   });
 
   if (unpluginMetaContext.framework === "esbuild") {
-    plugins.push({
-      name: "sentry-debug-id-plugin",
-      esbuild: {
-        setup({ initialOptions }) {
-          initialOptions.inject = initialOptions.inject || [];
-          initialOptions.inject.push(esbuildDebugIdInjectionFilePath);
+    if (internalOptions._experiments.debugIdUpload) {
+      plugins.push({
+        name: "sentry-debug-id-plugin",
+        esbuild: {
+          setup({ initialOptions }) {
+            initialOptions.inject = initialOptions.inject || [];
+            initialOptions.inject.push(esbuildDebugIdInjectionFilePath);
+          },
         },
-      },
-    });
+      });
+    }
   }
 
   return plugins;
