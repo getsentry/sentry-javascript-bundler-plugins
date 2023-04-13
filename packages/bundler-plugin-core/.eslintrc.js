@@ -11,6 +11,7 @@ module.exports = {
     "rollup.config.js",
     "test/fixtures/**/*",
     "sentry-release-injection-file.js",
+    "sentry-esbuild-debugid-injection-file.js",
   ],
   parserOptions: {
     tsconfigRootDir: __dirname,

@@ -11,7 +11,8 @@
   },
   "files": [
     "dist",
-    "sentry-release-injection-file.js"
+    "sentry-release-injection-file.js",
+    "sentry-esbuild-debugid-injection-file.js"
   ],
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.mjs",
@@ -71,5 +72,9 @@
   },
   "engines": {
     "node": ">= 10"
-  }
+  },
+  "sideEffects": [
+    "./sentry-release-injection-file.js",
+    "./sentry-esbuild-debugid-injection-file.js"
+  ]
 }

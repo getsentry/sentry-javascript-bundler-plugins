@@ -1,4 +1,4 @@
-import { createUnplugin } from "unplugin";
+import { createUnplugin, UnpluginOptions } from "unplugin";
 import MagicString from "magic-string";
 import { Options, BuildContext } from "./types";
 import {
@@ -26,8 +26,8 @@ import { makeMain } from "@sentry/node";
 import os from "os";
 import path from "path";
 import fs from "fs";
-import util from "util";
-import { getDependencies, getPackageJson, parseMajorVersion } from "./utils";
+import { promisify } from "util";
+import { getDependencies, getPackageJson, parseMajorVersion, stringToUUID } from "./utils";
 import { glob } from "glob";
 import { injectDebugIdSnippetIntoChunk, prepareBundleForDebugIdUpload } from "./debug-id";
 import { SourceMapSource } from "webpack-sources";
@@ -37,6 +37,10 @@ const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs
 
 const releaseInjectionFilePath = require.resolve(
   "@sentry/bundler-plugin-core/sentry-release-injection-file"
+);
+
+const esbuildDebugIdInjectionFilePath = require.resolve(
+  "@sentry/bundler-plugin-core/sentry-esbuild-debugid-injection-file"
 );
 
 /**
@@ -66,7 +70,7 @@ const releaseInjectionFilePath = require.resolve(
  *
  * This release creation pipeline relies on Sentry CLI to execute the different steps.
  */
-const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
+const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) => {
   const internalOptions = normalizeUserOptions(options);
 
   const allowedToSendTelemetryPromise = shouldSendTelemetry(internalOptions);
@@ -113,7 +117,9 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
   let transaction: Transaction | undefined;
   let releaseInjectionSpan: Span | undefined;
 
-  return {
+  const plugins: UnpluginOptions[] = [];
+
+  plugins.push({
     name: "sentry-plugin",
     enforce: "pre", // needed for Vite to call resolveId hook
 
@@ -317,7 +323,31 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
               })
             ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs") || p.endsWith(".cjs"));
 
-            const sourceFileUploadFolderPromise = util.promisify(fs.mkdtemp)(
+            if (unpluginMetaContext.framework === "esbuild") {
+              await Promise.all(
+                debugIdChunkFilePaths.map(async (debugIdChunkFilePath) => {
+                  const chunkFileContents = await promisify(fs.readFile)(
+                    debugIdChunkFilePath,
+                    "utf-8"
+                  );
+
+                  const debugId = stringToUUID(chunkFileContents);
+
+                  const newChunkFileContents = chunkFileContents.replace(
+                    /__SENTRY_DEBUG_ID__/g,
+                    debugId
+                  );
+
+                  await promisify(fs.writeFile)(
+                    debugIdChunkFilePath,
+                    newChunkFileContents,
+                    "utf-8"
+                  );
+                })
+              );
+            }
+
+            const sourceFileUploadFolderPromise = promisify(fs.mkdtemp)(
               path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
             );
 
@@ -455,7 +485,23 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
         });
       }
     },
-  };
+  });
+
+  if (unpluginMetaContext.framework === "esbuild") {
+    if (internalOptions._experiments.debugIdUpload) {
+      plugins.push({
+        name: "sentry-esbuild-debug-id-plugin",
+        esbuild: {
+          setup({ initialOptions }) {
+            initialOptions.inject = initialOptions.inject || [];
+            initialOptions.inject.push(esbuildDebugIdInjectionFilePath);
+          },
+        },
+      });
+    }
+  }
+
+  return plugins;
 });
 
 function handleError(
