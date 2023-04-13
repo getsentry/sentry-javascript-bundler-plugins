@@ -490,7 +490,7 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
   if (unpluginMetaContext.framework === "esbuild") {
     if (internalOptions._experiments.debugIdUpload) {
       plugins.push({
-        name: "sentry-debug-id-plugin",
+        name: "sentry-esbuild-debug-id-plugin",
         esbuild: {
           setup({ initialOptions }) {
             initialOptions.inject = initialOptions.inject || [];
