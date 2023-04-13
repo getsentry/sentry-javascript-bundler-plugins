@@ -315,7 +315,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
                 nodir: true,
                 ignore: internalOptions._experiments.debugIdUpload.ignore,
               })
-            ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs"));
+            ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs") || p.endsWith(".cjs"));
 
             const sourceFileUploadFolderPromise = util.promisify(fs.mkdtemp)(
               path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
@@ -373,7 +373,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       renderChunk(code, chunk) {
         if (
           options._experiments?.debugIdUpload &&
-          [".js", ".mjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+          [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
         ) {
           return injectDebugIdSnippetIntoChunk(code);
         } else {
@@ -385,7 +385,7 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
       renderChunk(code, chunk) {
         if (
           options._experiments?.debugIdUpload &&
-          [".js", ".mjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+          [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
         ) {
           return injectDebugIdSnippetIntoChunk(code);
         } else {
