@@ -4,6 +4,31 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.7.0
+
+This release introduces the `sourcemaps` option. This option switches to a new system of handling source maps in Sentry.
+
+While the old system is still available via the `include` option, the recommended way forward is the `sourcemaps` option.
+
+You can configure the `sourcemaps` option as follows:
+
+```js
+plugin({
+  org: "Your organization",
+  project: "Your project",
+  authToken: "Your auth token",
+
+  sourcemaps: {
+    // Specify the directory containing build artifacts
+    assets: "./dist/**",
+  },
+});
+```
+
+- feat(esbuild): Add debug ID injection for esbuild (#202)
+- feat: Promote debug ID uploading to stable via `sourcemaps` option (#204)
+- fix(core): Also do debug ID injection for `.cjs` files (#203)
+
 ## 0.6.0
 
 - feat(webpack): Add debug ID injection to the webpack plugin (#198)
