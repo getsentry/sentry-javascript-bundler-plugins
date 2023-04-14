@@ -1,5 +1,5 @@
 import { Hub } from "@sentry/node";
-import { InternalOptions, normalizeUserOptions } from "../../src/options-mapping";
+import { NormalizedOptions, normalizeUserOptions } from "../../src/options-mapping";
 import { addPluginOptionInformationToHub, shouldSendTelemetry } from "../../src/sentry/telemetry";
 
 const mockCliExecute = jest.fn();
@@ -20,14 +20,14 @@ describe("shouldSendTelemetry", () => {
     mockCliExecute.mockImplementation(
       () => "Sentry Server: https://selfhostedSentry.io  \nsomeotherstuff\netc"
     );
-    expect(await shouldSendTelemetry({} as InternalOptions)).toBe(false);
+    expect(await shouldSendTelemetry({} as NormalizedOptions)).toBe(false);
   });
 
   it("should return true if CLI returns sentry.io as a URL", async () => {
     mockCliExecute.mockImplementation(
       () => "Sentry Server: https://sentry.io  \nsomeotherstuff\netc"
     );
-    expect(await shouldSendTelemetry({} as InternalOptions)).toBe(true);
+    expect(await shouldSendTelemetry({} as NormalizedOptions)).toBe(true);
   });
 });
 

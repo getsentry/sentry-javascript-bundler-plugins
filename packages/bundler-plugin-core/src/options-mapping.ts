@@ -63,7 +63,7 @@ export type InternalIncludeEntry = RequiredInternalIncludeEntry &
 
 export const SENTRY_SAAS_URL = "https://sentry.io";
 
-export function normalizeUserOptions(userOptions: UserOptions): NormalizedOptions {
+export function normalizeUserOptions(userOptions: UserOptions) {
   const options = {
     // include is the only strictly required option
     // (normalizeInclude needs all userOptions to access top-level include options)
@@ -95,6 +95,7 @@ export function normalizeUserOptions(userOptions: UserOptions): NormalizedOption
     injectReleasesMap: userOptions.injectReleasesMap ?? false,
     injectRelease: userOptions.injectRelease ?? true,
     uploadSourceMaps: userOptions.uploadSourceMaps ?? true,
+    sourcemaps: userOptions.sourcemaps,
     _experiments: userOptions._experiments ?? {},
 
     // These options and can also be set via env variables or the config file.

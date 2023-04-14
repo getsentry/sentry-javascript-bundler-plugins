@@ -1,4 +1,4 @@
-import { InternalOptions, normalizeUserOptions } from "../../src/options-mapping";
+import { NormalizedOptions, normalizeUserOptions } from "../../src/options-mapping";
 import {
   addDeploy,
   cleanArtifacts,
@@ -59,7 +59,7 @@ describe("Release Pipeline", () => {
 
   describe("createNewRelease", () => {
     it("makes a call to Sentry CLI's releases creation command", async () => {
-      await createNewRelease({} as InternalOptions, ctx as unknown as BuildContext, "1.0.0");
+      await createNewRelease({} as NormalizedOptions, ctx as unknown as BuildContext, "1.0.0");
 
       expect(mockedCLI.releases.new).toHaveBeenCalledWith("1.0.0");
       expect(mockedAddSpanToTxn).toHaveBeenCalledWith(ctx, "function.plugin.create_release");
@@ -69,7 +69,7 @@ describe("Release Pipeline", () => {
 
   describe("cleanArtifacts", () => {
     it("doest do anything if cleanArtifacts is not true", async () => {
-      await cleanArtifacts({} as InternalOptions, ctx as unknown as BuildContext, "my-release");
+      await cleanArtifacts({} as NormalizedOptions, ctx as unknown as BuildContext, "my-release");
 
       expect(mockedCLI.releases.execute).not.toHaveBeenCalled();
       expect(mockedAddSpanToTxn).not.toHaveBeenCalled();
@@ -78,7 +78,7 @@ describe("Release Pipeline", () => {
 
     it("makes a call to Sentry CLI's artifact removal command if `cleanArtifacts` is set", async () => {
       await cleanArtifacts(
-        { cleanArtifacts: true } as InternalOptions,
+        { cleanArtifacts: true } as NormalizedOptions,
         ctx as unknown as BuildContext,
         "1.0.0"
       );
@@ -126,7 +126,7 @@ describe("Release Pipeline", () => {
 
   describe("setCommits", () => {
     it("doesn't do anything if `setCommits` option is not specified", async () => {
-      await setCommits({} as InternalOptions, ctx as unknown as BuildContext, "1.0.0");
+      await setCommits({} as NormalizedOptions, ctx as unknown as BuildContext, "1.0.0");
 
       expect(mockedCLI.releases.setCommits).not.toHaveBeenCalled();
       expect(mockedAddSpanToTxn).not.toHaveBeenCalled();
@@ -135,7 +135,7 @@ describe("Release Pipeline", () => {
 
     it("makes a call to Sentry CLI if the correct options are specified", async () => {
       await setCommits(
-        { setCommits: { auto: true } } as InternalOptions,
+        { setCommits: { auto: true } } as NormalizedOptions,
         ctx as unknown as BuildContext,
         "1.0.0"
       );
@@ -148,7 +148,7 @@ describe("Release Pipeline", () => {
 
   describe("finalizeRelease", () => {
     it("doesn't do anything if `finalize` is not set", async () => {
-      await finalizeRelease({} as InternalOptions, ctx as unknown as BuildContext, "1.0.0");
+      await finalizeRelease({} as NormalizedOptions, ctx as unknown as BuildContext, "1.0.0");
 
       expect(mockedCLI.releases.finalize).not.toHaveBeenCalled();
       expect(mockedAddSpanToTxn).not.toHaveBeenCalled();
@@ -157,7 +157,7 @@ describe("Release Pipeline", () => {
 
     it("makes a call to Sentry CLI's release finalization command if `finalize` is true", async () => {
       await finalizeRelease(
-        { finalize: true } as InternalOptions,
+        { finalize: true } as NormalizedOptions,
         ctx as unknown as BuildContext,
         "1.0.0"
       );
@@ -170,7 +170,7 @@ describe("Release Pipeline", () => {
 
   describe("addDeploy", () => {
     it("doesn't do anything if `deploy` option is not specified", async () => {
-      await addDeploy({} as InternalOptions, ctx as unknown as BuildContext, "1.0.0");
+      await addDeploy({} as NormalizedOptions, ctx as unknown as BuildContext, "1.0.0");
 
       expect(mockedCLI.releases.newDeploy).not.toHaveBeenCalled();
       expect(mockedAddSpanToTxn).not.toHaveBeenCalled();
@@ -187,7 +187,7 @@ describe("Release Pipeline", () => {
       };
 
       await addDeploy(
-        { deploy: deployOptions } as InternalOptions,
+        { deploy: deployOptions } as NormalizedOptions,
         ctx as unknown as BuildContext,
         "1.0.0"
       );
