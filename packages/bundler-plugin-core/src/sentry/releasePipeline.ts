@@ -7,12 +7,12 @@
 //           - unnecessary functionality
 
 import { logger } from "@sentry/utils";
-import { InternalOptions } from "../options-mapping";
+import { NormalizedOptions } from "../options-mapping";
 import { BuildContext } from "../types";
 import { addSpanToTransaction } from "./telemetry";
 
 export async function createNewRelease(
-  options: InternalOptions,
+  options: NormalizedOptions,
   ctx: BuildContext,
   releaseName: string
 ): Promise<void> {
@@ -32,7 +32,7 @@ export async function createNewRelease(
 }
 
 export async function cleanArtifacts(
-  options: InternalOptions,
+  options: NormalizedOptions,
   ctx: BuildContext,
   releaseName: string
 ): Promise<void> {
@@ -57,7 +57,7 @@ export async function cleanArtifacts(
 }
 
 export async function uploadSourceMaps(
-  options: InternalOptions,
+  options: NormalizedOptions,
   ctx: BuildContext,
   releaseName: string
 ): Promise<void> {
@@ -88,7 +88,7 @@ export async function uploadSourceMaps(
 }
 
 export async function uploadDebugIdSourcemaps(
-  options: InternalOptions,
+  options: NormalizedOptions,
   ctx: BuildContext,
   folderPathToUpload: string,
   releaseName: string
@@ -121,7 +121,7 @@ export async function uploadDebugIdSourcemaps(
 }
 
 export async function setCommits(
-  options: InternalOptions,
+  options: NormalizedOptions,
   ctx: BuildContext,
   releaseName: string
 ): Promise<void> {
@@ -154,7 +154,7 @@ export async function setCommits(
 }
 
 export async function finalizeRelease(
-  options: InternalOptions,
+  options: NormalizedOptions,
   ctx: BuildContext,
   releaseName: string
 ): Promise<void> {
@@ -180,7 +180,7 @@ export async function finalizeRelease(
 }
 
 export async function addDeploy(
-  options: InternalOptions,
+  options: NormalizedOptions,
   ctx: BuildContext,
   releaseName: string
 ): Promise<void> {
