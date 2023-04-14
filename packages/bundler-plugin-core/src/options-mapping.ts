@@ -32,6 +32,7 @@ type OptionalInternalOptions = Partial<
     | "deploy"
     | "configFile"
     | "headers"
+    | "sourcemaps"
   >
 >;
 
@@ -40,7 +41,7 @@ type NormalizedInternalOptions = {
   include: InternalIncludeEntry[];
 };
 
-export type InternalOptions = RequiredInternalOptions &
+export type NormalizedOptions = RequiredInternalOptions &
   OptionalInternalOptions &
   NormalizedInternalOptions;
 
@@ -62,7 +63,7 @@ export type InternalIncludeEntry = RequiredInternalIncludeEntry &
 
 export const SENTRY_SAAS_URL = "https://sentry.io";
 
-export function normalizeUserOptions(userOptions: UserOptions): InternalOptions {
+export function normalizeUserOptions(userOptions: UserOptions) {
   const options = {
     // include is the only strictly required option
     // (normalizeInclude needs all userOptions to access top-level include options)
@@ -94,6 +95,7 @@ export function normalizeUserOptions(userOptions: UserOptions): InternalOptions 
     injectReleasesMap: userOptions.injectReleasesMap ?? false,
     injectRelease: userOptions.injectRelease ?? true,
     uploadSourceMaps: userOptions.uploadSourceMaps ?? true,
+    sourcemaps: userOptions.sourcemaps,
     _experiments: userOptions._experiments ?? {},
 
     // These options and can also be set via env variables or the config file.
@@ -149,6 +151,10 @@ function normalizeReleaseInjectionTargets(
  * @return an array of `InternalIncludeEntry` objects.
  */
 function normalizeInclude(userOptions: UserOptions): InternalIncludeEntry[] {
+  if (!userOptions.include) {
+    return [];
+  }
+
   return arrayify(userOptions.include)
     .map((includeItem) =>
       typeof includeItem === "string" ? { paths: [includeItem] } : includeItem
@@ -198,7 +204,7 @@ function normalizeIncludeEntry(
  *
  * @returns `true` if the options are valid, `false` otherwise
  */
-export function validateOptions(options: InternalOptions, logger: Logger): boolean {
+export function validateOptions(options: NormalizedOptions, logger: Logger): boolean {
   if (options.injectReleasesMap && !options.org) {
     logger.error(
       "The `injectReleasesMap` option was set but it is only supported when the `org` option is also specified.",

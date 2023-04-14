@@ -1,6 +1,6 @@
 import SentryCli from "@sentry/cli";
 import { defaultStackParser, Hub, makeNodeTransport, NodeClient, Span } from "@sentry/node";
-import { InternalOptions, SENTRY_SAAS_URL } from "../options-mapping";
+import { NormalizedOptions, SENTRY_SAAS_URL } from "../options-mapping";
 import { BuildContext } from "../types";
 
 const SENTRY_SAAS_HOSTNAME = "sentry.io";
@@ -81,7 +81,7 @@ export function addSpanToTransaction(
 }
 
 export function addPluginOptionInformationToHub(
-  options: InternalOptions,
+  options: NormalizedOptions,
   hub: Hub,
   bundler: "rollup" | "webpack" | "vite" | "esbuild"
 ) {
@@ -96,7 +96,7 @@ export function addPluginOptionInformationToHub(
     errorHandler,
     deploy,
     include,
-    _experiments,
+    sourcemaps,
   } = options;
 
   hub.setTag("include", include.length > 1 ? "multiple-entries" : "single-entry");
@@ -125,7 +125,7 @@ export function addPluginOptionInformationToHub(
   if (errorHandler) {
     hub.setTag("error-handler", "custom");
   }
-  if (_experiments.debugIdUpload) {
+  if (sourcemaps?.assets) {
     hub.setTag("debug-id-upload", true);
   }
 
@@ -140,7 +140,7 @@ export function addPluginOptionInformationToHub(
   hub.setUser({ id: org });
 }
 
-export async function shouldSendTelemetry(options: InternalOptions): Promise<boolean> {
+export async function shouldSendTelemetry(options: NormalizedOptions): Promise<boolean> {
   const { silent, org, project, authToken, url, vcsRemote, headers, telemetry, dryRun } = options;
 
   // `options.telemetry` defaults to true

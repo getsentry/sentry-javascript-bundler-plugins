@@ -92,9 +92,9 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    * types can be uploaded by using the `ext` option.
    * Each path can be given as a string or an object with path-specific options
    *
-   * This is a required field.
+   * @deprecated Use the `sourcemaps` option instead.
    */
-  include: string | IncludeEntry | Array<string | IncludeEntry>;
+  include?: string | IncludeEntry | Array<string | IncludeEntry>;
 
   /* --- other properties: */
 
@@ -214,7 +214,35 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   uploadSourceMaps?: boolean;
 
   /**
+   * Options for source maps uploading.
+   */
+  sourcemaps?: {
+    /**
+     * A glob or an array of globs that specify the build artifacts that should be uploaded to Sentry.
+     * Leave this option undefined if you do not want to upload source maps to Sentry.
+     *
+     * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
+     *
+     * Use the `debug` option to print information about which files end up being uploaded.
+     */
+    assets: string | string[];
+
+    /**
+     * A glob or an array of globs that specify which build artifacts should not be uploaded to Sentry.
+     *
+     * Default: `[]`
+     *
+     * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
+     *
+     * Use the `debug` option to print information about which files end up being uploaded.
+     */
+    ignore?: string | string[];
+  };
+
+  /**
    * Options that are considered experimental and subject to change.
+   *
+   * @experimental API may change in any release
    */
   _experiments?: {
     /**
@@ -224,24 +252,6 @@ export type Options = Omit<IncludeEntry, "paths"> & {
      * Defaults to `false`.
      */
     injectBuildInformation?: boolean;
-
-    /**
-     * Configuration for debug ID upload.
-     *
-     * Note: Currently only functional for Vite, Webpack and Rollup.
-     */
-    debugIdUpload?: {
-      /**
-       * Glob paths to files that should get be injected with a debug ID and uploaded.
-       */
-      include: string | string[];
-      /**
-       * Glob paths to files that should be ignored for debug ID injection and upload.
-       *
-       * Default: `[]`
-       */
-      ignore?: string | string[];
-    };
   };
 };
 

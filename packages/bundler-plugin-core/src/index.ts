@@ -20,7 +20,7 @@ import {
 } from "./sentry/telemetry";
 import { Span, Transaction } from "@sentry/types";
 import { createLogger, Logger } from "./sentry/logger";
-import { InternalOptions, normalizeUserOptions, validateOptions } from "./options-mapping";
+import { NormalizedOptions, normalizeUserOptions, validateOptions } from "./options-mapping";
 import { getSentryCli } from "./sentry/cli";
 import { makeMain } from "@sentry/node";
 import os from "os";
@@ -70,18 +70,18 @@ const esbuildDebugIdInjectionFilePath = require.resolve(
  *
  * This release creation pipeline relies on Sentry CLI to execute the different steps.
  */
-const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) => {
-  const internalOptions = normalizeUserOptions(options);
+const unplugin = createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
+  const options = normalizeUserOptions(userOptions);
 
-  const allowedToSendTelemetryPromise = shouldSendTelemetry(internalOptions);
+  const allowedToSendTelemetryPromise = shouldSendTelemetry(options);
 
   const { sentryHub, sentryClient } = makeSentryClient(
     "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
     allowedToSendTelemetryPromise,
-    internalOptions.project
+    options.project
   );
 
-  addPluginOptionInformationToHub(internalOptions, sentryHub, unpluginMetaContext.framework);
+  addPluginOptionInformationToHub(options, sentryHub, unpluginMetaContext.framework);
 
   //TODO: This call is problematic because as soon as we set our hub as the current hub
   //      we might interfere with other plugins that use Sentry. However, for now, we'll
@@ -92,23 +92,23 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
 
   const logger = createLogger({
     prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
-    silent: internalOptions.silent,
-    debug: internalOptions.debug,
+    silent: options.silent,
+    debug: options.debug,
   });
 
-  if (!validateOptions(internalOptions, logger)) {
+  if (!validateOptions(options, logger)) {
     handleError(
       new Error("Options were not set correctly. See output above for more details."),
       logger,
-      internalOptions.errorHandler
+      options.errorHandler
     );
   }
 
-  const cli = getSentryCli(internalOptions, logger);
+  const cli = getSentryCli(options, logger);
 
   const releaseNamePromise = new Promise<string>((resolve) => {
-    if (options.release) {
-      resolve(options.release);
+    if (userOptions.release) {
+      resolve(userOptions.release);
     } else {
       resolve(cli.releases.proposeVersion());
     }
@@ -156,7 +156,7 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
             "Unable to determine a release name. Make sure to set the `release` option or use an environment that supports auto-detection https://docs.sentry.io/cli/releases/#creating-releases`"
           ),
           logger,
-          internalOptions.errorHandler
+          options.errorHandler
         );
       }
 
@@ -211,13 +211,13 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
       // a windows style path to `releaseInjectionTargets`
       const normalizedId = path.normalize(id);
 
-      if (internalOptions.releaseInjectionTargets) {
+      if (options.releaseInjectionTargets) {
         // If there's an `releaseInjectionTargets` option transform (ie. inject the release varible) when the file path matches the option.
-        if (typeof internalOptions.releaseInjectionTargets === "function") {
-          return internalOptions.releaseInjectionTargets(normalizedId);
+        if (typeof options.releaseInjectionTargets === "function") {
+          return options.releaseInjectionTargets(normalizedId);
         }
 
-        return internalOptions.releaseInjectionTargets.some((entry) => {
+        return options.releaseInjectionTargets.some((entry) => {
           if (entry instanceof RegExp) {
             return entry.test(normalizedId);
           } else {
@@ -247,7 +247,7 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
     async transform(code, id) {
       logger.debug('Called "transform":', { id });
 
-      if (!internalOptions.injectRelease) {
+      if (!options.injectRelease) {
         return;
       }
 
@@ -259,10 +259,10 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
         ms.append(
           generateGlobalInjectorCode({
             release: await releaseNamePromise,
-            injectReleasesMap: internalOptions.injectReleasesMap,
-            injectBuildInformation: internalOptions._experiments.injectBuildInformation || false,
-            org: internalOptions.org,
-            project: internalOptions.project,
+            injectReleasesMap: options.injectReleasesMap,
+            injectBuildInformation: options._experiments.injectBuildInformation || false,
+            org: options.org,
+            project: options.project,
           })
         );
       } else {
@@ -314,12 +314,12 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
 
       try {
         if (!unpluginMetaContext.watchMode) {
-          if (internalOptions._experiments.debugIdUpload) {
+          if (options.sourcemaps?.assets) {
             const debugIdChunkFilePaths = (
-              await glob(internalOptions._experiments.debugIdUpload.include, {
+              await glob(options.sourcemaps.assets, {
                 absolute: true,
                 nodir: true,
-                ignore: internalOptions._experiments.debugIdUpload.ignore,
+                ignore: options.sourcemaps.ignore,
               })
             ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs") || p.endsWith(".cjs"));
 
@@ -363,15 +363,15 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
             );
 
             tmpUploadFolder = await sourceFileUploadFolderPromise;
-            await uploadDebugIdSourcemaps(internalOptions, ctx, tmpUploadFolder, releaseName);
+            await uploadDebugIdSourcemaps(options, ctx, tmpUploadFolder, releaseName);
           }
 
-          await createNewRelease(internalOptions, ctx, releaseName);
-          await cleanArtifacts(internalOptions, ctx, releaseName);
-          await uploadSourceMaps(internalOptions, ctx, releaseName);
-          await setCommits(internalOptions, ctx, releaseName);
-          await finalizeRelease(internalOptions, ctx, releaseName);
-          await addDeploy(internalOptions, ctx, releaseName);
+          await createNewRelease(options, ctx, releaseName);
+          await cleanArtifacts(options, ctx, releaseName);
+          await uploadSourceMaps(options, ctx, releaseName);
+          await setCommits(options, ctx, releaseName);
+          await finalizeRelease(options, ctx, releaseName);
+          await addDeploy(options, ctx, releaseName);
         }
         transaction?.setStatus("ok");
       } catch (e: unknown) {
@@ -380,7 +380,7 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
           level: "error",
           message: "Error during writeBundle",
         });
-        handleError(e, logger, internalOptions.errorHandler);
+        handleError(e, logger, options.errorHandler);
       } finally {
         if (tmpUploadFolder) {
           fs.rm(tmpUploadFolder, { recursive: true, force: true }, () => {
@@ -402,7 +402,7 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
     rollup: {
       renderChunk(code, chunk) {
         if (
-          options._experiments?.debugIdUpload &&
+          options.sourcemaps?.assets &&
           [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
         ) {
           return injectDebugIdSnippetIntoChunk(code);
@@ -414,7 +414,7 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
     vite: {
       renderChunk(code, chunk) {
         if (
-          options._experiments?.debugIdUpload &&
+          options.sourcemaps?.assets &&
           [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
         ) {
           return injectDebugIdSnippetIntoChunk(code);
@@ -424,7 +424,7 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
       },
     },
     webpack(compiler) {
-      if (options._experiments?.debugIdUpload) {
+      if (options.sourcemaps?.assets) {
         // Cache inspired by https://github.com/webpack/webpack/pull/15454
         const cache = new WeakMap<sources.Source, sources.Source>();
 
@@ -488,7 +488,7 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
   });
 
   if (unpluginMetaContext.framework === "esbuild") {
-    if (internalOptions._experiments.debugIdUpload) {
+    if (options.sourcemaps?.assets) {
       plugins.push({
         name: "sentry-esbuild-debug-id-plugin",
         esbuild: {
@@ -507,7 +507,7 @@ const unplugin = createUnplugin<Options, true>((options, unpluginMetaContext) =>
 function handleError(
   unknownError: unknown,
   logger: Logger,
-  errorHandler: InternalOptions["errorHandler"]
+  errorHandler: NormalizedOptions["errorHandler"]
 ) {
   if (unknownError instanceof Error) {
     logger.error(unknownError.message);

@@ -1,5 +1,5 @@
 import SentryCli, { SentryCliReleases } from "@sentry/cli";
-import { InternalOptions } from "../options-mapping";
+import { NormalizedOptions } from "../options-mapping";
 import { Logger } from "./logger";
 
 type SentryDryRunCLI = {
@@ -14,7 +14,7 @@ export type SentryCLILike = SentryCli | SentryDryRunCLI;
  * In case, users selected the `dryRun` options, this returns a stub
  * that makes no-ops out of most CLI operations
  */
-export function getSentryCli(internalOptions: InternalOptions, logger: Logger): SentryCLILike {
+export function getSentryCli(internalOptions: NormalizedOptions, logger: Logger): SentryCLILike {
   const { silent, org, project, authToken, url, vcsRemote, headers } = internalOptions;
   const cli = new SentryCli(internalOptions.configFile, {
     url,
