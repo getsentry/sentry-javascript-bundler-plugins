@@ -1,6 +1,6 @@
 {
   "name": "@sentry-internal/bundler-plugin-e2e-tests",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -15,15 +15,15 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@sentry/esbuild-plugin": "0.7.1",
-    "@sentry/rollup-plugin": "0.7.1",
-    "@sentry/vite-plugin": "0.7.1",
-    "@sentry/webpack-plugin": "0.7.1",
+    "@sentry/esbuild-plugin": "0.7.2",
+    "@sentry/rollup-plugin": "0.7.2",
+    "@sentry/vite-plugin": "0.7.2",
+    "@sentry/webpack-plugin": "0.7.2",
     "axios": "^1.1.3"
   },
   "devDependencies": {
-    "@sentry-internal/eslint-config": "0.7.1",
-    "@sentry-internal/sentry-bundler-plugin-tsconfig": "0.7.1",
+    "@sentry-internal/eslint-config": "0.7.2",
+    "@sentry-internal/sentry-bundler-plugin-tsconfig": "0.7.2",
     "@swc/jest": "^0.2.21",
     "@types/axios": "^0.14.0",
     "@types/glob": "8.0.0",
