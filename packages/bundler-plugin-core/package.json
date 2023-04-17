@@ -1,6 +1,6 @@
 {
   "name": "@sentry/bundler-plugin-core",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Sentry Bundler Plugin Core",
   "repository": "git://github.com/getsentry/sentry-javascript-bundler-plugins.git",
   "homepage": "https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/bundler-plugin-core",
@@ -70,8 +70,8 @@
     "@rollup/plugin-json": "4.1.0",
     "@rollup/plugin-node-resolve": "13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
-    "@sentry-internal/eslint-config": "0.6.0",
-    "@sentry-internal/sentry-bundler-plugin-tsconfig": "0.6.0",
+    "@sentry-internal/eslint-config": "0.7.0",
+    "@sentry-internal/sentry-bundler-plugin-tsconfig": "0.7.0",
     "@swc/core": "^1.2.205",
     "@swc/jest": "^0.2.21",
     "@types/jest": "^28.1.3",
