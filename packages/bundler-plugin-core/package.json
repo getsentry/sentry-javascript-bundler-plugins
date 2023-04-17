@@ -19,7 +19,9 @@
       "import": "./dist/esm/index.mjs",
       "require": "./dist/cjs/index.js",
       "types": "./dist/types/index.d.ts"
-    }
+    },
+    "./sentry-release-injection-file.js": "./sentry-release-injection-file.js",
+    "./sentry-esbuild-debugid-injection-file.js": "./sentry-esbuild-debugid-injection-file.js"
   },
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.mjs",
