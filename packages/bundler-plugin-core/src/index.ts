@@ -30,7 +30,7 @@ import { promisify } from "util";
 import { getDependencies, getPackageJson, parseMajorVersion, stringToUUID } from "./utils";
 import { glob } from "glob";
 import { injectDebugIdSnippetIntoChunk, prepareBundleForDebugIdUpload } from "./debug-id";
-import { SourceMapSource } from "webpack-sources";
+import webpackSources from "webpack-sources";
 import type { sources } from "webpack";
 
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
@@ -465,7 +465,7 @@ const unplugin = createUnplugin<Options, true>((userOptions, unpluginMetaContext
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                   newSourceMap.sourcesContent = originalSourceMap.sourcesContent as string[];
 
-                  const newSource = new SourceMapSource(
+                  const newSource = new webpackSources.SourceMapSource(
                     newCode,
                     fileName,
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
