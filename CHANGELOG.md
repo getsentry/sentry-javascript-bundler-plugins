@@ -28,6 +28,7 @@ plugin({
 - feat(esbuild): Add debug ID injection for esbuild (#202)
 - feat: Promote debug ID uploading to stable via `sourcemaps` option (#204)
 - fix(core): Also do debug ID injection for `.cjs` files (#203)
+- fix: Add typing exports to packages (#208)
 
 ## 0.6.0
 

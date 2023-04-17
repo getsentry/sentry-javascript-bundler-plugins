@@ -14,6 +14,21 @@
     "sentry-release-injection-file.js",
     "sentry-esbuild-debugid-injection-file.js"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./sentry-release-injection-file": {
+      "import": "./sentry-release-injection-file.js",
+      "require": "./sentry-release-injection-file.js"
+    },
+    "./sentry-esbuild-debugid-injection-file": {
+      "import": "./sentry-esbuild-debugid-injection-file.js",
+      "require": "./sentry-esbuild-debugid-injection-file.js"
+    }
+  },
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.mjs",
   "types": "dist/types/index.d.ts",
