@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.7.1
+
+- fix(core): Fix vite complaining about CJS import of webpack-sources (#210)
+
 ## 0.7.0
 
 This release introduces the `sourcemaps` option. This option switches to a new system of handling source maps in Sentry.
