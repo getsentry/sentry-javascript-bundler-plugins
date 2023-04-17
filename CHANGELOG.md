@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.7.2
+
+- fix(core): Use createRequire to not use built-in require in ESM (#212)
+
 ## 0.7.1
 
 - fix(core): Fix vite complaining about CJS import of webpack-sources (#210)
