@@ -26,6 +26,7 @@ import { makeMain } from "@sentry/node";
 import os from "os";
 import path from "path";
 import fs from "fs";
+import { createRequire } from "module";
 import { promisify } from "util";
 import { getDependencies, getPackageJson, parseMajorVersion, stringToUUID } from "./utils";
 import { glob } from "glob";
@@ -34,6 +35,9 @@ import webpackSources from "webpack-sources";
 import type { sources } from "webpack";
 
 const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
+
+// Use createRequire because esm doesn't like built-in require.resolve
+const require = createRequire(import.meta.url);
 
 const releaseInjectionFilePath = require.resolve(
   "@sentry/bundler-plugin-core/sentry-release-injection-file"
