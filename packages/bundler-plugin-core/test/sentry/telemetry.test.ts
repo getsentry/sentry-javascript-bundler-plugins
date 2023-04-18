@@ -90,7 +90,7 @@ describe("addPluginOptionTagsToHub", () => {
     `should set setCommits tag to %s if the setCommits option is %s`,
     (expectedValue, commitOptions) => {
       addPluginOptionInformationToHub(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
         normalizeUserOptions({ ...defaultOptions, setCommits: commitOptions as any }),
         mockedHub as unknown as Hub,
         "rollup"
@@ -118,15 +118,16 @@ describe("addPluginOptionTagsToHub", () => {
     expect(mockedHub.setTag).toHaveBeenCalledWith("dry-run", true);
   });
 
-  it("shouldn't set any tags other than include if no opional options are specified", () => {
+  it("shouldn't set any tags other than include if no optional options are specified", () => {
     addPluginOptionInformationToHub(
       normalizeUserOptions(defaultOptions),
       mockedHub as unknown as Hub,
       "rollup"
     );
 
-    expect(mockedHub.setTag).toHaveBeenCalledTimes(3);
+    expect(mockedHub.setTag).toHaveBeenCalledTimes(4);
     expect(mockedHub.setTag).toHaveBeenCalledWith("include", "single-entry");
+    expect(mockedHub.setTag).toHaveBeenCalledWith("set-commits", "auto");
     expect(mockedHub.setTag).toHaveBeenCalledWith("finalize-release", true);
     expect(mockedHub.setTag).toHaveBeenCalledWith("node", expect.any(String));
   });

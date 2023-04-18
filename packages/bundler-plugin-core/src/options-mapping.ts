@@ -97,6 +97,7 @@ export function normalizeUserOptions(userOptions: UserOptions) {
     uploadSourceMaps: userOptions.uploadSourceMaps ?? true,
     sourcemaps: userOptions.sourcemaps,
     _experiments: userOptions._experiments ?? {},
+    setCommits: userOptions.setCommits ?? { auto: true },
 
     // These options and can also be set via env variables or the config file.
     // If they're set in the options, we simply pass them to the CLI constructor.
@@ -109,7 +110,6 @@ export function normalizeUserOptions(userOptions: UserOptions) {
     vcsRemote: userOptions.vcsRemote, // env var: `SENTRY_VSC_REMOTE`
 
     // Optional options
-    setCommits: userOptions.setCommits,
     deploy: userOptions.deploy,
     releaseInjectionTargets: normalizeReleaseInjectionTargets(userOptions.releaseInjectionTargets),
     dist: userOptions.dist,

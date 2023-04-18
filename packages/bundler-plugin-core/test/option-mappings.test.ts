@@ -38,6 +38,7 @@ describe("normalizeUserOptions()", () => {
       uploadSourceMaps: true,
       _experiments: {},
       url: "https://sentry.io",
+      setCommits: { auto: true },
     });
   });
 
@@ -84,6 +85,7 @@ describe("normalizeUserOptions()", () => {
       uploadSourceMaps: true,
       _experiments: {},
       url: "https://sentry.io",
+      setCommits: { auto: true },
     });
   });
 
