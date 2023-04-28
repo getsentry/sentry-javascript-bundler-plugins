@@ -13,7 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: volta-cli/action@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: "package.json"
       - run: yarn --frozen-lockfile
       - run: yarn build
 
@@ -23,7 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: volta-cli/action@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: "package.json"
       - run: yarn --frozen-lockfile
       - run: yarn check:types
 
@@ -32,7 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: volta-cli/action@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: "package.json"
       - run: yarn --frozen-lockfile
       - run: yarn check:formatting
 
@@ -42,7 +48,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: volta-cli/action@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: "package.json"
       - run: yarn --frozen-lockfile
       - run: yarn test:unit
 
@@ -65,7 +73,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - uses: volta-cli/action@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
       # husky uses fs-extra which needs node >= 14 - we can ignore because its a dev dependency
@@ -77,8 +85,7 @@ jobs:
     # Dependabot PRs sadly also don't have access to secrets, so we skip them as well
     if:
       (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) &&
-      github.actor != 'dependabot[bot]' &&
-      false # Debug ID backend changes broke the E2E tests, we need to revisit them
+      github.actor != 'dependabot[bot]'
     needs: build
     name: E2E Tests
     runs-on: ubuntu-latest
@@ -96,7 +103,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: volta-cli/action@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: "package.json"
       - run: yarn --frozen-lockfile
       - run: yarn lint
 
@@ -108,17 +117,9 @@ jobs:
     if: startsWith(github.ref, 'refs/heads/release/')
     steps:
       - uses: actions/checkout@v3
-      - uses: volta-cli/action@v3
-      # - name: Check dependency cache
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: ${{ env.CACHED_DEPENDENCY_PATHS }}
-      #     key: ${{ needs.job_build.outputs.dependency_cache_key }}
-      # - name: Check build cache
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: ${{ env.CACHED_BUILD_PATHS }}
-      #     key: ${{ env.BUILD_CACHE_KEY }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: "package.json"
       - run: yarn --frozen-lockfile
       - name: pack
         run: yarn build:npm
