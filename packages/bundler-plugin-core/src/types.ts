@@ -255,6 +255,247 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   };
 };
 
+export interface NewOptions {
+  /**
+   * The slug of the Sentry organization associated with the app.
+   *
+   * This value can also be specified via the `SENTRY_ORG` environment variable.
+   */
+  org?: string;
+
+  /**
+   * The slug of the Sentry project associated with the app.
+   *
+   * This value can also be specified via the `SENTRY_PROJECT` environment variable.
+   */
+  project?: string;
+
+  /**
+   * The authentication token to use for all communication with Sentry.
+   * Can be obtained from https://sentry.io/settings/account/api/auth-tokens/.
+   * Required scopes: project:releases (and org:read if setCommits option is used).
+   *
+   * This value can also be specified via the `SENTRY_AUTH_TOKEN` environment variable.
+   */
+  authToken?: string;
+
+  /**
+   * The base URL of your Sentry instance. Use this if you are using a self-hosted
+   * or Sentry instance other than sentry.io.
+   *
+   * This value can also be set via the `SENTRY_URL` environment variable.
+   *
+   * Defaults to https://sentry.io/, which is the correct value for SaaS customers.
+   */
+  url?: string;
+
+  /**
+   * Headers added to every outgoing network request.
+   */
+  headers?: Record<string, string>;
+
+  /**
+   * Print useful debug information.
+   *
+   * Defaults to `false`.
+   */
+  debug?: boolean;
+
+  /**
+   * Suppresses all logs.
+   *
+   * Defaults to `false`.
+   */
+  silent?: boolean;
+
+  /**
+   * When an error occurs during rlease creation or sourcemaps upload, the plugin will call this function.
+   *
+   * By default, the plugin will simply throw an error, thereby stopping the bundling process.
+   * If an `errorHandler` callback is provided, compilation will continue, unless an error is
+   * thrown in the provided callback.
+   *
+   * To allow compilation to continue but still emit a warning, set this option to the following:
+   *
+   * ```js
+   * (err) => {
+   *   console.warn(err);
+   * }
+   * ```
+   */
+  errorHandler?: (err: Error) => void;
+
+  /**
+   * If set to true, internal plugin errors and performance data will be sent to Sentry.
+   *
+   * At Sentry we like to use Sentry ourselves to deliver faster and more stable products.
+   * We're very careful of what we're sending. We won't collect anything other than error
+   * and high-level performance data. We will never collect your code or any details of the
+   * projects in which you're using this plugin.
+   *
+   * Defaults to `true`.
+   */
+  telemetry?: boolean;
+
+  /**
+   * Completely disables all functionality of the plugin.
+   *
+   * Defaults to `false`.
+   */
+  disable?: boolean;
+
+  /**
+   * Options for source maps uploading.
+   * Leave this option undefined if you do not want to upload source maps to Sentry.
+   */
+  sourcemaps?: {
+    /**
+     * A glob or an array of globs that specifies the build artifacts that should be uploaded to Sentry.
+     *
+     * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
+     *
+     * Use the `debug` option to print information about which files end up being uploaded.
+     */
+    assets: string | string[];
+
+    /**
+     * A glob or an array of globs that specifies which build artifacts should not be uploaded to Sentry.
+     *
+     * Default: `[]`
+     *
+     * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
+     *
+     * Use the `debug` option to print information about which files end up being uploaded.
+     */
+    ignore?: string | string[];
+
+    /**
+     * Hook to rewrite the `sources` field inside the source map before being uploaded to Sentry. Does not modify the actual source map.
+     *
+     * Defaults to making all sources relative to `process.cwd()` while building.
+     *
+     * @hidden Not yet implemented.
+     */
+    rewriteSources?: (source: string, map: any) => string;
+
+    /**
+     * A glob or an array of globs that specifies the build artifacts that should be deleted after the artifact upload to Sentry has been completed.
+     *
+     * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
+     *
+     * Use the `debug` option to print information about which files end up being deleted.
+     *
+     * @hidden Not yet implemented.
+     */
+    deleteAfterUpload?: string | string[];
+  };
+
+  /**
+   * Options related to managing the Sentry releases for a build.
+   *
+   * More info: https://docs.sentry.io/product/releases/
+   */
+  release?: {
+    /**
+     * Unique identifier for the release you want to create.
+     *
+     * This value can also be specified via the `SENTRY_RELEASE` environment variable.
+     *
+     * Defaults to automatically detecting a value for your environment.
+     * This includes values for Cordova, Heroku, AWS CodeBuild, CircleCI, Xcode, and Gradle, and otherwise uses the git `HEAD`'s commit SHA.
+     * (the latterrequires access to git CLI and for the root directory to be a valid repository)
+     *
+     * If you didn't provide a value and the plugin can't automatically detect one, no release will be created.
+     */
+    name?: string;
+
+    /**
+     * Whether the plugin should inject release information into the build for the SDK to pick it up when sending events. (recommended)
+     *
+     * Defaults to `true`.
+     */
+    inject?: boolean;
+
+    /**
+     * Whether the plugin should create a release on Sentry during the build.
+     * Note that a release may still appear in Sentry even if this is value is `false` because any Sentry event that has a release value attached will automatically create a release.
+     * (for example via the `inject` option)
+     *
+     * Defaults to `true`.
+     */
+    create?: boolean;
+
+    /**
+     * Whether the Sentry release should be automatically finalized (meaning an end timestamp is added) after the build ends.
+     *
+     * Defaults to `true`.
+     */
+    finalize?: boolean;
+
+    /**
+     * Unique identifier for the distribution, used to further segment your release.
+     * Usually your build number.
+     */
+    dist?: string;
+
+    /**
+     * Version control system remote name.
+     *
+     * This value can also be specified via the `SENTRY_VSC_REMOTE` environment variable.
+     *
+     * Defaults to 'origin'.
+     */
+    vcsRemote?: string;
+
+    /**
+     * Associates the release with its commits in Sentry.
+     */
+    setCommits?: SetCommitsOptions;
+
+    /**
+     * Adds deployment information to the release in Sentry.
+     */
+    deploy?: DeployOptions;
+
+    /**
+     * Legacy method of uploading source maps. (not recommended unless necessary)
+     *
+     * The modern version of doing source maps upload is more robust and way easier to get working but has to inject a very small snippet of JavaScript into your output bundles.
+     * In situations where this leads to problems (e.g subresource integrity) you can use this option as a fallback.
+     */
+    legacySourcemaps?: {
+      /**
+       * One or more paths that should be scanned recursively for sources.
+       *
+       * Each path can be given as a string or an object with more specific options.
+       */
+      include?: string | IncludeEntry | Array<string | IncludeEntry>;
+
+      /**
+       * Remove all the artifacts in the release before the upload.
+       *
+       * Defaults to `false`.
+       */
+      cleanArtifacts?: boolean;
+    };
+  };
+
+  /**
+   * Options that are considered experimental and subject to change.
+   *
+   * @experimental API that does not follow semantic versioning and may change in any release
+   */
+  _experiments?: {
+    /**
+     * If set to true, the plugin will inject an additional `SENTRY_BUILD_INFO` variable.
+     * This contains information about the build, e.g. dependencies, node version and other useful data.
+     *
+     * Defaults to `false`.
+     */
+    injectBuildInformation?: boolean;
+  };
+}
+
 export type IncludeEntry = {
   /**
    * One or more paths to scan for files to upload.
