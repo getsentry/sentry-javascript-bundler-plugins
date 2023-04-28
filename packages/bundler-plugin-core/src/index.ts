@@ -10,7 +10,6 @@ import {
   uploadSourceMaps,
   uploadDebugIdSourcemaps,
 } from "./sentry/releasePipeline";
-import "@sentry/tracing";
 import SentryCli from "@sentry/cli";
 import {
   addPluginOptionInformationToHub,
