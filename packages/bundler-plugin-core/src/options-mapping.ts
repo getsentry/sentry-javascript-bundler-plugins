@@ -33,6 +33,7 @@ type OptionalInternalOptions = Partial<
     | "configFile"
     | "headers"
     | "sourcemaps"
+    | "release"
   >
 >;
 

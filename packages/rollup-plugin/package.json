@@ -50,6 +50,9 @@
   "dependencies": {
     "@sentry/bundler-plugin-core": "0.7.2"
   },
+  "peerDependencies": {
+    "rollup": ">=3.2.0"
+  },
   "devDependencies": {
     "@babel/core": "7.18.5",
     "@babel/preset-env": "7.18.2",

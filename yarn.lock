@@ -2584,7 +2584,7 @@
     "@sentry/utils" "7.19.0"
     tslib "^1.9.3"
 
-"@sentry/integrations@^7.19.0":
+"@sentry/integrations@7.19.0":
   version "7.19.0"
   resolved "https://registry.yarnpkg.com/@sentry/integrations/-/integrations-7.19.0.tgz#570b7ced7ef9de43a6a56f99f324936148adf6b9"
   integrity sha512-0x5AGU7EBIzOTSqD7TFvD4S5eX6hbqbvb4YCzJt3SIZC3bO4FiBu2t0y+PIZUSsupnqafBIIWsCcGWeKrNHAyA==
@@ -2594,7 +2594,7 @@
     localforage "^1.8.1"
     tslib "^1.9.3"
 
-"@sentry/node@^7.19.0":
+"@sentry/node@7.19.0":
   version "7.19.0"
   resolved "https://registry.yarnpkg.com/@sentry/node/-/node-7.19.0.tgz#4c9494d6aaa15d7f22fe4e6c31d0358a365adb2f"
   integrity sha512-yG7Tx32WqOkEHVotFLrumCcT9qlaSDTkFNZ+yLSvZXx74ifsE781DzBA9W7K7bBdYO3op+p2YdsOKzf3nPpAyQ==
@@ -2607,7 +2607,7 @@
     lru_map "^0.3.3"
     tslib "^1.9.3"
 
-"@sentry/tracing@^7.19.0":
+"@sentry/tracing@7.19.0":
   version "7.19.0"
   resolved "https://registry.yarnpkg.com/@sentry/tracing/-/tracing-7.19.0.tgz#d69ecea2c0b53d113c5100fc52d0a0acc5c8a129"
   integrity sha512-SWY17M3TsgBePaGowUcSqBwaT0TJQzuNexVnLojuU0k6F57L9hubvP9zaoosoCfARXQ/3NypAFWnlJyf570rFQ==
@@ -11752,25 +11752,7 @@ webidl-conversions@^6.1.0:
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-6.1.0.tgz#9111b4d7ea80acd40f5270d666621afa78b69514"
   integrity sha512-qBIvFLGiBpLjfwmYAaHPXsn+ho5xZnGvyGvsarywGNc8VyQJUMHJ8OBKGGrPER0okBeMDaan4mNBlgBROxuI8w==
 
-webpack-sources@3.2.3, webpack-sources@^3.2.3:
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/webpack-sources/-/webpack-sources-3.2.3.tgz#2d4daab8451fd4b240cc27055ff6a0c2ccea0cde"
-  integrity sha512-/DyMEOrDgLKKIG0fmvtz+4dUX/3Ghozwgm6iPp8KRhvn+eQf9+Q7GWxVNMk3+uCPWfdXYC4ExGBckIXdFEfH1w==
-
-webpack-sources@^1.4.0, webpack-sources@^1.4.1:
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/webpack-sources/-/webpack-sources-1.4.3.tgz#eedd8ec0b928fbf1cbfe994e22d2d890f330a933"
-  integrity sha512-lgTS3Xhv1lCOKo7SA5TjKXMjpSM4sBjNV5+q2bqesbSPs5FjGmU6jjtBSkX9b4qW87vDIsCIlUPOEhbZrMdjeQ==
-  dependencies:
-    source-list-map "^2.0.0"
-    source-map "~0.6.1"
-
-webpack-virtual-modules@^0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/webpack-virtual-modules/-/webpack-virtual-modules-0.5.0.tgz#362f14738a56dae107937ab98ea7062e8bdd3b6c"
-  integrity sha512-kyDivFZ7ZM0BVOUteVbDFhlRt7Ah/CSPwJdi8hBpkK7QLumUqdLtVfm/PX/hkcnrvr0i77fO5+TjZ94Pe+C9iw==
-
-"webpack4@npm:webpack@4.46.0":
+"webpack-4@npm:webpack@^4", "webpack4@npm:webpack@4.46.0":
   version "4.46.0"
   resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.46.0.tgz#bf9b4404ea20a073605e0a011d188d77cb6ad542"
   integrity sha512-6jJuJjg8znb/xRItk7bkT0+Q7AHCYjjFnvKIWQPkNIOyRqoCGvkOs0ipeQzrqz4l5FtN5ZI/ukEHroeX/o1/5Q==
@@ -11798,6 +11780,24 @@ webpack-virtual-modules@^0.5.0:
     terser-webpack-plugin "^1.4.3"
     watchpack "^1.7.4"
     webpack-sources "^1.4.1"
+
+webpack-sources@3.2.3, webpack-sources@^3.2.3:
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/webpack-sources/-/webpack-sources-3.2.3.tgz#2d4daab8451fd4b240cc27055ff6a0c2ccea0cde"
+  integrity sha512-/DyMEOrDgLKKIG0fmvtz+4dUX/3Ghozwgm6iPp8KRhvn+eQf9+Q7GWxVNMk3+uCPWfdXYC4ExGBckIXdFEfH1w==
+
+webpack-sources@^1.4.0, webpack-sources@^1.4.1:
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/webpack-sources/-/webpack-sources-1.4.3.tgz#eedd8ec0b928fbf1cbfe994e22d2d890f330a933"
+  integrity sha512-lgTS3Xhv1lCOKo7SA5TjKXMjpSM4sBjNV5+q2bqesbSPs5FjGmU6jjtBSkX9b4qW87vDIsCIlUPOEhbZrMdjeQ==
+  dependencies:
+    source-list-map "^2.0.0"
+    source-map "~0.6.1"
+
+webpack-virtual-modules@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/webpack-virtual-modules/-/webpack-virtual-modules-0.5.0.tgz#362f14738a56dae107937ab98ea7062e8bdd3b6c"
+  integrity sha512-kyDivFZ7ZM0BVOUteVbDFhlRt7Ah/CSPwJdi8hBpkK7QLumUqdLtVfm/PX/hkcnrvr0i77fO5+TjZ94Pe+C9iw==
 
 webpack@5.74.0:
   version "5.74.0"

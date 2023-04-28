@@ -1,5 +1,4 @@
 import { createUnplugin, UnpluginOptions } from "unplugin";
-import MagicString from "magic-string";
 import { Options, BuildContext } from "./types";
 import {
   createNewRelease,
@@ -33,15 +32,14 @@ import { glob } from "glob";
 import { injectDebugIdSnippetIntoChunk, prepareBundleForDebugIdUpload } from "./debug-id";
 import webpackSources from "webpack-sources";
 import type { sources } from "webpack";
-
-const ALLOWED_TRANSFORMATION_FILE_ENDINGS = [".js", ".ts", ".jsx", ".tsx", ".mjs"];
+import {
+  esbuildReleaseInjectionPlugin,
+  rolluplikeReleaseInjectionPlugin,
+  webpackReleaseInjectionPlugin,
+} from "./plugins/release-injection";
 
 // Use createRequire because esm doesn't like built-in require.resolve
 const require = createRequire(import.meta.url);
-
-const releaseInjectionFilePath = require.resolve(
-  "@sentry/bundler-plugin-core/sentry-release-injection-file"
-);
 
 const esbuildDebugIdInjectionFilePath = require.resolve(
   "@sentry/bundler-plugin-core/sentry-esbuild-debugid-injection-file"
@@ -168,125 +166,6 @@ const unplugin = createUnplugin<Options, true>((userOptions, unpluginMetaContext
         op: "function.plugin",
         name: "Sentry Bundler Plugin execution",
       });
-
-      releaseInjectionSpan = addSpanToTransaction(
-        { hub: sentryHub, parentSpan: transaction, logger, cli },
-        "function.plugin.inject_release",
-        "Release injection"
-      );
-    },
-
-    /**
-     * Responsible for returning the "sentry-release-injector" ID when we encounter it. We return the ID so load is
-     * called and we can "virtually" load the module. See `load` hook for more info on why it's virtual.
-     *
-     * We also record the id (i.e. absolute path) of any non-entrypoint.
-     *
-     * @param id For imports: The absolute path of the module to be imported. For entrypoints: The path the user defined as entrypoint - may also be relative.
-     * @param importer For imports: The absolute path of the module that imported this module. For entrypoints: `undefined`.
-     * @param options Additional information to use for making a resolving decision.
-     * @returns `"sentry-release-injector"` when the imported file is called `"sentry-release-injector"`. Otherwise returns `undefined`.
-     */
-    resolveId(id, importer, { isEntry }) {
-      logger.debug('Called "resolveId":', { id, importer, isEntry });
-      return undefined;
-    },
-
-    /**
-     * This hook determines whether we want to transform a module. In the sentry bundler plugin we want to transform every entrypoint
-     * unless configured otherwise with the `releaseInjectionTargets` option.
-     *
-     * @param id Always the absolute (fully resolved) path to the module.
-     * @returns `true` or `false` depending on whether we want to transform the module. For the sentry bundler plugin we only
-     * want to transform the release injector file.
-     */
-    transformInclude(id) {
-      logger.debug('Called "transformInclude":', { id });
-
-      if (id.includes("sentry-release-injection-file")) {
-        return true;
-      }
-
-      if (id.match(/\\node_modules\\|\/node_modules\//)) {
-        return false; // never transform 3rd party modules
-      }
-
-      // We normalize the id because vite always passes `id` as a unix style path which causes problems when a user passes
-      // a windows style path to `releaseInjectionTargets`
-      const normalizedId = path.normalize(id);
-
-      if (options.releaseInjectionTargets) {
-        // If there's an `releaseInjectionTargets` option transform (ie. inject the release varible) when the file path matches the option.
-        if (typeof options.releaseInjectionTargets === "function") {
-          return options.releaseInjectionTargets(normalizedId);
-        }
-
-        return options.releaseInjectionTargets.some((entry) => {
-          if (entry instanceof RegExp) {
-            return entry.test(normalizedId);
-          } else {
-            const normalizedEntry = path.normalize(entry);
-            return normalizedId === normalizedEntry;
-          }
-        });
-      } else {
-        const pathIsOrdinary = !normalizedId.includes("?") && !normalizedId.includes("#");
-
-        const pathHasAllowedFileEnding = ALLOWED_TRANSFORMATION_FILE_ENDINGS.some(
-          (allowedFileEnding) => normalizedId.endsWith(allowedFileEnding)
-        );
-
-        return pathIsOrdinary && pathHasAllowedFileEnding;
-      }
-    },
-
-    /**
-     * This hook is responsible for injecting the "sentry release injector" imoprt statement into each entrypoint unless
-     * configured otherwise with the `releaseInjectionTargets` option (logic for that is in the `transformInclude` hook).
-     *
-     * @param code Code of the file to transform.
-     * @param id Always the absolute (fully resolved) path to the module.
-     * @returns transformed code + source map
-     */
-    async transform(code, id) {
-      logger.debug('Called "transform":', { id });
-
-      if (!options.injectRelease) {
-        return;
-      }
-
-      // The MagicString library allows us to generate sourcemaps for the changes we make to the user code.
-      const ms = new MagicString(code);
-
-      if (code.includes("_sentry_release_injection_file")) {
-        // Appending instead of prepending has less probability of mucking with user's source maps.
-        ms.append(
-          generateGlobalInjectorCode({
-            release: await releaseNamePromise,
-            injectReleasesMap: options.injectReleasesMap,
-            injectBuildInformation: options._experiments.injectBuildInformation || false,
-            org: options.org,
-            project: options.project,
-          })
-        );
-      } else {
-        // Appending instead of prepending has less probability of mucking with user's source maps.
-        // Luckily import statements get hoisted to the top anyways.
-        // The import needs to be an absolute path because Rollup doesn't bundle stuff in `node_modules` by default when bundling CJS (unless the import path is absolute or the node-resolve-plugin is used).
-        ms.append(`;\nimport "${releaseInjectionFilePath.replace(/\\/g, "\\\\")}";`);
-      }
-
-      if (unpluginMetaContext.framework === "esbuild") {
-        // esbuild + unplugin is buggy at the moment when we return an object with a `map` (sourcemap) property.
-        // Currently just returning a string here seems to work and even correctly sourcemaps the code we generate.
-        // However, other bundlers need the `map` property
-        return ms.toString();
-      } else {
-        return {
-          code: ms.toString(),
-          map: ms.generateMap(),
-        };
-      }
     },
 
     /**
@@ -505,6 +384,18 @@ const unplugin = createUnplugin<Options, true>((userOptions, unpluginMetaContext
     }
   }
 
+  if (options.injectRelease) {
+    if (unpluginMetaContext.framework === "esbuild") {
+      plugins.push(esbuildReleaseInjectionPlugin(options));
+    } else if (unpluginMetaContext.framework === "webpack") {
+      plugins.push(webpackReleaseInjectionPlugin(options));
+    } else if (unpluginMetaContext.framework === "rollup") {
+      plugins.push(rolluplikeReleaseInjectionPlugin(options));
+    } else if (unpluginMetaContext.framework === "vite") {
+      plugins.push(rolluplikeReleaseInjectionPlugin(options));
+    }
+  }
+
   return plugins;
 });
 
@@ -528,54 +419,6 @@ function handleError(
   } else {
     throw unknownError;
   }
-}
-
-/**
- * Generates code for the global injector which is responsible for setting the global
- * `SENTRY_RELEASE` & `SENTRY_BUILD_INFO` variables.
- */
-function generateGlobalInjectorCode({
-  release,
-  injectReleasesMap,
-  injectBuildInformation,
-  org,
-  project,
-}: {
-  release: string;
-  injectReleasesMap: boolean;
-  injectBuildInformation: boolean;
-  org?: string;
-  project?: string;
-}) {
-  // The code below is mostly ternary operators because it saves bundle size.
-  // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
-  let code = `
-    var _global =
-      typeof window !== 'undefined' ?
-        window :
-        typeof global !== 'undefined' ?
-          global :
-          typeof self !== 'undefined' ?
-            self :
-            {};
-
-    _global.SENTRY_RELEASE={id:"${release}"};`;
-
-  if (injectReleasesMap && project) {
-    const key = org ? `${project}@${org}` : project;
-    code += `
-      _global.SENTRY_RELEASES=_global.SENTRY_RELEASES || {};
-      _global.SENTRY_RELEASES["${key}"]={id:"${release}"};`;
-  }
-
-  if (injectBuildInformation) {
-    const buildInfo = getBuildInformation();
-
-    code += `
-      _global.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)};`;
-  }
-
-  return code;
 }
 
 export function getBuildInformation() {
