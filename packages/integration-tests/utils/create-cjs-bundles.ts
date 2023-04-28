@@ -12,7 +12,8 @@ import {
   Options,
 } from "@sentry/bundler-plugin-core";
 
-const nodejsMajorversion = process.version.split(".")[0];
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const nodejsMajorversion = process.version.split(".")[0]!.slice(1);
 
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
@@ -57,7 +58,7 @@ export function createCjsBundles(
   });
 
   // Webpack 4 doesn't work on Node.js versions >= 18
-  if (!nodejsMajorversion || parseInt(nodejsMajorversion) < 18) {
+  if (parseInt(nodejsMajorversion) < 18) {
     webpack4(
       {
         mode: "production",

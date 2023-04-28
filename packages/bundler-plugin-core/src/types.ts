@@ -73,6 +73,8 @@ export type Options = Omit<IncludeEntry, "paths"> & {
    *
    * By default, the release will be injected into all entrypoints. If release
    * injection should be disabled, provide an empty array here.
+   *
+   * @deprecated This option will be removed in the next major version.
    */
   releaseInjectionTargets?: (string | RegExp)[] | RegExp | string | ((filePath: string) => boolean);
 
