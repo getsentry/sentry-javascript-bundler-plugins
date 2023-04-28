@@ -392,7 +392,6 @@ export interface NewOptions {
 
   /**
    * Options related to managing the Sentry releases for a build.
-   * Leave this option undefined if you do not want to create a release.
    *
    * More info: https://docs.sentry.io/product/releases/
    */
