@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "@sentry/bundler-plugin-core": "0.7.2",
-    "@sentry/integrations": "7.19.0",
-    "@sentry/node": "7.19.0",
+    "@sentry/integrations": "^7.19.0",
+    "@sentry/node": "^7.19.0",
     "@types/express": "^4.17.13",
     "@types/http-proxy": "^1.17.9",
     "esbuild": "0.14.49",
