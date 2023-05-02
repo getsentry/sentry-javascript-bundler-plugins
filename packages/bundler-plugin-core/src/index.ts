@@ -78,330 +78,332 @@ const esbuildDebugIdInjectionFilePath = require.resolve(
  *
  * This release creation pipeline relies on Sentry CLI to execute the different steps.
  */
-const unplugin = createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
-  const options = normalizeUserOptions(userOptions);
+export function sentryUnpluginFactory() {
+  return createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
+    const options = normalizeUserOptions(userOptions);
 
-  const allowedToSendTelemetryPromise = shouldSendTelemetry(options);
+    const allowedToSendTelemetryPromise = shouldSendTelemetry(options);
 
-  const { sentryHub, sentryClient } = makeSentryClient(
-    "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
-    allowedToSendTelemetryPromise,
-    options.project
-  );
-
-  addPluginOptionInformationToHub(options, sentryHub, unpluginMetaContext.framework);
-
-  //TODO: This call is problematic because as soon as we set our hub as the current hub
-  //      we might interfere with other plugins that use Sentry. However, for now, we'll
-  //      leave it in because without it, we can't get distributed traces (which are pretty nice)
-  //      Let's keep it until someone complains about interference.
-  //      The ideal solution would be a code change in the JS SDK but it's not a straight-forward fix.
-  makeMain(sentryHub);
-
-  const logger = createLogger({
-    prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
-    silent: options.silent,
-    debug: options.debug,
-  });
-
-  if (!validateOptions(options, logger)) {
-    handleError(
-      new Error("Options were not set correctly. See output above for more details."),
-      logger,
-      options.errorHandler
+    const { sentryHub, sentryClient } = makeSentryClient(
+      "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
+      allowedToSendTelemetryPromise,
+      options.project
     );
-  }
 
-  const cli = getSentryCli(options, logger);
+    addPluginOptionInformationToHub(options, sentryHub, unpluginMetaContext.framework);
 
-  let transaction: Transaction | undefined;
-  let releaseInjectionSpan: Span | undefined;
+    //TODO: This call is problematic because as soon as we set our hub as the current hub
+    //      we might interfere with other plugins that use Sentry. However, for now, we'll
+    //      leave it in because without it, we can't get distributed traces (which are pretty nice)
+    //      Let's keep it until someone complains about interference.
+    //      The ideal solution would be a code change in the JS SDK but it's not a straight-forward fix.
+    makeMain(sentryHub);
 
-  const releaseName = options.release ?? determineReleaseName();
-  if (!releaseName) {
-    handleError(
-      new Error("Unable to determine a release name. Please set the `release` option."),
-      logger,
-      options.errorHandler
-    );
-  }
+    const logger = createLogger({
+      prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
+      silent: options.silent,
+      debug: options.debug,
+    });
 
-  const plugins: UnpluginOptions[] = [];
+    if (!validateOptions(options, logger)) {
+      handleError(
+        new Error("Options were not set correctly. See output above for more details."),
+        logger,
+        options.errorHandler
+      );
+    }
 
-  plugins.push({
-    name: "sentry-plugin",
-    enforce: "pre", // needed for Vite to call resolveId hook
+    const cli = getSentryCli(options, logger);
 
-    /**
-     * Responsible for starting the plugin execution transaction and the release injection span
-     */
-    async buildStart() {
-      logger.debug("Called 'buildStart'");
+    let transaction: Transaction | undefined;
+    let releaseInjectionSpan: Span | undefined;
 
-      const isAllowedToSendToSendTelemetry = await allowedToSendTelemetryPromise;
-      if (isAllowedToSendToSendTelemetry) {
-        logger.info("Sending error and performance telemetry data to Sentry.");
-        logger.info("To disable telemetry, set `options.telemetry` to `false`.");
-        sentryHub.addBreadcrumb({ level: "info", message: "Telemetry enabled." });
-      } else {
-        sentryHub.addBreadcrumb({
-          level: "info",
-          message: "Telemetry disabled. This should never show up in a Sentry event.",
+    const releaseName = options.release ?? determineReleaseName();
+    if (!releaseName) {
+      handleError(
+        new Error("Unable to determine a release name. Please set the `release` option."),
+        logger,
+        options.errorHandler
+      );
+    }
+
+    const plugins: UnpluginOptions[] = [];
+
+    plugins.push({
+      name: "sentry-plugin",
+      enforce: "pre", // needed for Vite to call resolveId hook
+
+      /**
+       * Responsible for starting the plugin execution transaction and the release injection span
+       */
+      async buildStart() {
+        logger.debug("Called 'buildStart'");
+
+        const isAllowedToSendToSendTelemetry = await allowedToSendTelemetryPromise;
+        if (isAllowedToSendToSendTelemetry) {
+          logger.info("Sending error and performance telemetry data to Sentry.");
+          logger.info("To disable telemetry, set `options.telemetry` to `false`.");
+          sentryHub.addBreadcrumb({ level: "info", message: "Telemetry enabled." });
+        } else {
+          sentryHub.addBreadcrumb({
+            level: "info",
+            message: "Telemetry disabled. This should never show up in a Sentry event.",
+          });
+        }
+
+        if (process.cwd().match(/\\node_modules\\|\/node_modules\//)) {
+          logger.warn(
+            "Running Sentry plugin from within a `node_modules` folder. Some features may not work."
+          );
+        }
+
+        transaction = sentryHub.startTransaction({
+          op: "function.plugin",
+          name: "Sentry Bundler Plugin execution",
         });
-      }
+      },
 
-      if (process.cwd().match(/\\node_modules\\|\/node_modules\//)) {
-        logger.warn(
-          "Running Sentry plugin from within a `node_modules` folder. Some features may not work."
-        );
-      }
+      /**
+       * Responsible for executing the sentry release creation pipeline (i.e. creating a release on
+       * Sentry.io, uploading sourcemaps, associating commits and deploys and finalizing the release)
+       */
+      async writeBundle() {
+        logger.debug('Called "writeBundle"');
 
-      transaction = sentryHub.startTransaction({
-        op: "function.plugin",
-        name: "Sentry Bundler Plugin execution",
-      });
-    },
+        releaseInjectionSpan?.finish();
+        const releasePipelineSpan =
+          transaction &&
+          addSpanToTransaction(
+            { hub: sentryHub, parentSpan: transaction, logger, cli },
+            "function.plugin.release",
+            "Release pipeline"
+          );
 
-    /**
-     * Responsible for executing the sentry release creation pipeline (i.e. creating a release on
-     * Sentry.io, uploading sourcemaps, associating commits and deploys and finalizing the release)
-     */
-    async writeBundle() {
-      logger.debug('Called "writeBundle"');
+        sentryHub.addBreadcrumb({
+          category: "writeBundle:start",
+          level: "info",
+        });
 
-      releaseInjectionSpan?.finish();
-      const releasePipelineSpan =
-        transaction &&
-        addSpanToTransaction(
-          { hub: sentryHub, parentSpan: transaction, logger, cli },
-          "function.plugin.release",
-          "Release pipeline"
-        );
+        const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan, logger, cli };
 
-      sentryHub.addBreadcrumb({
-        category: "writeBundle:start",
-        level: "info",
-      });
+        let tmpUploadFolder: string | undefined;
 
-      const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan, logger, cli };
+        try {
+          if (!unpluginMetaContext.watchMode) {
+            if (options.sourcemaps?.assets) {
+              const debugIdChunkFilePaths = (
+                await glob(options.sourcemaps.assets, {
+                  absolute: true,
+                  nodir: true,
+                  ignore: options.sourcemaps.ignore,
+                })
+              ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs") || p.endsWith(".cjs"));
 
-      let tmpUploadFolder: string | undefined;
+              if (unpluginMetaContext.framework === "esbuild") {
+                await Promise.all(
+                  debugIdChunkFilePaths.map(async (debugIdChunkFilePath) => {
+                    const chunkFileContents = await promisify(fs.readFile)(
+                      debugIdChunkFilePath,
+                      "utf-8"
+                    );
 
-      try {
-        if (!unpluginMetaContext.watchMode) {
-          if (options.sourcemaps?.assets) {
-            const debugIdChunkFilePaths = (
-              await glob(options.sourcemaps.assets, {
-                absolute: true,
-                nodir: true,
-                ignore: options.sourcemaps.ignore,
-              })
-            ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs") || p.endsWith(".cjs"));
+                    const debugId = stringToUUID(chunkFileContents);
 
-            if (unpluginMetaContext.framework === "esbuild") {
+                    const newChunkFileContents = chunkFileContents.replace(
+                      /__SENTRY_DEBUG_ID__/g,
+                      debugId
+                    );
+
+                    await promisify(fs.writeFile)(
+                      debugIdChunkFilePath,
+                      newChunkFileContents,
+                      "utf-8"
+                    );
+                  })
+                );
+              }
+
+              const sourceFileUploadFolderPromise = promisify(fs.mkdtemp)(
+                path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+              );
+
               await Promise.all(
-                debugIdChunkFilePaths.map(async (debugIdChunkFilePath) => {
-                  const chunkFileContents = await promisify(fs.readFile)(
-                    debugIdChunkFilePath,
-                    "utf-8"
-                  );
-
-                  const debugId = stringToUUID(chunkFileContents);
-
-                  const newChunkFileContents = chunkFileContents.replace(
-                    /__SENTRY_DEBUG_ID__/g,
-                    debugId
-                  );
-
-                  await promisify(fs.writeFile)(
-                    debugIdChunkFilePath,
-                    newChunkFileContents,
-                    "utf-8"
+                debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
+                  await prepareBundleForDebugIdUpload(
+                    chunkFilePath,
+                    await sourceFileUploadFolderPromise,
+                    String(chunkIndex),
+                    logger
                   );
                 })
               );
+
+              tmpUploadFolder = await sourceFileUploadFolderPromise;
+              await uploadDebugIdSourcemaps(options, ctx, tmpUploadFolder, releaseName ?? "");
             }
 
-            const sourceFileUploadFolderPromise = promisify(fs.mkdtemp)(
-              path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
-            );
-
-            await Promise.all(
-              debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
-                await prepareBundleForDebugIdUpload(
-                  chunkFilePath,
-                  await sourceFileUploadFolderPromise,
-                  String(chunkIndex),
-                  logger
-                );
-              })
-            );
-
-            tmpUploadFolder = await sourceFileUploadFolderPromise;
-            await uploadDebugIdSourcemaps(options, ctx, tmpUploadFolder, releaseName ?? "");
+            if (releaseName) {
+              await createNewRelease(options, ctx, releaseName);
+              await cleanArtifacts(options, ctx, releaseName);
+              await uploadSourceMaps(options, ctx, releaseName);
+              await setCommits(options, ctx, releaseName);
+              await finalizeRelease(options, ctx, releaseName);
+              await addDeploy(options, ctx, releaseName);
+            } else {
+              logger.warn("No release value provided. Will not upload source maps.");
+            }
           }
-
-          if (releaseName) {
-            await createNewRelease(options, ctx, releaseName);
-            await cleanArtifacts(options, ctx, releaseName);
-            await uploadSourceMaps(options, ctx, releaseName);
-            await setCommits(options, ctx, releaseName);
-            await finalizeRelease(options, ctx, releaseName);
-            await addDeploy(options, ctx, releaseName);
-          } else {
-            logger.warn("No release value provided. Will not upload source maps.");
+          transaction?.setStatus("ok");
+        } catch (e: unknown) {
+          transaction?.setStatus("cancelled");
+          sentryHub.addBreadcrumb({
+            level: "error",
+            message: "Error during writeBundle",
+          });
+          handleError(e, logger, options.errorHandler);
+        } finally {
+          if (tmpUploadFolder) {
+            fs.rm(tmpUploadFolder, { recursive: true, force: true }, () => {
+              // We don't care if this errors
+            });
           }
-        }
-        transaction?.setStatus("ok");
-      } catch (e: unknown) {
-        transaction?.setStatus("cancelled");
-        sentryHub.addBreadcrumb({
-          level: "error",
-          message: "Error during writeBundle",
-        });
-        handleError(e, logger, options.errorHandler);
-      } finally {
-        if (tmpUploadFolder) {
-          fs.rm(tmpUploadFolder, { recursive: true, force: true }, () => {
-            // We don't care if this errors
+          releasePipelineSpan?.finish();
+          transaction?.finish();
+          await sentryClient.flush().then(null, () => {
+            logger.warn("Sending of telemetry failed");
           });
         }
-        releasePipelineSpan?.finish();
-        transaction?.finish();
-        await sentryClient.flush().then(null, () => {
-          logger.warn("Sending of telemetry failed");
+
+        sentryHub.addBreadcrumb({
+          category: "writeBundle:finish",
+          level: "info",
         });
-      }
-
-      sentryHub.addBreadcrumb({
-        category: "writeBundle:finish",
-        level: "info",
-      });
-    },
-    rollup: {
-      renderChunk(code, chunk) {
-        if (
-          options.sourcemaps?.assets &&
-          [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
-        ) {
-          return injectDebugIdSnippetIntoChunk(code);
-        } else {
-          return null; // returning null means not modifying the chunk at all
-        }
       },
-    },
-    vite: {
-      renderChunk(code, chunk) {
-        if (
-          options.sourcemaps?.assets &&
-          [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
-        ) {
-          return injectDebugIdSnippetIntoChunk(code);
-        } else {
-          return null; // returning null means not modifying the chunk at all
-        }
+      rollup: {
+        renderChunk(code, chunk) {
+          if (
+            options.sourcemaps?.assets &&
+            [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+          ) {
+            return injectDebugIdSnippetIntoChunk(code);
+          } else {
+            return null; // returning null means not modifying the chunk at all
+          }
+        },
       },
-    },
-    webpack(compiler) {
-      if (options.sourcemaps?.assets) {
-        // Cache inspired by https://github.com/webpack/webpack/pull/15454
-        const cache = new WeakMap<sources.Source, sources.Source>();
+      vite: {
+        renderChunk(code, chunk) {
+          if (
+            options.sourcemaps?.assets &&
+            [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+          ) {
+            return injectDebugIdSnippetIntoChunk(code);
+          } else {
+            return null; // returning null means not modifying the chunk at all
+          }
+        },
+      },
+      webpack(compiler) {
+        if (options.sourcemaps?.assets) {
+          // Cache inspired by https://github.com/webpack/webpack/pull/15454
+          const cache = new WeakMap<sources.Source, sources.Source>();
 
-        compiler.hooks.compilation.tap("sentry-plugin", (compilation) => {
-          compilation.hooks.optimizeChunkAssets.tap("sentry-plugin", (chunks) => {
-            chunks.forEach((chunk) => {
-              const fileNames = chunk.files;
-              fileNames.forEach((fileName) => {
-                const source = compilation.assets[fileName];
+          compiler.hooks.compilation.tap("sentry-plugin", (compilation) => {
+            compilation.hooks.optimizeChunkAssets.tap("sentry-plugin", (chunks) => {
+              chunks.forEach((chunk) => {
+                const fileNames = chunk.files;
+                fileNames.forEach((fileName) => {
+                  const source = compilation.assets[fileName];
 
-                if (!source) {
-                  logger.warn(
-                    "Unable to access compilation assets. If you see this warning, it is likely a bug in the Sentry webpack plugin. Feel free to open an issue at https://github.com/getsentry/sentry-javascript-bundler-plugins with reproduction steps."
-                  );
-                  return;
-                }
-
-                compilation.updateAsset(fileName, (oldSource) => {
-                  const cached = cache.get(oldSource);
-                  if (cached) {
-                    return cached;
+                  if (!source) {
+                    logger.warn(
+                      "Unable to access compilation assets. If you see this warning, it is likely a bug in the Sentry webpack plugin. Feel free to open an issue at https://github.com/getsentry/sentry-javascript-bundler-plugins with reproduction steps."
+                    );
+                    return;
                   }
 
-                  const originalCode = source.source().toString();
+                  compilation.updateAsset(fileName, (oldSource) => {
+                    const cached = cache.get(oldSource);
+                    if (cached) {
+                      return cached;
+                    }
 
-                  // The source map type is very annoying :(
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-                  const originalSourceMap = source.map() as any;
+                    const originalCode = source.source().toString();
 
-                  const { code: newCode, map: newSourceMap } = injectDebugIdSnippetIntoChunk(
-                    originalCode,
-                    fileName
-                  );
+                    // The source map type is very annoying :(
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+                    const originalSourceMap = source.map() as any;
 
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                  newSourceMap.sources = originalSourceMap.sources as string[];
+                    const { code: newCode, map: newSourceMap } = injectDebugIdSnippetIntoChunk(
+                      originalCode,
+                      fileName
+                    );
 
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                  newSourceMap.sourcesContent = originalSourceMap.sourcesContent as string[];
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    newSourceMap.sources = originalSourceMap.sources as string[];
 
-                  const newSource = new webpackSources.SourceMapSource(
-                    newCode,
-                    fileName,
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-                    originalSourceMap,
-                    originalCode,
-                    newSourceMap,
-                    false
-                  ) as sources.Source;
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                    newSourceMap.sourcesContent = originalSourceMap.sourcesContent as string[];
 
-                  cache.set(oldSource, newSource);
+                    const newSource = new webpackSources.SourceMapSource(
+                      newCode,
+                      fileName,
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+                      originalSourceMap,
+                      originalCode,
+                      newSourceMap,
+                      false
+                    ) as sources.Source;
 
-                  return newSource;
+                    cache.set(oldSource, newSource);
+
+                    return newSource;
+                  });
                 });
               });
             });
           });
-        });
-      }
-    },
-  });
-
-  if (unpluginMetaContext.framework === "esbuild") {
-    if (options.sourcemaps?.assets) {
-      plugins.push({
-        name: "sentry-esbuild-debug-id-plugin",
-        esbuild: {
-          setup({ initialOptions }) {
-            initialOptions.inject = initialOptions.inject || [];
-            initialOptions.inject.push(esbuildDebugIdInjectionFilePath);
-          },
-        },
-      });
-    }
-  }
-
-  if (options.injectRelease && releaseName) {
-    const releaseInjectionPluginOptions = {
-      release: releaseName,
-      org: options.org,
-      project: options.project,
-      injectReleasesMap: options.injectReleasesMap,
-      injectBuildInformation: options._experiments.injectBuildInformation ?? false,
-    };
+        }
+      },
+    });
 
     if (unpluginMetaContext.framework === "esbuild") {
-      plugins.push(esbuildReleaseInjectionPlugin(releaseInjectionPluginOptions));
-    } else if (unpluginMetaContext.framework === "webpack") {
-      plugins.push(webpackReleaseInjectionPlugin(releaseInjectionPluginOptions));
-    } else if (unpluginMetaContext.framework === "rollup") {
-      plugins.push(rollupReleaseInjectionPlugin(releaseInjectionPluginOptions));
-    } else if (unpluginMetaContext.framework === "vite") {
-      plugins.push(viteReleaseInjectionPlugin(releaseInjectionPluginOptions));
+      if (options.sourcemaps?.assets) {
+        plugins.push({
+          name: "sentry-esbuild-debug-id-plugin",
+          esbuild: {
+            setup({ initialOptions }) {
+              initialOptions.inject = initialOptions.inject || [];
+              initialOptions.inject.push(esbuildDebugIdInjectionFilePath);
+            },
+          },
+        });
+      }
     }
-  }
 
-  return plugins;
-});
+    if (options.injectRelease && releaseName) {
+      const releaseInjectionPluginOptions = {
+        release: releaseName,
+        org: options.org,
+        project: options.project,
+        injectReleasesMap: options.injectReleasesMap,
+        injectBuildInformation: options._experiments.injectBuildInformation ?? false,
+      };
+
+      if (unpluginMetaContext.framework === "esbuild") {
+        plugins.push(esbuildReleaseInjectionPlugin(releaseInjectionPluginOptions));
+      } else if (unpluginMetaContext.framework === "webpack") {
+        plugins.push(webpackReleaseInjectionPlugin(releaseInjectionPluginOptions));
+      } else if (unpluginMetaContext.framework === "rollup") {
+        plugins.push(rollupReleaseInjectionPlugin(releaseInjectionPluginOptions));
+      } else if (unpluginMetaContext.framework === "vite") {
+        plugins.push(viteReleaseInjectionPlugin(releaseInjectionPluginOptions));
+      }
+    }
+
+    return plugins;
+  });
+}
 
 function handleError(
   unknownError: unknown,
@@ -447,14 +449,5 @@ export function getBuildInformation() {
 export function sentryCliBinaryExists(): boolean {
   return fs.existsSync(SentryCli.getPath());
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const sentryVitePlugin: (options: Options) => any = unplugin.vite;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const sentryRollupPlugin: (options: Options) => any = unplugin.rollup;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const sentryWebpackPlugin: (options: Options) => any = unplugin.webpack;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const sentryEsbuildPlugin: (options: Options) => any = unplugin.esbuild;
 
 export type { Options } from "./types";
