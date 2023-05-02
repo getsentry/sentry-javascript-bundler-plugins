@@ -204,6 +204,12 @@ export function determineReleaseName(): string | undefined {
     process.env["GITHUB_SHA"] ||
     // Netlify - https://docs.netlify.com/configure-builds/environment-variables/#build-metadata
     process.env["COMMIT_REF"] ||
+    // Cloudflare Pages - https://developers.cloudflare.com/pages/platform/build-configuration/#environment-variables
+    process.env["CF_PAGES_COMMIT_SHA"] ||
+    // AWS CodeBuild - https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+    process.env["CODEBUILD_RESOLVED_SOURCE_VERSION"] ||
+    // CircleCI - https://circleci.com/docs/2.0/env-vars/
+    process.env["CIRCLE_SHA1"] ||
     // Vercel - https://vercel.com/docs/v2/build-step#system-environment-variables
     process.env["VERCEL_GIT_COMMIT_SHA"] ||
     process.env["VERCEL_GITHUB_COMMIT_SHA"] ||
