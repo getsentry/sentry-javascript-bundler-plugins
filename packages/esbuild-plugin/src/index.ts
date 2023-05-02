@@ -3,11 +3,8 @@ import type { UnpluginOptions } from "unplugin";
 
 /**
  * Esbuild specific plugin to inject release values.
- *
- * This plugin works by pointing esbuild's inject option to a virtual file that
- * we load and fill with release injection code.
  */
-export function esbuildReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
+function esbuildReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   const pluginName = "sentry-esbuild-release-injection-plugin";
   const virtualReleaseInjectionFilePath = "_sentry-release-injection-file";
 

@@ -5,12 +5,7 @@ import { UnpluginOptions } from "unplugin";
 // @ts-ignore No typedefs for webpack 4
 import { BannerPlugin as Webpack4BannerPlugin } from "webpack-4";
 
-/**
- * Webpack specific plugin to inject release values.
- *
- * This plugin works by using the Webpack banner plugin to prepend output bundles with release injection code.
- */
-export function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
+function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   const pluginName = "sentry-webpack-release-injection-plugin";
 
   return {

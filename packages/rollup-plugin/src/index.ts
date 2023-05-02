@@ -7,10 +7,8 @@ import type { UnpluginOptions } from "unplugin";
 
 /**
  * Rollup specific plugin to inject release values.
- *
- * This plugin works by creating a virtual module containing the injection which we then from every user module.
  */
-export function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
+function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   return {
     name: "sentry-rollup-release-injection-plugin",
     rollup: createRollupReleaseInjectionHooks(injectionCode),

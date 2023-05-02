@@ -5,12 +5,7 @@ import {
 } from "@sentry/bundler-plugin-core";
 import { UnpluginOptions } from "unplugin";
 
-/**
- * Rollup specific plugin to inject release values.
- *
- * This plugin works by creating a virtual module containing the injection which we then from every user module.
- */
-export function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
+function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   return {
     name: "sentry-vite-release-injection-plugin",
     enforce: "pre" as const, // need this so that vite runs the resolveId hook
