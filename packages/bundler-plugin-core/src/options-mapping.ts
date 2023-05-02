@@ -33,6 +33,7 @@ type OptionalInternalOptions = Partial<
     | "configFile"
     | "headers"
     | "sourcemaps"
+    | "release"
   >
 >;
 
@@ -79,7 +80,7 @@ export function normalizeUserOptions(userOptions: UserOptions) {
     // Falling back to the empty string here b/c at a later point, we use
     // Sentry CLI to determine a release if none was specified via options
     // or env vars. In case we don't find one, we'll bail at that point.
-    release: userOptions.release ?? process.env["SENTRY_RELEASE"] ?? "",
+    release: userOptions.release ?? process.env["SENTRY_RELEASE"],
     // We technically don't need the URL for anything release-specific
     // but we want to make sure that we're only sending Sentry data
     // of SaaS customers. Hence we want to read it anyway.

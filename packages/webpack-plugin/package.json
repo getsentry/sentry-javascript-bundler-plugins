@@ -47,7 +47,9 @@
     "lint": "eslint ./src ./test"
   },
   "dependencies": {
-    "@sentry/bundler-plugin-core": "0.7.2"
+    "unplugin": "1.0.1",
+    "@sentry/bundler-plugin-core": "0.7.2",
+    "webpack-4": "npm:webpack@^4"
   },
   "devDependencies": {
     "@babel/core": "7.18.5",

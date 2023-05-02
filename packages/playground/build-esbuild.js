@@ -1,4 +1,4 @@
-const { sentryEsbuildPlugin } = require("@sentry/bundler-plugin-core");
+const { sentryEsbuildPlugin } = require("@sentry/esbuild-plugin");
 const { build } = require("esbuild");
 const placeHolderOptions = require("./config.json");
 

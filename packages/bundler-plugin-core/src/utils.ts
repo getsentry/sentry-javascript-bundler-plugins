@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import os from "os";
 import crypto from "crypto";
+import childProcess from "child_process";
 
 /**
  * Checks whether the given input is already an array, and if it isn't, wraps it in one.
@@ -185,4 +186,101 @@ export function stringToUUID(str: string): string {
     "-" +
     md5Hash.substring(20)
   ).toLowerCase();
+}
+
+/**
+ * Tries to guess a release name based on environmental data.
+ */
+export function determineReleaseName(): string | undefined {
+  let gitRevision: string | undefined;
+  try {
+    gitRevision = childProcess.execSync("git rev-parse --short HEAD").toString().trim();
+  } catch (e) {
+    // noop
+  }
+
+  return (
+    // GitHub Actions - https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
+    process.env["GITHUB_SHA"] ||
+    // Netlify - https://docs.netlify.com/configure-builds/environment-variables/#build-metadata
+    process.env["COMMIT_REF"] ||
+    // Cloudflare Pages - https://developers.cloudflare.com/pages/platform/build-configuration/#environment-variables
+    process.env["CF_PAGES_COMMIT_SHA"] ||
+    // AWS CodeBuild - https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+    process.env["CODEBUILD_RESOLVED_SOURCE_VERSION"] ||
+    // CircleCI - https://circleci.com/docs/2.0/env-vars/
+    process.env["CIRCLE_SHA1"] ||
+    // Vercel - https://vercel.com/docs/v2/build-step#system-environment-variables
+    process.env["VERCEL_GIT_COMMIT_SHA"] ||
+    process.env["VERCEL_GITHUB_COMMIT_SHA"] ||
+    process.env["VERCEL_GITLAB_COMMIT_SHA"] ||
+    process.env["VERCEL_BITBUCKET_COMMIT_SHA"] ||
+    // Zeit (now known as Vercel)
+    process.env["ZEIT_GITHUB_COMMIT_SHA"] ||
+    process.env["ZEIT_GITLAB_COMMIT_SHA"] ||
+    process.env["ZEIT_BITBUCKET_COMMIT_SHA"] ||
+    gitRevision
+  );
+}
+
+/**
+ * Generates code for the global injector which is responsible for setting the global
+ * `SENTRY_RELEASE` & `SENTRY_BUILD_INFO` variables.
+ */
+export function generateGlobalInjectorCode({
+  release,
+  injectReleasesMap,
+  injectBuildInformation,
+  org,
+  project,
+}: {
+  release: string;
+  injectReleasesMap: boolean;
+  injectBuildInformation: boolean;
+  org?: string;
+  project?: string;
+}) {
+  // The code below is mostly ternary operators because it saves bundle size.
+  // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
+  let code = `
+    var _global =
+      typeof window !== 'undefined' ?
+        window :
+        typeof global !== 'undefined' ?
+          global :
+          typeof self !== 'undefined' ?
+            self :
+            {};
+
+    _global.SENTRY_RELEASE={id:"${release}"};`;
+
+  if (injectReleasesMap && project) {
+    const key = org ? `${project}@${org}` : project;
+    code += `
+      _global.SENTRY_RELEASES=_global.SENTRY_RELEASES || {};
+      _global.SENTRY_RELEASES["${key}"]={id:"${release}"};`;
+  }
+
+  if (injectBuildInformation) {
+    const buildInfo = getBuildInformation();
+
+    code += `
+      _global.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)};`;
+  }
+
+  return code;
+}
+
+function getBuildInformation() {
+  const packageJson = getPackageJson();
+
+  const { deps, depsVersions } = packageJson
+    ? getDependencies(packageJson)
+    : { deps: [], depsVersions: {} };
+
+  return {
+    deps,
+    depsVersions,
+    nodeVersion: parseMajorVersion(process.version),
+  };
 }

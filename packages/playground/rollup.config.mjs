@@ -1,16 +1,14 @@
 // @ts-check
-import { sentryRollupPlugin } from "@sentry/bundler-plugin-core";
-import placeHolderOptions from "./config.json";
+import { sentryRollupPlugin } from "@sentry/rollup-plugin";
+import fs from "fs";
 
 const input = ["src/entrypoint1.js"];
-
-const extensions = [".js"];
 
 export default {
   input,
   plugins: [
     sentryRollupPlugin({
-      ...placeHolderOptions,
+      ...JSON.parse(fs.readFileSync("./config.json", "utf-8")),
     }),
   ],
   output: {

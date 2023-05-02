@@ -48,7 +48,11 @@
     "lint": "eslint ./src ./test"
   },
   "dependencies": {
+    "unplugin": "1.0.1",
     "@sentry/bundler-plugin-core": "0.7.2"
+  },
+  "peerDependencies": {
+    "rollup": ">=3.2.0"
   },
   "devDependencies": {
     "@babel/core": "7.18.5",

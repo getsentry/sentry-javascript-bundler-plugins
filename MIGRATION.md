@@ -4,6 +4,8 @@ This document serves as a migration guide, documenting all breaking changes betw
 
 ## Unreleased
 
+- The minimum compatible version of rollup is version `3.2.0`.
+- Removed functionality for the `releaseInjectionTargets` option.
 - `@sentry/bundler-plugin-core` will no longer export the individual plugins but a factory function to create them.
 
 ## [Unreleased] Upgrading from 1.x to 2.x (Webpack Plugin Only)

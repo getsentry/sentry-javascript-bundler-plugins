@@ -1,6 +1,41 @@
 import { sentryUnpluginFactory, Options } from "@sentry/bundler-plugin-core";
+import type { UnpluginOptions } from "unplugin";
 
-const sentryUnplugin = sentryUnpluginFactory();
+/**
+ * Esbuild specific plugin to inject release values.
+ */
+function esbuildReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
+  const pluginName = "sentry-esbuild-release-injection-plugin";
+  const virtualReleaseInjectionFilePath = "_sentry-release-injection-file";
+
+  return {
+    name: pluginName,
+
+    esbuild: {
+      setup({ initialOptions, onLoad }) {
+        initialOptions.inject = initialOptions.inject || [];
+        initialOptions.inject.push(virtualReleaseInjectionFilePath);
+
+        onLoad(
+          {
+            filter: /_sentry-release-injection-file$/,
+          },
+          () => {
+            return {
+              loader: "js",
+              pluginName,
+              contents: injectionCode,
+            };
+          }
+        );
+      },
+    },
+  };
+}
+
+const sentryUnplugin = sentryUnpluginFactory({
+  releaseInjectionPlugin: esbuildReleaseInjectionPlugin,
+});
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sentryEsbuildPlugin: (options: Options) => any = sentryUnplugin.esbuild;
