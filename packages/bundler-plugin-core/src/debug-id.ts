@@ -1,40 +1,7 @@
 import * as fs from "fs";
-import MagicString from "magic-string";
 import * as path from "path";
 import * as util from "util";
 import { Logger } from "./sentry/logger";
-import { stringToUUID } from "./utils";
-
-// TODO: Find a more elaborate process to generate this. (Maybe with type checking and built-in minification)
-const DEBUG_ID_INJECTOR_SNIPPET =
-  ';!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{},n=(new Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="__SENTRY_DEBUG_ID__",e._sentryDebugIdIdentifier="sentry-dbid-__SENTRY_DEBUG_ID__")}catch(e){}}();';
-
-export function injectDebugIdSnippetIntoChunk(code: string, filename?: string) {
-  const debugId = stringToUUID(code); // generate a deterministic debug ID
-  const ms = new MagicString(code, { filename });
-
-  const codeToInject = DEBUG_ID_INJECTOR_SNIPPET.replace(/__SENTRY_DEBUG_ID__/g, debugId);
-
-  // We need to be careful not to inject the snippet before any `"use strict";`s.
-  // As an additional complication `"use strict";`s may come after any number of comments.
-  const commentUseStrictRegex =
-    /^(?:\s*|\/\*(.|\r|\n)*?\*\/|\/\/.*?[\n\r])*(?:"use strict";|'use strict';)?/;
-
-  if (code.match(commentUseStrictRegex)?.[0]) {
-    // Add injected code after any comments or "use strict" at the beginning of the bundle.
-    ms.replace(commentUseStrictRegex, (match) => `${match}${codeToInject}`);
-  } else {
-    // ms.replace() doesn't work when there is an empty string match (which happens if
-    // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
-    // need this special case here.
-    ms.prepend(codeToInject);
-  }
-
-  return {
-    code: ms.toString(),
-    map: ms.generateMap(),
-  };
-}
 
 export async function prepareBundleForDebugIdUpload(
   bundleFilePath: string,
