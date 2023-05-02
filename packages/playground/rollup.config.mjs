@@ -12,7 +12,6 @@ export default {
     }),
   ],
   output: {
-    preserveModules: true,
     dir: "./out/rollup",
     format: "cjs",
     exports: "named",
