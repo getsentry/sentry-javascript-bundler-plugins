@@ -2,6 +2,7 @@ import {
   sentryUnpluginFactory,
   Options,
   createRollupReleaseInjectionHooks,
+  createRollupDebugIdInjectionHooks,
 } from "@sentry/bundler-plugin-core";
 import { UnpluginOptions } from "unplugin";
 
@@ -13,8 +14,19 @@ function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
+/**
+ * Rollup specific plugin to inject debug IDs.
+ */
+function viteDebugIdInjectionPlugin(): UnpluginOptions {
+  return {
+    name: "sentry-vite-debug-id-injection-plugin",
+    rollup: createRollupDebugIdInjectionHooks(),
+  };
+}
+
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: viteReleaseInjectionPlugin,
+  debugIdInjectionPlugin: viteDebugIdInjectionPlugin,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

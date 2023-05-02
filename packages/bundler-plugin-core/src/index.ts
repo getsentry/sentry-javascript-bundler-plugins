@@ -50,6 +50,7 @@ const esbuildDebugIdInjectionFilePath = require.resolve(
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
+  debugIdInjectionPlugin: () => UnpluginOptions;
 }
 /**
  * The sentry bundler plugin concerns itself with two things:
@@ -78,7 +79,10 @@ interface SentryUnpluginFactoryOptions {
  *
  * This release creation pipeline relies on Sentry CLI to execute the different steps.
  */
-export function sentryUnpluginFactory({ releaseInjectionPlugin }: SentryUnpluginFactoryOptions) {
+export function sentryUnpluginFactory({
+  releaseInjectionPlugin,
+  debugIdInjectionPlugin,
+}: SentryUnpluginFactoryOptions) {
   return createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
     const options = normalizeUserOptions(userOptions);
 
@@ -279,30 +283,6 @@ export function sentryUnpluginFactory({ releaseInjectionPlugin }: SentryUnplugin
           level: "info",
         });
       },
-      rollup: {
-        renderChunk(code, chunk) {
-          if (
-            options.sourcemaps?.assets &&
-            [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
-          ) {
-            return injectDebugIdSnippetIntoChunk(code);
-          } else {
-            return null; // returning null means not modifying the chunk at all
-          }
-        },
-      },
-      vite: {
-        renderChunk(code, chunk) {
-          if (
-            options.sourcemaps?.assets &&
-            [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
-          ) {
-            return injectDebugIdSnippetIntoChunk(code);
-          } else {
-            return null; // returning null means not modifying the chunk at all
-          }
-        },
-      },
       webpack(compiler) {
         if (options.sourcemaps?.assets) {
           // Cache inspired by https://github.com/webpack/webpack/pull/15454
@@ -391,6 +371,10 @@ export function sentryUnpluginFactory({ releaseInjectionPlugin }: SentryUnplugin
       });
 
       plugins.push(releaseInjectionPlugin(injectionCode));
+    }
+
+    if (options.sourcemaps?.assets) {
+      plugins.push(debugIdInjectionPlugin());
     }
 
     return plugins;
@@ -491,6 +475,20 @@ export function createRollupReleaseInjectionHooks(
         code: ms.toString(),
         map: ms.generateMap(),
       };
+    },
+  };
+}
+
+export function createRollupDebugIdInjectionHooks(): Pick<Plugin, "renderChunk"> {
+  return {
+    renderChunk(code, chunk) {
+      if (
+        [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+      ) {
+        return injectDebugIdSnippetIntoChunk(code);
+      } else {
+        return null; // returning null means not modifying the chunk at all
+      }
     },
   };
 }
