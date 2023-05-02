@@ -28,6 +28,7 @@ import { createRequire } from "module";
 import { promisify } from "util";
 import {
   determineReleaseName,
+  generateGlobalInjectorCode,
   getDependencies,
   getPackageJson,
   parseMajorVersion,
@@ -37,12 +38,8 @@ import { glob } from "glob";
 import { injectDebugIdSnippetIntoChunk, prepareBundleForDebugIdUpload } from "./debug-id";
 import webpackSources from "webpack-sources";
 import type { sources } from "webpack";
-import {
-  esbuildReleaseInjectionPlugin,
-  rollupReleaseInjectionPlugin,
-  viteReleaseInjectionPlugin,
-  webpackReleaseInjectionPlugin,
-} from "./plugins/release-injection";
+import type { Plugin } from "rollup";
+import MagicString from "magic-string";
 
 // Use createRequire because esm doesn't like built-in require.resolve
 const require = createRequire(import.meta.url);
@@ -51,6 +48,9 @@ const esbuildDebugIdInjectionFilePath = require.resolve(
   "@sentry/bundler-plugin-core/sentry-esbuild-debugid-injection-file"
 );
 
+interface SentryUnpluginFactoryOptions {
+  releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
+}
 /**
  * The sentry bundler plugin concerns itself with two things:
  * - Release injection
@@ -78,7 +78,7 @@ const esbuildDebugIdInjectionFilePath = require.resolve(
  *
  * This release creation pipeline relies on Sentry CLI to execute the different steps.
  */
-export function sentryUnpluginFactory() {
+export function sentryUnpluginFactory({ releaseInjectionPlugin }: SentryUnpluginFactoryOptions) {
   return createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
     const options = normalizeUserOptions(userOptions);
 
@@ -382,23 +382,15 @@ export function sentryUnpluginFactory() {
     }
 
     if (options.injectRelease && releaseName) {
-      const releaseInjectionPluginOptions = {
+      const injectionCode = generateGlobalInjectorCode({
         release: releaseName,
+        injectReleasesMap: options.injectReleasesMap,
+        injectBuildInformation: options._experiments.injectBuildInformation || false,
         org: options.org,
         project: options.project,
-        injectReleasesMap: options.injectReleasesMap,
-        injectBuildInformation: options._experiments.injectBuildInformation ?? false,
-      };
+      });
 
-      if (unpluginMetaContext.framework === "esbuild") {
-        plugins.push(esbuildReleaseInjectionPlugin(releaseInjectionPluginOptions));
-      } else if (unpluginMetaContext.framework === "webpack") {
-        plugins.push(webpackReleaseInjectionPlugin(releaseInjectionPluginOptions));
-      } else if (unpluginMetaContext.framework === "rollup") {
-        plugins.push(rollupReleaseInjectionPlugin(releaseInjectionPluginOptions));
-      } else if (unpluginMetaContext.framework === "vite") {
-        plugins.push(viteReleaseInjectionPlugin(releaseInjectionPluginOptions));
-      }
+      plugins.push(releaseInjectionPlugin(injectionCode));
     }
 
     return plugins;
@@ -448,6 +440,59 @@ export function getBuildInformation() {
  */
 export function sentryCliBinaryExists(): boolean {
   return fs.existsSync(SentryCli.getPath());
+}
+
+export function createRollupReleaseInjectionHooks(
+  injectionCode: string
+): Pick<Plugin, "resolveId" | "load" | "transform"> {
+  const virtualReleaseInjectionFileId = "\0sentry-release-injection-file";
+
+  return {
+    resolveId(id) {
+      if (id === virtualReleaseInjectionFileId) {
+        return {
+          id: virtualReleaseInjectionFileId,
+          external: false,
+          moduleSideEffects: true,
+        };
+      } else {
+        return null;
+      }
+    },
+
+    load(id) {
+      if (id === virtualReleaseInjectionFileId) {
+        return injectionCode;
+      } else {
+        return null;
+      }
+    },
+
+    transform(code, id) {
+      if (id === virtualReleaseInjectionFileId) {
+        return null;
+      }
+
+      if (id.match(/\\node_modules\\|\/node_modules\//)) {
+        return null;
+      }
+
+      if (![".js", ".ts", ".jsx", ".tsx", ".mjs"].some((ending) => id.endsWith(ending))) {
+        return null;
+      }
+
+      const ms = new MagicString(code);
+
+      // Appending instead of prepending has less probability of mucking with user's source maps.
+      // Luckily import statements get hoisted to the top anyways.
+      ms.append(`\n\n;import "${virtualReleaseInjectionFileId}";`);
+
+      return {
+        code: ms.toString(),
+        map: ms.generateMap(),
+      };
+    },
+  };
 }
 
 export type { Options } from "./types";

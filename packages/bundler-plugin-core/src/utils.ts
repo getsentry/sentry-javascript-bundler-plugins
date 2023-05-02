@@ -216,3 +216,65 @@ export function determineReleaseName(): string | undefined {
     gitRevision
   );
 }
+
+/**
+ * Generates code for the global injector which is responsible for setting the global
+ * `SENTRY_RELEASE` & `SENTRY_BUILD_INFO` variables.
+ */
+export function generateGlobalInjectorCode({
+  release,
+  injectReleasesMap,
+  injectBuildInformation,
+  org,
+  project,
+}: {
+  release: string;
+  injectReleasesMap: boolean;
+  injectBuildInformation: boolean;
+  org?: string;
+  project?: string;
+}) {
+  // The code below is mostly ternary operators because it saves bundle size.
+  // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
+  let code = `
+    var _global =
+      typeof window !== 'undefined' ?
+        window :
+        typeof global !== 'undefined' ?
+          global :
+          typeof self !== 'undefined' ?
+            self :
+            {};
+
+    _global.SENTRY_RELEASE={id:"${release}"};`;
+
+  if (injectReleasesMap && project) {
+    const key = org ? `${project}@${org}` : project;
+    code += `
+      _global.SENTRY_RELEASES=_global.SENTRY_RELEASES || {};
+      _global.SENTRY_RELEASES["${key}"]={id:"${release}"};`;
+  }
+
+  if (injectBuildInformation) {
+    const buildInfo = getBuildInformation();
+
+    code += `
+      _global.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)};`;
+  }
+
+  return code;
+}
+
+function getBuildInformation() {
+  const packageJson = getPackageJson();
+
+  const { deps, depsVersions } = packageJson
+    ? getDependencies(packageJson)
+    : { deps: [], depsVersions: {} };
+
+  return {
+    deps,
+    depsVersions,
+    nodeVersion: parseMajorVersion(process.version),
+  };
+}

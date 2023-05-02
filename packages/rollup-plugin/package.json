@@ -48,6 +48,7 @@
     "lint": "eslint ./src ./test"
   },
   "dependencies": {
+    "unplugin": "1.0.1",
     "@sentry/bundler-plugin-core": "0.7.2"
   },
   "peerDependencies": {
