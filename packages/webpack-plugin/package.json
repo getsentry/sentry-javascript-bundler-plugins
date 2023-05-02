@@ -55,8 +55,6 @@
     "@babel/preset-typescript": "7.17.12",
     "@rollup/plugin-babel": "5.3.1",
     "@rollup/plugin-commonjs": "22.0.1",
-    "@rollup/plugin-json": "4.1.0",
-    "@rollup/plugin-node-resolve": "13.3.0",
     "@sentry-internal/eslint-config": "0.7.2",
     "@sentry-internal/sentry-bundler-plugin-tsconfig": "0.7.2",
     "@swc/core": "^1.2.205",

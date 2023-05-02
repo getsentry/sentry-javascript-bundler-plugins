@@ -6,7 +6,6 @@
 //           - huge download
 //           - unnecessary functionality
 
-import { logger } from "@sentry/utils";
 import { NormalizedOptions } from "../options-mapping";
 import { BuildContext } from "../types";
 import { addSpanToTransaction } from "./telemetry";
@@ -37,7 +36,7 @@ export async function cleanArtifacts(
   releaseName: string
 ): Promise<void> {
   if (!options.cleanArtifacts) {
-    logger.debug("Skipping artifact cleanup.");
+    ctx.logger.debug("Skipping artifact cleanup.");
     return;
   }
 
@@ -62,7 +61,7 @@ export async function uploadSourceMaps(
   releaseName: string
 ): Promise<void> {
   if (!options.uploadSourceMaps) {
-    logger.debug("Skipping source maps upload.");
+    ctx.logger.debug("Skipping source maps upload.");
     return;
   }
 
@@ -126,7 +125,7 @@ export async function setCommits(
   releaseName: string
 ): Promise<void> {
   if (!options.setCommits) {
-    logger.debug("Skipping setting commits to release.");
+    ctx.logger.debug("Skipping setting commits to release.");
     return;
   }
 
@@ -160,7 +159,7 @@ export async function finalizeRelease(
 ): Promise<void> {
   if (!options.finalize) {
     ctx.hub.addBreadcrumb({ level: "info", message: "Skipping release finalization." });
-    logger.debug("Skipping release finalization.");
+    ctx.logger.debug("Skipping release finalization.");
     return;
   }
 
@@ -186,7 +185,7 @@ export async function addDeploy(
 ): Promise<void> {
   if (!options.deploy) {
     ctx.hub.addBreadcrumb({ level: "info", message: "Skipping adding deploy info to release." });
-    logger.debug("Skipping adding deploy info to release.");
+    ctx.logger.debug("Skipping adding deploy info to release.");
     return;
   }
 
