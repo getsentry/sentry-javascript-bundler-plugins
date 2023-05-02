@@ -14,13 +14,10 @@ function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-/**
- * Rollup specific plugin to inject debug IDs.
- */
 function viteDebugIdInjectionPlugin(): UnpluginOptions {
   return {
     name: "sentry-vite-debug-id-injection-plugin",
-    rollup: createRollupDebugIdInjectionHooks(),
+    vite: createRollupDebugIdInjectionHooks(),
   };
 }
 

@@ -3,9 +3,6 @@ import type { UnpluginOptions } from "unplugin";
 
 import { v4 as uuidv4 } from "uuid";
 
-/**
- * Esbuild specific plugin to inject release values.
- */
 function esbuildReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   const pluginName = "sentry-esbuild-release-injection-plugin";
   const virtualReleaseInjectionFilePath = "_sentry-release-injection-file";

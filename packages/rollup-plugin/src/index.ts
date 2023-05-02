@@ -6,9 +6,6 @@ import {
 } from "@sentry/bundler-plugin-core";
 import type { UnpluginOptions } from "unplugin";
 
-/**
- * Rollup specific plugin to inject release values.
- */
 function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   return {
     name: "sentry-rollup-release-injection-plugin",
@@ -16,9 +13,6 @@ function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-/**
- * Rollup specific plugin to inject debug IDs.
- */
 function rollupDebugIdInjectionPlugin(): UnpluginOptions {
   return {
     name: "sentry-rollup-debug-id-injection-plugin",
