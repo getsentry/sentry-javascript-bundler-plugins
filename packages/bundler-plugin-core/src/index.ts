@@ -6,7 +6,6 @@ import { glob } from "glob";
 import MagicString from "magic-string";
 import os from "os";
 import path from "path";
-import type { Plugin } from "rollup";
 import { createUnplugin, UnpluginOptions } from "unplugin";
 import { promisify } from "util";
 import { prepareBundleForDebugIdUpload } from "./debug-id";
@@ -340,13 +339,11 @@ export function sentryCliBinaryExists(): boolean {
   return fs.existsSync(SentryCli.getPath());
 }
 
-export function createRollupReleaseInjectionHooks(
-  injectionCode: string
-): Pick<Plugin, "resolveId" | "load" | "transform"> {
+export function createRollupReleaseInjectionHooks(injectionCode: string) {
   const virtualReleaseInjectionFileId = "\0sentry-release-injection-file";
 
   return {
-    resolveId(id) {
+    resolveId(id: string) {
       if (id === virtualReleaseInjectionFileId) {
         return {
           id: virtualReleaseInjectionFileId,
@@ -358,7 +355,7 @@ export function createRollupReleaseInjectionHooks(
       }
     },
 
-    load(id) {
+    load(id: string) {
       if (id === virtualReleaseInjectionFileId) {
         return injectionCode;
       } else {
@@ -366,7 +363,7 @@ export function createRollupReleaseInjectionHooks(
       }
     },
 
-    transform(code, id) {
+    transform(code: string, id: string) {
       if (id === virtualReleaseInjectionFileId) {
         return null;
       }
@@ -393,9 +390,9 @@ export function createRollupReleaseInjectionHooks(
   };
 }
 
-export function createRollupDebugIdInjectionHooks(): Pick<Plugin, "renderChunk"> {
+export function createRollupDebugIdInjectionHooks() {
   return {
-    renderChunk(code, chunk) {
+    renderChunk(code: string, chunk: { fileName: string }) {
       if (
         [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
       ) {
