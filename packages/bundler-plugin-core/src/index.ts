@@ -404,7 +404,8 @@ export function createRollupDebugIdInjectionHooks() {
         // We need to be careful not to inject the snippet before any `"use strict";`s.
         // As an additional complication `"use strict";`s may come after any number of comments.
         const commentUseStrictRegex =
-          /^(?:\s*|\/\*(.|\r|\n)*\*\/|\/\/.*[\n\r])*(?:"[^"]*";|'[^']*';)?/;
+          // Note: CodeQL complains that this regex potentially has n^2 runtime. This likely won't affect realistic files.
+          /^(?:\s*|\/\*(?:.|\r|\n)*\*\/|\/\/.*[\n\r])*(?:"[^"]*";|'[^']*';)?/;
 
         if (code.match(commentUseStrictRegex)?.[0]) {
           // Add injected code after any comments or "use strict" at the beginning of the bundle.
