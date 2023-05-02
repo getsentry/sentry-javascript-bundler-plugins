@@ -1,14 +1,12 @@
-import commonjs from "@rollup/plugin-commonjs";
+import babel from "@rollup/plugin-babel";
+import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
-import babel from "@rollup/plugin-babel";
-import packageJson from "./package.json";
-import json from "@rollup/plugin-json";
 import modulePackage from "module";
+import packageJson from "./package.json";
 
 const input = ["src/index.ts"];
-
-const extensions = [".js", ".ts"];
+const extensions = [".ts"];
 
 export default {
   input,
@@ -17,8 +15,11 @@ export default {
     throw new Error(warning.message); // Warnings are usually high-consequence for us so let's throw to catch them
   },
   plugins: [
-    resolve({ extensions, preferBuiltins: true }),
-    commonjs(),
+    resolve({
+      extensions,
+      rootDir: "./src",
+      preferBuiltins: true,
+    }),
     json(),
     replace({
       preventAssignment: true,
