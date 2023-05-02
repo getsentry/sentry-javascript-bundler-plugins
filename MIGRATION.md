@@ -2,6 +2,10 @@
 
 This document serves as a migration guide, documenting all breaking changes between major versions of the Sentry bundler plugins.
 
+## Unreleased
+
+- `@sentry/bundler-plugin-core` will no longer export the individual plugins but a factory function to create them.
+
 ## [Unreleased] Upgrading from 1.x to 2.x (Webpack Plugin Only)
 
 Version 2 of `@sentry/webpack-plugin` is a complete rewrite of version 1, relying on bundler-agnostic code (based on [unjs/unplugin](https://github.com/unjs/unplugin)). While we tried to keep changes to v1 of the webpack plugin minimal, a adjustments are nevertheless necessary:
