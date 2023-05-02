@@ -26,14 +26,21 @@ import path from "path";
 import fs from "fs";
 import { createRequire } from "module";
 import { promisify } from "util";
-import { getDependencies, getPackageJson, parseMajorVersion, stringToUUID } from "./utils";
+import {
+  determineReleaseName,
+  getDependencies,
+  getPackageJson,
+  parseMajorVersion,
+  stringToUUID,
+} from "./utils";
 import { glob } from "glob";
 import { injectDebugIdSnippetIntoChunk, prepareBundleForDebugIdUpload } from "./debug-id";
 import webpackSources from "webpack-sources";
 import type { sources } from "webpack";
 import {
   esbuildReleaseInjectionPlugin,
-  rolluplikeReleaseInjectionPlugin,
+  rollupReleaseInjectionPlugin,
+  viteReleaseInjectionPlugin,
   webpackReleaseInjectionPlugin,
 } from "./plugins/release-injection";
 
@@ -107,16 +114,17 @@ const unplugin = createUnplugin<Options, true>((userOptions, unpluginMetaContext
 
   const cli = getSentryCli(options, logger);
 
-  const releaseNamePromise = new Promise<string>((resolve) => {
-    if (userOptions.release) {
-      resolve(userOptions.release);
-    } else {
-      resolve(cli.releases.proposeVersion());
-    }
-  });
-
   let transaction: Transaction | undefined;
   let releaseInjectionSpan: Span | undefined;
+
+  const releaseName = options.release ?? determineReleaseName();
+  if (!releaseName) {
+    handleError(
+      new Error("Unable to determine a release name. Please set the `release` option."),
+      logger,
+      options.errorHandler
+    );
+  }
 
   const plugins: UnpluginOptions[] = [];
 
@@ -148,19 +156,6 @@ const unplugin = createUnplugin<Options, true>((userOptions, unpluginMetaContext
         );
       }
 
-      const releaseName = await releaseNamePromise;
-
-      // At this point, we either have determined a release or we have to bail
-      if (!releaseName) {
-        handleError(
-          new Error(
-            "Unable to determine a release name. Make sure to set the `release` option or use an environment that supports auto-detection https://docs.sentry.io/cli/releases/#creating-releases`"
-          ),
-          logger,
-          options.errorHandler
-        );
-      }
-
       transaction = sentryHub.startTransaction({
         op: "function.plugin",
         name: "Sentry Bundler Plugin execution",
@@ -189,8 +184,6 @@ const unplugin = createUnplugin<Options, true>((userOptions, unpluginMetaContext
       });
 
       const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan, logger, cli };
-
-      const releaseName = await releaseNamePromise;
 
       let tmpUploadFolder: string | undefined;
 
@@ -245,15 +238,19 @@ const unplugin = createUnplugin<Options, true>((userOptions, unpluginMetaContext
             );
 
             tmpUploadFolder = await sourceFileUploadFolderPromise;
-            await uploadDebugIdSourcemaps(options, ctx, tmpUploadFolder, releaseName);
+            await uploadDebugIdSourcemaps(options, ctx, tmpUploadFolder, releaseName ?? "");
           }
 
-          await createNewRelease(options, ctx, releaseName);
-          await cleanArtifacts(options, ctx, releaseName);
-          await uploadSourceMaps(options, ctx, releaseName);
-          await setCommits(options, ctx, releaseName);
-          await finalizeRelease(options, ctx, releaseName);
-          await addDeploy(options, ctx, releaseName);
+          if (releaseName) {
+            await createNewRelease(options, ctx, releaseName);
+            await cleanArtifacts(options, ctx, releaseName);
+            await uploadSourceMaps(options, ctx, releaseName);
+            await setCommits(options, ctx, releaseName);
+            await finalizeRelease(options, ctx, releaseName);
+            await addDeploy(options, ctx, releaseName);
+          } else {
+            logger.warn("No release value provided. Will not upload source maps.");
+          }
         }
         transaction?.setStatus("ok");
       } catch (e: unknown) {
@@ -383,15 +380,23 @@ const unplugin = createUnplugin<Options, true>((userOptions, unpluginMetaContext
     }
   }
 
-  if (options.injectRelease) {
+  if (options.injectRelease && releaseName) {
+    const releaseInjectionPluginOptions = {
+      release: releaseName,
+      org: options.org,
+      project: options.project,
+      injectReleasesMap: options.injectReleasesMap,
+      injectBuildInformation: options._experiments.injectBuildInformation ?? false,
+    };
+
     if (unpluginMetaContext.framework === "esbuild") {
-      plugins.push(esbuildReleaseInjectionPlugin(options));
+      plugins.push(esbuildReleaseInjectionPlugin(releaseInjectionPluginOptions));
     } else if (unpluginMetaContext.framework === "webpack") {
-      plugins.push(webpackReleaseInjectionPlugin(options));
+      plugins.push(webpackReleaseInjectionPlugin(releaseInjectionPluginOptions));
     } else if (unpluginMetaContext.framework === "rollup") {
-      plugins.push(rolluplikeReleaseInjectionPlugin(options));
+      plugins.push(rollupReleaseInjectionPlugin(releaseInjectionPluginOptions));
     } else if (unpluginMetaContext.framework === "vite") {
-      plugins.push(rolluplikeReleaseInjectionPlugin(options));
+      plugins.push(viteReleaseInjectionPlugin(releaseInjectionPluginOptions));
     }
   }
 

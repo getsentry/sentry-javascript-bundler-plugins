@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import os from "os";
 import crypto from "crypto";
+import childProcess from "child_process";
 
 /**
  * Checks whether the given input is already an array, and if it isn't, wraps it in one.
@@ -185,4 +186,33 @@ export function stringToUUID(str: string): string {
     "-" +
     md5Hash.substring(20)
   ).toLowerCase();
+}
+
+/**
+ * Tries to guess a release name based on environmental data.
+ */
+export function determineReleaseName(): string | undefined {
+  let gitRevision: string | undefined;
+  try {
+    gitRevision = childProcess.execSync("git rev-parse --short HEAD").toString().trim();
+  } catch (e) {
+    // noop
+  }
+
+  return (
+    // GitHub Actions - https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
+    process.env["GITHUB_SHA"] ||
+    // Netlify - https://docs.netlify.com/configure-builds/environment-variables/#build-metadata
+    process.env["COMMIT_REF"] ||
+    // Vercel - https://vercel.com/docs/v2/build-step#system-environment-variables
+    process.env["VERCEL_GIT_COMMIT_SHA"] ||
+    process.env["VERCEL_GITHUB_COMMIT_SHA"] ||
+    process.env["VERCEL_GITLAB_COMMIT_SHA"] ||
+    process.env["VERCEL_BITBUCKET_COMMIT_SHA"] ||
+    // Zeit (now known as Vercel)
+    process.env["ZEIT_GITHUB_COMMIT_SHA"] ||
+    process.env["ZEIT_GITLAB_COMMIT_SHA"] ||
+    process.env["ZEIT_BITBUCKET_COMMIT_SHA"] ||
+    gitRevision
+  );
 }

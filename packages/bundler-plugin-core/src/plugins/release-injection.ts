@@ -1,85 +1,68 @@
 import MagicString from "magic-string";
-import { UnpluginOptions } from "unplugin";
-import { NormalizedOptions } from "../options-mapping";
+import type { UnpluginOptions } from "unplugin";
 import { getDependencies, getPackageJson, parseMajorVersion } from "../utils";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No typedefs for webpack 4
 import { BannerPlugin as Webpack4BannerPlugin } from "webpack-4";
 
-export function rolluplikeReleaseInjectionPlugin(options: NormalizedOptions): UnpluginOptions {
-  const releaseName = options.release ?? determineReleaseName();
+import type { Plugin } from "rollup";
 
-  const virtualReleaseInjectionFileId = "\0sentry-release-injection-file";
+interface ReleaseInjectionPluginOptions {
+  release: string;
+  org?: string;
+  project?: string;
+  injectReleasesMap: boolean;
+  injectBuildInformation: boolean;
+}
 
+/**
+ * Rollup specific plugin to inject release values.
+ *
+ * This plugin works by creating a virtual module containing the injection which we then from every user module.
+ */
+export function rollupReleaseInjectionPlugin(
+  options: ReleaseInjectionPluginOptions
+): UnpluginOptions {
   return {
     name: "sentry-rollup-release-injection-plugin",
-    enforce: "pre",
-    resolveId(id) {
-      if (id === virtualReleaseInjectionFileId) {
-        return {
-          id: virtualReleaseInjectionFileId,
-          external: false,
-        };
-      } else {
-        return null;
-      }
-    },
-
-    load(id) {
-      if (id === virtualReleaseInjectionFileId) {
-        return generateGlobalInjectorCode({
-          release: releaseName,
-          injectReleasesMap: options.injectReleasesMap,
-          injectBuildInformation: options._experiments?.injectBuildInformation || false,
-          org: options.org,
-          project: options.project,
-        });
-      } else {
-        return null;
-      }
-    },
-
-    transform(code, id) {
-      if (id === virtualReleaseInjectionFileId) {
-        return null;
-      }
-
-      if (id.match(/\\node_modules\\|\/node_modules\//)) {
-        return null;
-      }
-
-      if (![".js", ".ts", ".jsx", ".tsx", ".mjs"].some((ending) => id.endsWith(ending))) {
-        return null;
-      }
-
-      const ms = new MagicString(code);
-
-      // Appending instead of prepending has less probability of mucking with user's source maps.
-      // Luckily import statements get hoisted to the top anyways.
-      ms.prepend(`\n\n;import "${virtualReleaseInjectionFileId}";`);
-
-      return {
-        code: ms.toString(),
-        map: ms.generateMap(),
-      };
-    },
+    rollup: createRollupReleaseInjectionHooks(options),
   };
 }
 
-export function webpackReleaseInjectionPlugin(options: NormalizedOptions): UnpluginOptions {
-  const pluginName = "sentry-webpack-release-injection-plugin";
+/**
+ * Rollup specific plugin to inject release values.
+ *
+ * This plugin works by creating a virtual module containing the injection which we then from every user module.
+ */
+export function viteReleaseInjectionPlugin(
+  options: ReleaseInjectionPluginOptions
+): UnpluginOptions {
+  return {
+    name: "sentry-vite-release-injection-plugin",
+    enforce: "pre", // need this so that vite runs the resolveId hook
+    vite: createRollupReleaseInjectionHooks(options),
+  };
+}
 
-  const releaseName = options.release ?? determineReleaseName();
+/**
+ * Webpack specific plugin to inject release values.
+ *
+ * This plugin works by using the Webpack banner plugin to prepend output bundles with release injection code.
+ */
+export function webpackReleaseInjectionPlugin(
+  options: ReleaseInjectionPluginOptions
+): UnpluginOptions {
+  const pluginName = "sentry-webpack-release-injection-plugin";
 
   return {
     name: pluginName,
 
     webpack(compiler) {
       const codeToInject = generateGlobalInjectorCode({
-        release: releaseName,
+        release: options.release,
         injectReleasesMap: options.injectReleasesMap,
-        injectBuildInformation: options._experiments?.injectBuildInformation || false,
+        injectBuildInformation: options.injectBuildInformation,
         org: options.org,
         project: options.project,
       });
@@ -106,9 +89,15 @@ export function webpackReleaseInjectionPlugin(options: NormalizedOptions): Unplu
   };
 }
 
-export function esbuildReleaseInjectionPlugin(options: NormalizedOptions): UnpluginOptions {
-  const releaseName = options.release ?? determineReleaseName();
-
+/**
+ * Esbuild specific plugin to inject release values.
+ *
+ * This plugin works by pointing esbuild's inject option to a virtual file that
+ * we load and fill with release injection code.
+ */
+export function esbuildReleaseInjectionPlugin(
+  options: ReleaseInjectionPluginOptions
+): UnpluginOptions {
   const pluginName = "sentry-esbuild-release-injection-plugin";
   const virtualReleaseInjectionFilePath = "_sentry-release-injection-file";
 
@@ -129,9 +118,9 @@ export function esbuildReleaseInjectionPlugin(options: NormalizedOptions): Unplu
               loader: "js",
               pluginName,
               contents: generateGlobalInjectorCode({
-                release: releaseName,
+                release: options.release,
                 injectReleasesMap: options.injectReleasesMap,
-                injectBuildInformation: options._experiments?.injectBuildInformation || false,
+                injectBuildInformation: options.injectBuildInformation,
                 org: options.org,
                 project: options.project,
               }),
@@ -143,8 +132,63 @@ export function esbuildReleaseInjectionPlugin(options: NormalizedOptions): Unplu
   };
 }
 
-function determineReleaseName(): string {
-  return "TODO";
+function createRollupReleaseInjectionHooks(
+  options: ReleaseInjectionPluginOptions
+): Pick<Plugin, "resolveId" | "load" | "transform"> {
+  const virtualReleaseInjectionFileId = "\0sentry-release-injection-file";
+
+  return {
+    resolveId(id) {
+      if (id === virtualReleaseInjectionFileId) {
+        return {
+          id: virtualReleaseInjectionFileId,
+          external: false,
+          moduleSideEffects: true,
+        };
+      } else {
+        return null;
+      }
+    },
+
+    load(id) {
+      if (id === virtualReleaseInjectionFileId) {
+        return generateGlobalInjectorCode({
+          release: options.release,
+          injectReleasesMap: options.injectReleasesMap,
+          injectBuildInformation: options.injectBuildInformation || false,
+          org: options.org,
+          project: options.project,
+        });
+      } else {
+        return null;
+      }
+    },
+
+    transform(code, id) {
+      if (id === virtualReleaseInjectionFileId) {
+        return null;
+      }
+
+      if (id.match(/\\node_modules\\|\/node_modules\//)) {
+        return null;
+      }
+
+      if (![".js", ".ts", ".jsx", ".tsx", ".mjs"].some((ending) => id.endsWith(ending))) {
+        return null;
+      }
+
+      const ms = new MagicString(code);
+
+      // Appending instead of prepending has less probability of mucking with user's source maps.
+      // Luckily import statements get hoisted to the top anyways.
+      ms.append(`\n\n;import "${virtualReleaseInjectionFileId}";`);
+
+      return {
+        code: ms.toString(),
+        map: ms.generateMap(),
+      };
+    },
+  };
 }
 
 /**
