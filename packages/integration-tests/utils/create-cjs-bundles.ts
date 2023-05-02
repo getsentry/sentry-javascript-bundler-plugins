@@ -4,13 +4,11 @@ import * as rollup from "rollup";
 import { default as webpack4 } from "webpack4";
 import { webpack as webpack5 } from "webpack";
 import * as esbuild from "esbuild";
-import {
-  sentryEsbuildPlugin,
-  sentryRollupPlugin,
-  sentryVitePlugin,
-  sentryWebpackPlugin,
-  Options,
-} from "@sentry/bundler-plugin-core";
+import { Options } from "@sentry/bundler-plugin-core";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
+import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
+import { sentryEsbuildPlugin } from "@sentry/esbuild-plugin";
+import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const nodejsMajorversion = process.version.split(".")[0]!.slice(1);
