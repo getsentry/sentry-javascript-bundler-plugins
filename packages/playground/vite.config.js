@@ -1,5 +1,5 @@
 // @ts-check
-import { sentryVitePlugin } from "@sentry/bundler-plugin-core";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { defineConfig } from "vite";
 import * as path from "path";
 import placeHolderOptions from "./config.json";
