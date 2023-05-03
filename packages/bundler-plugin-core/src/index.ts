@@ -2,14 +2,10 @@ import SentryCli from "@sentry/cli";
 import { makeMain } from "@sentry/node";
 import { Span, Transaction } from "@sentry/types";
 import fs from "fs";
-import { glob } from "glob";
 import MagicString from "magic-string";
-import os from "os";
-import path from "path";
 import { createUnplugin, UnpluginOptions } from "unplugin";
-import { promisify } from "util";
-import { prepareBundleForDebugIdUpload } from "./debug-id";
 import { NormalizedOptions, normalizeUserOptions, validateOptions } from "./options-mapping";
+import { debugIdUploadPlugin } from "./plugins/debug-id-upload";
 import { getSentryCli } from "./sentry/cli";
 import { createLogger, Logger } from "./sentry/logger";
 import {
@@ -18,7 +14,6 @@ import {
   createNewRelease,
   finalizeRelease,
   setCommits,
-  uploadDebugIdSourcemaps,
   uploadSourceMaps,
 } from "./sentry/releasePipeline";
 import {
@@ -183,58 +178,6 @@ export function sentryUnpluginFactory({
 
         try {
           if (!unpluginMetaContext.watchMode) {
-            if (options.sourcemaps?.assets) {
-              const debugIdChunkFilePaths = (
-                await glob(options.sourcemaps.assets, {
-                  absolute: true,
-                  nodir: true,
-                  ignore: options.sourcemaps.ignore,
-                })
-              ).filter((p) => p.endsWith(".js") || p.endsWith(".mjs") || p.endsWith(".cjs"));
-
-              if (unpluginMetaContext.framework === "esbuild") {
-                await Promise.all(
-                  debugIdChunkFilePaths.map(async (debugIdChunkFilePath) => {
-                    const chunkFileContents = await promisify(fs.readFile)(
-                      debugIdChunkFilePath,
-                      "utf-8"
-                    );
-
-                    const debugId = stringToUUID(chunkFileContents);
-
-                    const newChunkFileContents = chunkFileContents.replace(
-                      /__SENTRY_DEBUG_ID__/g,
-                      debugId
-                    );
-
-                    await promisify(fs.writeFile)(
-                      debugIdChunkFilePath,
-                      newChunkFileContents,
-                      "utf-8"
-                    );
-                  })
-                );
-              }
-
-              const sourceFileUploadFolderPromise = promisify(fs.mkdtemp)(
-                path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
-              );
-
-              await Promise.all(
-                debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
-                  await prepareBundleForDebugIdUpload(
-                    chunkFilePath,
-                    await sourceFileUploadFolderPromise,
-                    String(chunkIndex),
-                    logger
-                  );
-                })
-              );
-
-              tmpUploadFolder = await sourceFileUploadFolderPromise;
-              await uploadDebugIdSourcemaps(options, ctx, tmpUploadFolder, releaseName ?? "");
-            }
-
             if (releaseName) {
               await createNewRelease(options, ctx, releaseName);
               await cleanArtifacts(options, ctx, releaseName);
@@ -284,6 +227,19 @@ export function sentryUnpluginFactory({
       });
 
       plugins.push(releaseInjectionPlugin(injectionCode));
+    }
+
+    if (!unpluginMetaContext.watchMode && options.sourcemaps?.assets !== undefined) {
+      plugins.push(
+        debugIdUploadPlugin({
+          assets: options.sourcemaps.assets,
+          ignore: options.sourcemaps.ignore,
+          dist: options.dist,
+          releaseName: releaseName,
+          logger: logger,
+          cliInstance: cli,
+        })
+      );
     }
 
     if (options.sourcemaps?.assets) {
