@@ -1,28 +1,19 @@
 import SentryCli from "@sentry/cli";
 import { makeMain } from "@sentry/node";
-import { Span, Transaction } from "@sentry/types";
 import fs from "fs";
 import MagicString from "magic-string";
 import { createUnplugin, UnpluginOptions } from "unplugin";
-import { NormalizedOptions, normalizeUserOptions, validateOptions } from "./options-mapping";
+import { normalizeUserOptions, validateOptions } from "./options-mapping";
 import { debugIdUploadPlugin } from "./plugins/debug-id-upload";
+import { releaseManagementPlugin } from "./plugins/release-management";
 import { getSentryCli } from "./sentry/cli";
-import { createLogger, Logger } from "./sentry/logger";
-import {
-  addDeploy,
-  cleanArtifacts,
-  createNewRelease,
-  finalizeRelease,
-  setCommits,
-  uploadSourceMaps,
-} from "./sentry/releasePipeline";
+import { createLogger } from "./sentry/logger";
 import {
   addPluginOptionInformationToHub,
-  addSpanToTransaction,
   makeSentryClient,
   shouldSendTelemetry,
 } from "./sentry/telemetry";
-import { BuildContext, Options } from "./types";
+import { Options } from "./types";
 import {
   determineReleaseName,
   generateGlobalInjectorCode,
@@ -72,7 +63,7 @@ export function sentryUnpluginFactory({
 
     const allowedToSendTelemetryPromise = shouldSendTelemetry(options);
 
-    const { sentryHub, sentryClient } = makeSentryClient(
+    const { sentryHub } = makeSentryClient(
       "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
       allowedToSendTelemetryPromise,
       options.project
@@ -93,25 +84,34 @@ export function sentryUnpluginFactory({
       debug: options.debug,
     });
 
+    function handleError(unknownError: unknown) {
+      if (unknownError instanceof Error) {
+        logger.error(unknownError.message);
+      } else {
+        logger.error(String(unknownError));
+      }
+
+      if (options.errorHandler) {
+        if (unknownError instanceof Error) {
+          options.errorHandler(unknownError);
+        } else {
+          options.errorHandler(new Error("An unknown error occured"));
+        }
+      } else {
+        throw unknownError;
+      }
+    }
+
     if (!validateOptions(options, logger)) {
-      handleError(
-        new Error("Options were not set correctly. See output above for more details."),
-        logger,
-        options.errorHandler
-      );
+      handleError(new Error("Options were not set correctly. See output above for more details."));
     }
 
     const cli = getSentryCli(options, logger);
 
-    let transaction: Transaction | undefined;
-    let releaseInjectionSpan: Span | undefined;
-
     const releaseName = options.release ?? determineReleaseName();
     if (!releaseName) {
       handleError(
-        new Error("Unable to determine a release name. Please set the `release` option."),
-        logger,
-        options.errorHandler
+        new Error("Unable to determine a release name. Please set the `release` option.")
       );
     }
 
@@ -144,78 +144,26 @@ export function sentryUnpluginFactory({
             "Running Sentry plugin from within a `node_modules` folder. Some features may not work."
           );
         }
-
-        transaction = sentryHub.startTransaction({
-          op: "function.plugin",
-          name: "Sentry Bundler Plugin execution",
-        });
-      },
-
-      /**
-       * Responsible for executing the sentry release creation pipeline (i.e. creating a release on
-       * Sentry.io, uploading sourcemaps, associating commits and deploys and finalizing the release)
-       */
-      async writeBundle() {
-        logger.debug('Called "writeBundle"');
-
-        releaseInjectionSpan?.finish();
-        const releasePipelineSpan =
-          transaction &&
-          addSpanToTransaction(
-            { hub: sentryHub, parentSpan: transaction, logger, cli },
-            "function.plugin.release",
-            "Release pipeline"
-          );
-
-        sentryHub.addBreadcrumb({
-          category: "writeBundle:start",
-          level: "info",
-        });
-
-        const ctx: BuildContext = { hub: sentryHub, parentSpan: releasePipelineSpan, logger, cli };
-
-        let tmpUploadFolder: string | undefined;
-
-        try {
-          if (!unpluginMetaContext.watchMode) {
-            if (releaseName) {
-              await createNewRelease(options, ctx, releaseName);
-              await cleanArtifacts(options, ctx, releaseName);
-              await uploadSourceMaps(options, ctx, releaseName);
-              await setCommits(options, ctx, releaseName);
-              await finalizeRelease(options, ctx, releaseName);
-              await addDeploy(options, ctx, releaseName);
-            } else {
-              logger.warn("No release value provided. Will not upload source maps.");
-            }
-          }
-          transaction?.setStatus("ok");
-        } catch (e: unknown) {
-          transaction?.setStatus("cancelled");
-          sentryHub.addBreadcrumb({
-            level: "error",
-            message: "Error during writeBundle",
-          });
-          handleError(e, logger, options.errorHandler);
-        } finally {
-          if (tmpUploadFolder) {
-            fs.rm(tmpUploadFolder, { recursive: true, force: true }, () => {
-              // We don't care if this errors
-            });
-          }
-          releasePipelineSpan?.finish();
-          transaction?.finish();
-          await sentryClient.flush().then(null, () => {
-            logger.warn("Sending of telemetry failed");
-          });
-        }
-
-        sentryHub.addBreadcrumb({
-          category: "writeBundle:finish",
-          level: "info",
-        });
       },
     });
+
+    if (releaseName) {
+      plugins.push(
+        releaseManagementPlugin({
+          logger,
+          cliInstance: cli,
+          releaseName: releaseName,
+          shouldCleanArtifacts: options.cleanArtifacts,
+          shouldUploadSourceMaps: options.uploadSourceMaps,
+          shouldFinalizeRelease: options.finalize,
+          include: options.include,
+          setCommitsOption: options.setCommits,
+          deployOptions: options.deploy,
+          dist: options.dist,
+          handleError,
+        })
+      );
+    }
 
     if (options.injectRelease && releaseName) {
       const injectionCode = generateGlobalInjectorCode({
@@ -248,28 +196,6 @@ export function sentryUnpluginFactory({
 
     return plugins;
   });
-}
-
-function handleError(
-  unknownError: unknown,
-  logger: Logger,
-  errorHandler: NormalizedOptions["errorHandler"]
-) {
-  if (unknownError instanceof Error) {
-    logger.error(unknownError.message);
-  } else {
-    logger.error(String(unknownError));
-  }
-
-  if (errorHandler) {
-    if (unknownError instanceof Error) {
-      errorHandler(unknownError);
-    } else {
-      errorHandler(new Error("An unknown error occured"));
-    }
-  } else {
-    throw unknownError;
-  }
 }
 
 export function getBuildInformation() {
