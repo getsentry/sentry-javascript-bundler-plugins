@@ -2,12 +2,10 @@ import {
   sentryUnpluginFactory,
   Options,
   createRollupReleaseInjectionHooks,
+  createRollupDebugIdInjectionHooks,
 } from "@sentry/bundler-plugin-core";
 import type { UnpluginOptions } from "unplugin";
 
-/**
- * Rollup specific plugin to inject release values.
- */
 function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   return {
     name: "sentry-rollup-release-injection-plugin",
@@ -15,8 +13,16 @@ function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
+function rollupDebugIdInjectionPlugin(): UnpluginOptions {
+  return {
+    name: "sentry-rollup-debug-id-injection-plugin",
+    rollup: createRollupDebugIdInjectionHooks(),
+  };
+}
+
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: rollupReleaseInjectionPlugin,
+  debugIdInjectionPlugin: rollupDebugIdInjectionPlugin,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
