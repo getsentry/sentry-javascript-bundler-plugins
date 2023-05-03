@@ -1,7 +1,78 @@
-import * as fs from "fs";
-import * as path from "path";
+import fs from "fs";
+import { glob } from "glob";
+import os from "os";
+import path from "path";
 import * as util from "util";
-import { Logger } from "./sentry/logger";
+import { UnpluginOptions } from "unplugin";
+import { Logger } from "../sentry/logger";
+import { promisify } from "util";
+import { SentryCLILike } from "../sentry/cli";
+
+interface DebugIdUploadPluginOptions {
+  logger: Logger;
+  cliInstance: SentryCLILike;
+  assets: string | string[];
+  ignore?: string | string[];
+  releaseName?: string;
+  dist?: string;
+}
+
+export function debugIdUploadPlugin({
+  assets,
+  ignore,
+  logger,
+  cliInstance,
+  releaseName,
+  dist,
+}: DebugIdUploadPluginOptions): UnpluginOptions {
+  return {
+    name: "sentry-debug-id-upload-plugin",
+    async writeBundle() {
+      const tmpUploadFolder = await fs.promises.mkdtemp(
+        path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+      );
+
+      try {
+        const debugIdChunkFilePaths = (
+          await glob(assets, {
+            absolute: true,
+            nodir: true,
+            ignore: ignore,
+          })
+        ).filter(
+          (debugIdChunkFilePath) =>
+            debugIdChunkFilePath.endsWith(".js") ||
+            debugIdChunkFilePath.endsWith(".mjs") ||
+            debugIdChunkFilePath.endsWith(".cjs")
+        );
+
+        await Promise.all(
+          debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
+            await prepareBundleForDebugIdUpload(
+              chunkFilePath,
+              tmpUploadFolder,
+              String(chunkIndex),
+              logger
+            );
+          })
+        );
+
+        await cliInstance.releases.uploadSourceMaps(releaseName ?? "", {
+          include: [
+            {
+              paths: [tmpUploadFolder],
+              rewrite: false,
+              dist: dist,
+            },
+          ],
+          useArtifactBundle: true,
+        });
+      } finally {
+        void fs.promises.rm(tmpUploadFolder, { recursive: true, force: true });
+      }
+    },
+  };
+}
 
 export async function prepareBundleForDebugIdUpload(
   bundleFilePath: string,
@@ -11,7 +82,7 @@ export async function prepareBundleForDebugIdUpload(
 ) {
   let bundleContent;
   try {
-    bundleContent = await util.promisify(fs.readFile)(bundleFilePath, "utf8");
+    bundleContent = await promisify(fs.readFile)(bundleFilePath, "utf8");
   } catch (e) {
     logger.warn(`Could not read bundle to determine debug ID and source map: ${bundleFilePath}`);
     return;
@@ -24,7 +95,7 @@ export async function prepareBundleForDebugIdUpload(
   }
 
   bundleContent += `\n//# debugId=${debugId}`;
-  const writeSourceFilePromise = util.promisify(fs.writeFile)(
+  const writeSourceFilePromise = fs.promises.writeFile(
     path.join(uploadFolder, `${uniqueUploadName}.js`),
     bundleContent,
     "utf-8"
