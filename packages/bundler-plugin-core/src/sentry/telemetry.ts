@@ -1,25 +1,19 @@
 import SentryCli from "@sentry/cli";
-import { defaultStackParser, Hub, makeNodeTransport, NodeClient, Span } from "@sentry/node";
+import { defaultStackParser, Hub, makeNodeTransport, NodeClient } from "@sentry/node";
 import { NormalizedOptions, SENTRY_SAAS_URL } from "../options-mapping";
-import { BuildContext } from "../types";
 
 const SENTRY_SAAS_HOSTNAME = "sentry.io";
 
-export function makeSentryClient(
-  dsn: string,
-  allowedToSendTelemetryPromise: Promise<boolean>,
-  userProject: string | undefined
-): { sentryHub: Hub; sentryClient: NodeClient } {
+export function createSentryInstance(
+  options: NormalizedOptions,
+  shouldSendTelemetry: Promise<boolean>,
+  bundler: string
+) {
   const client = new NodeClient({
-    dsn,
+    dsn: "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
 
     tracesSampleRate: 1,
     sampleRate: 1,
-
-    // We're also sending the user project in dist because it is an indexed fieldso we can use this data effectively in
-    // a dashboard.
-    // Yes, this is slightly abusing the purpose of this field.
-    dist: userProject,
 
     release: __PACKAGE_VERSION__,
     integrations: [],
@@ -48,8 +42,7 @@ export function makeSentryClient(
       return {
         flush: (timeout) => nodeTransport.flush(timeout),
         send: async (request) => {
-          const isAllowedToSend = await allowedToSendTelemetryPromise;
-          if (isAllowedToSend) {
+          if (await shouldSendTelemetry) {
             return nodeTransport.send(request);
           } else {
             return undefined;
@@ -61,30 +54,12 @@ export function makeSentryClient(
 
   const hub = new Hub(client);
 
-  return { sentryClient: client, sentryHub: hub };
+  setTelemetryDataOnHub(options, hub, bundler);
+
+  return { sentryHub: hub, sentryClient: client };
 }
 
-/**
- * Adds a span to the passed parentSpan or to the current transaction that's on the passed hub's scope.
- */
-export function addSpanToTransaction(
-  ctx: BuildContext,
-  op?: string,
-  description?: string
-): Span | undefined {
-  const { hub, parentSpan } = ctx;
-  const actualSpan = parentSpan || hub.getScope()?.getTransaction();
-  const span = actualSpan?.startChild({ op, description });
-  hub.configureScope((scope) => scope.setSpan(span));
-
-  return span;
-}
-
-export function addPluginOptionInformationToHub(
-  options: NormalizedOptions,
-  hub: Hub,
-  bundler: "rollup" | "webpack" | "vite" | "esbuild"
-) {
+export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bundler: string) {
   const {
     org,
     project,
@@ -140,7 +115,7 @@ export function addPluginOptionInformationToHub(
   hub.setUser({ id: org });
 }
 
-export async function shouldSendTelemetry(options: NormalizedOptions): Promise<boolean> {
+export async function allowedToSendTelemetry(options: NormalizedOptions): Promise<boolean> {
   const { silent, org, project, authToken, url, vcsRemote, headers, telemetry, dryRun } = options;
 
   // `options.telemetry` defaults to true
@@ -174,9 +149,7 @@ export async function shouldSendTelemetry(options: NormalizedOptions): Promise<b
     // could point to another URL than the default URL.
     cliInfo = await cli.execute(["info"], false);
   } catch (e) {
-    throw new Error(
-      'Sentry CLI "info" command failed, make sure you have an auth token configured, and your `url` option is correct.'
-    );
+    return false;
   }
 
   const cliInfoUrl = cliInfo
@@ -189,4 +162,30 @@ export async function shouldSendTelemetry(options: NormalizedOptions): Promise<b
   }
 
   return new URL(cliInfoUrl).hostname === SENTRY_SAAS_HOSTNAME;
+}
+
+export interface TelemetryParticipantsManager {
+  addTelemetryParticipant: () => () => void;
+  telemetryPending: Promise<void>;
+}
+
+export function getTelemetryParticipantsManager() {
+  return new Promise<TelemetryParticipantsManager>((resolveTelemetryManager) => {
+    const telemetryPending = new Promise<void>((resolveTelemetryPending) => {
+      const telemetryParticipants = new Set();
+      resolveTelemetryManager({
+        addTelemetryParticipant: () => {
+          const telemetryParticipant = Symbol();
+          telemetryParticipants.add(telemetryParticipant);
+          return () => {
+            telemetryParticipants.delete(telemetryParticipant);
+            if (telemetryParticipants.size === 0) {
+              resolveTelemetryPending();
+            }
+          };
+        },
+        telemetryPending: telemetryPending,
+      });
+    });
+  });
 }

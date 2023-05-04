@@ -1,17 +1,17 @@
 import SentryCli from "@sentry/cli";
-import { makeMain } from "@sentry/node";
 import fs from "fs";
 import MagicString from "magic-string";
 import { createUnplugin, UnpluginOptions } from "unplugin";
 import { normalizeUserOptions, validateOptions } from "./options-mapping";
 import { debugIdUploadPlugin } from "./plugins/debug-id-upload";
 import { releaseManagementPlugin } from "./plugins/release-management";
+import { telemetryPlugin } from "./plugins/telemetry";
 import { getSentryCli } from "./sentry/cli";
 import { createLogger } from "./sentry/logger";
 import {
-  addPluginOptionInformationToHub,
-  makeSentryClient,
-  shouldSendTelemetry,
+  getTelemetryParticipantsManager,
+  createSentryInstance,
+  allowedToSendTelemetry,
 } from "./sentry/telemetry";
 import { Options } from "./types";
 import {
@@ -27,6 +27,7 @@ interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
 }
+
 /**
  * The sentry bundler plugin concerns itself with two things:
  * - Release injection
@@ -60,23 +61,6 @@ export function sentryUnpluginFactory({
 }: SentryUnpluginFactoryOptions) {
   return createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
     const options = normalizeUserOptions(userOptions);
-
-    const allowedToSendTelemetryPromise = shouldSendTelemetry(options);
-
-    const { sentryHub } = makeSentryClient(
-      "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
-      allowedToSendTelemetryPromise,
-      options.project
-    );
-
-    addPluginOptionInformationToHub(options, sentryHub, unpluginMetaContext.framework);
-
-    //TODO: This call is problematic because as soon as we set our hub as the current hub
-    //      we might interfere with other plugins that use Sentry. However, for now, we'll
-    //      leave it in because without it, we can't get distributed traces (which are pretty nice)
-    //      Let's keep it until someone complains about interference.
-    //      The ideal solution would be a code change in the JS SDK but it's not a straight-forward fix.
-    makeMain(sentryHub);
 
     const logger = createLogger({
       prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
@@ -115,37 +99,34 @@ export function sentryUnpluginFactory({
       );
     }
 
+    if (process.cwd().match(/\\node_modules\\|\/node_modules\//)) {
+      logger.warn(
+        "Running Sentry plugin from within a `node_modules` folder. Some features may not work."
+      );
+    }
+
+    const shouldSendTelemetry = allowedToSendTelemetry(options);
+    const { sentryHub, sentryClient } = createSentryInstance(
+      options,
+      shouldSendTelemetry,
+      unpluginMetaContext.framework
+    );
+    const telemetryParticipantsManagerPromise = getTelemetryParticipantsManager();
+    const unpluginExecutionTransaction = sentryHub.startTransaction({
+      name: "Sentry Bundler Plugin execution",
+    });
+
     const plugins: UnpluginOptions[] = [];
 
-    plugins.push({
-      name: "sentry-plugin",
-      enforce: "pre", // needed for Vite to call resolveId hook
-
-      /**
-       * Responsible for starting the plugin execution transaction and the release injection span
-       */
-      async buildStart() {
-        logger.debug("Called 'buildStart'");
-
-        const isAllowedToSendToSendTelemetry = await allowedToSendTelemetryPromise;
-        if (isAllowedToSendToSendTelemetry) {
-          logger.info("Sending error and performance telemetry data to Sentry.");
-          logger.info("To disable telemetry, set `options.telemetry` to `false`.");
-          sentryHub.addBreadcrumb({ level: "info", message: "Telemetry enabled." });
-        } else {
-          sentryHub.addBreadcrumb({
-            level: "info",
-            message: "Telemetry disabled. This should never show up in a Sentry event.",
-          });
-        }
-
-        if (process.cwd().match(/\\node_modules\\|\/node_modules\//)) {
-          logger.warn(
-            "Running Sentry plugin from within a `node_modules` folder. Some features may not work."
-          );
-        }
-      },
-    });
+    plugins.push(
+      telemetryPlugin({
+        telemetryParticipantsManagerPromise,
+        unpluginExecutionTransaction: unpluginExecutionTransaction,
+        logger,
+        shouldSendTelemetry,
+        sentryClient,
+      })
+    );
 
     if (releaseName) {
       plugins.push(
