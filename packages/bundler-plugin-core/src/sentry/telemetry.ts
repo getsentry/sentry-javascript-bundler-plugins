@@ -163,29 +163,3 @@ export async function allowedToSendTelemetry(options: NormalizedOptions): Promis
 
   return new URL(cliInfoUrl).hostname === SENTRY_SAAS_HOSTNAME;
 }
-
-export interface TelemetryParticipantsManager {
-  addTelemetryParticipant: () => () => void;
-  telemetryPending: Promise<void>;
-}
-
-export function getTelemetryParticipantsManager() {
-  return new Promise<TelemetryParticipantsManager>((resolveTelemetryManager) => {
-    const telemetryPending = new Promise<void>((resolveTelemetryPending) => {
-      const telemetryParticipants = new Set();
-      resolveTelemetryManager({
-        addTelemetryParticipant: () => {
-          const telemetryParticipant = Symbol();
-          telemetryParticipants.add(telemetryParticipant);
-          return () => {
-            telemetryParticipants.delete(telemetryParticipant);
-            if (telemetryParticipants.size === 0) {
-              resolveTelemetryPending();
-            }
-          };
-        },
-        telemetryPending: telemetryPending,
-      });
-    });
-  });
-}

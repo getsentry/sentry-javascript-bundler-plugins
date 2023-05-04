@@ -8,11 +8,7 @@ import { releaseManagementPlugin } from "./plugins/release-management";
 import { telemetryPlugin } from "./plugins/telemetry";
 import { getSentryCli } from "./sentry/cli";
 import { createLogger } from "./sentry/logger";
-import {
-  getTelemetryParticipantsManager,
-  createSentryInstance,
-  allowedToSendTelemetry,
-} from "./sentry/telemetry";
+import { createSentryInstance, allowedToSendTelemetry } from "./sentry/telemetry";
 import { Options } from "./types";
 import {
   determineReleaseName,
@@ -22,6 +18,7 @@ import {
   parseMajorVersion,
   stringToUUID,
 } from "./utils";
+import { EventEmitter } from "events";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
@@ -111,17 +108,31 @@ export function sentryUnpluginFactory({
       shouldSendTelemetry,
       unpluginMetaContext.framework
     );
-    const telemetryParticipantsManagerPromise = getTelemetryParticipantsManager();
+
     const unpluginExecutionTransaction = sentryHub.startTransaction({
       name: "Sentry Bundler Plugin execution",
     });
 
     const plugins: UnpluginOptions[] = [];
 
+    const telemetryWorkersDoneEmitter = new EventEmitter();
+    const telemetryWorkers = new Set<symbol>();
+
+    // TODO: uncomment and use in plugins
+    // const registerTelemetryWorker = () => {
+    //   const telemetryWorker = Symbol();
+    //   telemetryWorkers.add(telemetryWorker);
+    //   () => {
+    //     telemetryWorkers.delete(telemetryWorker);
+    //     telemetryWorkersDoneEmitter.emit("done");
+    //   };
+    // };
+
     plugins.push(
       telemetryPlugin({
-        telemetryParticipantsManagerPromise,
-        unpluginExecutionTransaction: unpluginExecutionTransaction,
+        telemetryWorkers,
+        telemetryWorkersDoneEmitter,
+        unpluginExecutionTransaction,
         logger,
         shouldSendTelemetry,
         sentryClient,
