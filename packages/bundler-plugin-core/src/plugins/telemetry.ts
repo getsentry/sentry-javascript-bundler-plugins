@@ -1,20 +1,23 @@
 import { NodeClient, Transaction } from "@sentry/node";
+import { EventEmitter } from "events";
 import { UnpluginOptions } from "unplugin";
 import { Logger } from "../sentry/logger";
 
 interface TelemetryPluginOptions {
   sentryClient: NodeClient;
   unpluginExecutionTransaction: Transaction;
-  telemetryPending: Promise<void>;
+  telemetryWorkersDoneEmitter: EventEmitter;
   shouldSendTelemetry: Promise<boolean>;
+  telemetryWorkers: Set<symbol>;
   logger: Logger;
 }
 
 export function telemetryPlugin({
   sentryClient,
-  telemetryPending,
+  telemetryWorkers,
   unpluginExecutionTransaction,
   shouldSendTelemetry,
+  telemetryWorkersDoneEmitter,
   logger,
 }: TelemetryPluginOptions): UnpluginOptions {
   return {
@@ -28,7 +31,21 @@ export function telemetryPlugin({
       unpluginExecutionTransaction.startTimestamp = Date.now() / 1000;
     },
     async writeBundle() {
-      await telemetryPending;
+      await new Promise<void>((resolve) => {
+        if (telemetryWorkers.size === 0) {
+          resolve();
+        }
+
+        const doneHandler = () => {
+          if (telemetryWorkers.size === 0) {
+            resolve();
+            telemetryWorkersDoneEmitter.off("done", doneHandler);
+          }
+        };
+
+        telemetryWorkersDoneEmitter.on("done", doneHandler);
+      });
+
       unpluginExecutionTransaction.finish();
       await sentryClient.flush();
     },

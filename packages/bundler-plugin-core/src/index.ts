@@ -115,34 +115,24 @@ export function sentryUnpluginFactory({
 
     const plugins: UnpluginOptions[] = [];
 
-    const participantsEventEmitter = new EventEmitter();
-    const participants = new Set();
+    const telemetryWorkersDoneEmitter = new EventEmitter();
+    const telemetryWorkers = new Set<symbol>();
 
     // TODO: uncomment and use in plugins
-    // const registerParticipant = () => {
-    //   const participant = Symbol();
-    //   participants.add(participant);
+    // const registerTelemetryWorker = () => {
+    //   const telemetryWorker = Symbol();
+    //   telemetryWorkers.add(telemetryWorker);
     //   () => {
-    //     participants.delete(participants);
-    //     participantsEventEmitter.emit("done");
+    //     telemetryWorkers.delete(telemetryWorker);
+    //     telemetryWorkersDoneEmitter.emit("done");
     //   };
     // };
 
-    const telemetryPending = new Promise<void>((resolve) => {
-      const doneHandler = () => {
-        if (participants.size === 0) {
-          resolve();
-          participantsEventEmitter.off("done", doneHandler);
-        }
-      };
-
-      participantsEventEmitter.on("done", doneHandler);
-    });
-
     plugins.push(
       telemetryPlugin({
-        telemetryPending,
-        unpluginExecutionTransaction: unpluginExecutionTransaction,
+        telemetryWorkers,
+        telemetryWorkersDoneEmitter,
+        unpluginExecutionTransaction,
         logger,
         shouldSendTelemetry,
         sentryClient,
