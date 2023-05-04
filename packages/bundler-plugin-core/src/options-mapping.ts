@@ -11,7 +11,6 @@ type RequiredInternalOptions = Required<
     | "silent"
     | "cleanArtifacts"
     | "telemetry"
-    | "injectReleasesMap"
     | "_experiments"
     | "injectRelease"
     | "uploadSourceMaps"
@@ -93,7 +92,6 @@ export function normalizeUserOptions(userOptions: UserOptions) {
     debug: userOptions.debug ?? false,
     silent: userOptions.silent ?? false,
     telemetry: userOptions.telemetry ?? true,
-    injectReleasesMap: userOptions.injectReleasesMap ?? false,
     injectRelease: userOptions.injectRelease ?? true,
     uploadSourceMaps: userOptions.uploadSourceMaps ?? true,
     sourcemaps: userOptions.sourcemaps,
@@ -206,14 +204,6 @@ function normalizeIncludeEntry(
  * @returns `true` if the options are valid, `false` otherwise
  */
 export function validateOptions(options: NormalizedOptions, logger: Logger): boolean {
-  if (options.injectReleasesMap && !options.org) {
-    logger.error(
-      "The `injectReleasesMap` option was set but it is only supported when the `org` option is also specified.",
-      "Please set the `org` option (you can also set the SENTRY_ORG environment variable) or disable the `injectReleasesMap` option."
-    );
-    return false;
-  }
-
   const setCommits = options.setCommits;
   if (setCommits) {
     if (!setCommits.auto && !(setCommits.repo && setCommits.commit)) {

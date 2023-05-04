@@ -229,16 +229,10 @@ export function determineReleaseName(): string | undefined {
  */
 export function generateGlobalInjectorCode({
   release,
-  injectReleasesMap,
   injectBuildInformation,
-  org,
-  project,
 }: {
   release: string;
-  injectReleasesMap: boolean;
   injectBuildInformation: boolean;
-  org?: string;
-  project?: string;
 }) {
   // The code below is mostly ternary operators because it saves bundle size.
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
@@ -253,13 +247,6 @@ export function generateGlobalInjectorCode({
             {};
 
     _global.SENTRY_RELEASE={id:"${release}"};`;
-
-  if (injectReleasesMap && project) {
-    const key = org ? `${project}@${org}` : project;
-    code += `
-      _global.SENTRY_RELEASES=_global.SENTRY_RELEASES || {};
-      _global.SENTRY_RELEASES["${key}"]={id:"${release}"};`;
-  }
 
   if (injectBuildInformation) {
     const buildInfo = getBuildInformation();

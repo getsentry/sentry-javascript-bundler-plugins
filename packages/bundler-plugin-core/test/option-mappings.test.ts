@@ -34,7 +34,6 @@ describe("normalizeUserOptions()", () => {
       silent: false,
       telemetry: true,
       injectRelease: true,
-      injectReleasesMap: false,
       uploadSourceMaps: true,
       _experiments: {},
       url: "https://sentry.io",
@@ -80,7 +79,6 @@ describe("normalizeUserOptions()", () => {
       silent: false,
       telemetry: true,
       injectRelease: true,
-      injectReleasesMap: false,
       uploadSourceMaps: true,
       _experiments: {},
       url: "https://sentry.io",
@@ -110,16 +108,6 @@ describe("validateOptions", () => {
 
   afterEach(() => {
     jest.resetAllMocks();
-  });
-
-  it("should return `false` if `injectRelease` is `true` but org is not provided", () => {
-    const options = { injectReleasesMap: true } as Partial<NormalizedOptions>;
-
-    expect(validateOptions(options as unknown as NormalizedOptions, mockedLogger)).toBe(false);
-    expect(mockedLogger.error).toHaveBeenCalledWith(
-      expect.stringMatching(/injectReleasesMap.*org/),
-      expect.stringMatching(/set.*org.*injectReleasesMap/)
-    );
   });
 
   it("should return `true` if `injectRelease` is `true` and org is provided", () => {

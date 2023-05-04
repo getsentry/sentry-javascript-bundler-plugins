@@ -12,5 +12,4 @@ createCjsBundles({ index: entryPointPath }, outputDir, {
   include: outputDir,
   dryRun: true,
   injectRelease: false,
-  injectReleasesMap: true,
 } as Options);

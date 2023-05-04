@@ -4,6 +4,7 @@ This document serves as a migration guide, documenting all breaking changes betw
 
 ## Unreleased
 
+- Removed `injectReleasesMap` option. If you need to inject values based on the build, please use your bundler's way of injecting values ([rollup](https://www.npmjs.com/package/@rollup/plugin-replace), [vite](https://vitejs.dev/config/shared-options.html#define), [webpack](https://webpack.js.org/plugins/define-plugin/), [esbuild](https://esbuild.github.io/api/#define)).
 - The minimum compatible version of rollup is version `3.2.0`.
 - Removed functionality for the `releaseInjectionTargets` option.
 - `@sentry/bundler-plugin-core` will no longer export the individual plugins but a factory function to create them.
