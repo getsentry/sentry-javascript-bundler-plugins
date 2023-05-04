@@ -8,11 +8,7 @@ import { releaseManagementPlugin } from "./plugins/release-management";
 import { telemetryPlugin } from "./plugins/telemetry";
 import { getSentryCli } from "./sentry/cli";
 import { createLogger } from "./sentry/logger";
-import {
-  getTelemetryParticipantsManager,
-  createSentryInstance,
-  allowedToSendTelemetry,
-} from "./sentry/telemetry";
+import { createSentryInstance, allowedToSendTelemetry } from "./sentry/telemetry";
 import { Options } from "./types";
 import {
   determineReleaseName,
@@ -22,6 +18,7 @@ import {
   parseMajorVersion,
   stringToUUID,
 } from "./utils";
+import { EventEmitter } from "events";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
@@ -111,16 +108,40 @@ export function sentryUnpluginFactory({
       shouldSendTelemetry,
       unpluginMetaContext.framework
     );
-    const telemetryParticipantsManagerPromise = getTelemetryParticipantsManager();
+
     const unpluginExecutionTransaction = sentryHub.startTransaction({
       name: "Sentry Bundler Plugin execution",
     });
 
     const plugins: UnpluginOptions[] = [];
 
+    const participantsEventEmitter = new EventEmitter();
+    const participants = new Set();
+
+    // TODO: uncomment and use in plugins
+    // const registerParticipant = () => {
+    //   const participant = Symbol();
+    //   participants.add(participant);
+    //   () => {
+    //     participants.delete(participants);
+    //     participantsEventEmitter.emit("done");
+    //   };
+    // };
+
+    const telemetryPending = new Promise<void>((resolve) => {
+      const doneHandler = () => {
+        if (participants.size === 0) {
+          resolve();
+          participantsEventEmitter.off("done", doneHandler);
+        }
+      };
+
+      participantsEventEmitter.on("done", doneHandler);
+    });
+
     plugins.push(
       telemetryPlugin({
-        telemetryParticipantsManagerPromise,
+        telemetryPending,
         unpluginExecutionTransaction: unpluginExecutionTransaction,
         logger,
         shouldSendTelemetry,
