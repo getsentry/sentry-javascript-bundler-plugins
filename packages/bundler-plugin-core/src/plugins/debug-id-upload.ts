@@ -7,6 +7,7 @@ import { UnpluginOptions } from "unplugin";
 import { Logger } from "../sentry/logger";
 import { promisify } from "util";
 import { SentryCLILike } from "../sentry/cli";
+import { Hub, NodeClient } from "@sentry/node";
 
 interface DebugIdUploadPluginOptions {
   logger: Logger;
@@ -15,6 +16,9 @@ interface DebugIdUploadPluginOptions {
   ignore?: string | string[];
   releaseName?: string;
   dist?: string;
+  handleError: (error: unknown) => void;
+  sentryHub: Hub;
+  sentryClient: NodeClient;
 }
 
 export function debugIdUploadPlugin({
@@ -24,15 +28,21 @@ export function debugIdUploadPlugin({
   cliInstance,
   releaseName,
   dist,
+  handleError,
+  sentryHub,
+  sentryClient,
 }: DebugIdUploadPluginOptions): UnpluginOptions {
   return {
     name: "sentry-debug-id-upload-plugin",
     async writeBundle() {
-      const tmpUploadFolder = await fs.promises.mkdtemp(
-        path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
-      );
-
+      let folderToCleanUp: string | undefined;
       try {
+        const tmpUploadFolder = await fs.promises.mkdtemp(
+          path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+        );
+
+        folderToCleanUp = tmpUploadFolder;
+
         const debugIdChunkFilePaths = (
           await glob(assets, {
             absolute: true,
@@ -67,8 +77,14 @@ export function debugIdUploadPlugin({
           ],
           useArtifactBundle: true,
         });
+      } catch (e) {
+        sentryHub.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
+        await sentryClient.flush();
+        handleError(e);
       } finally {
-        void fs.promises.rm(tmpUploadFolder, { recursive: true, force: true });
+        if (folderToCleanUp) {
+          void fs.promises.rm(folderToCleanUp, { recursive: true, force: true });
+        }
       }
     },
   };
