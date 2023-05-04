@@ -124,10 +124,7 @@ export function sentryUnpluginFactory({
     if (options.injectRelease && releaseName) {
       const injectionCode = generateGlobalInjectorCode({
         release: releaseName,
-        injectReleasesMap: options.injectReleasesMap,
         injectBuildInformation: options._experiments.injectBuildInformation || false,
-        org: options.org,
-        project: options.project,
       });
 
       plugins.push(releaseInjectionPlugin(injectionCode));

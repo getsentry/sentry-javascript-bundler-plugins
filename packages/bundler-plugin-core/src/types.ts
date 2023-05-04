@@ -199,15 +199,6 @@ export type Options = Omit<IncludeEntry, "paths"> & {
   injectRelease?: boolean;
 
   /**
-   * If set to true, the plugin will inject an additional `SENTRY_RELEASES` variable that
-   * maps from `{org}@{project}` to the `release` value. This might be helpful for webpack
-   * module federation or micro frontend setups.
-   *
-   * Defaults to `false`.
-   */
-  injectReleasesMap?: boolean;
-
-  /**
    * Whether the plugin should upload source maps to Sentry.
    *
    * Defaults to `true`.

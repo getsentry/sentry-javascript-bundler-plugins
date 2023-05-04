@@ -105,7 +105,6 @@ describe("addPluginOptionTagsToHub", () => {
         ...defaultOptions,
         cleanArtifacts: true,
         finalize: true,
-        injectReleasesMap: true,
         dryRun: true,
       }),
       mockedHub as unknown as Hub,
@@ -114,7 +113,6 @@ describe("addPluginOptionTagsToHub", () => {
 
     expect(mockedHub.setTag).toHaveBeenCalledWith("clean-artifacts", true);
     expect(mockedHub.setTag).toHaveBeenCalledWith("finalize-release", true);
-    expect(mockedHub.setTag).toHaveBeenCalledWith("inject-releases-map", true);
     expect(mockedHub.setTag).toHaveBeenCalledWith("dry-run", true);
   });
 

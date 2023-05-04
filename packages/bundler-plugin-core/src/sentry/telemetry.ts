@@ -66,7 +66,6 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
     cleanArtifacts,
     finalize,
     setCommits,
-    injectReleasesMap,
     dryRun,
     errorHandler,
     deploy,
@@ -93,9 +92,6 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
   // Miscelaneous options
   if (dryRun) {
     hub.setTag("dry-run", true);
-  }
-  if (injectReleasesMap) {
-    hub.setTag("inject-releases-map", true);
   }
   if (errorHandler) {
     hub.setTag("error-handler", "custom");
