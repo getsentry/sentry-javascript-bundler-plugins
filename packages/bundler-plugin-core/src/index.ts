@@ -18,7 +18,6 @@ import {
   parseMajorVersion,
   stringToUUID,
 } from "./utils";
-import { EventEmitter } from "events";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
@@ -59,6 +58,17 @@ export function sentryUnpluginFactory({
   return createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
     const options = normalizeUserOptions(userOptions);
 
+    const shouldSendTelemetry = allowedToSendTelemetry(options);
+    const { sentryHub, sentryClient } = createSentryInstance(
+      options,
+      shouldSendTelemetry,
+      unpluginMetaContext.framework
+    );
+    const pluginExecutionTransaction = sentryHub.startTransaction({
+      name: "Sentry Bundler Plugin execution",
+    });
+    sentryHub.getScope().setSpan(pluginExecutionTransaction);
+
     const logger = createLogger({
       prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
       silent: options.silent,
@@ -66,11 +76,7 @@ export function sentryUnpluginFactory({
     });
 
     function handleError(unknownError: unknown) {
-      if (unknownError instanceof Error) {
-        logger.error(unknownError.message);
-      } else {
-        logger.error(String(unknownError));
-      }
+      pluginExecutionTransaction.setStatus("internal_error");
 
       if (options.errorHandler) {
         if (unknownError instanceof Error) {
@@ -102,42 +108,32 @@ export function sentryUnpluginFactory({
       );
     }
 
-    const shouldSendTelemetry = allowedToSendTelemetry(options);
-    const { sentryHub, sentryClient } = createSentryInstance(
-      options,
-      shouldSendTelemetry,
-      unpluginMetaContext.framework
-    );
-
-    const unpluginExecutionTransaction = sentryHub.startTransaction({
-      name: "Sentry Bundler Plugin execution",
-    });
-
     const plugins: UnpluginOptions[] = [];
-
-    const telemetryWorkersDoneEmitter = new EventEmitter();
-    const telemetryWorkers = new Set<symbol>();
-
-    // TODO: uncomment and use in plugins
-    // const registerTelemetryWorker = () => {
-    //   const telemetryWorker = Symbol();
-    //   telemetryWorkers.add(telemetryWorker);
-    //   () => {
-    //     telemetryWorkers.delete(telemetryWorker);
-    //     telemetryWorkersDoneEmitter.emit("done");
-    //   };
-    // };
 
     plugins.push(
       telemetryPlugin({
-        telemetryWorkers,
-        telemetryWorkersDoneEmitter,
-        unpluginExecutionTransaction,
+        pluginExecutionTransaction,
         logger,
         shouldSendTelemetry,
         sentryClient,
       })
     );
+
+    if (options.injectRelease && releaseName) {
+      const injectionCode = generateGlobalInjectorCode({
+        release: releaseName,
+        injectReleasesMap: options.injectReleasesMap,
+        injectBuildInformation: options._experiments.injectBuildInformation || false,
+        org: options.org,
+        project: options.project,
+      });
+
+      plugins.push(releaseInjectionPlugin(injectionCode));
+    }
+
+    if (options.sourcemaps?.assets) {
+      plugins.push(debugIdInjectionPlugin());
+    }
 
     if (releaseName) {
       plugins.push(
@@ -153,20 +149,10 @@ export function sentryUnpluginFactory({
           deployOptions: options.deploy,
           dist: options.dist,
           handleError,
+          sentryHub,
+          sentryClient,
         })
       );
-    }
-
-    if (options.injectRelease && releaseName) {
-      const injectionCode = generateGlobalInjectorCode({
-        release: releaseName,
-        injectReleasesMap: options.injectReleasesMap,
-        injectBuildInformation: options._experiments.injectBuildInformation || false,
-        org: options.org,
-        project: options.project,
-      });
-
-      plugins.push(releaseInjectionPlugin(injectionCode));
     }
 
     if (!unpluginMetaContext.watchMode && options.sourcemaps?.assets !== undefined) {
@@ -178,12 +164,11 @@ export function sentryUnpluginFactory({
           releaseName: releaseName,
           logger: logger,
           cliInstance: cli,
+          handleError,
+          sentryHub,
+          sentryClient,
         })
       );
-    }
-
-    if (options.sourcemaps?.assets) {
-      plugins.push(debugIdInjectionPlugin());
     }
 
     return plugins;
