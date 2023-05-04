@@ -1,18 +1,14 @@
 import SentryCli from "@sentry/cli";
-import { makeMain } from "@sentry/node";
 import fs from "fs";
 import MagicString from "magic-string";
 import { createUnplugin, UnpluginOptions } from "unplugin";
 import { normalizeUserOptions, validateOptions } from "./options-mapping";
 import { debugIdUploadPlugin } from "./plugins/debug-id-upload";
 import { releaseManagementPlugin } from "./plugins/release-management";
+import { telemetryPlugin } from "./plugins/telemetry";
 import { getSentryCli } from "./sentry/cli";
 import { createLogger } from "./sentry/logger";
-import {
-  addPluginOptionInformationToHub,
-  makeSentryClient,
-  shouldSendTelemetry,
-} from "./sentry/telemetry";
+import { createSentryInstance, allowedToSendTelemetry } from "./sentry/telemetry";
 import { Options } from "./types";
 import {
   determineReleaseName,
@@ -27,6 +23,7 @@ interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
 }
+
 /**
  * The sentry bundler plugin concerns itself with two things:
  * - Release injection
@@ -61,22 +58,16 @@ export function sentryUnpluginFactory({
   return createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
     const options = normalizeUserOptions(userOptions);
 
-    const allowedToSendTelemetryPromise = shouldSendTelemetry(options);
-
-    const { sentryHub } = makeSentryClient(
-      "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
-      allowedToSendTelemetryPromise,
-      options.project
+    const shouldSendTelemetry = allowedToSendTelemetry(options);
+    const { sentryHub, sentryClient } = createSentryInstance(
+      options,
+      shouldSendTelemetry,
+      unpluginMetaContext.framework
     );
-
-    addPluginOptionInformationToHub(options, sentryHub, unpluginMetaContext.framework);
-
-    //TODO: This call is problematic because as soon as we set our hub as the current hub
-    //      we might interfere with other plugins that use Sentry. However, for now, we'll
-    //      leave it in because without it, we can't get distributed traces (which are pretty nice)
-    //      Let's keep it until someone complains about interference.
-    //      The ideal solution would be a code change in the JS SDK but it's not a straight-forward fix.
-    makeMain(sentryHub);
+    const pluginExecutionTransaction = sentryHub.startTransaction({
+      name: "Sentry Bundler Plugin execution",
+    });
+    sentryHub.getScope().setSpan(pluginExecutionTransaction);
 
     const logger = createLogger({
       prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
@@ -84,12 +75,8 @@ export function sentryUnpluginFactory({
       debug: options.debug,
     });
 
-    function handleError(unknownError: unknown) {
-      if (unknownError instanceof Error) {
-        logger.error(unknownError.message);
-      } else {
-        logger.error(String(unknownError));
-      }
+    function handleRecoverableError(unknownError: unknown) {
+      pluginExecutionTransaction.setStatus("internal_error");
 
       if (options.errorHandler) {
         if (unknownError instanceof Error) {
@@ -103,49 +90,52 @@ export function sentryUnpluginFactory({
     }
 
     if (!validateOptions(options, logger)) {
-      handleError(new Error("Options were not set correctly. See output above for more details."));
+      handleRecoverableError(
+        new Error("Options were not set correctly. See output above for more details.")
+      );
     }
 
     const cli = getSentryCli(options, logger);
 
     const releaseName = options.release ?? determineReleaseName();
     if (!releaseName) {
-      handleError(
+      handleRecoverableError(
         new Error("Unable to determine a release name. Please set the `release` option.")
+      );
+    }
+
+    if (process.cwd().match(/\\node_modules\\|\/node_modules\//)) {
+      logger.warn(
+        "Running Sentry plugin from within a `node_modules` folder. Some features may not work."
       );
     }
 
     const plugins: UnpluginOptions[] = [];
 
-    plugins.push({
-      name: "sentry-plugin",
-      enforce: "pre", // needed for Vite to call resolveId hook
+    plugins.push(
+      telemetryPlugin({
+        pluginExecutionTransaction,
+        logger,
+        shouldSendTelemetry,
+        sentryClient,
+      })
+    );
 
-      /**
-       * Responsible for starting the plugin execution transaction and the release injection span
-       */
-      async buildStart() {
-        logger.debug("Called 'buildStart'");
+    if (options.injectRelease && releaseName) {
+      const injectionCode = generateGlobalInjectorCode({
+        release: releaseName,
+        injectReleasesMap: options.injectReleasesMap,
+        injectBuildInformation: options._experiments.injectBuildInformation || false,
+        org: options.org,
+        project: options.project,
+      });
 
-        const isAllowedToSendToSendTelemetry = await allowedToSendTelemetryPromise;
-        if (isAllowedToSendToSendTelemetry) {
-          logger.info("Sending error and performance telemetry data to Sentry.");
-          logger.info("To disable telemetry, set `options.telemetry` to `false`.");
-          sentryHub.addBreadcrumb({ level: "info", message: "Telemetry enabled." });
-        } else {
-          sentryHub.addBreadcrumb({
-            level: "info",
-            message: "Telemetry disabled. This should never show up in a Sentry event.",
-          });
-        }
+      plugins.push(releaseInjectionPlugin(injectionCode));
+    }
 
-        if (process.cwd().match(/\\node_modules\\|\/node_modules\//)) {
-          logger.warn(
-            "Running Sentry plugin from within a `node_modules` folder. Some features may not work."
-          );
-        }
-      },
-    });
+    if (options.sourcemaps?.assets) {
+      plugins.push(debugIdInjectionPlugin());
+    }
 
     if (releaseName) {
       plugins.push(
@@ -160,21 +150,11 @@ export function sentryUnpluginFactory({
           setCommitsOption: options.setCommits,
           deployOptions: options.deploy,
           dist: options.dist,
-          handleError,
+          handleRecoverableError: handleRecoverableError,
+          sentryHub,
+          sentryClient,
         })
       );
-    }
-
-    if (options.injectRelease && releaseName) {
-      const injectionCode = generateGlobalInjectorCode({
-        release: releaseName,
-        injectReleasesMap: options.injectReleasesMap,
-        injectBuildInformation: options._experiments.injectBuildInformation || false,
-        org: options.org,
-        project: options.project,
-      });
-
-      plugins.push(releaseInjectionPlugin(injectionCode));
     }
 
     if (!unpluginMetaContext.watchMode && options.sourcemaps?.assets !== undefined) {
@@ -186,12 +166,11 @@ export function sentryUnpluginFactory({
           releaseName: releaseName,
           logger: logger,
           cliInstance: cli,
+          handleRecoverableError: handleRecoverableError,
+          sentryHub,
+          sentryClient,
         })
       );
-    }
-
-    if (options.sourcemaps?.assets) {
-      plugins.push(debugIdInjectionPlugin());
     }
 
     return plugins;

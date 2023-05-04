@@ -1,6 +1,6 @@
 import { Hub } from "@sentry/node";
 import { NormalizedOptions, normalizeUserOptions } from "../../src/options-mapping";
-import { addPluginOptionInformationToHub, shouldSendTelemetry } from "../../src/sentry/telemetry";
+import { allowedToSendTelemetry, setTelemetryDataOnHub } from "../../src/sentry/telemetry";
 
 const mockCliExecute = jest.fn();
 jest.mock(
@@ -20,14 +20,14 @@ describe("shouldSendTelemetry", () => {
     mockCliExecute.mockImplementation(
       () => "Sentry Server: https://selfhostedSentry.io  \nsomeotherstuff\netc"
     );
-    expect(await shouldSendTelemetry({} as NormalizedOptions)).toBe(false);
+    expect(await allowedToSendTelemetry({} as NormalizedOptions)).toBe(false);
   });
 
   it("should return true if CLI returns sentry.io as a URL", async () => {
     mockCliExecute.mockImplementation(
       () => "Sentry Server: https://sentry.io  \nsomeotherstuff\netc"
     );
-    expect(await shouldSendTelemetry({} as NormalizedOptions)).toBe(true);
+    expect(await allowedToSendTelemetry({} as NormalizedOptions)).toBe(true);
   });
 });
 
@@ -47,7 +47,7 @@ describe("addPluginOptionTagsToHub", () => {
   });
 
   it("should set include tag according to number of entries (single entry)", () => {
-    addPluginOptionInformationToHub(
+    setTelemetryDataOnHub(
       normalizeUserOptions(defaultOptions),
       mockedHub as unknown as Hub,
       "rollup"
@@ -56,7 +56,7 @@ describe("addPluginOptionTagsToHub", () => {
   });
 
   it("should set include tag according to number of entries (multiple entries)", () => {
-    addPluginOptionInformationToHub(
+    setTelemetryDataOnHub(
       normalizeUserOptions({ include: ["", "", ""] }),
       mockedHub as unknown as Hub,
       "rollup"
@@ -65,7 +65,7 @@ describe("addPluginOptionTagsToHub", () => {
   });
 
   it("should set deploy tag to true if the deploy option is specified", () => {
-    addPluginOptionInformationToHub(
+    setTelemetryDataOnHub(
       normalizeUserOptions({ ...defaultOptions, deploy: { env: "production" } }),
       mockedHub as unknown as Hub,
       "rollup"
@@ -74,7 +74,7 @@ describe("addPluginOptionTagsToHub", () => {
   });
 
   it("should set errorHandler tag to `custom` if the errorHandler option is specified", () => {
-    addPluginOptionInformationToHub(
+    setTelemetryDataOnHub(
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       normalizeUserOptions({ ...defaultOptions, errorHandler: () => {} }),
       mockedHub as unknown as Hub,
@@ -89,7 +89,7 @@ describe("addPluginOptionTagsToHub", () => {
   ])(
     `should set setCommits tag to %s if the setCommits option is %s`,
     (expectedValue, commitOptions) => {
-      addPluginOptionInformationToHub(
+      setTelemetryDataOnHub(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         normalizeUserOptions({ ...defaultOptions, setCommits: commitOptions as any }),
         mockedHub as unknown as Hub,
@@ -100,7 +100,7 @@ describe("addPluginOptionTagsToHub", () => {
   );
 
   it("sets all simple tags correctly", () => {
-    addPluginOptionInformationToHub(
+    setTelemetryDataOnHub(
       normalizeUserOptions({
         ...defaultOptions,
         cleanArtifacts: true,
@@ -119,7 +119,7 @@ describe("addPluginOptionTagsToHub", () => {
   });
 
   it("shouldn't set any tags other than include if no opional options are specified", () => {
-    addPluginOptionInformationToHub(
+    setTelemetryDataOnHub(
       normalizeUserOptions(defaultOptions),
       mockedHub as unknown as Hub,
       "rollup"

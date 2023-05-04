@@ -1,4 +1,5 @@
 import { SentryCliCommitsOptions, SentryCliNewDeployOptions } from "@sentry/cli";
+import { Hub, NodeClient } from "@sentry/node";
 import { UnpluginOptions } from "unplugin";
 import { InternalIncludeEntry } from "../options-mapping";
 import { SentryCLILike } from "../sentry/cli";
@@ -15,7 +16,9 @@ interface DebugIdUploadPluginOptions {
   setCommitsOption?: SentryCliCommitsOptions;
   deployOptions?: SentryCliNewDeployOptions;
   dist?: string;
-  handleError: (error: unknown) => void;
+  handleRecoverableError: (error: unknown) => void;
+  sentryHub: Hub;
+  sentryClient: NodeClient;
 }
 
 export function releaseManagementPlugin({
@@ -28,7 +31,9 @@ export function releaseManagementPlugin({
   shouldUploadSourceMaps,
   shouldFinalizeRelease,
   deployOptions,
-  handleError,
+  handleRecoverableError,
+  sentryHub,
+  sentryClient,
 }: DebugIdUploadPluginOptions): UnpluginOptions {
   return {
     name: "sentry-debug-id-upload-plugin",
@@ -59,7 +64,9 @@ export function releaseManagementPlugin({
           await cliInstance.releases.newDeploy(releaseName, deployOptions);
         }
       } catch (e) {
-        handleError(e);
+        sentryHub.captureException('Error in "releaseManagementPlugin" writeBundle hook');
+        await sentryClient.flush();
+        handleRecoverableError(e);
       }
     },
   };
