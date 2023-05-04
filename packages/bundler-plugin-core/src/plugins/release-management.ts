@@ -16,7 +16,7 @@ interface DebugIdUploadPluginOptions {
   setCommitsOption?: SentryCliCommitsOptions;
   deployOptions?: SentryCliNewDeployOptions;
   dist?: string;
-  handleError: (error: unknown) => void;
+  handleRecoverableError: (error: unknown) => void;
   sentryHub: Hub;
   sentryClient: NodeClient;
 }
@@ -31,7 +31,7 @@ export function releaseManagementPlugin({
   shouldUploadSourceMaps,
   shouldFinalizeRelease,
   deployOptions,
-  handleError,
+  handleRecoverableError,
   sentryHub,
   sentryClient,
 }: DebugIdUploadPluginOptions): UnpluginOptions {
@@ -66,7 +66,7 @@ export function releaseManagementPlugin({
       } catch (e) {
         sentryHub.captureException('Error in "releaseManagementPlugin" writeBundle hook');
         await sentryClient.flush();
-        handleError(e);
+        handleRecoverableError(e);
       }
     },
   };

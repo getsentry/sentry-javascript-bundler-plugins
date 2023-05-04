@@ -75,7 +75,7 @@ export function sentryUnpluginFactory({
       debug: options.debug,
     });
 
-    function handleError(unknownError: unknown) {
+    function handleRecoverableError(unknownError: unknown) {
       pluginExecutionTransaction.setStatus("internal_error");
 
       if (options.errorHandler) {
@@ -90,14 +90,16 @@ export function sentryUnpluginFactory({
     }
 
     if (!validateOptions(options, logger)) {
-      handleError(new Error("Options were not set correctly. See output above for more details."));
+      handleRecoverableError(
+        new Error("Options were not set correctly. See output above for more details.")
+      );
     }
 
     const cli = getSentryCli(options, logger);
 
     const releaseName = options.release ?? determineReleaseName();
     if (!releaseName) {
-      handleError(
+      handleRecoverableError(
         new Error("Unable to determine a release name. Please set the `release` option.")
       );
     }
@@ -148,7 +150,7 @@ export function sentryUnpluginFactory({
           setCommitsOption: options.setCommits,
           deployOptions: options.deploy,
           dist: options.dist,
-          handleError,
+          handleRecoverableError: handleRecoverableError,
           sentryHub,
           sentryClient,
         })
@@ -164,7 +166,7 @@ export function sentryUnpluginFactory({
           releaseName: releaseName,
           logger: logger,
           cliInstance: cli,
-          handleError,
+          handleRecoverableError: handleRecoverableError,
           sentryHub,
           sentryClient,
         })

@@ -16,7 +16,7 @@ interface DebugIdUploadPluginOptions {
   ignore?: string | string[];
   releaseName?: string;
   dist?: string;
-  handleError: (error: unknown) => void;
+  handleRecoverableError: (error: unknown) => void;
   sentryHub: Hub;
   sentryClient: NodeClient;
 }
@@ -28,7 +28,7 @@ export function debugIdUploadPlugin({
   cliInstance,
   releaseName,
   dist,
-  handleError,
+  handleRecoverableError,
   sentryHub,
   sentryClient,
 }: DebugIdUploadPluginOptions): UnpluginOptions {
@@ -80,7 +80,7 @@ export function debugIdUploadPlugin({
       } catch (e) {
         sentryHub.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
         await sentryClient.flush();
-        handleError(e);
+        handleRecoverableError(e);
       } finally {
         if (folderToCleanUp) {
           void fs.promises.rm(folderToCleanUp, { recursive: true, force: true });
