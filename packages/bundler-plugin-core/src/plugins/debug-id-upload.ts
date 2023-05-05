@@ -6,12 +6,12 @@ import * as util from "util";
 import { UnpluginOptions } from "unplugin";
 import { Logger } from "../sentry/logger";
 import { promisify } from "util";
-import { SentryCLILike } from "../sentry/cli";
 import { Hub, NodeClient } from "@sentry/node";
+import type SentryCli from "@sentry/cli";
 
 interface DebugIdUploadPluginOptions {
   logger: Logger;
-  cliInstance: SentryCLILike;
+  cliInstance: SentryCli;
   assets: string | string[];
   ignore?: string | string[];
   releaseName?: string;

@@ -6,12 +6,10 @@ import { normalizeUserOptions, validateOptions } from "./options-mapping";
 import { debugIdUploadPlugin } from "./plugins/debug-id-upload";
 import { releaseManagementPlugin } from "./plugins/release-management";
 import { telemetryPlugin } from "./plugins/telemetry";
-import { getSentryCli } from "./sentry/cli";
 import { createLogger } from "./sentry/logger";
-import { createSentryInstance, allowedToSendTelemetry } from "./sentry/telemetry";
+import { allowedToSendTelemetry, createSentryInstance } from "./sentry/telemetry";
 import { Options } from "./types";
 import {
-  determineReleaseName,
   generateGlobalInjectorCode,
   getDependencies,
   getPackageJson,
@@ -58,6 +56,14 @@ export function sentryUnpluginFactory({
   return createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
     const options = normalizeUserOptions(userOptions);
 
+    if (unpluginMetaContext.watchMode || options.disable) {
+      return [
+        {
+          name: "sentry-noop-plugin",
+        },
+      ];
+    }
+
     const shouldSendTelemetry = allowedToSendTelemetry(options);
     const { sentryHub, sentryClient } = createSentryInstance(
       options,
@@ -95,14 +101,15 @@ export function sentryUnpluginFactory({
       );
     }
 
-    const cli = getSentryCli(options, logger);
-
-    const releaseName = options.release ?? determineReleaseName();
-    if (!releaseName) {
-      handleRecoverableError(
-        new Error("Unable to determine a release name. Please set the `release` option.")
-      );
-    }
+    const cli = new SentryCli(null, {
+      url: options.url,
+      authToken: options.authToken,
+      org: options.org,
+      project: options.project,
+      vcsRemote: options.release.vcsRemote,
+      silent: options.silent,
+      headers: options.headers,
+    });
 
     if (process.cwd().match(/\\node_modules\\|\/node_modules\//)) {
       logger.warn(
@@ -121,12 +128,15 @@ export function sentryUnpluginFactory({
       })
     );
 
-    if (options.injectRelease && releaseName) {
+    if (!options.release.inject) {
+      logger.debug("Release injection disabled via `release.inject`. Will not inject.");
+    } else if (options.release.name === undefined) {
+      logger.debug("No release name provided. Will not inject release.");
+    } else {
       const injectionCode = generateGlobalInjectorCode({
-        release: releaseName,
+        release: options.release.name,
         injectBuildInformation: options._experiments.injectBuildInformation || false,
       });
-
       plugins.push(releaseInjectionPlugin(injectionCode));
     }
 
@@ -134,19 +144,21 @@ export function sentryUnpluginFactory({
       plugins.push(debugIdInjectionPlugin());
     }
 
-    if (releaseName) {
+    if (options.release.name === undefined) {
+      logger.debug("No release name provided. Will not manage release.");
+    } else {
       plugins.push(
         releaseManagementPlugin({
           logger,
           cliInstance: cli,
-          releaseName: releaseName,
-          shouldCleanArtifacts: options.cleanArtifacts,
-          shouldUploadSourceMaps: options.uploadSourceMaps,
-          shouldFinalizeRelease: options.finalize,
-          include: options.include,
-          setCommitsOption: options.setCommits,
-          deployOptions: options.deploy,
-          dist: options.dist,
+          releaseName: options.release.name,
+          shouldCreateRelease: options.release.create,
+          shouldCleanArtifacts: options.release.cleanArtifacts,
+          shouldFinalizeRelease: options.release.finalize,
+          include: options.release.uploadlegacySourcemaps,
+          setCommitsOption: options.release.setCommits,
+          deployOptions: options.release.deploy,
+          dist: options.release.dist,
           handleRecoverableError: handleRecoverableError,
           sentryHub,
           sentryClient,
@@ -154,13 +166,13 @@ export function sentryUnpluginFactory({
       );
     }
 
-    if (!unpluginMetaContext.watchMode && options.sourcemaps?.assets !== undefined) {
+    if (options.sourcemaps) {
       plugins.push(
         debugIdUploadPlugin({
           assets: options.sourcemaps.assets,
           ignore: options.sourcemaps.ignore,
-          dist: options.dist,
-          releaseName: releaseName,
+          dist: options.release.dist,
+          releaseName: options.release.name,
           logger: logger,
           cliInstance: cli,
           handleRecoverableError: handleRecoverableError,
