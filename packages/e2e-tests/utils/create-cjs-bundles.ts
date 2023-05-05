@@ -37,8 +37,12 @@ export function createCjsBundles(
     plugins: [
       sentryVitePlugin({
         ...sentryUnpluginOptions,
-        release: `${sentryUnpluginOptions.release}-vite`,
-        include: `${sentryUnpluginOptions.include as string}/vite`,
+        release: {
+          name: `${sentryUnpluginOptions.release.name!}-vite`,
+          uploadlegacySourcemaps: `${
+            sentryUnpluginOptions.release.uploadlegacySourcemaps as string
+          }/vite`,
+        },
       }),
     ],
   });
@@ -49,8 +53,12 @@ export function createCjsBundles(
       plugins: [
         sentryRollupPlugin({
           ...sentryUnpluginOptions,
-          release: `${sentryUnpluginOptions.release}-rollup`,
-          include: `${sentryUnpluginOptions.include as string}/rollup`,
+          release: {
+            name: `${sentryUnpluginOptions.release.name!}-rollup`,
+            uploadlegacySourcemaps: `${
+              sentryUnpluginOptions.release.uploadlegacySourcemaps as string
+            }/rollup`,
+          },
         }),
       ],
     })
@@ -70,8 +78,12 @@ export function createCjsBundles(
     plugins: [
       sentryEsbuildPlugin({
         ...sentryUnpluginOptions,
-        release: `${sentryUnpluginOptions.release}-esbuild`,
-        include: `${sentryUnpluginOptions.include as string}/esbuild`,
+        release: {
+          name: `${sentryUnpluginOptions.release.name!}-esbuild`,
+          uploadlegacySourcemaps: `${
+            sentryUnpluginOptions.release.uploadlegacySourcemaps as string
+          }/esbuild`,
+        },
       }),
     ],
     minify: true,
@@ -93,8 +105,12 @@ export function createCjsBundles(
       plugins: [
         sentryWebpackPlugin({
           ...sentryUnpluginOptions,
-          release: `${sentryUnpluginOptions.release}-webpack4`,
-          include: `${sentryUnpluginOptions.include as string}/webpack4`,
+          release: {
+            name: `${sentryUnpluginOptions.release.name!}-webpack4`,
+            uploadlegacySourcemaps: `${
+              sentryUnpluginOptions.release.uploadlegacySourcemaps as string
+            }/webpack4`,
+          },
         }),
       ],
     },
@@ -120,8 +136,12 @@ export function createCjsBundles(
       plugins: [
         sentryWebpackPlugin({
           ...sentryUnpluginOptions,
-          release: `${sentryUnpluginOptions.release}-webpack5`,
-          include: `${sentryUnpluginOptions.include as string}/webpack5`,
+          release: {
+            name: `${sentryUnpluginOptions.release.name!}-webpack5`,
+            uploadlegacySourcemaps: `${
+              sentryUnpluginOptions.release.uploadlegacySourcemaps as string
+            }/webpack5`,
+          },
         }),
       ],
     },
