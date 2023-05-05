@@ -101,16 +101,6 @@ export function sentryUnpluginFactory({
       );
     }
 
-    const cli = new SentryCli(null, {
-      url: options.url,
-      authToken: options.authToken,
-      org: options.org,
-      project: options.project,
-      vcsRemote: options.release.vcsRemote,
-      silent: options.silent,
-      headers: options.headers,
-    });
-
     if (process.cwd().match(/\\node_modules\\|\/node_modules\//)) {
       logger.warn(
         "Running Sentry plugin from within a `node_modules` folder. Some features may not work."
@@ -130,8 +120,8 @@ export function sentryUnpluginFactory({
 
     if (!options.release.inject) {
       logger.debug("Release injection disabled via `release.inject`. Will not inject.");
-    } else if (options.release.name === undefined) {
-      logger.debug("No release name provided. Will not inject release.");
+    } else if (!options.release.name) {
+      logger.warn("No release name provided. Will not inject release.");
     } else {
       const injectionCode = generateGlobalInjectorCode({
         release: options.release.name,
@@ -144,9 +134,25 @@ export function sentryUnpluginFactory({
       plugins.push(debugIdInjectionPlugin());
     }
 
-    if (options.release.name === undefined) {
-      logger.debug("No release name provided. Will not manage release.");
+    if (!options.release.name) {
+      logger.warn("No release name provided. Will not manage release.");
+    } else if (!options.authToken) {
+      logger.warn("No auth token provided. Will not manage release.");
+    } else if (!options.org) {
+      logger.warn("No org provided. Will not manage release.");
+    } else if (!options.project) {
+      logger.warn("No project provided. Will not manage release.");
     } else {
+      const cli = new SentryCli(null, {
+        url: options.url,
+        authToken: options.authToken,
+        org: options.org,
+        project: options.project,
+        vcsRemote: options.release.vcsRemote,
+        silent: options.silent,
+        headers: options.headers,
+      });
+
       plugins.push(
         releaseManagementPlugin({
           logger,
@@ -167,19 +173,36 @@ export function sentryUnpluginFactory({
     }
 
     if (options.sourcemaps) {
-      plugins.push(
-        debugIdUploadPlugin({
-          assets: options.sourcemaps.assets,
-          ignore: options.sourcemaps.ignore,
-          dist: options.release.dist,
-          releaseName: options.release.name,
-          logger: logger,
-          cliInstance: cli,
-          handleRecoverableError: handleRecoverableError,
-          sentryHub,
-          sentryClient,
-        })
-      );
+      if (!options.authToken) {
+        logger.warn("No auth token provided. Will not upload source maps.");
+      } else if (!options.org) {
+        logger.warn("No org provided. Will not upload source maps.");
+      } else if (!options.project) {
+        logger.warn("No project provided. Will not upload source maps.");
+      } else {
+        const cli = new SentryCli(null, {
+          url: options.url,
+          authToken: options.authToken,
+          org: options.org,
+          project: options.project,
+          vcsRemote: options.release.vcsRemote,
+          silent: options.silent,
+          headers: options.headers,
+        });
+        plugins.push(
+          debugIdUploadPlugin({
+            assets: options.sourcemaps.assets,
+            ignore: options.sourcemaps.ignore,
+            dist: options.release.dist,
+            releaseName: options.release.name,
+            logger: logger,
+            cliInstance: cli,
+            handleRecoverableError: handleRecoverableError,
+            sentryHub,
+            sentryClient,
+          })
+        );
+      }
     }
 
     return plugins;
