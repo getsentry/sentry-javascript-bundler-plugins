@@ -130,10 +130,6 @@ export function sentryUnpluginFactory({
       plugins.push(releaseInjectionPlugin(injectionCode));
     }
 
-    if (options.sourcemaps?.assets) {
-      plugins.push(debugIdInjectionPlugin());
-    }
-
     if (!options.release.name) {
       logger.warn("No release name provided. Will not manage release.");
     } else if (!options.authToken) {
@@ -143,20 +139,9 @@ export function sentryUnpluginFactory({
     } else if (!options.project) {
       logger.warn("No project provided. Will not manage release.");
     } else {
-      const cli = new SentryCli(null, {
-        url: options.url,
-        authToken: options.authToken,
-        org: options.org,
-        project: options.project,
-        vcsRemote: options.release.vcsRemote,
-        silent: options.silent,
-        headers: options.headers,
-      });
-
       plugins.push(
         releaseManagementPlugin({
           logger,
-          cliInstance: cli,
           releaseName: options.release.name,
           shouldCreateRelease: options.release.create,
           shouldCleanArtifacts: options.release.cleanArtifacts,
@@ -168,6 +153,15 @@ export function sentryUnpluginFactory({
           handleRecoverableError: handleRecoverableError,
           sentryHub,
           sentryClient,
+          sentryCliOptions: {
+            authToken: options.authToken,
+            org: options.org,
+            project: options.project,
+            silent: options.silent,
+            url: options.url,
+            vcsRemote: options.release.vcsRemote,
+            headers: options.headers,
+          },
         })
       );
     }
@@ -179,16 +173,10 @@ export function sentryUnpluginFactory({
         logger.warn("No org provided. Will not upload source maps.");
       } else if (!options.project) {
         logger.warn("No project provided. Will not upload source maps.");
+      } else if (!options.sourcemaps.assets) {
+        logger.warn("No assets defined. Will not upload source maps.");
       } else {
-        const cli = new SentryCli(null, {
-          url: options.url,
-          authToken: options.authToken,
-          org: options.org,
-          project: options.project,
-          vcsRemote: options.release.vcsRemote,
-          silent: options.silent,
-          headers: options.headers,
-        });
+        plugins.push(debugIdInjectionPlugin());
         plugins.push(
           debugIdUploadPlugin({
             assets: options.sourcemaps.assets,
@@ -196,10 +184,18 @@ export function sentryUnpluginFactory({
             dist: options.release.dist,
             releaseName: options.release.name,
             logger: logger,
-            cliInstance: cli,
             handleRecoverableError: handleRecoverableError,
             sentryHub,
             sentryClient,
+            sentryCliOptions: {
+              authToken: options.authToken,
+              org: options.org,
+              project: options.project,
+              silent: options.silent,
+              url: options.url,
+              vcsRemote: options.release.vcsRemote,
+              headers: options.headers,
+            },
           })
         );
       }

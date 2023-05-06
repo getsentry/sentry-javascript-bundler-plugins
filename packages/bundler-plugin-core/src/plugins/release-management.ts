@@ -7,7 +7,6 @@ import { arrayify } from "../utils";
 
 interface ReleaseManagementPluginOptions {
   logger: Logger;
-  cliInstance: SentryCli;
   releaseName: string;
   shouldCreateRelease: boolean;
   shouldCleanArtifacts: boolean;
@@ -19,10 +18,18 @@ interface ReleaseManagementPluginOptions {
   handleRecoverableError: (error: unknown) => void;
   sentryHub: Hub;
   sentryClient: NodeClient;
+  sentryCliOptions: {
+    url: string;
+    authToken: string;
+    org: string;
+    project: string;
+    vcsRemote: string;
+    silent: boolean;
+    headers?: Record<string, string>;
+  };
 }
 
 export function releaseManagementPlugin({
-  cliInstance,
   releaseName,
   include,
   dist,
@@ -34,11 +41,14 @@ export function releaseManagementPlugin({
   handleRecoverableError,
   sentryHub,
   sentryClient,
+  sentryCliOptions,
 }: ReleaseManagementPluginOptions): UnpluginOptions {
   return {
     name: "sentry-debug-id-upload-plugin",
     async writeBundle() {
       try {
+        const cliInstance = new SentryCli(null, sentryCliOptions);
+
         if (shouldCreateRelease) {
           await cliInstance.releases.new(releaseName);
         }

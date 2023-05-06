@@ -7,11 +7,10 @@ import { UnpluginOptions } from "unplugin";
 import { Logger } from "../sentry/logger";
 import { promisify } from "util";
 import { Hub, NodeClient } from "@sentry/node";
-import type SentryCli from "@sentry/cli";
+import SentryCli from "@sentry/cli";
 
 interface DebugIdUploadPluginOptions {
   logger: Logger;
-  cliInstance: SentryCli;
   assets: string | string[];
   ignore?: string | string[];
   releaseName?: string;
@@ -19,23 +18,35 @@ interface DebugIdUploadPluginOptions {
   handleRecoverableError: (error: unknown) => void;
   sentryHub: Hub;
   sentryClient: NodeClient;
+  sentryCliOptions: {
+    url: string;
+    authToken: string;
+    org: string;
+    project: string;
+    vcsRemote: string;
+    silent: boolean;
+    headers?: Record<string, string>;
+  };
 }
 
 export function debugIdUploadPlugin({
   assets,
   ignore,
   logger,
-  cliInstance,
   releaseName,
   dist,
   handleRecoverableError,
   sentryHub,
   sentryClient,
+  sentryCliOptions,
 }: DebugIdUploadPluginOptions): UnpluginOptions {
   return {
     name: "sentry-debug-id-upload-plugin",
     async writeBundle() {
       let folderToCleanUp: string | undefined;
+
+      const cliInstance = new SentryCli(null, sentryCliOptions);
+
       try {
         const tmpUploadFolder = await fs.promises.mkdtemp(
           path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
