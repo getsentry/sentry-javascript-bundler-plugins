@@ -10,7 +10,7 @@ export function normalizeUserOptions(userOptions: UserOptions) {
   const options = {
     org: userOptions.org ?? process.env["SENTRY_ORG"],
     project: userOptions.project ?? process.env["SENTRY_PROJECT"],
-    authToken: userOptions.authToken, // env var: `SENTRY_AUTH_TOKEN`
+    authToken: userOptions.authToken ?? process.env["SENTRY_AUTH_TOKEN"],
     url: userOptions.url ?? process.env["SENTRY_URL"] ?? SENTRY_SAAS_URL,
     headers: userOptions.headers,
     debug: userOptions.debug ?? false,
