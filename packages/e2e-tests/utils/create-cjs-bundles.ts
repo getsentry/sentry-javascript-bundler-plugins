@@ -39,8 +39,8 @@ export function createCjsBundles(
         ...sentryUnpluginOptions,
         release: {
           name: `${sentryUnpluginOptions.release.name!}-vite`,
-          uploadlegacySourcemaps: `${
-            sentryUnpluginOptions.release.uploadlegacySourcemaps as string
+          uploadLegacySourcemaps: `${
+            sentryUnpluginOptions.release.uploadLegacySourcemaps as string
           }/vite`,
         },
       }),
@@ -55,8 +55,8 @@ export function createCjsBundles(
           ...sentryUnpluginOptions,
           release: {
             name: `${sentryUnpluginOptions.release.name!}-rollup`,
-            uploadlegacySourcemaps: `${
-              sentryUnpluginOptions.release.uploadlegacySourcemaps as string
+            uploadLegacySourcemaps: `${
+              sentryUnpluginOptions.release.uploadLegacySourcemaps as string
             }/rollup`,
           },
         }),
@@ -80,8 +80,8 @@ export function createCjsBundles(
         ...sentryUnpluginOptions,
         release: {
           name: `${sentryUnpluginOptions.release.name!}-esbuild`,
-          uploadlegacySourcemaps: `${
-            sentryUnpluginOptions.release.uploadlegacySourcemaps as string
+          uploadLegacySourcemaps: `${
+            sentryUnpluginOptions.release.uploadLegacySourcemaps as string
           }/esbuild`,
         },
       }),
@@ -107,8 +107,8 @@ export function createCjsBundles(
           ...sentryUnpluginOptions,
           release: {
             name: `${sentryUnpluginOptions.release.name!}-webpack4`,
-            uploadlegacySourcemaps: `${
-              sentryUnpluginOptions.release.uploadlegacySourcemaps as string
+            uploadLegacySourcemaps: `${
+              sentryUnpluginOptions.release.uploadLegacySourcemaps as string
             }/webpack4`,
           },
         }),
@@ -138,8 +138,8 @@ export function createCjsBundles(
           ...sentryUnpluginOptions,
           release: {
             name: `${sentryUnpluginOptions.release.name!}-webpack5`,
-            uploadlegacySourcemaps: `${
-              sentryUnpluginOptions.release.uploadlegacySourcemaps as string
+            uploadLegacySourcemaps: `${
+              sentryUnpluginOptions.release.uploadLegacySourcemaps as string
             }/webpack5`,
           },
         }),

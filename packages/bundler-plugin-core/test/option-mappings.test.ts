@@ -7,7 +7,7 @@ describe("normalizeUserOptions()", () => {
       org: "my-org",
       project: "my-project",
       authToken: "my-auth-token",
-      release: { name: "my-release", uploadlegacySourcemaps: "./out" }, // we have to define this even though it is an optional value because of auto discovery
+      release: { name: "my-release", uploadLegacySourcemaps: "./out" }, // we have to define this even though it is an optional value because of auto discovery
     };
 
     expect(normalizeUserOptions(userOptions)).toEqual({
@@ -23,7 +23,7 @@ describe("normalizeUserOptions()", () => {
         cleanArtifacts: false,
         create: true,
         vcsRemote: "origin",
-        uploadlegacySourcemaps: "./out",
+        uploadLegacySourcemaps: "./out",
       },
       silent: false,
       telemetry: true,
@@ -39,7 +39,7 @@ describe("normalizeUserOptions()", () => {
       authToken: "my-auth-token",
       release: {
         name: "my-release", // we have to define this even though it is an optional value because of auto discovery
-        uploadlegacySourcemaps: {
+        uploadLegacySourcemaps: {
           paths: ["./output", "./files"],
           ignore: ["./files"],
           rewrite: true,
@@ -63,7 +63,7 @@ describe("normalizeUserOptions()", () => {
         create: true,
         inject: true,
         cleanArtifacts: false,
-        uploadlegacySourcemaps: {
+        uploadLegacySourcemaps: {
           ext: ["js", "map", ".foo"],
           ignore: ["./files"],
           paths: ["./output", "./files"],

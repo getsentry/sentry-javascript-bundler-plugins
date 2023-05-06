@@ -146,7 +146,7 @@ export function sentryUnpluginFactory({
           shouldCreateRelease: options.release.create,
           shouldCleanArtifacts: options.release.cleanArtifacts,
           shouldFinalizeRelease: options.release.finalize,
-          include: options.release.uploadlegacySourcemaps,
+          include: options.release.uploadLegacySourcemaps,
           setCommitsOption: options.release.setCommits,
           deployOptions: options.release.deploy,
           dist: options.release.dist,

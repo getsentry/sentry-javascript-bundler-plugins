@@ -62,10 +62,10 @@ export function createSentryInstance(
 export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bundler: string) {
   const { org, project, release, errorHandler, sourcemaps } = options;
 
-  if (release.uploadlegacySourcemaps) {
+  if (release.uploadLegacySourcemaps) {
     hub.setTag(
-      "uploadlegacySourcemapsEntries",
-      Array.isArray(release.uploadlegacySourcemaps) ? release.uploadlegacySourcemaps.length : 1
+      "uploadLegacySourcemapsEntries",
+      Array.isArray(release.uploadLegacySourcemaps) ? release.uploadLegacySourcemaps.length : 1
     );
   }
 

@@ -7,7 +7,7 @@ import * as path from "path";
 export const pluginConfig: Options = {
   release: {
     name: "basic-upload",
-    uploadlegacySourcemaps: path.resolve(__dirname, "out"),
+    uploadLegacySourcemaps: path.resolve(__dirname, "out"),
   },
   authToken: process.env["SENTRY_AUTH_TOKEN"] || "",
   org: "sentry-sdks",

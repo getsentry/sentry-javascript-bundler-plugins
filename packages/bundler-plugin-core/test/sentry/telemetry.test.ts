@@ -39,7 +39,7 @@ describe("addPluginOptionTagsToHub", () => {
   };
 
   const defaultOptions = {
-    release: { uploadlegacySourcemaps: [] },
+    release: { uploadLegacySourcemaps: [] },
   };
 
   beforeEach(() => {
@@ -52,16 +52,16 @@ describe("addPluginOptionTagsToHub", () => {
       mockedHub as unknown as Hub,
       "rollup"
     );
-    expect(mockedHub.setTag).toHaveBeenCalledWith("uploadlegacySourcemapsEntries", 0);
+    expect(mockedHub.setTag).toHaveBeenCalledWith("uploadLegacySourcemapsEntries", 0);
   });
 
   it("should set include tag according to number of entries (multiple entries)", () => {
     setTelemetryDataOnHub(
-      normalizeUserOptions({ release: { uploadlegacySourcemaps: ["", "", ""] } }),
+      normalizeUserOptions({ release: { uploadLegacySourcemaps: ["", "", ""] } }),
       mockedHub as unknown as Hub,
       "rollup"
     );
-    expect(mockedHub.setTag).toHaveBeenCalledWith("uploadlegacySourcemapsEntries", 3);
+    expect(mockedHub.setTag).toHaveBeenCalledWith("uploadLegacySourcemapsEntries", 3);
   });
 
   it("should set deploy tag to true if the deploy option is specified", () => {
@@ -123,7 +123,7 @@ describe("addPluginOptionTagsToHub", () => {
       "rollup"
     );
 
-    expect(mockedHub.setTag).toHaveBeenCalledWith("uploadlegacySourcemapsEntries", 0);
+    expect(mockedHub.setTag).toHaveBeenCalledWith("uploadLegacySourcemapsEntries", 0);
     expect(mockedHub.setTag).toHaveBeenCalledWith("finalize-release", true);
     expect(mockedHub.setTag).toHaveBeenCalledWith("node", expect.any(String));
   });
