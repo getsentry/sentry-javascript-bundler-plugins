@@ -119,9 +119,13 @@ export function sentryUnpluginFactory({
     );
 
     if (!options.release.inject) {
-      logger.debug("Release injection disabled via `release.inject`. Will not inject.");
+      logger.debug(
+        "Release injection disabled via `release.inject` option. Will not inject release."
+      );
     } else if (!options.release.name) {
-      logger.warn("No release name provided. Will not inject release.");
+      logger.warn(
+        "No release name provided. Will not inject release. Please set the `release.name` option to identifiy your release."
+      );
     } else {
       const injectionCode = generateGlobalInjectorCode({
         release: options.release.name,
@@ -131,13 +135,21 @@ export function sentryUnpluginFactory({
     }
 
     if (!options.release.name) {
-      logger.warn("No release name provided. Will not manage release.");
+      logger.warn(
+        "No release name provided. Will not create release. Please set the `release.name` option to identifiy your release."
+      );
     } else if (!options.authToken) {
-      logger.warn("No auth token provided. Will not manage release.");
+      logger.warn(
+        "No auth token provided. Will not create release. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
+      );
     } else if (!options.org) {
-      logger.warn("No org provided. Will not manage release.");
+      logger.warn(
+        "No organization slug provided. Will not create release. Please set the `org` option to your Sentry organization slug."
+      );
     } else if (!options.project) {
-      logger.warn("No project provided. Will not manage release.");
+      logger.warn(
+        "No project provided. Will not create release. Please set the `project` option to your Sentry project slug."
+      );
     } else {
       plugins.push(
         releaseManagementPlugin({
@@ -168,13 +180,21 @@ export function sentryUnpluginFactory({
 
     if (options.sourcemaps) {
       if (!options.authToken) {
-        logger.warn("No auth token provided. Will not upload source maps.");
+        logger.warn(
+          "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
+        );
       } else if (!options.org) {
-        logger.warn("No org provided. Will not upload source maps.");
+        logger.warn(
+          "No org provided. Will not upload source maps. Please set the `org` option to your Sentry organization slug."
+        );
       } else if (!options.project) {
-        logger.warn("No project provided. Will not upload source maps.");
+        logger.warn(
+          "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug."
+        );
       } else if (!options.sourcemaps.assets) {
-        logger.warn("No assets defined. Will not upload source maps.");
+        logger.warn(
+          "No assets defined. Will not upload source maps. Please provide set the `assets` option to your build-output folder."
+        );
       } else {
         plugins.push(debugIdInjectionPlugin());
         plugins.push(
