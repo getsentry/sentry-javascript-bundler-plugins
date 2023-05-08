@@ -90,6 +90,9 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
   if (sourcemaps?.assets) {
     hub.setTag("debug-id-upload", true);
   }
+  if (sourcemaps?.deleteAfterUpload) {
+    hub.setTag("delete-after-upload", true);
+  }
 
   hub.setTag("node", process.version);
 

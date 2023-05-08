@@ -199,7 +199,7 @@ export interface Options {
     deploy?: DeployOptions;
 
     /**
-     * Remove all the artifacts in the release before the upload.
+     * Remove all previously uploaded artifacts for this release on Sentry before the upload.
      *
      * Defaults to `false`.
      */
