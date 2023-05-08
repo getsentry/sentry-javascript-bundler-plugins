@@ -111,7 +111,10 @@ export async function prepareBundleForDebugIdUpload(
   try {
     bundleContent = await promisify(fs.readFile)(bundleFilePath, "utf8");
   } catch (e) {
-    logger.error(`Could not read bundle to determine debug ID and source map: ${bundleFilePath}`);
+    logger.error(
+      `Could not read bundle to determine debug ID and source map: ${bundleFilePath}`,
+      e
+    );
     return;
   }
 
@@ -215,7 +218,7 @@ async function prepareSourceMapForDebugIdUpload(
       encoding: "utf8",
     });
   } catch (e) {
-    logger.error(`Failed to read source map for debug ID upload: ${sourceMapPath}`);
+    logger.error(`Failed to read source map for debug ID upload: ${sourceMapPath}`, e);
     return;
   }
 
@@ -235,7 +238,7 @@ async function prepareSourceMapForDebugIdUpload(
       encoding: "utf8",
     });
   } catch (e) {
-    logger.error(`Failed to prepare source map for debug ID upload: ${sourceMapPath}`);
+    logger.error(`Failed to prepare source map for debug ID upload: ${sourceMapPath}`, e);
     return;
   }
 }
