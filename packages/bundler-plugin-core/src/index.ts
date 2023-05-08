@@ -6,12 +6,10 @@ import { normalizeUserOptions, validateOptions } from "./options-mapping";
 import { debugIdUploadPlugin } from "./plugins/debug-id-upload";
 import { releaseManagementPlugin } from "./plugins/release-management";
 import { telemetryPlugin } from "./plugins/telemetry";
-import { getSentryCli } from "./sentry/cli";
 import { createLogger } from "./sentry/logger";
-import { createSentryInstance, allowedToSendTelemetry } from "./sentry/telemetry";
+import { allowedToSendTelemetry, createSentryInstance } from "./sentry/telemetry";
 import { Options } from "./types";
 import {
-  determineReleaseName,
   generateGlobalInjectorCode,
   getDependencies,
   getPackageJson,
@@ -58,6 +56,14 @@ export function sentryUnpluginFactory({
   return createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
     const options = normalizeUserOptions(userOptions);
 
+    if (unpluginMetaContext.watchMode || options.disable) {
+      return [
+        {
+          name: "sentry-noop-plugin",
+        },
+      ];
+    }
+
     const shouldSendTelemetry = allowedToSendTelemetry(options);
     const { sentryHub, sentryClient } = createSentryInstance(
       options,
@@ -95,15 +101,6 @@ export function sentryUnpluginFactory({
       );
     }
 
-    const cli = getSentryCli(options, logger);
-
-    const releaseName = options.release ?? determineReleaseName();
-    if (!releaseName) {
-      handleRecoverableError(
-        new Error("Unable to determine a release name. Please set the `release` option.")
-      );
-    }
-
     if (process.cwd().match(/\\node_modules\\|\/node_modules\//)) {
       logger.warn(
         "Running Sentry plugin from within a `node_modules` folder. Some features may not work."
@@ -121,53 +118,87 @@ export function sentryUnpluginFactory({
       })
     );
 
-    if (options.injectRelease && releaseName) {
+    if (!options.release.inject) {
+      logger.debug("Release injection disabled via `release.inject`. Will not inject.");
+    } else if (!options.release.name) {
+      logger.warn("No release name provided. Will not inject release.");
+    } else {
       const injectionCode = generateGlobalInjectorCode({
-        release: releaseName,
+        release: options.release.name,
         injectBuildInformation: options._experiments.injectBuildInformation || false,
       });
-
       plugins.push(releaseInjectionPlugin(injectionCode));
     }
 
-    if (options.sourcemaps?.assets) {
-      plugins.push(debugIdInjectionPlugin());
-    }
-
-    if (releaseName) {
+    if (!options.release.name) {
+      logger.warn("No release name provided. Will not manage release.");
+    } else if (!options.authToken) {
+      logger.warn("No auth token provided. Will not manage release.");
+    } else if (!options.org) {
+      logger.warn("No org provided. Will not manage release.");
+    } else if (!options.project) {
+      logger.warn("No project provided. Will not manage release.");
+    } else {
       plugins.push(
         releaseManagementPlugin({
           logger,
-          cliInstance: cli,
-          releaseName: releaseName,
-          shouldCleanArtifacts: options.cleanArtifacts,
-          shouldUploadSourceMaps: options.uploadSourceMaps,
-          shouldFinalizeRelease: options.finalize,
-          include: options.include,
-          setCommitsOption: options.setCommits,
-          deployOptions: options.deploy,
-          dist: options.dist,
+          releaseName: options.release.name,
+          shouldCreateRelease: options.release.create,
+          shouldCleanArtifacts: options.release.cleanArtifacts,
+          shouldFinalizeRelease: options.release.finalize,
+          include: options.release.uploadLegacySourcemaps,
+          setCommitsOption: options.release.setCommits,
+          deployOptions: options.release.deploy,
+          dist: options.release.dist,
           handleRecoverableError: handleRecoverableError,
           sentryHub,
           sentryClient,
+          sentryCliOptions: {
+            authToken: options.authToken,
+            org: options.org,
+            project: options.project,
+            silent: options.silent,
+            url: options.url,
+            vcsRemote: options.release.vcsRemote,
+            headers: options.headers,
+          },
         })
       );
     }
 
-    if (!unpluginMetaContext.watchMode && options.sourcemaps?.assets !== undefined) {
-      plugins.push(
-        debugIdUploadPlugin({
-          assets: options.sourcemaps.assets,
-          ignore: options.sourcemaps.ignore,
-          dist: options.dist,
-          releaseName: releaseName,
-          logger: logger,
-          cliInstance: cli,
-          handleRecoverableError: handleRecoverableError,
-          sentryHub,
-          sentryClient,
-        })
-      );
+    if (options.sourcemaps) {
+      if (!options.authToken) {
+        logger.warn("No auth token provided. Will not upload source maps.");
+      } else if (!options.org) {
+        logger.warn("No org provided. Will not upload source maps.");
+      } else if (!options.project) {
+        logger.warn("No project provided. Will not upload source maps.");
+      } else if (!options.sourcemaps.assets) {
+        logger.warn("No assets defined. Will not upload source maps.");
+      } else {
+        plugins.push(debugIdInjectionPlugin());
+        plugins.push(
+          debugIdUploadPlugin({
+            assets: options.sourcemaps.assets,
+            ignore: options.sourcemaps.ignore,
+            dist: options.release.dist,
+            releaseName: options.release.name,
+            logger: logger,
+            handleRecoverableError: handleRecoverableError,
+            sentryHub,
+            sentryClient,
+            sentryCliOptions: {
+              authToken: options.authToken,
+              org: options.org,
+              project: options.project,
+              silent: options.silent,
+              url: options.url,
+              vcsRemote: options.release.vcsRemote,
+              headers: options.headers,
+            },
+          })
+        );
+      }
     }
 
     return plugins;

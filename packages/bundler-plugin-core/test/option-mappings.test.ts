@@ -7,34 +7,26 @@ describe("normalizeUserOptions()", () => {
       org: "my-org",
       project: "my-project",
       authToken: "my-auth-token",
-      release: "my-release", // we have to define this even though it is an optional value because of auto discovery
-      include: "./out",
+      release: { name: "my-release", uploadLegacySourcemaps: "./out" }, // we have to define this even though it is an optional value because of auto discovery
     };
 
     expect(normalizeUserOptions(userOptions)).toEqual({
       authToken: "my-auth-token",
-      cleanArtifacts: false,
-      debug: false,
-      dryRun: false,
-      finalize: true,
-      include: [
-        {
-          ext: [".js", ".map", ".jsbundle", ".bundle"],
-          ignore: ["node_modules"],
-          paths: ["./out"],
-          rewrite: true,
-          sourceMapReference: true,
-          stripCommonPrefix: false,
-          validate: false,
-        },
-      ],
       org: "my-org",
       project: "my-project",
-      release: "my-release",
+      debug: false,
+      disable: false,
+      release: {
+        name: "my-release",
+        finalize: true,
+        inject: true,
+        cleanArtifacts: false,
+        create: true,
+        vcsRemote: "origin",
+        uploadLegacySourcemaps: "./out",
+      },
       silent: false,
       telemetry: true,
-      injectRelease: true,
-      uploadSourceMaps: true,
       _experiments: {},
       url: "https://sentry.io",
     });
@@ -45,41 +37,43 @@ describe("normalizeUserOptions()", () => {
       org: "my-org",
       project: "my-project",
       authToken: "my-auth-token",
-      release: "my-release", // we have to define this even though it is an optional value because of auto discovery
-
-      // include options
-      include: [{ paths: ["./output", "./files"], ignore: ["./files"] }],
-      rewrite: true,
-      sourceMapReference: false,
-      stripCommonPrefix: true,
-      // It is intentional that only foo has a `.`. We're expecting all extensions to be prefixed with a dot.
-      ext: ["js", "map", ".foo"],
+      release: {
+        name: "my-release", // we have to define this even though it is an optional value because of auto discovery
+        uploadLegacySourcemaps: {
+          paths: ["./output", "./files"],
+          ignore: ["./files"],
+          rewrite: true,
+          sourceMapReference: false,
+          stripCommonPrefix: true,
+          ext: ["js", "map", ".foo"],
+        },
+      },
     };
 
     expect(normalizeUserOptions(userOptions)).toEqual({
       authToken: "my-auth-token",
-      cleanArtifacts: false,
+      org: "my-org",
+      project: "my-project",
       debug: false,
-      dryRun: false,
-      finalize: true,
-      include: [
-        {
-          ext: [".js", ".map", ".foo"],
+      disable: false,
+      release: {
+        name: "my-release",
+        vcsRemote: "origin",
+        finalize: true,
+        create: true,
+        inject: true,
+        cleanArtifacts: false,
+        uploadLegacySourcemaps: {
+          ext: ["js", "map", ".foo"],
           ignore: ["./files"],
           paths: ["./output", "./files"],
           rewrite: true,
           sourceMapReference: false,
           stripCommonPrefix: true,
-          validate: false,
         },
-      ],
-      org: "my-org",
-      project: "my-project",
-      release: "my-release",
+      },
       silent: false,
       telemetry: true,
-      injectRelease: true,
-      uploadSourceMaps: true,
       _experiments: {},
       url: "https://sentry.io",
     });
@@ -118,7 +112,7 @@ describe("validateOptions", () => {
   });
 
   it("should return `false` if `setCommits` is set but neither auto nor manual options are set", () => {
-    const options = { setCommits: {} } as Partial<NormalizedOptions>;
+    const options = { release: { setCommits: {} } } as Partial<NormalizedOptions>;
 
     expect(validateOptions(options as unknown as NormalizedOptions, mockedLogger)).toBe(false);
     expect(mockedLogger.error).toHaveBeenCalledWith(
@@ -128,7 +122,7 @@ describe("validateOptions", () => {
   });
 
   it("should return `true` but warn if `setCommits` is set and both auto nor manual options are set", () => {
-    const options = { setCommits: { auto: true, repo: "myRepo", commit: "myCommit" } };
+    const options = { release: { setCommits: { auto: true, repo: "myRepo", commit: "myCommit" } } };
 
     expect(validateOptions(options as unknown as NormalizedOptions, mockedLogger)).toBe(true);
     expect(mockedLogger.error).not.toHaveBeenCalled();
@@ -140,7 +134,7 @@ describe("validateOptions", () => {
   });
 
   it("should return `false` if `deploy`is set but `env` is not provided", () => {
-    const options = { deploy: {} } as Partial<NormalizedOptions>;
+    const options = { release: { deploy: {} } } as Partial<NormalizedOptions>;
 
     expect(validateOptions(options as unknown as NormalizedOptions, mockedLogger)).toBe(false);
     expect(mockedLogger.error).toHaveBeenCalledWith(

@@ -20,14 +20,14 @@ describe("shouldSendTelemetry", () => {
     mockCliExecute.mockImplementation(
       () => "Sentry Server: https://selfhostedSentry.io  \nsomeotherstuff\netc"
     );
-    expect(await allowedToSendTelemetry({} as NormalizedOptions)).toBe(false);
+    expect(await allowedToSendTelemetry({ release: {} } as NormalizedOptions)).toBe(false);
   });
 
   it("should return true if CLI returns sentry.io as a URL", async () => {
     mockCliExecute.mockImplementation(
       () => "Sentry Server: https://sentry.io  \nsomeotherstuff\netc"
     );
-    expect(await allowedToSendTelemetry({} as NormalizedOptions)).toBe(true);
+    expect(await allowedToSendTelemetry({ release: {} } as NormalizedOptions)).toBe(true);
   });
 });
 
@@ -39,7 +39,7 @@ describe("addPluginOptionTagsToHub", () => {
   };
 
   const defaultOptions = {
-    include: [],
+    release: { uploadLegacySourcemaps: [] },
   };
 
   beforeEach(() => {
@@ -52,21 +52,21 @@ describe("addPluginOptionTagsToHub", () => {
       mockedHub as unknown as Hub,
       "rollup"
     );
-    expect(mockedHub.setTag).toHaveBeenCalledWith("include", "single-entry");
+    expect(mockedHub.setTag).toHaveBeenCalledWith("uploadLegacySourcemapsEntries", 0);
   });
 
   it("should set include tag according to number of entries (multiple entries)", () => {
     setTelemetryDataOnHub(
-      normalizeUserOptions({ include: ["", "", ""] }),
+      normalizeUserOptions({ release: { uploadLegacySourcemaps: ["", "", ""] } }),
       mockedHub as unknown as Hub,
       "rollup"
     );
-    expect(mockedHub.setTag).toHaveBeenCalledWith("include", "multiple-entries");
+    expect(mockedHub.setTag).toHaveBeenCalledWith("uploadLegacySourcemapsEntries", 3);
   });
 
   it("should set deploy tag to true if the deploy option is specified", () => {
     setTelemetryDataOnHub(
-      normalizeUserOptions({ ...defaultOptions, deploy: { env: "production" } }),
+      normalizeUserOptions({ ...defaultOptions, release: { deploy: { env: "production" } } }),
       mockedHub as unknown as Hub,
       "rollup"
     );
@@ -91,7 +91,7 @@ describe("addPluginOptionTagsToHub", () => {
     (expectedValue, commitOptions) => {
       setTelemetryDataOnHub(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        normalizeUserOptions({ ...defaultOptions, setCommits: commitOptions as any }),
+        normalizeUserOptions({ ...defaultOptions, release: { setCommits: commitOptions as any } }),
         mockedHub as unknown as Hub,
         "rollup"
       );
@@ -103,9 +103,10 @@ describe("addPluginOptionTagsToHub", () => {
     setTelemetryDataOnHub(
       normalizeUserOptions({
         ...defaultOptions,
-        cleanArtifacts: true,
-        finalize: true,
-        dryRun: true,
+        release: {
+          cleanArtifacts: true,
+          finalize: true,
+        },
       }),
       mockedHub as unknown as Hub,
       "rollup"
@@ -113,7 +114,6 @@ describe("addPluginOptionTagsToHub", () => {
 
     expect(mockedHub.setTag).toHaveBeenCalledWith("clean-artifacts", true);
     expect(mockedHub.setTag).toHaveBeenCalledWith("finalize-release", true);
-    expect(mockedHub.setTag).toHaveBeenCalledWith("dry-run", true);
   });
 
   it("shouldn't set any tags other than include if no opional options are specified", () => {
@@ -123,8 +123,7 @@ describe("addPluginOptionTagsToHub", () => {
       "rollup"
     );
 
-    expect(mockedHub.setTag).toHaveBeenCalledTimes(3);
-    expect(mockedHub.setTag).toHaveBeenCalledWith("include", "single-entry");
+    expect(mockedHub.setTag).toHaveBeenCalledWith("uploadLegacySourcemapsEntries", 0);
     expect(mockedHub.setTag).toHaveBeenCalledWith("finalize-release", true);
     expect(mockedHub.setTag).toHaveBeenCalledWith("node", expect.any(String));
   });

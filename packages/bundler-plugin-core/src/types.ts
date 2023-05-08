@@ -1,257 +1,6 @@
-import { Hub, Span } from "@sentry/node";
-import { SentryCLILike } from "./sentry/cli";
-import { createLogger } from "./sentry/logger";
-
-/**
- * The main options object holding all plugin options available to users
- */
-export type Options = Omit<IncludeEntry, "paths"> & {
-  /* --- authentication/identification: */
-
+export interface Options {
   /**
    * The slug of the Sentry organization associated with the app.
-   *
-   * This value can also be specified via the `SENTRY_ORG` environment variable.
-   */
-  org?: string;
-
-  /**
-   * The slug of the Sentry project associated with the app.
-   *
-   * This value can also be specified via the `SENTRY_PROJECT` environment variable.
-   */
-  project?: string;
-
-  /**
-   * The authentication token to use for all communication with Sentry.
-   * Can be obtained from https://sentry.io/settings/account/api/auth-tokens/.
-   * Required scopes: project:releases (and org:read if setCommits option is used).
-   *
-   * This value can also be specified via the `SENTRY_AUTH_TOKEN` environment variable.
-   */
-  authToken?: string;
-
-  /**
-   * The base URL of your Sentry instance. Use this if you are using a self-hosted
-   * or Sentry instance other than sentry.io.
-   *
-   * This value can also be set via the `SENTRY_URL` environment variable.
-   *
-   * Defaults to https://sentry.io/, which is the correct value for SaaS customers.
-   */
-  url?: string;
-
-  /* --- release properties: */
-
-  /**
-   * Unique identifier for the release.
-   *
-   * This value can also be specified via the `SENTRY_RELEASE` environment variable.
-   *
-   * Defaults to the output of the sentry-cli releases propose-version command,
-   * which automatically detects values for Cordova, Heroku, AWS CodeBuild, CircleCI,
-   * Xcode, and Gradle, and otherwise uses the git `HEAD`'s commit SHA. (the latter
-   * requires access to git CLI and for the root directory to be a valid repository).
-   */
-  release?: string;
-
-  /**
-   * Unique identifier for the distribution, used to further segment your release.
-   * Usually your build number.
-   */
-  dist?: string;
-
-  /**
-   * Filter for modules that the release should be injected in.
-   *
-   * This option takes a string, a regular expression, or an array containing strings,
-   * regular expressions, or both. It's also possible to provide a filter function
-   * that takes the absolute path of a processed module. It should return `true`
-   * if the release should be injected into the module and `false` otherwise. String
-   * values of this option require a full match with the absolute path of the module.
-   *
-   * By default, the release will be injected into all entrypoints. If release
-   * injection should be disabled, provide an empty array here.
-   *
-   * @deprecated This option will be removed in the next major version.
-   */
-  releaseInjectionTargets?: (string | RegExp)[] | RegExp | string | ((filePath: string) => boolean);
-
-  /**
-   * Determines if the Sentry release record should be automatically finalized
-   * (meaning a date_released timestamp is added) after artifact upload.
-   *
-   * Defaults to `true`.
-   */
-  finalize?: boolean;
-
-  /* --- source maps properties: */
-
-  /**
-   * One or more paths that Sentry CLI should scan recursively for sources.
-   * It will upload all .map files and match associated .js files. Other file
-   * types can be uploaded by using the `ext` option.
-   * Each path can be given as a string or an object with path-specific options
-   *
-   * @deprecated Use the `sourcemaps` option instead.
-   */
-  include?: string | IncludeEntry | Array<string | IncludeEntry>;
-
-  /* --- other properties: */
-
-  /**
-   * Version control system remote name.
-   *
-   * This value can also be specified via the `SENTRY_VSC_REMOTE` environment variable.
-   *
-   * Defaults to 'origin'.
-   */
-  vcsRemote?: string;
-
-  /**
-   * Headers added to every outgoing network request.
-   */
-  headers?: Record<string, string>;
-
-  /**
-   * Attempts a dry run (useful for dev environments), making release creation
-   * a no-op.
-   *
-   * Defaults to `false`, but may be automatically set to `true` in development environments
-   * by some framework integrations (Next.JS, possibly others).
-   */
-  dryRun?: boolean;
-
-  /**
-   * Print useful debug information.
-   *
-   * Defaults to `false`.
-   */
-  debug?: boolean;
-
-  /**
-   * Suppresses all logs.
-   *
-   * Defaults to `false`.
-   */
-  silent?: boolean;
-
-  /**
-   * Remove all the artifacts in the release before the upload.
-   *
-   * Defaults to `false`.
-   */
-  cleanArtifacts?: boolean;
-
-  /**
-   * When an error occurs during rlease creation or sourcemaps upload, the plugin will call this function.
-   *
-   * By default, the plugin will simply throw an error, thereby stopping the bundling process.
-   * If an `errorHandler` callback is provided, compilation will continue, unless an error is
-   * thrown in the provided callback.
-   *
-   * To allow compilation to continue but still emit a warning, set this option to the following:
-   *
-   * ```js
-   * (err) => {
-   *   console.warn(err);
-   * }
-   * ```
-   */
-  errorHandler?: (err: Error) => void;
-
-  /**
-   * Associates the release with its commits in Sentry.
-   */
-  setCommits?: SetCommitsOptions;
-
-  /**
-   * Adds deployment information to the release in Sentry.
-   */
-  deploy?: DeployOptions;
-
-  /**
-   * If set to true, internal plugin errors and performance data will be sent to Sentry.
-   *
-   * At Sentry we like to use Sentry ourselves to deliver faster and more stable products.
-   * We're very careful of what we're sending. We won't collect anything other than error
-   * and high-level performance data. We will never collect your code or any details of the
-   * projects in which you're using this plugin.
-   *
-   * Defaults to `true`.
-   */
-  telemetry?: boolean;
-
-  /**
-   * Path to Sentry CLI config properties, as described in
-   * https://docs.sentry.io/product/cli/configuration/#configuration-file.
-   *
-   * By default, the config file is looked for upwards from the current path, and
-   * defaults from ~/.sentryclirc are always loaded
-   */
-  configFile?: string;
-
-  /**
-   * Whether the plugin should inject release information into the build.
-   *
-   * Defaults to `true`.
-   */
-  injectRelease?: boolean;
-
-  /**
-   * Whether the plugin should upload source maps to Sentry.
-   *
-   * Defaults to `true`.
-   */
-  uploadSourceMaps?: boolean;
-
-  /**
-   * Options for source maps uploading.
-   */
-  sourcemaps?: {
-    /**
-     * A glob or an array of globs that specify the build artifacts that should be uploaded to Sentry.
-     * Leave this option undefined if you do not want to upload source maps to Sentry.
-     *
-     * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
-     *
-     * Use the `debug` option to print information about which files end up being uploaded.
-     */
-    assets: string | string[];
-
-    /**
-     * A glob or an array of globs that specify which build artifacts should not be uploaded to Sentry.
-     *
-     * Default: `[]`
-     *
-     * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
-     *
-     * Use the `debug` option to print information about which files end up being uploaded.
-     */
-    ignore?: string | string[];
-  };
-
-  /**
-   * Options that are considered experimental and subject to change.
-   *
-   * @experimental API may change in any release
-   */
-  _experiments?: {
-    /**
-     * If set to true, the plugin will inject an additional `SENTRY_BUILD_INFO` variable.
-     * This contains information about the build, e.g. dependencies, node version and other useful data.
-     *
-     * Defaults to `false`.
-     */
-    injectBuildInformation?: boolean;
-  };
-};
-
-export interface NewOptions {
-  /**
-   * The slug of the Sentry organization associated with the app.
-   *
-   * This value can also be specified via the `SENTRY_ORG` environment variable.
    */
   org?: string;
 
@@ -450,26 +199,23 @@ export interface NewOptions {
     deploy?: DeployOptions;
 
     /**
+     * Remove all previously uploaded artifacts for this release on Sentry before the upload.
+     *
+     * Defaults to `false`.
+     */
+    cleanArtifacts?: boolean;
+
+    /**
      * Legacy method of uploading source maps. (not recommended unless necessary)
+     *
+     * One or more paths that should be scanned recursively for sources.
+     *
+     * Each path can be given as a string or an object with more specific options.
      *
      * The modern version of doing source maps upload is more robust and way easier to get working but has to inject a very small snippet of JavaScript into your output bundles.
      * In situations where this leads to problems (e.g subresource integrity) you can use this option as a fallback.
      */
-    legacySourcemaps?: {
-      /**
-       * One or more paths that should be scanned recursively for sources.
-       *
-       * Each path can be given as a string or an object with more specific options.
-       */
-      include?: string | IncludeEntry | Array<string | IncludeEntry>;
-
-      /**
-       * Remove all the artifacts in the release before the upload.
-       *
-       * Defaults to `false`.
-       */
-      cleanArtifacts?: boolean;
-    };
+    uploadLegacySourcemaps?: string | IncludeEntry | Array<string | IncludeEntry>;
   };
 
   /**
@@ -663,15 +409,4 @@ type DeployOptions = {
    * URL that points to the deployment.
    */
   url?: string;
-};
-
-/**
- * Holds data for internal purposes
- * (e.g. telemetry and logging)
- */
-export type BuildContext = {
-  hub: Hub;
-  parentSpan?: Span;
-  logger: ReturnType<typeof createLogger>;
-  cli: SentryCLILike;
 };

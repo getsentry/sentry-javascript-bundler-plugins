@@ -60,44 +60,38 @@ export function createSentryInstance(
 }
 
 export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bundler: string) {
-  const {
-    org,
-    project,
-    cleanArtifacts,
-    finalize,
-    setCommits,
-    dryRun,
-    errorHandler,
-    deploy,
-    include,
-    sourcemaps,
-  } = options;
+  const { org, project, release, errorHandler, sourcemaps } = options;
 
-  hub.setTag("include", include.length > 1 ? "multiple-entries" : "single-entry");
+  if (release.uploadLegacySourcemaps) {
+    hub.setTag(
+      "uploadLegacySourcemapsEntries",
+      Array.isArray(release.uploadLegacySourcemaps) ? release.uploadLegacySourcemaps.length : 1
+    );
+  }
 
   // Optional release pipeline steps
-  if (cleanArtifacts) {
+  if (release.cleanArtifacts) {
     hub.setTag("clean-artifacts", true);
   }
-  if (setCommits) {
-    hub.setTag("set-commits", setCommits.auto === true ? "auto" : "manual");
+  if (release.setCommits) {
+    hub.setTag("set-commits", release.setCommits.auto === true ? "auto" : "manual");
   }
-  if (finalize) {
+  if (release.finalize) {
     hub.setTag("finalize-release", true);
   }
-  if (deploy) {
+  if (release.deploy) {
     hub.setTag("add-deploy", true);
   }
 
   // Miscelaneous options
-  if (dryRun) {
-    hub.setTag("dry-run", true);
-  }
   if (errorHandler) {
     hub.setTag("error-handler", "custom");
   }
   if (sourcemaps?.assets) {
     hub.setTag("debug-id-upload", true);
+  }
+  if (sourcemaps?.deleteAfterUpload) {
+    hub.setTag("delete-after-upload", true);
   }
 
   hub.setTag("node", process.version);
@@ -112,14 +106,10 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
 }
 
 export async function allowedToSendTelemetry(options: NormalizedOptions): Promise<boolean> {
-  const { silent, org, project, authToken, url, vcsRemote, headers, telemetry, dryRun } = options;
+  const { silent, org, project, authToken, url, headers, telemetry, release } = options;
 
   // `options.telemetry` defaults to true
   if (telemetry === false) {
-    return false;
-  }
-
-  if (dryRun) {
     return false;
   }
 
@@ -127,12 +117,12 @@ export async function allowedToSendTelemetry(options: NormalizedOptions): Promis
     return true;
   }
 
-  const cli = new SentryCli(options.configFile, {
+  const cli = new SentryCli(null, {
     url,
     authToken,
     org,
     project,
-    vcsRemote,
+    vcsRemote: release.vcsRemote,
     silent,
     headers,
   });
