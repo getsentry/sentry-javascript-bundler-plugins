@@ -4,10 +4,6 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
-## 2.0.0-alpha.2
-
-This is a pre-release for version 2.
-
 ## 0.7.2
 
 - fix(core): Use createRequire to not use built-in require in ESM (#212)
