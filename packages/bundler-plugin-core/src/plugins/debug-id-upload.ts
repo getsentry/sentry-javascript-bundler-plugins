@@ -111,13 +111,18 @@ export async function prepareBundleForDebugIdUpload(
   try {
     bundleContent = await promisify(fs.readFile)(bundleFilePath, "utf8");
   } catch (e) {
-    logger.warn(`Could not read bundle to determine debug ID and source map: ${bundleFilePath}`);
+    logger.error(
+      `Could not read bundle to determine debug ID and source map: ${bundleFilePath}`,
+      e
+    );
     return;
   }
 
   const debugId = determineDebugIdFromBundleSource(bundleContent);
   if (debugId === undefined) {
-    logger.warn(`Could not determine debug ID from bundle: ${bundleFilePath}`);
+    logger.warn(
+      `Could not determine debug ID from bundle. This can happen if you did not clean your output folder before installing the Sentry plugin. File will not be source mapped: ${bundleFilePath}`
+    );
     return;
   }
 
@@ -207,21 +212,33 @@ async function prepareSourceMapForDebugIdUpload(
   debugId: string,
   logger: Logger
 ): Promise<void> {
+  let sourceMapFileContent: string;
   try {
-    const sourceMapFileContent = await util.promisify(fs.readFile)(sourceMapPath, {
+    sourceMapFileContent = await util.promisify(fs.readFile)(sourceMapPath, {
       encoding: "utf8",
     });
+  } catch (e) {
+    logger.error(`Failed to read source map for debug ID upload: ${sourceMapPath}`, e);
+    return;
+  }
 
-    const map = JSON.parse(sourceMapFileContent) as Record<string, string>;
-
+  let map: Record<string, string>;
+  try {
+    map = JSON.parse(sourceMapFileContent) as Record<string, string>;
     // For now we write both fields until we know what will become the standard - if ever.
     map["debug_id"] = debugId;
     map["debugId"] = debugId;
+  } catch (e) {
+    logger.error(`Failed to parse source map for debug ID upload: ${sourceMapPath}`);
+    return;
+  }
 
+  try {
     await util.promisify(fs.writeFile)(targetPath, JSON.stringify(map), {
       encoding: "utf8",
     });
   } catch (e) {
-    logger.warn(`Failed to prepare source map for debug ID upload: ${sourceMapPath}`);
+    logger.error(`Failed to prepare source map for debug ID upload: ${sourceMapPath}`, e);
+    return;
   }
 }
