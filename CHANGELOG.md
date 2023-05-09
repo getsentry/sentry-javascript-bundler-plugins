@@ -4,7 +4,7 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
-## 2.0.0-alpha.3
+## 2.0.0-alpha.4
 
 This is a pre-release for version 2.
 
