@@ -12,7 +12,6 @@
     "bundler",
     "plugin"
   ],
-  "private": true,
   "publishConfig": {
     "access": "public"
   },
