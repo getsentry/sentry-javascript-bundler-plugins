@@ -20,15 +20,21 @@ In version 2, you simply need to call a function and pass the initialization opt
 
 ```js
 // old initialization:
+import SentryWebpackPlugin from "@sentry/webpack-plugin";
 new SentryCliPlugin({
   include: "./dist",
 });
 
 // new initialization:
+import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
 sentryWebpackPlugin({
-  include: "./dist",
+  sourcemaps: { assets: "./dist/**" },
 });
 ```
+
+### Changed options
+
+The options have been changed for v2. See https://github.com/getsentry/rfcs/blob/main/text/0086-sentry-bundler-plugins-api.md for details.
 
 ### Replacing `entries` option with `releaseInjectionTargets`
 
