@@ -4,11 +4,7 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
-## 2.0.0-alpha.5
-
-- Ensure we actually publish this for the webpack plugin
-
-## 2.0.0-alpha.4
+## 2.0.0-alpha.6
 
 This is a pre-release for version 2.
 
