@@ -37,7 +37,6 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
 
 function webpackDebugIdInjectionPlugin(): UnpluginOptions {
   const pluginName = "sentry-webpack-debug-id-injection-plugin";
-  const debugIdSnippet = getDebugIdSnippet(uuidv4());
 
   return {
     name: pluginName,
@@ -48,7 +47,7 @@ function webpackDebugIdInjectionPlugin(): UnpluginOptions {
           new compiler.webpack.BannerPlugin({
             raw: true,
             include: /\.(js|ts|jsx|tsx|mjs|cjs)$/,
-            banner: debugIdSnippet,
+            banner: () => getDebugIdSnippet(uuidv4()),
           })
         );
       } else {
@@ -57,7 +56,7 @@ function webpackDebugIdInjectionPlugin(): UnpluginOptions {
           new Webpack4BannerPlugin({
             raw: true,
             include: /\.(js|ts|jsx|tsx|mjs|cjs)$/,
-            banner: debugIdSnippet,
+            banner: () => getDebugIdSnippet(uuidv4()),
           })
         );
       }
