@@ -114,8 +114,6 @@ export interface Options {
      * Hook to rewrite the `sources` field inside the source map before being uploaded to Sentry. Does not modify the actual source map.
      *
      * Defaults to making all sources relative to `process.cwd()` while building.
-     *
-     * @hidden Not yet implemented.
      */
     rewriteSources?: (source: string, map: any) => string;
 
