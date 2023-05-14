@@ -70,6 +70,12 @@ export function sentryUnpluginFactory({
       shouldSendTelemetry,
       unpluginMetaContext.framework
     );
+    const sentrySession = sentryHub.startSession();
+    sentryHub.captureSession();
+    process.on("beforeExit", () => {
+      sentrySession.init = false;
+      sentryHub.endSession();
+    });
     const pluginExecutionTransaction = sentryHub.startTransaction({
       name: "Sentry Bundler Plugin execution",
     });
@@ -82,15 +88,22 @@ export function sentryUnpluginFactory({
     });
 
     function handleRecoverableError(unknownError: unknown) {
-      pluginExecutionTransaction.setStatus("internal_error");
-
+      sentrySession.init = false;
+      sentrySession.status = "abnormal";
+      sentryHub.endSession();
       if (options.errorHandler) {
-        if (unknownError instanceof Error) {
-          options.errorHandler(unknownError);
-        } else {
-          options.errorHandler(new Error("An unknown error occured"));
+        try {
+          if (unknownError instanceof Error) {
+            options.errorHandler(unknownError);
+          } else {
+            options.errorHandler(new Error("An unknown error occured"));
+          }
+        } catch (e) {
+          sentrySession.status = "crashed";
+          throw e;
         }
       } else {
+        sentrySession.status = "crashed";
         throw unknownError;
       }
     }
