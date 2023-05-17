@@ -53,7 +53,7 @@ sentryWebpackPlugin({
   sourcemaps: {
     assets: ["./path1/**", "./path2/**"],
     ignore: ["./path2/ignore/**"],
-    deleteAfterUpload: true,
+    deleteFilesAfterUpload: ["./path1/**/*.map", "./path2/**/*.map"],
   },
 });
 ```
