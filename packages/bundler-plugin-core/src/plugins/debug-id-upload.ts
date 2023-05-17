@@ -71,12 +71,7 @@ export function debugIdUploadPlugin({
 
         await Promise.all(
           debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
-            await prepareBundleForDebugIdUpload(
-              chunkFilePath,
-              tmpUploadFolder,
-              String(chunkIndex),
-              logger
-            );
+            await prepareBundleForDebugIdUpload(chunkFilePath, tmpUploadFolder, chunkIndex, logger);
           })
         );
 
@@ -123,7 +118,7 @@ export function debugIdUploadPlugin({
 export async function prepareBundleForDebugIdUpload(
   bundleFilePath: string,
   uploadFolder: string,
-  uniqueUploadName: string,
+  chunkIndex: number,
   logger: Logger
 ) {
   let bundleContent;
@@ -139,11 +134,13 @@ export async function prepareBundleForDebugIdUpload(
 
   const debugId = determineDebugIdFromBundleSource(bundleContent);
   if (debugId === undefined) {
-    logger.warn(
+    logger.debug(
       `Could not determine debug ID from bundle. This can happen if you did not clean your output folder before installing the Sentry plugin. File will not be source mapped: ${bundleFilePath}`
     );
     return;
   }
+
+  const uniqueUploadName = `${debugId}-${chunkIndex}`;
 
   bundleContent += `\n//# debugId=${debugId}`;
   const writeSourceFilePromise = fs.promises.writeFile(
@@ -218,7 +215,8 @@ async function determineSourceMapPathFromBundle(
     // noop
   }
 
-  logger.warn(`Could not determine source map path for bundle: ${bundlePath}`);
+  // This is just a debug message because it can be quite spammy for some frameworks
+  logger.debug(`Could not determine source map path for bundle: ${bundlePath}`);
   return undefined;
 }
 
