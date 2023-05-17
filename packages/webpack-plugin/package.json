@@ -8,13 +8,12 @@
   "license": "MIT",
   "keywords": [
     "Sentry",
-    "Vite",
+    "Webpack",
     "bundler",
     "plugin"
   ],
-  "private": true,
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "files": [
     "dist"
@@ -39,6 +38,7 @@
     "check:types": "run-p check:types:src check:types:test",
     "check:types:src": "tsc --project ./src/tsconfig.json --noEmit",
     "check:types:test": "tsc --project ./test/tsconfig.json --noEmit",
+    "build:npm": "npm pack",
     "clean": "run-s clean:build",
     "clean:all": "run-p clean clean:deps",
     "clean:build": "rimraf ./dist *.tgz",
