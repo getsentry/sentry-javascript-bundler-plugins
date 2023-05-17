@@ -23,6 +23,7 @@ interface DebugIdUploadPluginOptions {
   handleRecoverableError: (error: unknown) => void;
   sentryHub: Hub;
   sentryClient: NodeClient;
+  deleteFilesAfterUpload?: string | string[];
   sentryCliOptions: {
     url: string;
     authToken: string;
@@ -45,6 +46,7 @@ export function debugIdUploadPlugin({
   sentryClient,
   sentryCliOptions,
   rewriteSourcesHook,
+  deleteFilesAfterUpload,
 }: DebugIdUploadPluginOptions): UnpluginOptions {
   return {
     name: "sentry-debug-id-upload-plugin",
@@ -95,6 +97,23 @@ export function debugIdUploadPlugin({
           ],
           useArtifactBundle: true,
         });
+
+        if (deleteFilesAfterUpload) {
+          const filePathsToDelete = await glob(deleteFilesAfterUpload, {
+            absolute: true,
+            nodir: true,
+          });
+
+          filePathsToDelete.forEach((filePathToDelete) => {
+            logger.debug(`Deleting asset after upload: ${filePathToDelete}`);
+          });
+
+          await Promise.all(
+            filePathsToDelete.map((filePathToDelete) =>
+              fs.promises.rm(filePathToDelete, { force: true })
+            )
+          );
+        }
       } catch (e) {
         sentryHub.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
         await sentryClient.flush();

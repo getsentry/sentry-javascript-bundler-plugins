@@ -123,10 +123,8 @@ export interface Options {
      * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
      *
      * Use the `debug` option to print information about which files end up being deleted.
-     *
-     * @hidden Not yet implemented.
      */
-    deleteAfterUpload?: string | string[];
+    deleteFilesAfterUpload?: string | string[];
   };
 
   /**
