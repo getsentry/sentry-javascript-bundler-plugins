@@ -30,6 +30,34 @@ sentryWebpackPlugin({
 });
 ```
 
+### Removal of `include` for `sourcemap` option
+
+The `include` option was removed in favour of the new `sourcemaps` option. If you cannot migrate to the `sourcemaps`, `include` is still avaliable as the `uploadLegacySourcemaps` option.
+
+Use the `sourcemaps.assets` and `sourcemaps.ignore` options to indicate to the plugin which sourcemaps should be uploaded to Sentry. The plugin now also exposes `sourcemaps.deleteAfterUpload` to delete your sourcemaps after they have been uploaded to Sentry. With the `sourcemaps` options, you no longer need to set filename transforms like `urlPrefix` because the plugin uses a new debug IDs system to associate sourcemaps to your bundles.
+
+```js
+// old initialization:
+import SentryWebpackPlugin from "@sentry/webpack-plugin";
+new SentryWebpackPlugin({
+  include: {
+    paths: ["./path1", "./path2"],
+    ignore: ["./path2/ignore"],
+    urlPrefix: "~/static/js",
+  },
+});
+
+// new initialization:
+import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
+sentryWebpackPlugin({
+  sourcemaps: {
+    assets: ["./path1/**", "./path2/**"],
+    ignore: ["./path2/ignore/**"],
+    deleteFilesAfterUpload: ["./path1/**/*.map", "./path2/**/*.map"],
+  },
+});
+```
+
 ### Replacing `entries` option with `releaseInjectionTargets`
 
 Previously, the `entries` option was used to filter for _entrypoints_ that the plugin should inject the release into.
