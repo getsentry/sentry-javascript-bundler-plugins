@@ -10,10 +10,10 @@ Core package containing the bundler-agnostic functionality used by the bundler p
 
 Check out the individual packages for more information and examples:
 
-- [Rollup](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/rollup-plugin)
-- [Vite](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/vite-plugin)
-- [esbuild](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/esbuild-plugin)
-- [Webpack](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/webpack-plugin)
+- [Rollup](https://www.npmjs.com/package/@sentry/rollup-plugin)
+- [Vite](https://www.npmjs.com/package/@sentry/vite-plugin)
+- [esbuild](https://www.npmjs.com/package/@sentry/esbuild-plugin)
+- [Webpack](https://www.npmjs.com/package/@sentry/webpack-plugin)
 
 ### Features
 
@@ -27,7 +27,5 @@ The Sentry bundler plugin core package contains the following functionality:
 ### More information
 
 - [Sentry Documentation](https://docs.sentry.io/quickstart/)
-- [Troubleshooting Sourcemaps](https://docs.sentry.io/platforms/javascript/sourcemaps/troubleshooting_js/)
-- [Sentry CLI](https://docs.sentry.io/learn/cli/)
 - [Sentry Discord](https://discord.gg/Ww9hbqr)
 - [Sentry Stackoverflow](http://stackoverflow.com/questions/tagged/sentry)
