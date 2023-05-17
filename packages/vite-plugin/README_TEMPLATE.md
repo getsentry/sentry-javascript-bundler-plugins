@@ -36,24 +36,45 @@ pnpm install @sentry/vite-plugin --dev
 
 ```ts
 // vite.config.ts
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 
-export default {
+// https://vitejs.dev/config/
+export default defineConfig({
+  build: {
+    sourcemap: true, // Source map generation must be turned on
+  },
   plugins: [
+    vue(),
+
+    // Put the Sentry vite plugin after all other plugins
     sentryVitePlugin({
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
+
+      // Auth tokens can be obtained from https://sentry.io/settings/account/api/auth-tokens/
+      // and need `project:releases` and `org:read` scopes
       authToken: process.env.SENTRY_AUTH_TOKEN,
+
       sourcemaps: {
+        // Specify the directory containing build artifacts
         assets: "./**",
+        // Don't upload the source maps of dependencies
         ignore: ["./node_modules/**"],
       },
 
-      // Set to false to make plugin less noisy
+      // Helps troubleshooting - set to false to make plugin less noisy
       debug: true,
+
+      // Use the following option if you're on an SDK version lower than 7.47.0:
+      // include: "./dist",
+
+      // Optionally uncomment the line below to override automatic release name detection
+      // release: env.RELEASE,
     }),
   ],
-};
+});
 ```
 
 #OPTIONS_SECTION_INSERT#

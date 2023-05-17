@@ -40,19 +40,35 @@ import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 
 export default {
   plugins: [
+    // Put the Sentry rollup plugin after all other plugins
     sentryRollupPlugin({
-      org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT,
-      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: "___ORG_SLUG___",
+      project: "___PROJECT_SLUG___",
+
+      // Auth tokens can be obtained from https://sentry.io/settings/account/api/auth-tokens/
+      // and need `project:releases` and `org:read` scopes
+      authToken: env.SENTRY_AUTH_TOKEN,
+
       sourcemaps: {
+        // Specify the directory containing build artifacts
         assets: "./**",
+        // Don't upload the source maps of dependencies
         ignore: ["./node_modules/**"],
       },
 
-      // Set to false to make plugin less noisy
+      // Helps troubleshooting - set to false to make plugin less noisy
       debug: true,
+
+      // Use the following option if you're on an SDK version lower than 7.47.0:
+      // include: "./dist",
+
+      // Optionally uncomment the line below to override automatic release name detection
+      // release: env.RELEASE,
     }),
   ],
+  output: {
+    sourcemap: true, // Source map generation must be turned on
+  },
 };
 ```
 

@@ -39,18 +39,33 @@ pnpm install @sentry/webpack-plugin --dev
 const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 
 module.exports = {
+  // ... other config above ...
+
+  devtool: "source-map", // Source map generation must be turned on
   plugins: [
     sentryWebpackPlugin({
       org: process.env.SENTRY_ORG,
       project: process.env.SENTRY_PROJECT,
+
+      // Auth tokens can be obtained from https://sentry.io/settings/account/api/auth-tokens/
+      // and need `project:releases` and `org:read` scopes
       authToken: process.env.SENTRY_AUTH_TOKEN,
+
       sourcemaps: {
+        // Specify the directory containing build artifacts
         assets: "./**",
+        // Don't upload the source maps of dependencies
         ignore: ["./node_modules/**"],
       },
 
-      // Set to false to make plugin less noisy
+      // Helps troubleshooting - set to false to make plugin less noisy
       debug: true,
+
+      // Use the following option if you're on an SDK version lower than 7.47.0:
+      // include: "./dist",
+
+      // Optionally uncomment the line below to override automatic release name detection
+      // release: env.RELEASE,
     }),
   ],
 };
