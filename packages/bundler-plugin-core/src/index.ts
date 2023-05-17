@@ -206,6 +206,7 @@ export function sentryUnpluginFactory({
             releaseName: options.release.name,
             logger: logger,
             handleRecoverableError: handleRecoverableError,
+            rewriteSourcesHook: options.sourcemaps.rewriteSources,
             sentryHub,
             sentryClient,
             sentryCliOptions: {

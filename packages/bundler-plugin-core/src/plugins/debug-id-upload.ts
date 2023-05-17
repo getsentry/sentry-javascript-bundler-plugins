@@ -9,12 +9,17 @@ import { promisify } from "util";
 import { Hub, NodeClient } from "@sentry/node";
 import SentryCli from "@sentry/cli";
 
+interface RewriteSourcesHook {
+  (source: string, map: any): string;
+}
+
 interface DebugIdUploadPluginOptions {
   logger: Logger;
   assets: string | string[];
   ignore?: string | string[];
   releaseName?: string;
   dist?: string;
+  rewriteSourcesHook?: RewriteSourcesHook;
   handleRecoverableError: (error: unknown) => void;
   sentryHub: Hub;
   sentryClient: NodeClient;
@@ -40,6 +45,7 @@ export function debugIdUploadPlugin({
   sentryHub,
   sentryClient,
   sentryCliOptions,
+  rewriteSourcesHook,
   deleteFilesAfterUpload,
 }: DebugIdUploadPluginOptions): UnpluginOptions {
   return {
@@ -71,7 +77,13 @@ export function debugIdUploadPlugin({
 
         await Promise.all(
           debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
-            await prepareBundleForDebugIdUpload(chunkFilePath, tmpUploadFolder, chunkIndex, logger);
+            await prepareBundleForDebugIdUpload(
+              chunkFilePath,
+              tmpUploadFolder,
+              chunkIndex,
+              logger,
+              rewriteSourcesHook ?? defaultRewriteSourcesHook
+            );
           })
         );
 
@@ -119,7 +131,8 @@ export async function prepareBundleForDebugIdUpload(
   bundleFilePath: string,
   uploadFolder: string,
   chunkIndex: number,
-  logger: Logger
+  logger: Logger,
+  rewriteSourcesHook: RewriteSourcesHook
 ) {
   let bundleContent;
   try {
@@ -159,6 +172,7 @@ export async function prepareBundleForDebugIdUpload(
         sourceMapPath,
         path.join(uploadFolder, `${uniqueUploadName}.js.map`),
         debugId,
+        rewriteSourcesHook,
         logger
       );
     }
@@ -227,6 +241,7 @@ async function prepareSourceMapForDebugIdUpload(
   sourceMapPath: string,
   targetPath: string,
   debugId: string,
+  rewriteSourcesHook: RewriteSourcesHook,
   logger: Logger
 ): Promise<void> {
   let sourceMapFileContent: string;
@@ -239,15 +254,19 @@ async function prepareSourceMapForDebugIdUpload(
     return;
   }
 
-  let map: Record<string, string>;
+  let map: Record<string, unknown>;
   try {
-    map = JSON.parse(sourceMapFileContent) as Record<string, string>;
+    map = JSON.parse(sourceMapFileContent) as { sources: unknown; [key: string]: unknown };
     // For now we write both fields until we know what will become the standard - if ever.
     map["debug_id"] = debugId;
     map["debugId"] = debugId;
   } catch (e) {
     logger.error(`Failed to parse source map for debug ID upload: ${sourceMapPath}`);
     return;
+  }
+
+  if (map["sources"] && Array.isArray(map["sources"])) {
+    map["sources"].map((source: string) => rewriteSourcesHook(source, map));
   }
 
   try {
@@ -257,5 +276,14 @@ async function prepareSourceMapForDebugIdUpload(
   } catch (e) {
     logger.error(`Failed to prepare source map for debug ID upload: ${sourceMapPath}`, e);
     return;
+  }
+}
+
+const PROTOCOL_REGEX = /^[a-zA-Z][a-zA-Z0-9+\-.]*:\/\//;
+function defaultRewriteSourcesHook(source: string): string {
+  if (source.match(PROTOCOL_REGEX)) {
+    return source.replace(PROTOCOL_REGEX, "");
+  } else {
+    return path.relative(process.cwd(), path.normalize(source));
   }
 }
