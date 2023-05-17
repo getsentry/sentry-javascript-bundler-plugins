@@ -6,14 +6,14 @@
 
 # Sentry Bundler Plugins
 
-Universal Sentry plugin for various JavaScript bundlers. Based on [unjs/unplugin](https://github.com/unjs/unplugin). Currently supports Rollup, Vite, esbuild, Webpack 4 and Webpack 5.
+Sentry plugins for various JavaScript bundlers. Currently supporting Rollup, Vite, esbuild, Webpack 4 and Webpack 5.
 
 Check out the individual packages for more information and examples:
 
-- [Rollup](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/rollup-plugin)
-- [Vite](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/vite-plugin)
-- [esbuild](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/esbuild-plugin)
-- [Webpack](https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/webpack-plugin)
+- [Rollup](https://www.npmjs.com/package/@sentry/rollup-plugin)
+- [Vite](https://www.npmjs.com/package/@sentry/vite-plugin)
+- [esbuild](https://www.npmjs.com/package/@sentry/esbuild-plugin)
+- [Webpack](https://www.npmjs.com/package/@sentry/webpack-plugin)
 
 ### Features
 
@@ -24,12 +24,8 @@ The Sentry Bundler Plugins take care of Sentry-related tasks at build time of yo
 - Automatic release name discovery (based on CI environment - Vercel, AWS, Heroku, CircleCI, or current Git SHA)
 - Automatically associate errors with releases (Release injection)
 
-The Sentry Bundler Plugins can be used as a replacement of [Sentry CLI](https://docs.sentry.io/learn/cli/) for these tasks.
-
 ### More information
 
 - [Sentry Documentation](https://docs.sentry.io/quickstart/)
-- [Troubleshooting Sourcemaps](https://docs.sentry.io/platforms/javascript/sourcemaps/troubleshooting_js/)
-- [Sentry CLI](https://docs.sentry.io/learn/cli/)
 - [Sentry Discord](https://discord.gg/Ww9hbqr)
 - [Sentry Stackoverflow](http://stackoverflow.com/questions/tagged/sentry)
