@@ -61,7 +61,12 @@ require("esbuild").build({
       debug: true,
 
       // Use the following option if you're on an SDK version lower than 7.47.0:
-      // include: "./dist",
+      // release: {
+      //   uploadLegacySourcemaps: {
+      //     include: ".",
+      //     ignore: ["node_modules"],
+      //   },
+      // },
 
       // Optionally uncomment the line below to override automatic release name detection
       // release: process.env.RELEASE,
