@@ -1,6 +1,5 @@
 import { Logger } from "./sentry/logger";
 import { Options as UserOptions } from "./types";
-import { determineReleaseName } from "./utils";
 
 export type NormalizedOptions = ReturnType<typeof normalizeUserOptions>;
 
