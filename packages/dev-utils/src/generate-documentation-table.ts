@@ -375,9 +375,7 @@ function generateDescriptions(
     .map((node) => {
       const name = parentName === undefined ? node.name : `${parentName}.${node.name}`;
       const id = `${parentId}-${node.name.toLowerCase()}`;
-      let output = `### \`${name}\`
-
-<a name="${id}"></a>
+      let output = `### <a name="${id}"></a>\`${name}\`
 
 ${node.type === undefined ? "" : `Type: \`${node.type}\``}
 
