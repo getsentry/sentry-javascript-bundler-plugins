@@ -3,8 +3,6 @@ const path = require("path");
 const webpack4 = require("webpack4");
 const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 
-const placeHolderOptions = require("./config.json");
-
 webpack4(
   {
     mode: "production",
@@ -16,7 +14,14 @@ webpack4(
       library: "ExampleBundle",
       libraryTarget: "commonjs",
     },
-    plugins: [sentryWebpackPlugin({ ...placeHolderOptions })],
+    plugins: [
+      sentryWebpackPlugin({
+        sourcemaps: {
+          assets: "./out/webpack4/**",
+          deleteFilesAfterUpload: "./out/webpack4/**/*.map",
+        },
+      }),
+    ],
     devtool: "source-map",
   },
   (err) => {

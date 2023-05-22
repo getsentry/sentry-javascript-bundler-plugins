@@ -1,6 +1,5 @@
 import { Logger } from "./sentry/logger";
 import { Options as UserOptions } from "./types";
-import { determineReleaseName } from "./utils";
 
 export type NormalizedOptions = ReturnType<typeof normalizeUserOptions>;
 
@@ -20,13 +19,12 @@ export function normalizeUserOptions(userOptions: UserOptions) {
     disable: userOptions.disable ?? false,
     sourcemaps: userOptions.sourcemaps,
     release: {
-      name: determineReleaseName(),
-      inject: true,
-      create: true,
-      finalize: true,
-      vcsRemote: process.env["SENTRY_VSC_REMOTE"] ?? "origin",
-      cleanArtifacts: false,
       ...userOptions.release,
+      inject: userOptions.release?.inject ?? true,
+      create: userOptions.release?.create ?? true,
+      finalize: userOptions.release?.finalize ?? true,
+      vcsRemote: userOptions.release?.vcsRemote ?? process.env["SENTRY_VSC_REMOTE"] ?? "origin",
+      cleanArtifacts: userOptions.release?.cleanArtifacts ?? false,
     },
     _experiments: userOptions._experiments ?? {},
   };

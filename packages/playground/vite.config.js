@@ -2,7 +2,6 @@
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { defineConfig } from "vite";
 import * as path from "path";
-import placeHolderOptions from "./config.json";
 
 export default defineConfig({
   build: {
@@ -17,7 +16,10 @@ export default defineConfig({
   },
   plugins: [
     sentryVitePlugin({
-      ...placeHolderOptions,
+      sourcemaps: {
+        assets: "./out/vite/**",
+        deleteFilesAfterUpload: "./out/vite/**/*.map",
+      },
     }),
   ],
 });

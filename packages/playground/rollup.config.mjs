@@ -8,7 +8,10 @@ export default {
   input,
   plugins: [
     sentryRollupPlugin({
-      ...JSON.parse(fs.readFileSync("./config.json", "utf-8")),
+      sourcemaps: {
+        assets: "./out/rollup/**",
+        deleteFilesAfterUpload: "./out/rollup/**/*.map",
+      },
     }),
   ],
   output: {

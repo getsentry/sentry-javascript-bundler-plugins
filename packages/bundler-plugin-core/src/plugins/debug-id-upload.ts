@@ -87,16 +87,19 @@ export function debugIdUploadPlugin({
           })
         );
 
-        await cliInstance.releases.uploadSourceMaps(releaseName ?? "", {
-          include: [
-            {
-              paths: [tmpUploadFolder],
-              rewrite: false,
-              dist: dist,
-            },
-          ],
-          useArtifactBundle: true,
-        });
+        await cliInstance.releases.uploadSourceMaps(
+          releaseName ?? "undefined", // unfortunetly this needs a value for now but it will not matter since debug IDs overpower releases anyhow
+          {
+            include: [
+              {
+                paths: [tmpUploadFolder],
+                rewrite: false,
+                dist: dist,
+              },
+            ],
+            useArtifactBundle: true,
+          }
+        );
 
         if (deleteFilesAfterUpload) {
           const filePathsToDelete = await glob(deleteFilesAfterUpload, {
