@@ -4,6 +4,29 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.0.0
+
+Version 2.0.0 marks the official release of the `@sentry/vite-plugin`, `@sentry/esbuild-plugin` and `@sentry/rollup-plugin` packages.
+They are now considered stable.
+
+For the `@sentry/webpack-plugin` this is a major release with breaking changes.
+Please refer to the [migration guide](https://github.com/getsentry/sentry-javascript-bundler-plugins/blob/main/MIGRATION.md) for instructions on how to upgrade.
+
+- feat(core): Add `deleteFilesAfterUpload` option (#244)
+- feat(core): Implements rewrite sources for debug ID upload (#243)
+- fix(core): Account for undefined release name values (#251)
+- fix(webpack): Inject different debug IDs for different bundles (#242)
+- ref(core): Add new options type for future use (#216)
+- ref(core): Extract debug ID injection into separate plugins (#230)
+- ref(core): Extract debug ID sourcemap upload into a separate plugin (#231)
+- ref(core): Extract release injection into separate plugins (#218)
+- ref(core): Extract release management into a separate plugin (#232)
+- ref(core): Extract telemetry into a separate plugin (#234)
+- ref(core): Switch to v2 options (#237)
+- ref(core): Use debug ID as filename for upload (#247)
+- ref(core): Use factory function to create individual plugins (#229)
+- ref: Remove `injectReleasesMap` option (#236)
+
 ## 0.7.2
 
 - fix(core): Use createRequire to not use built-in require in ESM (#212)
