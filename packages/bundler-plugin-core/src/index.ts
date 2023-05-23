@@ -1,6 +1,5 @@
 import SentryCli from "@sentry/cli";
 import fs from "fs";
-import MagicString from "magic-string";
 import { createUnplugin, UnpluginOptions } from "unplugin";
 import { normalizeUserOptions, validateOptions } from "./options-mapping";
 import { debugIdUploadPlugin } from "./plugins/debug-id-upload";
@@ -15,8 +14,9 @@ import {
   getDependencies,
   getPackageJson,
   parseMajorVersion,
-  stringToUUID,
 } from "./utils";
+
+import { v4 as uuidV4 } from "uuid";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
@@ -253,90 +253,15 @@ export function sentryCliBinaryExists(): boolean {
 }
 
 export function createRollupReleaseInjectionHooks(injectionCode: string) {
-  const virtualReleaseInjectionFileId = "\0sentry-release-injection-file";
-
   return {
-    resolveId(id: string) {
-      if (id === virtualReleaseInjectionFileId) {
-        return {
-          id: virtualReleaseInjectionFileId,
-          external: false,
-          moduleSideEffects: true,
-        };
-      } else {
-        return null;
-      }
-    },
-
-    load(id: string) {
-      if (id === virtualReleaseInjectionFileId) {
-        return injectionCode;
-      } else {
-        return null;
-      }
-    },
-
-    transform(code: string, id: string) {
-      if (id === virtualReleaseInjectionFileId) {
-        return null;
-      }
-
-      if (id.match(/\\node_modules\\|\/node_modules\//)) {
-        return null;
-      }
-
-      if (![".js", ".ts", ".jsx", ".tsx", ".mjs"].some((ending) => id.endsWith(ending))) {
-        return null;
-      }
-
-      const ms = new MagicString(code);
-
-      // Appending instead of prepending has less probability of mucking with user's source maps.
-      // Luckily import statements get hoisted to the top anyways.
-      ms.append(`\n\n;import "${virtualReleaseInjectionFileId}";`);
-
-      return {
-        code: ms.toString(),
-        map: ms.generateMap(),
-      };
-    },
+    banner: injectionCode,
   };
 }
 
 export function createRollupDebugIdInjectionHooks() {
   return {
-    renderChunk(code: string, chunk: { fileName: string }) {
-      if (
-        [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
-      ) {
-        const debugId = stringToUUID(code); // generate a deterministic debug ID
-        const codeToInject = getDebugIdSnippet(debugId);
-
-        const ms = new MagicString(code, { filename: chunk.fileName });
-
-        // We need to be careful not to inject the snippet before any `"use strict";`s.
-        // As an additional complication `"use strict";`s may come after any number of comments.
-        const commentUseStrictRegex =
-          // Note: CodeQL complains that this regex potentially has n^2 runtime. This likely won't affect realistic files.
-          /^(?:\s*|\/\*(?:.|\r|\n)*\*\/|\/\/.*[\n\r])*(?:"[^"]*";|'[^']*';)?/;
-
-        if (code.match(commentUseStrictRegex)?.[0]) {
-          // Add injected code after any comments or "use strict" at the beginning of the bundle.
-          ms.replace(commentUseStrictRegex, (match) => `${match}${codeToInject}`);
-        } else {
-          // ms.replace() doesn't work when there is an empty string match (which happens if
-          // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
-          // need this special case here.
-          ms.prepend(codeToInject);
-        }
-
-        return {
-          code: ms.toString(),
-          map: ms.generateMap({ file: chunk.fileName }),
-        };
-      } else {
-        return null; // returning null means not modifying the chunk at all
-      }
+    banner: () => {
+      return getDebugIdSnippet(uuidV4());
     },
   };
 }
