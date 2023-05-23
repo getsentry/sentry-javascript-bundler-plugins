@@ -6,10 +6,7 @@ build({
   outdir: "./out/esbuild",
   plugins: [
     sentryEsbuildPlugin({
-      sourcemaps: {
-        assets: "./out/esbuild/**",
-        deleteFilesAfterUpload: "./out/esbuild/**/*.map",
-      },
+      debug: true,
     }),
   ],
   minify: true,

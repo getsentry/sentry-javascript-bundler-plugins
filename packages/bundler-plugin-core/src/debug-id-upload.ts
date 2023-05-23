@@ -3,8 +3,7 @@ import { glob } from "glob";
 import os from "os";
 import path from "path";
 import * as util from "util";
-import { UnpluginOptions } from "unplugin";
-import { Logger } from "../sentry/logger";
+import { Logger } from "./sentry/logger";
 import { promisify } from "util";
 import { Hub, NodeClient } from "@sentry/node";
 import SentryCli from "@sentry/cli";
@@ -15,7 +14,7 @@ interface RewriteSourcesHook {
 
 interface DebugIdUploadPluginOptions {
   logger: Logger;
-  assets: string | string[];
+  assets?: string | string[];
   ignore?: string | string[];
   releaseName?: string;
   dist?: string;
@@ -35,7 +34,7 @@ interface DebugIdUploadPluginOptions {
   };
 }
 
-export function debugIdUploadPlugin({
+export function createDebugIdUploadFunction({
   assets,
   ignore,
   logger,
@@ -47,34 +46,41 @@ export function debugIdUploadPlugin({
   sentryCliOptions,
   rewriteSourcesHook,
   deleteFilesAfterUpload,
-}: DebugIdUploadPluginOptions): UnpluginOptions {
-  return {
-    name: "sentry-debug-id-upload-plugin",
-    async writeBundle() {
-      let folderToCleanUp: string | undefined;
+}: DebugIdUploadPluginOptions) {
+  return async (buildArtifactPaths: string[]) => {
+    let folderToCleanUp: string | undefined;
 
-      const cliInstance = new SentryCli(null, sentryCliOptions);
+    const cliInstance = new SentryCli(null, sentryCliOptions);
 
-      try {
-        const tmpUploadFolder = await fs.promises.mkdtemp(
-          path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+    try {
+      const tmpUploadFolder = await fs.promises.mkdtemp(
+        path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+      );
+
+      folderToCleanUp = tmpUploadFolder;
+
+      const debugIdChunkFilePaths = (
+        await glob(assets ?? buildArtifactPaths, {
+          absolute: true,
+          nodir: true,
+          ignore: ignore,
+        })
+      ).filter(
+        (debugIdChunkFilePath) =>
+          debugIdChunkFilePath.endsWith(".js") ||
+          debugIdChunkFilePath.endsWith(".mjs") ||
+          debugIdChunkFilePath.endsWith(".cjs")
+      );
+
+      if (Array.isArray(assets) && assets.length === 0) {
+        logger.debug(
+          "Empty `sourcemaps.assets` option provided. Will not upload sourcemaps with debug ID."
         );
-
-        folderToCleanUp = tmpUploadFolder;
-
-        const debugIdChunkFilePaths = (
-          await glob(assets, {
-            absolute: true,
-            nodir: true,
-            ignore: ignore,
-          })
-        ).filter(
-          (debugIdChunkFilePath) =>
-            debugIdChunkFilePath.endsWith(".js") ||
-            debugIdChunkFilePath.endsWith(".mjs") ||
-            debugIdChunkFilePath.endsWith(".cjs")
+      } else if (debugIdChunkFilePaths.length === 0) {
+        logger.warn(
+          "Didn't find any matching sources for debug ID upload. Please check the `sourcemaps.assets` option."
         );
-
+      } else {
         await Promise.all(
           debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
             await prepareBundleForDebugIdUpload(
@@ -100,33 +106,33 @@ export function debugIdUploadPlugin({
             useArtifactBundle: true,
           }
         );
-
-        if (deleteFilesAfterUpload) {
-          const filePathsToDelete = await glob(deleteFilesAfterUpload, {
-            absolute: true,
-            nodir: true,
-          });
-
-          filePathsToDelete.forEach((filePathToDelete) => {
-            logger.debug(`Deleting asset after upload: ${filePathToDelete}`);
-          });
-
-          await Promise.all(
-            filePathsToDelete.map((filePathToDelete) =>
-              fs.promises.rm(filePathToDelete, { force: true })
-            )
-          );
-        }
-      } catch (e) {
-        sentryHub.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
-        await sentryClient.flush();
-        handleRecoverableError(e);
-      } finally {
-        if (folderToCleanUp) {
-          void fs.promises.rm(folderToCleanUp, { recursive: true, force: true });
-        }
       }
-    },
+
+      if (deleteFilesAfterUpload) {
+        const filePathsToDelete = await glob(deleteFilesAfterUpload, {
+          absolute: true,
+          nodir: true,
+        });
+
+        filePathsToDelete.forEach((filePathToDelete) => {
+          logger.debug(`Deleting asset after upload: ${filePathToDelete}`);
+        });
+
+        await Promise.all(
+          filePathsToDelete.map((filePathToDelete) =>
+            fs.promises.rm(filePathToDelete, { force: true })
+          )
+        );
+      }
+    } catch (e) {
+      sentryHub.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
+      await sentryClient.flush();
+      handleRecoverableError(e);
+    } finally {
+      if (folderToCleanUp) {
+        void fs.promises.rm(folderToCleanUp, { recursive: true, force: true });
+      }
+    }
   };
 }
 
