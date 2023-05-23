@@ -59,8 +59,18 @@ export function createDebugIdUploadFunction({
 
       folderToCleanUp = tmpUploadFolder;
 
+      let globAssets;
+      if (assets) {
+        globAssets = assets;
+      } else {
+        logger.debug(
+          "Not `sourcemaps.assets` option provided, falling back to uploading detected build artifacts."
+        );
+        globAssets = buildArtifactPaths;
+      }
+
       const debugIdChunkFilePaths = (
-        await glob(assets ?? buildArtifactPaths, {
+        await glob(globAssets, {
           absolute: true,
           nodir: true,
           ignore: ignore,
