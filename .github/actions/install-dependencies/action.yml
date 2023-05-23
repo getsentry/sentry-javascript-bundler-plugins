@@ -1,4 +1,5 @@
 name: "Install Dependencies"
+description: Installs dependencies
 
 runs:
   using: "composite"
@@ -12,3 +13,4 @@ runs:
         path: "**/node_modules"
         key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
     - run: yarn --frozen-lockfile --ignore-engines
+      shell: bash
