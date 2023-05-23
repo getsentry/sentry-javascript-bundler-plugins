@@ -9,6 +9,10 @@
       }
     }
   },
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "sharedGlobals": ["{workspaceRoot}/*.js", "{workspaceRoot}/*.json"]
+  },
   "targetDefaults": {
     "build": {
       "dependsOn": ["^build"],
