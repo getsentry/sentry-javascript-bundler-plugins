@@ -47,6 +47,7 @@ jobs:
 
   formatting-check:
     name: Formatting check
+    needs: install_deps
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
