@@ -179,9 +179,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .nxcache
-          key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
+          key: build-cache-key-${{ runner.os }}-${{ matrix.target }}-${{ matrix.jobIndex }}-${{ github.run_id }}
           restore-keys: |
-            build-cache-key-${{ runner.os }}-
+            build-cache-key-${{ runner.os }}-${{ matrix.target }}-${{ matrix.jobIndex }}-
       - name: Install dependencies
         run: yarn --frozen-lockfile --ignore-engines
         if: steps.dependency-cache.outputs.cache-hit != 'true'
