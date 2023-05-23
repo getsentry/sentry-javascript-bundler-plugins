@@ -10,7 +10,6 @@ import { createLogger } from "./sentry/logger";
 import { allowedToSendTelemetry, createSentryInstance } from "./sentry/telemetry";
 import { Options } from "./types";
 import {
-  determineReleaseName,
   generateGlobalInjectorCode,
   getDependencies,
   getPackageJson,
@@ -135,8 +134,7 @@ export function sentryUnpluginFactory({
       plugins.push(releaseInjectionPlugin(injectionCode));
     }
 
-    const releaseManagementPluginReleaseName = options.release.name ?? determineReleaseName();
-    if (!releaseManagementPluginReleaseName) {
+    if (!options.release.name) {
       logger.warn(
         "No release name provided. Will not create release. Please set the `release.name` option to identifiy your release."
       );
@@ -156,7 +154,7 @@ export function sentryUnpluginFactory({
       plugins.push(
         releaseManagementPlugin({
           logger,
-          releaseName: releaseManagementPluginReleaseName,
+          releaseName: options.release.name,
           shouldCreateRelease: options.release.create,
           shouldCleanArtifacts: options.release.cleanArtifacts,
           shouldFinalizeRelease: options.release.finalize,
