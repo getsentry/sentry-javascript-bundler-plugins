@@ -189,41 +189,6 @@ export function stringToUUID(str: string): string {
 }
 
 /**
- * Tries to guess a release name based on environmental data.
- */
-export function determineReleaseName(): string | undefined {
-  let gitRevision: string | undefined;
-  try {
-    gitRevision = childProcess.execSync("git rev-parse --short HEAD").toString().trim();
-  } catch (e) {
-    // noop
-  }
-
-  return (
-    // GitHub Actions - https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
-    process.env["GITHUB_SHA"] ||
-    // Netlify - https://docs.netlify.com/configure-builds/environment-variables/#build-metadata
-    process.env["COMMIT_REF"] ||
-    // Cloudflare Pages - https://developers.cloudflare.com/pages/platform/build-configuration/#environment-variables
-    process.env["CF_PAGES_COMMIT_SHA"] ||
-    // AWS CodeBuild - https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
-    process.env["CODEBUILD_RESOLVED_SOURCE_VERSION"] ||
-    // CircleCI - https://circleci.com/docs/2.0/env-vars/
-    process.env["CIRCLE_SHA1"] ||
-    // Vercel - https://vercel.com/docs/v2/build-step#system-environment-variables
-    process.env["VERCEL_GIT_COMMIT_SHA"] ||
-    process.env["VERCEL_GITHUB_COMMIT_SHA"] ||
-    process.env["VERCEL_GITLAB_COMMIT_SHA"] ||
-    process.env["VERCEL_BITBUCKET_COMMIT_SHA"] ||
-    // Zeit (now known as Vercel)
-    process.env["ZEIT_GITHUB_COMMIT_SHA"] ||
-    process.env["ZEIT_GITLAB_COMMIT_SHA"] ||
-    process.env["ZEIT_BITBUCKET_COMMIT_SHA"] ||
-    gitRevision
-  );
-}
-
-/**
  * Generates code for the global injector which is responsible for setting the global
  * `SENTRY_RELEASE` & `SENTRY_BUILD_INFO` variables.
  */

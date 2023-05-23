@@ -22,6 +22,7 @@ export function normalizeUserOptions(userOptions: UserOptions) {
       ...userOptions.release,
       inject: userOptions.release?.inject ?? true,
       create: userOptions.release?.create ?? true,
+      disable: userOptions.release?.disable ?? false,
       finalize: userOptions.release?.finalize ?? true,
       vcsRemote: userOptions.release?.vcsRemote ?? process.env["SENTRY_VSC_REMOTE"] ?? "origin",
       cleanArtifacts: userOptions.release?.cleanArtifacts ?? false,

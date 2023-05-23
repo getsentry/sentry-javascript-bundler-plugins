@@ -10,7 +10,6 @@ import { createLogger } from "./sentry/logger";
 import { allowedToSendTelemetry, createSentryInstance } from "./sentry/telemetry";
 import { Options } from "./types";
 import {
-  determineReleaseName,
   generateGlobalInjectorCode,
   getDependencies,
   getPackageJson,
@@ -124,8 +123,8 @@ export function sentryUnpluginFactory({
         "Release injection disabled via `release.inject` option. Will not inject release."
       );
     } else if (!options.release.name) {
-      logger.warn(
-        "No release name provided. Will not inject release. Please set the `release.name` option to identifiy your release."
+      logger.info(
+        "No release name provided. Will not inject release. Please set the `release.name` option to identifiy your release or set `release.inject` to `false` to silence this message."
       );
     } else {
       const injectionCode = generateGlobalInjectorCode({
@@ -135,28 +134,29 @@ export function sentryUnpluginFactory({
       plugins.push(releaseInjectionPlugin(injectionCode));
     }
 
-    const releaseManagementPluginReleaseName = options.release.name ?? determineReleaseName();
-    if (!releaseManagementPluginReleaseName) {
-      logger.warn(
-        "No release name provided. Will not create release. Please set the `release.name` option to identifiy your release."
+    if (options.release.disable) {
+      logger.debug("Release management disabled via `release.disable` option.");
+    } else if (!options.release.name) {
+      logger.info(
+        "No release name provided. Will not create/update release. Please set the `release.name` option to identifiy your release or set the `release.disable` option to `true` to silence this message."
       );
     } else if (!options.authToken) {
       logger.warn(
-        "No auth token provided. Will not create release. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
+        "No auth token provided. Will not create/update release. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
       );
     } else if (!options.org) {
       logger.warn(
-        "No organization slug provided. Will not create release. Please set the `org` option to your Sentry organization slug."
+        "No organization slug provided. Will not create/update release. Please set the `org` option to your Sentry organization name."
       );
     } else if (!options.project) {
       logger.warn(
-        "No project provided. Will not create release. Please set the `project` option to your Sentry project slug."
+        "No project provided. Will not create/update release. Please set the `project` option to your Sentry project name."
       );
     } else {
       plugins.push(
         releaseManagementPlugin({
           logger,
-          releaseName: releaseManagementPluginReleaseName,
+          releaseName: options.release.name,
           shouldCreateRelease: options.release.create,
           shouldCleanArtifacts: options.release.cleanArtifacts,
           shouldFinalizeRelease: options.release.finalize,

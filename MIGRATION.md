@@ -10,6 +10,7 @@ This document serves as a migration guide, documenting all breaking changes betw
 - `@sentry/bundler-plugin-core` will no longer export the individual plugins but a factory function to create them.
 - Removed `customHeader` option in favor of `headers` option which allows for multiple headers to be attached to outgoing requests.
 - The `cliBinaryExists` function was renamed to `sentryCliBinaryExists`
+- Removed auto release name detection. Please set a release value manually via the `release.name` option to create releases in Sentry. This was done to avoid spamming releases in Sentry.
 
 ## Upgrading from 1.x to 2.x (Webpack Plugin Only)
 

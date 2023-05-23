@@ -120,6 +120,12 @@ errorHandler: (err) => {
           "Whether the plugin should inject release information into the build for the SDK to pick it up when sending events. (recommended)\n\nDefaults to `true`.",
       },
       {
+        name: "disable",
+        type: "boolean",
+        fullDescription:
+          "If set to `true` the plugin will not create or update releases in Sentry during build. Injected release values will still create releases (see `release.inject` option).",
+      },
+      {
         name: "create",
         type: "boolean",
         fullDescription:

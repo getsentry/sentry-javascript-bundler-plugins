@@ -154,6 +154,14 @@ export interface Options {
     inject?: boolean;
 
     /**
+     * If set to `true` the plugin will not create or update releases in Sentry during build.
+     * Injected release values will still create releases (see `release.inject` option).
+     *
+     * Defaults to `false`.
+     */
+    disable?: boolean;
+
+    /**
      * Whether the plugin should create a release on Sentry during the build.
      * Note that a release may still appear in Sentry even if this is value is `false` because any Sentry event that has a release value attached will automatically create a release.
      * (for example via the `inject` option)
