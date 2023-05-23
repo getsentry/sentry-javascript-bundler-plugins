@@ -50,7 +50,7 @@ jobs:
           path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache@v3
         with:
           path: .nxcache
           key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
@@ -76,7 +76,7 @@ jobs:
           path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache@v3
         with:
           path: .nxcache
           key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
@@ -103,7 +103,7 @@ jobs:
           path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache@v3
         with:
           path: .nxcache
           key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
@@ -143,7 +143,7 @@ jobs:
           path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache@v3
         with:
           path: .nxcache
           key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
@@ -176,7 +176,7 @@ jobs:
           path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache@v3
         with:
           path: .nxcache
           key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
@@ -203,7 +203,7 @@ jobs:
           path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache@v3
         with:
           path: .nxcache
           key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
