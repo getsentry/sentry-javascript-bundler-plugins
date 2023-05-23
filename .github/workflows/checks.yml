@@ -18,13 +18,20 @@ jobs:
           node-version-file: "package.json"
       - name: Use dependency cache
         uses: actions/cache@v3
-        id: cache
+        id: dependency-cache
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Use build cache
+        uses: actions/cache@v3
+        with:
+          path: .nxcache
+          key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            build-cache-key-${{ runner.os }}-
       - name: Install dependencies
         run: yarn --frozen-lockfile --ignore-engines
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
       - run: yarn build
 
   type-check:
@@ -38,13 +45,20 @@ jobs:
           node-version-file: "package.json"
       - name: Use dependency cache
         uses: actions/cache@v3
-        id: cache
+        id: dependency-cache
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Use build cache
+        uses: actions/cache/restore@v3
+        with:
+          path: .nxcache
+          key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            build-cache-key-${{ runner.os }}-
       - name: Install dependencies
         run: yarn --frozen-lockfile --ignore-engines
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
       - run: yarn check:types
 
   formatting-check:
@@ -57,13 +71,20 @@ jobs:
           node-version-file: "package.json"
       - name: Use dependency cache
         uses: actions/cache@v3
-        id: cache
+        id: dependency-cache
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Use build cache
+        uses: actions/cache/restore@v3
+        with:
+          path: .nxcache
+          key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            build-cache-key-${{ runner.os }}-
       - name: Install dependencies
         run: yarn --frozen-lockfile --ignore-engines
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
       - run: yarn check:formatting
 
   test-unit:
@@ -77,13 +98,20 @@ jobs:
           node-version-file: "package.json"
       - name: Use dependency cache
         uses: actions/cache@v3
-        id: cache
+        id: dependency-cache
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Use build cache
+        uses: actions/cache/restore@v3
+        with:
+          path: .nxcache
+          key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            build-cache-key-${{ runner.os }}-
       - name: Install dependencies
         run: yarn --frozen-lockfile --ignore-engines
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
       - run: yarn test:unit
 
   test-integration:
@@ -110,13 +138,20 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Use dependency cache
         uses: actions/cache@v3
-        id: cache
+        id: dependency-cache
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Use build cache
+        uses: actions/cache/restore@v3
+        with:
+          path: .nxcache
+          key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            build-cache-key-${{ runner.os }}-
       - name: Install dependencies
         run: yarn --frozen-lockfile --ignore-engines
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
       - run: yarn test:integration
 
   test-e2e:
@@ -136,13 +171,20 @@ jobs:
       - uses: volta-cli/action@v3
       - name: Use dependency cache
         uses: actions/cache@v3
-        id: cache
+        id: dependency-cache
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Use build cache
+        uses: actions/cache/restore@v3
+        with:
+          path: .nxcache
+          key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            build-cache-key-${{ runner.os }}-
       - name: Install dependencies
         run: yarn --frozen-lockfile --ignore-engines
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
       - run: yarn test:e2e
 
   lint:
@@ -156,13 +198,20 @@ jobs:
           node-version-file: "package.json"
       - name: Use dependency cache
         uses: actions/cache@v3
-        id: cache
+        id: dependency-cache
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Use build cache
+        uses: actions/cache/restore@v3
+        with:
+          path: .nxcache
+          key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            build-cache-key-${{ runner.os }}-
       - name: Install dependencies
         run: yarn --frozen-lockfile --ignore-engines
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
       - run: yarn lint
 
   artifacts:

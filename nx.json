@@ -10,23 +10,26 @@
     }
   },
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "sharedGlobals": ["{workspaceRoot}/*.js", "{workspaceRoot}/*.json"]
+    "sharedGlobals": ["{workspaceRoot}/*.js", "{workspaceRoot}/*.json", "{workspaceRoot}/yarn.lock"]
   },
   "targetDefaults": {
     "build": {
+      "inputs": ["sharedGlobals"],
       "dependsOn": ["^build"],
       "outputs": ["{projectRoot}/dist"]
     },
     "lint": {
+      "inputs": ["sharedGlobals"],
       "dependsOn": ["^build", "build"],
       "outputs": []
     },
     "test": {
+      "inputs": ["sharedGlobals"],
       "dependsOn": ["^build"],
       "outputs": []
     },
     "check:types": {
+      "inputs": ["sharedGlobals"],
       "dependsOn": ["^build"],
       "outputs": []
     },
