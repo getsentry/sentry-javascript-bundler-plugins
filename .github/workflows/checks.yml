@@ -176,15 +176,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version-file: "package.json"
-      - name: Use dependency cache
-        uses: actions/cache@v3
-        id: cache
-        with:
-          path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Install dependencies
-        run: yarn --frozen-lockfile --ignore-engines
-        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn --frozen-lockfile
       - name: pack
         run: yarn build:npm
       - name: archive artifacts
