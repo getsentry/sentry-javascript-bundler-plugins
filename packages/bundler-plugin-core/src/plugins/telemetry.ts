@@ -18,10 +18,12 @@ export function telemetryPlugin({
   return {
     name: "sentry-telemetry-plugin",
     buildStart() {
-      void shouldSendTelemetry.then(() => {
-        logger.info(
-          "Sending error and performance telemetry data to Sentry. To disable telemetry, set `options.telemetry` to `false`."
-        );
+      void shouldSendTelemetry.then((willSendTelemetry) => {
+        if (willSendTelemetry) {
+          logger.info(
+            "Sending error and performance telemetry data to Sentry. To disable telemetry, set `options.telemetry` to `false`."
+          );
+        }
       });
       pluginExecutionTransaction.startTimestamp = Date.now() / 1000;
     },
