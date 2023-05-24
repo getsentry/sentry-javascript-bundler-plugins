@@ -93,11 +93,13 @@ export interface Options {
     /**
      * A glob or an array of globs that specifies the build artifacts that should be uploaded to Sentry.
      *
+     * If this option is not specified, the plugin will try to upload all JavaScript files and source map files that are created during build.
+     *
      * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
      *
      * Use the `debug` option to print information about which files end up being uploaded.
      */
-    assets: string | string[];
+    assets?: string | string[];
 
     /**
      * A glob or an array of globs that specifies which build artifacts should not be uploaded to Sentry.
@@ -114,8 +116,6 @@ export interface Options {
      * Hook to rewrite the `sources` field inside the source map before being uploaded to Sentry. Does not modify the actual source map.
      *
      * Defaults to making all sources relative to `process.cwd()` while building.
-     *
-     * @hidden Not yet implemented.
      */
     rewriteSources?: (source: string, map: any) => string;
 
@@ -125,10 +125,8 @@ export interface Options {
      * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
      *
      * Use the `debug` option to print information about which files end up being deleted.
-     *
-     * @hidden Not yet implemented.
      */
-    deleteAfterUpload?: string | string[];
+    deleteFilesAfterUpload?: string | string[];
   };
 
   /**

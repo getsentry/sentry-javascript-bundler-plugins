@@ -1,9 +1,10 @@
 import SentryCli from "@sentry/cli";
-import fs from "fs";
+import * as fs from "fs";
+import * as path from "path";
 import MagicString from "magic-string";
 import { createUnplugin, UnpluginOptions } from "unplugin";
 import { normalizeUserOptions, validateOptions } from "./options-mapping";
-import { debugIdUploadPlugin } from "./plugins/debug-id-upload";
+import { createDebugIdUploadFunction } from "./debug-id-upload";
 import { releaseManagementPlugin } from "./plugins/release-management";
 import { telemetryPlugin } from "./plugins/telemetry";
 import { createLogger } from "./sentry/logger";
@@ -15,11 +16,13 @@ import {
   getPackageJson,
   parseMajorVersion,
   stringToUUID,
+  stripQueryAndHashFromPath,
 } from "./utils";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
+  debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
 }
 
 /**
@@ -52,6 +55,7 @@ interface SentryUnpluginFactoryOptions {
 export function sentryUnpluginFactory({
   releaseInjectionPlugin,
   debugIdInjectionPlugin,
+  debugIdUploadPlugin,
 }: SentryUnpluginFactoryOptions) {
   return createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
     const options = normalizeUserOptions(userOptions);
@@ -191,33 +195,31 @@ export function sentryUnpluginFactory({
       );
     }
 
-    if (options.sourcemaps) {
-      if (!options.authToken) {
-        logger.warn(
-          "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
-        );
-      } else if (!options.org) {
-        logger.warn(
-          "No org provided. Will not upload source maps. Please set the `org` option to your Sentry organization slug."
-        );
-      } else if (!options.project) {
-        logger.warn(
-          "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug."
-        );
-      } else if (!options.sourcemaps.assets) {
-        logger.warn(
-          "No assets defined. Will not upload source maps. Please provide set the `assets` option to your build-output folder."
-        );
-      } else {
-        plugins.push(debugIdInjectionPlugin());
-        plugins.push(
-          debugIdUploadPlugin({
-            assets: options.sourcemaps.assets,
-            ignore: options.sourcemaps.ignore,
+    if (!options.authToken) {
+      logger.warn(
+        "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
+      );
+    } else if (!options.org) {
+      logger.warn(
+        "No org provided. Will not upload source maps. Please set the `org` option to your Sentry organization slug."
+      );
+    } else if (!options.project) {
+      logger.warn(
+        "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug."
+      );
+    } else {
+      plugins.push(debugIdInjectionPlugin());
+      plugins.push(
+        debugIdUploadPlugin(
+          createDebugIdUploadFunction({
+            assets: options.sourcemaps?.assets,
+            ignore: options.sourcemaps?.ignore,
+            deleteFilesAfterUpload: options.sourcemaps?.deleteFilesAfterUpload,
             dist: options.release.dist,
             releaseName: options.release.name,
             logger: logger,
             handleRecoverableError: handleRecoverableError,
+            rewriteSourcesHook: options.sourcemaps?.rewriteSources,
             sentryHub,
             sentryClient,
             sentryCliOptions: {
@@ -230,8 +232,8 @@ export function sentryUnpluginFactory({
               headers: options.headers,
             },
           })
-        );
-      }
+        )
+      );
     }
 
     return plugins;
@@ -290,11 +292,18 @@ export function createRollupReleaseInjectionHooks(injectionCode: string) {
         return null;
       }
 
-      if (id.match(/\\node_modules\\|\/node_modules\//)) {
+      // id may contain query and hash which will trip up our file extension logic below
+      const idWithoutQueryAndHash = stripQueryAndHashFromPath(id);
+
+      if (idWithoutQueryAndHash.match(/\\node_modules\\|\/node_modules\//)) {
         return null;
       }
 
-      if (![".js", ".ts", ".jsx", ".tsx", ".mjs"].some((ending) => id.endsWith(ending))) {
+      if (
+        ![".js", ".ts", ".jsx", ".tsx", ".mjs"].some((ending) =>
+          idWithoutQueryAndHash.endsWith(ending)
+        )
+      ) {
         return null;
       }
 
@@ -345,6 +354,28 @@ export function createRollupDebugIdInjectionHooks() {
         };
       } else {
         return null; // returning null means not modifying the chunk at all
+      }
+    },
+  };
+}
+
+export function createRollupDebugIdUploadHooks(
+  upload: (buildArtifacts: string[]) => Promise<void>
+) {
+  return {
+    async writeBundle(
+      outputOptions: { dir?: string; file?: string },
+      bundle: { [fileName: string]: unknown }
+    ) {
+      if (outputOptions.dir) {
+        const outputDir = outputOptions.dir;
+        const buildArtifacts = Object.keys(bundle).map((asset) => path.join(outputDir, asset));
+        await upload(buildArtifacts);
+      } else if (outputOptions.file) {
+        await upload([outputOptions.file]);
+      } else {
+        const buildArtifacts = Object.keys(bundle).map((asset) => path.join(path.resolve(), asset));
+        await upload(buildArtifacts);
       }
     },
   };

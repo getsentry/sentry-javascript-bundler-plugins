@@ -1,13 +1,12 @@
 const { sentryEsbuildPlugin } = require("@sentry/esbuild-plugin");
 const { build } = require("esbuild");
-const placeHolderOptions = require("./config.json");
 
 build({
   entryPoints: ["./src/entrypoint1.js"],
   outdir: "./out/esbuild",
   plugins: [
     sentryEsbuildPlugin({
-      ...placeHolderOptions,
+      debug: true,
     }),
   ],
   minify: true,

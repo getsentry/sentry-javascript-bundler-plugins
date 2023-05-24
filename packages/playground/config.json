@@ -1,8 +1,0 @@
-{
-  "release": "0.0.1",
-  "org": "some-org",
-  "project": "some-proj",
-  "authToken": "some-auth-token",
-  "include": "/dist",
-  "debug": true
-}

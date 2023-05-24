@@ -2,7 +2,7 @@ import * as vite from "vite";
 import * as path from "path";
 import * as rollup from "rollup";
 import { default as webpack4 } from "webpack4";
-import { webpack as webpack5 } from "webpack";
+import { webpack as webpack5 } from "webpack5";
 import * as esbuild from "esbuild";
 import { Options } from "@sentry/bundler-plugin-core";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
