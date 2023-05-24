@@ -69,9 +69,27 @@ function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
   };
 }
 
+function esbuildDebugIdUploadPlugin(
+  upload: (buildArtifacts: string[]) => Promise<void>
+): UnpluginOptions {
+  return {
+    name: "sentry-esbuild-debug-id-upload-plugin",
+    esbuild: {
+      setup({ initialOptions, onEnd }) {
+        initialOptions.metafile = true;
+        onEnd(async (result) => {
+          const buildArtifacts = result.metafile ? Object.keys(result.metafile.outputs) : [];
+          await upload(buildArtifacts);
+        });
+      },
+    },
+  };
+}
+
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: esbuildReleaseInjectionPlugin,
   debugIdInjectionPlugin: esbuildDebugIdInjectionPlugin,
+  debugIdUploadPlugin: esbuildDebugIdUploadPlugin,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

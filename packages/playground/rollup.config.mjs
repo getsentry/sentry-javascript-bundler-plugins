@@ -8,10 +8,7 @@ export default {
   input,
   plugins: [
     sentryRollupPlugin({
-      sourcemaps: {
-        assets: "./out/rollup/**",
-        deleteFilesAfterUpload: "./out/rollup/**/*.map",
-      },
+      debug: true,
     }),
   ],
   output: {

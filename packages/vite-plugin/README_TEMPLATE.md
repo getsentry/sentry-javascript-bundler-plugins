@@ -56,27 +56,6 @@ export default defineConfig({
       // Auth tokens can be obtained from https://sentry.io/settings/account/api/auth-tokens/
       // and need `project:releases` and `org:read` scopes
       authToken: process.env.SENTRY_AUTH_TOKEN,
-
-      sourcemaps: {
-        // Specify the directory containing build artifacts
-        assets: "./**",
-        // Don't upload the source maps of dependencies
-        ignore: ["./node_modules/**"],
-      },
-
-      // Helps troubleshooting - set to false to make plugin less noisy
-      debug: true,
-
-      // Use the following option if you're on an SDK version lower than 7.47.0:
-      // release: {
-      //   uploadLegacySourcemaps: {
-      //     include: ".",
-      //     ignore: ["node_modules"],
-      //   },
-      // },
-
-      // Optionally uncomment the line below to override automatic release name detection
-      // release: env.RELEASE,
     }),
   ],
 });

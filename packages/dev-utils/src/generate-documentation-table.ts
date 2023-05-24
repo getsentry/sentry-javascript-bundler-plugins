@@ -79,7 +79,7 @@ errorHandler: (err) => {
         name: "assets",
         type: "string | string[]",
         fullDescription:
-          "A glob or an array of globs that specifies the build artifacts that should be uploaded to Sentry.\n\nThe globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)\n\nUse the `debug` option to print information about which files end up being uploaded.",
+          "A glob or an array of globs that specifies the build artifacts that should be uploaded to Sentry.\n\nIf this option is not specified, the plugin will try to upload all JavaScript files and source map files that are created during build.\n\nThe globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)\n\nUse the `debug` option to print information about which files end up being uploaded.",
       },
       {
         name: "ignore",
