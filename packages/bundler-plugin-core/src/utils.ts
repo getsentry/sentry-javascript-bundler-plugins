@@ -271,3 +271,8 @@ function getBuildInformation() {
     nodeVersion: parseMajorVersion(process.version),
   };
 }
+
+export function stripQueryAndHashFromPath(path: string): string {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return path.split("?")[0]!.split("#")[0]!;
+}

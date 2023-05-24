@@ -17,6 +17,7 @@ import {
   getPackageJson,
   parseMajorVersion,
   stringToUUID,
+  stripQueryAndHashFromPath,
 } from "./utils";
 
 interface SentryUnpluginFactoryOptions {
@@ -280,11 +281,18 @@ export function createRollupReleaseInjectionHooks(injectionCode: string) {
         return null;
       }
 
-      if (id.match(/\\node_modules\\|\/node_modules\//)) {
+      // id may contain query and hash which will trip up our file extension logic below
+      const idWithoutQueryAndHash = stripQueryAndHashFromPath(id);
+
+      if (idWithoutQueryAndHash.match(/\\node_modules\\|\/node_modules\//)) {
         return null;
       }
 
-      if (![".js", ".ts", ".jsx", ".tsx", ".mjs"].some((ending) => id.endsWith(ending))) {
+      if (
+        ![".js", ".ts", ".jsx", ".tsx", ".mjs"].some((ending) =>
+          idWithoutQueryAndHash.endsWith(ending)
+        )
+      ) {
         return null;
       }
 
