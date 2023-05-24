@@ -64,7 +64,7 @@ export function createDebugIdUploadFunction({
         globAssets = assets;
       } else {
         logger.debug(
-          "Not `sourcemaps.assets` option provided, falling back to uploading detected build artifacts."
+          "No `sourcemaps.assets` option provided, falling back to uploading detected build artifacts."
         );
         globAssets = buildArtifactPaths;
       }
