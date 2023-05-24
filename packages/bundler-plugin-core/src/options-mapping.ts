@@ -1,5 +1,6 @@
 import { Logger } from "./sentry/logger";
 import { Options as UserOptions } from "./types";
+import { determineReleaseName } from "./utils";
 
 export type NormalizedOptions = ReturnType<typeof normalizeUserOptions>;
 
@@ -20,6 +21,7 @@ export function normalizeUserOptions(userOptions: UserOptions) {
     sourcemaps: userOptions.sourcemaps,
     release: {
       ...userOptions.release,
+      name: userOptions.release?.name ?? determineReleaseName(),
       inject: userOptions.release?.inject ?? true,
       create: userOptions.release?.create ?? true,
       finalize: userOptions.release?.finalize ?? true,
