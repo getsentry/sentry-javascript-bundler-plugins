@@ -1,6 +1,6 @@
 // @ts-check
 const path = require("path");
-const webpack5 = require("webpack");
+const webpack5 = require("webpack5");
 const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 
 webpack5(
