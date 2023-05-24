@@ -1,4 +1,5 @@
 import { getDebugIdSnippet, Options, sentryUnpluginFactory } from "@sentry/bundler-plugin-core";
+import * as path from "path";
 import { UnpluginOptions } from "unplugin";
 import { v4 as uuidv4 } from "uuid";
 
@@ -7,11 +8,8 @@ import { v4 as uuidv4 } from "uuid";
 import { BannerPlugin as Webpack4BannerPlugin } from "webpack-4";
 
 function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
-  const pluginName = "sentry-webpack-release-injection-plugin";
-
   return {
-    name: pluginName,
-
+    name: "sentry-webpack-release-injection-plugin",
     webpack(compiler) {
       if (compiler?.webpack?.BannerPlugin) {
         compiler.options.plugins.push(
@@ -36,11 +34,8 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
 }
 
 function webpackDebugIdInjectionPlugin(): UnpluginOptions {
-  const pluginName = "sentry-webpack-debug-id-injection-plugin";
-
   return {
-    name: pluginName,
-
+    name: "sentry-webpack-debug-id-injection-plugin",
     webpack(compiler) {
       if (compiler?.webpack?.BannerPlugin) {
         compiler.options.plugins.push(
@@ -64,9 +59,30 @@ function webpackDebugIdInjectionPlugin(): UnpluginOptions {
   };
 }
 
+function webpackDebugIdUploadPlugin(
+  upload: (buildArtifacts: string[]) => Promise<void>
+): UnpluginOptions {
+  const pluginName = "sentry-webpack-debug-id-upload-plugin";
+  return {
+    name: pluginName,
+    webpack(compiler) {
+      compiler.hooks.afterEmit.tapAsync(pluginName, (compilation, callback) => {
+        const outputPath = compilation.outputOptions.path ?? path.resolve();
+        const buildArtifacts = Object.keys(compilation.assets).map((asset) =>
+          path.join(outputPath, asset)
+        );
+        void upload(buildArtifacts).then(() => {
+          callback();
+        });
+      });
+    },
+  };
+}
+
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: webpackReleaseInjectionPlugin,
   debugIdInjectionPlugin: webpackDebugIdInjectionPlugin,
+  debugIdUploadPlugin: webpackDebugIdUploadPlugin,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

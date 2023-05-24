@@ -16,10 +16,7 @@ webpack4(
     },
     plugins: [
       sentryWebpackPlugin({
-        sourcemaps: {
-          assets: "./out/webpack4/**",
-          deleteFilesAfterUpload: "./out/webpack4/**/*.map",
-        },
+        debug: true,
       }),
     ],
     devtool: "source-map",

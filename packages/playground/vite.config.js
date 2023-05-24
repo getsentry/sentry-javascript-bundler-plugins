@@ -16,10 +16,7 @@ export default defineConfig({
   },
   plugins: [
     sentryVitePlugin({
-      sourcemaps: {
-        assets: "./out/vite/**",
-        deleteFilesAfterUpload: "./out/vite/**/*.map",
-      },
+      debug: true,
     }),
   ],
 });
