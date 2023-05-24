@@ -1,30 +1,37 @@
 {
-  "extends": "nx/presets/npm.json",
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "affected": {
-    "defaultBase": "main"
-  },
   "tasksRunnerOptions": {
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
         "cacheableOperations": ["build", "lint", "test"],
-        "parallel": 10
+        "cacheDirectory": ".nxcache"
       }
     }
   },
+  "namedInputs": {
+    "sharedGlobals": ["{workspaceRoot}/*.js", "{workspaceRoot}/*.json", "{workspaceRoot}/yarn.lock"]
+  },
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"]
+      "inputs": ["sharedGlobals"],
+      "dependsOn": ["^build"],
+      "outputs": ["{projectRoot}/dist"]
     },
     "lint": {
-      "dependsOn": ["^build", "build"]
+      "inputs": ["sharedGlobals"],
+      "dependsOn": ["^build", "build"],
+      "outputs": []
     },
     "test": {
-      "dependsOn": ["^build"]
+      "inputs": ["sharedGlobals"],
+      "dependsOn": ["^build"],
+      "outputs": []
     },
     "check:types": {
-      "dependsOn": ["^build"]
+      "inputs": ["sharedGlobals"],
+      "dependsOn": ["^build"],
+      "outputs": []
     },
     "build:npm": {
       "dependsOn": ["build", "^build"]
