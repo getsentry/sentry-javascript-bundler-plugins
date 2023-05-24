@@ -4,6 +4,15 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.1.0
+
+- docs: Add removal of `configFile` option to migration guide (#266)
+- feat: Auto detect build artifacts (#257)
+- fix(core): Ignore query and hash in filepaths for release injection (#272)
+- fix(esbuild): Use absolute path for virtual file resolving (#269)
+- fix: Don't show log message if telemetry is disabled (#267)
+- fix: Use automatic release name detection for release injection (#271)
+
 ## 2.0.0
 
 Version 2.0.0 marks the official release of the `@sentry/vite-plugin`, `@sentry/esbuild-plugin` and `@sentry/rollup-plugin` packages.
