@@ -56,10 +56,11 @@ function webpackDebugIdUploadPlugin(
   return {
     name: pluginName,
     webpack(compiler) {
-      compiler.hooks.afterEmit.tapAsync(pluginName, (compilation, callback) => {
-        const outputPath = compilation.outputOptions.path ?? path.resolve();
-        const buildArtifacts = Object.keys(compilation.assets).map((asset) =>
-          path.join(outputPath, asset)
+      compiler.hooks.afterEmit.tapAsync(pluginName, (compilation, callback: () => void) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const outputPath = (compilation.outputOptions.path as string | undefined) ?? path.resolve();
+        const buildArtifacts = Object.keys(compilation.assets as Record<string, unknown>).map(
+          (asset) => path.join(outputPath, asset)
         );
         void upload(buildArtifacts).then(() => {
           callback();
