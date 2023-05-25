@@ -1,35 +1,30 @@
-import { NodeClient, Transaction } from "@sentry/node";
+import { Hub, NodeClient } from "@sentry/node";
 import { UnpluginOptions } from "unplugin";
 import { Logger } from "../sentry/logger";
 
 interface TelemetryPluginOptions {
+  sentryHub: Hub;
   sentryClient: NodeClient;
-  pluginExecutionTransaction: Transaction;
   shouldSendTelemetry: Promise<boolean>;
   logger: Logger;
 }
 
 export function telemetryPlugin({
+  sentryHub,
   sentryClient,
-  pluginExecutionTransaction,
   shouldSendTelemetry,
   logger,
 }: TelemetryPluginOptions): UnpluginOptions {
   return {
     name: "sentry-telemetry-plugin",
-    buildStart() {
-      void shouldSendTelemetry.then((willSendTelemetry) => {
-        if (willSendTelemetry) {
-          logger.info(
-            "Sending error and performance telemetry data to Sentry. To disable telemetry, set `options.telemetry` to `false`."
-          );
-        }
-      });
-      pluginExecutionTransaction.startTimestamp = Date.now() / 1000;
-    },
-    async writeBundle() {
-      pluginExecutionTransaction.finish();
-      await sentryClient.flush();
+    async buildStart() {
+      if (await shouldSendTelemetry) {
+        logger.info(
+          "Sending error and performance telemetry data to Sentry. To disable telemetry, set `options.telemetry` to `false`."
+        );
+        sentryHub.startTransaction({ name: "Sentry Bundler Plugin execution" }).finish();
+        await sentryClient.flush(3000);
+      }
     },
   };
 }

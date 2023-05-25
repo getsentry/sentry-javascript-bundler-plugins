@@ -74,10 +74,17 @@ export function sentryUnpluginFactory({
       shouldSendTelemetry,
       unpluginMetaContext.framework
     );
-    const pluginExecutionTransaction = sentryHub.startTransaction({
-      name: "Sentry Bundler Plugin execution",
+    const sentrySession = sentryHub.startSession();
+    sentryHub.captureSession();
+
+    let sentEndSession = false; // Just to prevent infinite loops with beforeExit, which is called whenever the event loop empties out
+    // We also need to manually end sesisons on errors because beforeExit is not called on crashes
+    process.on("beforeExit", () => {
+      if (!sentEndSession) {
+        sentryHub.endSession();
+        sentEndSession = true;
+      }
     });
-    sentryHub.getScope().setSpan(pluginExecutionTransaction);
 
     const logger = createLogger({
       prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
@@ -86,16 +93,25 @@ export function sentryUnpluginFactory({
     });
 
     function handleRecoverableError(unknownError: unknown) {
-      pluginExecutionTransaction.setStatus("internal_error");
-
-      if (options.errorHandler) {
-        if (unknownError instanceof Error) {
-          options.errorHandler(unknownError);
+      sentrySession.status = "abnormal";
+      try {
+        if (options.errorHandler) {
+          try {
+            if (unknownError instanceof Error) {
+              options.errorHandler(unknownError);
+            } else {
+              options.errorHandler(new Error("An unknown error occured"));
+            }
+          } catch (e) {
+            sentrySession.status = "crashed";
+            throw e;
+          }
         } else {
-          options.errorHandler(new Error("An unknown error occured"));
+          sentrySession.status = "crashed";
+          throw unknownError;
         }
-      } else {
-        throw unknownError;
+      } finally {
+        sentryHub.endSession();
       }
     }
 
@@ -115,10 +131,10 @@ export function sentryUnpluginFactory({
 
     plugins.push(
       telemetryPlugin({
-        pluginExecutionTransaction,
+        sentryClient,
+        sentryHub,
         logger,
         shouldSendTelemetry,
-        sentryClient,
       })
     );
 

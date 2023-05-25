@@ -70,7 +70,7 @@ describe("addPluginOptionTagsToHub", () => {
       mockedHub as unknown as Hub,
       "rollup"
     );
-    expect(mockedHub.setTag).toHaveBeenCalledWith("add-deploy", true);
+    expect(mockedHub.setTag).toHaveBeenCalledWith("deploy-options", true);
   });
 
   it("should set errorHandler tag to `custom` if the errorHandler option is specified", () => {
@@ -80,7 +80,7 @@ describe("addPluginOptionTagsToHub", () => {
       mockedHub as unknown as Hub,
       "rollup"
     );
-    expect(mockedHub.setTag).toHaveBeenCalledWith("error-handler", "custom");
+    expect(mockedHub.setTag).toHaveBeenCalledWith("custom-error-handler", true);
   });
 
   it.each([
