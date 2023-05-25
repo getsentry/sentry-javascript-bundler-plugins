@@ -249,7 +249,9 @@ async function determineSourceMapPathFromBundle(
   }
 
   // This is just a debug message because it can be quite spammy for some frameworks
-  logger.debug(`Could not determine source map path for bundle: ${bundlePath}`);
+  logger.debug(
+    `Could not determine source map path for bundle: ${bundlePath} - Did you turn on source map generation in your bundler?`
+  );
   return undefined;
 }
 
