@@ -76,14 +76,14 @@ export function sentryUnpluginFactory({
     );
     const sentrySession = sentryHub.startSession();
     sentryHub.captureSession();
+
+    let sentEndSession = false;
     process.on("beforeExit", () => {
-      sentrySession.init = false;
-      sentryHub.endSession();
+      if (!sentEndSession) {
+        sentryHub.endSession();
+        sentEndSession = true;
+      }
     });
-    const pluginExecutionTransaction = sentryHub.startTransaction({
-      name: "Sentry Bundler Plugin execution",
-    });
-    sentryHub.getScope().setSpan(pluginExecutionTransaction);
 
     const logger = createLogger({
       prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
@@ -92,23 +92,25 @@ export function sentryUnpluginFactory({
     });
 
     function handleRecoverableError(unknownError: unknown) {
-      sentrySession.init = false;
       sentrySession.status = "abnormal";
-      sentryHub.endSession();
-      if (options.errorHandler) {
-        try {
-          if (unknownError instanceof Error) {
-            options.errorHandler(unknownError);
-          } else {
-            options.errorHandler(new Error("An unknown error occured"));
+      try {
+        if (options.errorHandler) {
+          try {
+            if (unknownError instanceof Error) {
+              options.errorHandler(unknownError);
+            } else {
+              options.errorHandler(new Error("An unknown error occured"));
+            }
+          } catch (e) {
+            sentrySession.status = "crashed";
+            throw e;
           }
-        } catch (e) {
+        } else {
           sentrySession.status = "crashed";
-          throw e;
+          throw unknownError;
         }
-      } else {
-        sentrySession.status = "crashed";
-        throw unknownError;
+      } finally {
+        sentryHub.endSession();
       }
     }
 
@@ -128,10 +130,10 @@ export function sentryUnpluginFactory({
 
     plugins.push(
       telemetryPlugin({
-        pluginExecutionTransaction,
+        sentryClient,
+        sentryHub,
         logger,
         shouldSendTelemetry,
-        sentryClient,
       })
     );
 

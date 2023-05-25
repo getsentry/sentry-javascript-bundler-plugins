@@ -62,6 +62,7 @@ export function createSentryInstance(
 export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bundler: string) {
   const { org, project, release, errorHandler, sourcemaps } = options;
 
+  hub.setTag("upload-legacy-sourcemaps", !!release.uploadLegacySourcemaps);
   if (release.uploadLegacySourcemaps) {
     hub.setTag(
       "uploadLegacySourcemapsEntries",
@@ -70,29 +71,19 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
   }
 
   // Optional release pipeline steps
-  if (release.cleanArtifacts) {
-    hub.setTag("clean-artifacts", true);
-  }
+  hub.setTag("clean-artifacts", release.cleanArtifacts);
   if (release.setCommits) {
     hub.setTag("set-commits", release.setCommits.auto === true ? "auto" : "manual");
+  } else {
+    hub.setTag("set-commits", "undefined");
   }
-  if (release.finalize) {
-    hub.setTag("finalize-release", true);
-  }
-  if (release.deploy) {
-    hub.setTag("add-deploy", true);
-  }
+  hub.setTag("finalize-release", release.finalize);
+  hub.setTag("deploy-options", !!release.deploy);
 
   // Miscelaneous options
-  if (errorHandler) {
-    hub.setTag("error-handler", "custom");
-  }
-  if (sourcemaps?.assets) {
-    hub.setTag("debug-id-upload", true);
-  }
-  if (sourcemaps?.deleteFilesAfterUpload) {
-    hub.setTag("delete-after-upload", true);
-  }
+  hub.setTag("custom-error-handler", !!errorHandler);
+  hub.setTag("sourcemaps-assets", !!sourcemaps?.assets);
+  hub.setTag("delete-after-upload", !!sourcemaps?.deleteFilesAfterUpload);
 
   hub.setTag("node", process.version);
 
