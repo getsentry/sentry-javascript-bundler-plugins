@@ -4,6 +4,13 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.2.0
+
+- ref(core): Make better use of Sentry (#246)
+- ref(webpack): Use webpack peer dependency (#273)
+
+Work in this release was made possible with help from @wojtekmaj and @dobladov. Thank you for your contributions!
+
 ## 2.1.0
 
 - docs: Add removal of `configFile` option to migration guide (#266)
