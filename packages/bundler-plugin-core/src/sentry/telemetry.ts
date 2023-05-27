@@ -86,6 +86,7 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
   hub.setTag("delete-after-upload", !!sourcemaps?.deleteFilesAfterUpload);
 
   hub.setTag("node", process.version);
+  hub.setTag("platform", process.platform);
 
   hub.setTags({
     organization: org,
