@@ -92,6 +92,11 @@ export function sentryUnpluginFactory({
       debug: options.debug,
     });
 
+    // Set the User-Agent that Sentry CLI will use when interacting with Sentry
+    process.env[
+      "SENTRY_PIPELINE"
+    ] = `${unpluginMetaContext.framework}-plugin/${__PACKAGE_VERSION__}`;
+
     function handleRecoverableError(unknownError: unknown) {
       sentrySession.status = "abnormal";
       try {
