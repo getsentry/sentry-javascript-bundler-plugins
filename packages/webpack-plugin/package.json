@@ -75,7 +75,7 @@
     "webpack": "npm:webpack@^4"
   },
   "peerDependencies": {
-    "webpack": ">=4"
+    "webpack": ">=4.40.0"
   },
   "volta": {
     "extends": "../../package.json"
