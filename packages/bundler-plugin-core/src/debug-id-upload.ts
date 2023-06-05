@@ -7,6 +7,7 @@ import { Logger } from "./sentry/logger";
 import { promisify } from "util";
 import { Hub, NodeClient } from "@sentry/node";
 import SentryCli from "@sentry/cli";
+import { dynamicSamplingContextToSentryBaggageHeader } from "@sentry/utils";
 
 interface RewriteSourcesHook {
   (source: string, map: any): string;
@@ -48,14 +49,18 @@ export function createDebugIdUploadFunction({
   deleteFilesAfterUpload,
 }: DebugIdUploadPluginOptions) {
   return async (buildArtifactPaths: string[]) => {
+    const artifactBundleUploadTransaction = sentryHub.startTransaction({
+      name: "debug-id-sourcemap-upload",
+    });
+
     let folderToCleanUp: string | undefined;
 
-    const cliInstance = new SentryCli(null, sentryCliOptions);
-
     try {
+      const mkdtempSpan = artifactBundleUploadTransaction.startChild({ description: "mkdtemp" });
       const tmpUploadFolder = await fs.promises.mkdtemp(
         path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
       );
+      mkdtempSpan.finish();
 
       folderToCleanUp = tmpUploadFolder;
 
@@ -69,13 +74,15 @@ export function createDebugIdUploadFunction({
         globAssets = buildArtifactPaths;
       }
 
-      const debugIdChunkFilePaths = (
-        await glob(globAssets, {
-          absolute: true,
-          nodir: true,
-          ignore: ignore,
-        })
-      ).filter(
+      const globSpan = artifactBundleUploadTransaction.startChild({ description: "glob" });
+      const globResult = await glob(globAssets, {
+        absolute: true,
+        nodir: true,
+        ignore: ignore,
+      });
+      globSpan.finish();
+
+      const debugIdChunkFilePaths = globResult.filter(
         (debugIdChunkFilePath) =>
           debugIdChunkFilePath.endsWith(".js") ||
           debugIdChunkFilePath.endsWith(".mjs") ||
@@ -91,6 +98,9 @@ export function createDebugIdUploadFunction({
           "Didn't find any matching sources for debug ID upload. Please check the `sourcemaps.assets` option."
         );
       } else {
+        const prepareSpan = artifactBundleUploadTransaction.startChild({
+          description: "prepare-bundles",
+        });
         await Promise.all(
           debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
             await prepareBundleForDebugIdUpload(
@@ -102,6 +112,33 @@ export function createDebugIdUploadFunction({
             );
           })
         );
+        prepareSpan.finish();
+
+        const files = await fs.promises.readdir(tmpUploadFolder);
+        const stats = files.map((file) => fs.promises.stat(path.join(tmpUploadFolder, file)));
+        const uploadSize = (await Promise.all(stats)).reduce(
+          (accumulator, { size }) => accumulator + size,
+          0
+        );
+
+        artifactBundleUploadTransaction.setMeasurement("files", files.length, "none");
+        artifactBundleUploadTransaction.setMeasurement("upload_size", uploadSize, "byte");
+
+        const uploadSpan = artifactBundleUploadTransaction.startChild({
+          description: "upload",
+        });
+
+        const cliInstance = new SentryCli(null, {
+          ...sentryCliOptions,
+          headers: {
+            "sentry-trace": uploadSpan.toTraceparent(),
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            baggage: dynamicSamplingContextToSentryBaggageHeader(
+              artifactBundleUploadTransaction.getDynamicSamplingContext()
+            )!,
+            ...sentryCliOptions.headers,
+          },
+        });
 
         await cliInstance.releases.uploadSourceMaps(
           releaseName ?? "undefined", // unfortunetly this needs a value for now but it will not matter since debug IDs overpower releases anyhow
@@ -116,32 +153,50 @@ export function createDebugIdUploadFunction({
             useArtifactBundle: true,
           }
         );
+
+        uploadSpan.finish();
       }
 
       if (deleteFilesAfterUpload) {
+        const deleteGlobSpan = artifactBundleUploadTransaction.startChild({
+          description: "delete-glob",
+        });
         const filePathsToDelete = await glob(deleteFilesAfterUpload, {
           absolute: true,
           nodir: true,
         });
+        deleteGlobSpan.finish();
 
         filePathsToDelete.forEach((filePathToDelete) => {
           logger.debug(`Deleting asset after upload: ${filePathToDelete}`);
         });
 
+        const deleteSpan = artifactBundleUploadTransaction.startChild({
+          description: "delete-files-after-upload",
+        });
         await Promise.all(
           filePathsToDelete.map((filePathToDelete) =>
             fs.promises.rm(filePathToDelete, { force: true })
           )
         );
+        deleteSpan.finish();
       }
     } catch (e) {
-      sentryHub.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
-      await sentryClient.flush();
+      sentryHub.withScope((scope) => {
+        scope.setSpan(artifactBundleUploadTransaction);
+        sentryHub.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
+      });
       handleRecoverableError(e);
     } finally {
       if (folderToCleanUp) {
+        const cleanupSpan = artifactBundleUploadTransaction.startChild({
+          description: "cleanup",
+        });
         void fs.promises.rm(folderToCleanUp, { recursive: true, force: true });
+        cleanupSpan.finish();
       }
+      artifactBundleUploadTransaction.finish();
+      await sentryClient.flush();
     }
   };
 }
