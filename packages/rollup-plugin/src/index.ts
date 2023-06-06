@@ -2,10 +2,11 @@ import {
   sentryUnpluginFactory,
   Options,
   createRollupReleaseInjectionHooks,
-  createRollupDebugIdInjectionHooks,
   createRollupDebugIdUploadHooks,
+  getDebugIdSnippet,
 } from "@sentry/bundler-plugin-core";
 import type { UnpluginOptions } from "unplugin";
+import { v4 as uuidv4 } from "uuid";
 
 function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   return {
@@ -17,7 +18,13 @@ function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
 function rollupDebugIdInjectionPlugin(): UnpluginOptions {
   return {
     name: "sentry-rollup-debug-id-injection-plugin",
-    rollup: createRollupDebugIdInjectionHooks(),
+    rollup: {
+      intro() {
+        const debugId = uuidv4();
+        const codeToInject = getDebugIdSnippet(debugId);
+        return codeToInject;
+      },
+    },
   };
 }
 

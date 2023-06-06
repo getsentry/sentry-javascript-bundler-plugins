@@ -50,7 +50,8 @@
   },
   "dependencies": {
     "@sentry/bundler-plugin-core": "2.2.0",
-    "unplugin": "1.0.1"
+    "unplugin": "1.0.1",
+    "uuid": "^9.0.0"
   },
   "peerDependencies": {
     "rollup": ">=3.2.0"

@@ -2,10 +2,11 @@ import {
   sentryUnpluginFactory,
   Options,
   createRollupReleaseInjectionHooks,
-  createRollupDebugIdInjectionHooks,
   createRollupDebugIdUploadHooks,
+  getDebugIdSnippet,
 } from "@sentry/bundler-plugin-core";
 import { UnpluginOptions } from "unplugin";
+import { v4 as uuidv4 } from "uuid";
 
 function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   return {
@@ -18,7 +19,13 @@ function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
 function viteDebugIdInjectionPlugin(): UnpluginOptions {
   return {
     name: "sentry-vite-debug-id-injection-plugin",
-    vite: createRollupDebugIdInjectionHooks(),
+    vite: {
+      intro() {
+        const debugId = uuidv4();
+        const codeToInject = getDebugIdSnippet(debugId);
+        return codeToInject;
+      },
+    },
   };
 }
 
