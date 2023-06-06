@@ -4,6 +4,15 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.2.1
+
+- feat(core): Improve telemetry (#294)
+- feat(core): Set custom user agent when interacting with Sentry (#296)
+- fix(esbuild): Inject different debug IDs into different output bundles (#301)
+- fix(webpack): Set minimum webpack 4 peer dep to `4.40.0` (#290)
+- fix: Use magic-string `appendLeft` instead of `replace` (#303)
+- ref: Improve log message when sourcemap cannot be found (#287)
+
 ## 2.2.0
 
 - ref(core): Make better use of Sentry (#246)
