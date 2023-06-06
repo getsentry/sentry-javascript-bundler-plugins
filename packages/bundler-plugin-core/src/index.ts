@@ -346,9 +346,11 @@ export function createRollupDebugIdInjectionHooks() {
           // Note: CodeQL complains that this regex potentially has n^2 runtime. This likely won't affect realistic files.
           /^(?:\s*|\/\*(?:.|\r|\n)*\*\/|\/\/.*[\n\r])*(?:"[^"]*";|'[^']*';)?/;
 
-        if (code.match(commentUseStrictRegex)?.[0]) {
+        const match = code.match(commentUseStrictRegex)?.[0];
+
+        if (match) {
           // Add injected code after any comments or "use strict" at the beginning of the bundle.
-          ms.replace(commentUseStrictRegex, (match) => `${match}${codeToInject}`);
+          ms.appendLeft(match.length, codeToInject);
         } else {
           // ms.replace() doesn't work when there is an empty string match (which happens if
           // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
