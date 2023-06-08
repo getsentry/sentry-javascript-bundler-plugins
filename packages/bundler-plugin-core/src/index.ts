@@ -344,7 +344,7 @@ export function createRollupDebugIdInjectionHooks() {
         // As an additional complication `"use strict";`s may come after any number of comments.
         const commentUseStrictRegex =
           // Note: CodeQL complains that this regex potentially has n^2 runtime. This likely won't affect realistic files.
-          /^(?:\s*|\/\*(?:.|\r|\n)*\*\/|\/\/.*[\n\r])*(?:"[^"]*";|'[^']*';)?/;
+          /^(?:\s*|\/\*(?:.|\r|\n)*?\*\/|\/\/.*[\n\r])*(?:"[^"]*";|'[^']*';)?/;
 
         const match = code.match(commentUseStrictRegex)?.[0];
 
