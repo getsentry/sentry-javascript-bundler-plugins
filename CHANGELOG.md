@@ -4,6 +4,13 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.2.2
+
+- fix(esbuild): Don't use namespace for esbuild proxy resolving (#311)
+- fix: Update commentUseStrictRegex to be lazy instead of greedy (#309)
+
+Work in this release contributed by @jdk2pq. Thank you for your contribution!
+
 ## 2.2.1
 
 - fix(esbuild): Inject different debug IDs into different output bundles (#301)
