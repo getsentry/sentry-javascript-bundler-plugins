@@ -62,9 +62,9 @@ function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
           }
         });
 
-        onLoad({ filter: /.*/, namespace: "file" }, (args) => {
+        onLoad({ filter: /.*/ }, (args) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          if (!(args.pluginData.isProxyResolver as undefined | boolean)) {
+          if (!(args.pluginData?.isProxyResolver as undefined | boolean)) {
             return null;
           }
 
