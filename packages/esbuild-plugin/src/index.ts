@@ -45,22 +45,21 @@ function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
 
     esbuild: {
       setup({ onLoad, onResolve }) {
-        onResolve({ filter: /.*/, namespace: "file" }, (args) => {
+        onResolve({ filter: /.*/ }, (args) => {
           if (args.kind !== "entry-point") {
             return;
+          } else {
+            return {
+              pluginName,
+              // needs to be an abs path, otherwise esbuild will complain
+              path: path.isAbsolute(args.path) ? args.path : path.join(args.resolveDir, args.path),
+              pluginData: {
+                isProxyResolver: true,
+                originalPath: args.path,
+                originalResolveDir: args.resolveDir,
+              },
+            };
           }
-
-          return {
-            pluginName,
-            // needs to be an abs path, otherwise esbuild will complain
-            path: path.isAbsolute(args.path) ? args.path : path.join(args.resolveDir, args.path),
-            namespace: "file", // passthrough
-            pluginData: {
-              isProxyResolver: true,
-              originalPath: args.path,
-              originalResolveDir: args.resolveDir,
-            },
-          };
         });
 
         onLoad({ filter: /.*/, namespace: "file" }, (args) => {
