@@ -38,7 +38,6 @@ function esbuildReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
 
 function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
   const pluginName = "sentry-esbuild-debug-id-injection-plugin";
-  const proxyNamespace = "sentry-debug-id-proxy";
   const stubNamespace = "sentry-debug-id-stub";
 
   return {
@@ -49,23 +48,31 @@ function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
         onResolve({ filter: /.*/ }, (args) => {
           if (args.kind !== "entry-point") {
             return;
+          } else {
+            return {
+              pluginName,
+              // needs to be an abs path, otherwise esbuild will complain
+              path: path.isAbsolute(args.path) ? args.path : path.join(args.resolveDir, args.path),
+              pluginData: {
+                isProxyResolver: true,
+                originalPath: args.path,
+                originalResolveDir: args.resolveDir,
+              },
+            };
           }
-          return {
-            pluginName,
-            path: args.path,
-            namespace: proxyNamespace,
-            pluginData: {
-              originalPath: args.path,
-              originalResolveDir: args.resolveDir,
-            },
-          };
         });
 
-        onLoad({ filter: /.*/, namespace: proxyNamespace }, (args) => {
+        onLoad({ filter: /.*/ }, (args) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          if (!(args.pluginData?.isProxyResolver as undefined | boolean)) {
+            return null;
+          }
+
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           const originalPath = args.pluginData.originalPath as string;
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           const originalResolveDir = args.pluginData.originalResolveDir as string;
+
           return {
             loader: "js",
             pluginName,
