@@ -94,7 +94,7 @@ errorHandler: (err) => {
           "Hook to rewrite the `sources` field inside the source map before being uploaded to Sentry. Does not modify the actual source map. Effectively, this modifies how files inside the stacktrace will show up in Sentry.\n\nDefaults to making all sources relative to `process.cwd()` while building.",
       },
       {
-        name: "deleteFilesAfterUpload",
+        name: "filesToDeleteAfterUpload",
         type: "string | string[]",
         fullDescription:
           "A glob or an array of globs that specifies the build artifacts that should be deleted after the artifact upload to Sentry has been completed.\n\nThe globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)\n\nUse the `debug` option to print information about which files end up being deleted.",

@@ -23,7 +23,7 @@ interface DebugIdUploadPluginOptions {
   handleRecoverableError: (error: unknown) => void;
   sentryHub: Hub;
   sentryClient: NodeClient;
-  deleteFilesAfterUpload?: string | string[];
+  filesToDeleteAfterUpload?: string | string[];
   sentryCliOptions: {
     url: string;
     authToken: string;
@@ -46,7 +46,7 @@ export function createDebugIdUploadFunction({
   sentryClient,
   sentryCliOptions,
   rewriteSourcesHook,
-  deleteFilesAfterUpload,
+  filesToDeleteAfterUpload,
 }: DebugIdUploadPluginOptions) {
   return async (buildArtifactPaths: string[]) => {
     const artifactBundleUploadTransaction = sentryHub.startTransaction({
@@ -157,11 +157,11 @@ export function createDebugIdUploadFunction({
         uploadSpan.finish();
       }
 
-      if (deleteFilesAfterUpload) {
+      if (filesToDeleteAfterUpload) {
         const deleteGlobSpan = artifactBundleUploadTransaction.startChild({
           description: "delete-glob",
         });
-        const filePathsToDelete = await glob(deleteFilesAfterUpload, {
+        const filePathsToDelete = await glob(filesToDeleteAfterUpload, {
           absolute: true,
           nodir: true,
         });
