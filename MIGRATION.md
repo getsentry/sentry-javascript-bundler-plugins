@@ -12,6 +12,15 @@ This document serves as a migration guide, documenting all breaking changes betw
 - The `cliBinaryExists` function was renamed to `sentryCliBinaryExists`
 - Removed the `configFile` option. Options should now be set explicitly or via environment variables.
 
+### Usage in combination with the `RewriteFrames` integration
+
+**We recommend removing the `RewriteFrames` integration from your code when upgrading to version 2.**
+
+From version 2 onwards, with the introduction of debug IDs, the `RewriteFrames` integration is not necessary anymore, since stack trace and source maps are linked via a unique ID.
+Usage of the `RewriteFrames` integration might disturb the process of linking errors to an ID.
+
+Note: The `RewriteFrames` integration is exported by the Sentry SDK and not by the bundler plugin.
+
 ## Upgrading from 1.x to 2.x (Webpack Plugin Only)
 
 Version 2 of `@sentry/webpack-plugin` is a complete rewrite of version 1, relying on bundler-agnostic code (based on [unjs/unplugin](https://github.com/unjs/unplugin)). While we tried to keep changes to v1 of the webpack plugin minimal, a adjustments are nevertheless necessary:
