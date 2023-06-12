@@ -83,7 +83,10 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
   // Miscelaneous options
   hub.setTag("custom-error-handler", !!errorHandler);
   hub.setTag("sourcemaps-assets", !!sourcemaps?.assets);
-  hub.setTag("delete-after-upload", !!sourcemaps?.deleteFilesAfterUpload);
+  hub.setTag(
+    "delete-after-upload",
+    !!sourcemaps?.deleteFilesAfterUpload || !!sourcemaps?.filesToDeleteAfterUpload
+  );
 
   hub.setTag("node", process.version);
   hub.setTag("platform", process.platform);

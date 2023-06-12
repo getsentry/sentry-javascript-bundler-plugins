@@ -222,7 +222,9 @@ export function sentryUnpluginFactory({
           createDebugIdUploadFunction({
             assets: options.sourcemaps?.assets,
             ignore: options.sourcemaps?.ignore,
-            deleteFilesAfterUpload: options.sourcemaps?.deleteFilesAfterUpload,
+            filesToDeleteAfterUpload:
+              options.sourcemaps?.filesToDeleteAfterUpload ??
+              options.sourcemaps?.deleteFilesAfterUpload,
             dist: options.release.dist,
             releaseName: options.release.name,
             logger: logger,

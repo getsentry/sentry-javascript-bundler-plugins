@@ -125,8 +125,20 @@ export interface Options {
      * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
      *
      * Use the `debug` option to print information about which files end up being deleted.
+     *
+     * @deprecated Use `filesToDeleteAfterUpload` instead.
      */
+    // TODO(v3): Remove this option.
     deleteFilesAfterUpload?: string | string[];
+
+    /**
+     * A glob or an array of globs that specifies the build artifacts that should be deleted after the artifact upload to Sentry has been completed.
+     *
+     * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
+     *
+     * Use the `debug` option to print information about which files end up being deleted.
+     */
+    filesToDeleteAfterUpload?: string | string[];
   };
 
   /**
