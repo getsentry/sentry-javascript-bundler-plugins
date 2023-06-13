@@ -155,6 +155,7 @@ export function createDebugIdUploadFunction({
         );
 
         uploadSpan.finish();
+        logger.info("Successfully uploaded source maps to Sentry");
       }
 
       if (filesToDeleteAfterUpload) {
