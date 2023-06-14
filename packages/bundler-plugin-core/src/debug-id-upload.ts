@@ -89,7 +89,9 @@ export function createDebugIdUploadFunction({
           debugIdChunkFilePath.endsWith(".cjs")
       );
 
-      debugIdChunkFilePaths.sort(); // ensure order; glob() does not
+      // The order of the files output by glob() is not deterministic
+      // Ensure order within the files so that {debug-id}-{chunkIndex} coupling is consistent
+      debugIdChunkFilePaths.sort();
 
       if (Array.isArray(assets) && assets.length === 0) {
         logger.debug(
