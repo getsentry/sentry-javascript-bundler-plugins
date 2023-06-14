@@ -89,6 +89,8 @@ export function createDebugIdUploadFunction({
           debugIdChunkFilePath.endsWith(".cjs")
       );
 
+      debugIdChunkFilePaths.sort(); // ensure order; glob() does not
+
       if (Array.isArray(assets) && assets.length === 0) {
         logger.debug(
           "Empty `sourcemaps.assets` option provided. Will not upload sourcemaps with debug ID."
