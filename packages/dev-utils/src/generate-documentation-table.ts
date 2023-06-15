@@ -356,7 +356,9 @@ function generateTableOfContents(
   return nodes
     .map((node) => {
       const id = `${parentId}-${node.name.toLowerCase()}`;
-      let output = `${"    ".repeat(depth)}-   [\`${node.name}\`](#${id})`;
+      let output = `${"    ".repeat(depth)}-   [\`${node.name}\`](#${id
+        .replace(/\./g, "")
+        .toLowerCase()})`;
       if (node.children && depth <= 0) {
         output += "\n";
         output += generateTableOfContents(depth + 1, id, node.children);
@@ -375,7 +377,7 @@ function generateDescriptions(
     .map((node) => {
       const name = parentName === undefined ? node.name : `${parentName}.${node.name}`;
       const id = `${parentId}-${node.name.toLowerCase()}`;
-      let output = `### <a name="${id}"></a>\`${name}\`
+      let output = `### \`${name}\`
 
 ${node.type === undefined ? "" : `Type: \`${node.type}\``}
 
