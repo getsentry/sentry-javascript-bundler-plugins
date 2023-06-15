@@ -1,4 +1,9 @@
-import { getDebugIdSnippet, Options, sentryUnpluginFactory } from "@sentry/bundler-plugin-core";
+import {
+  getDebugIdSnippet,
+  Options,
+  sentryUnpluginFactory,
+  stringToUUID,
+} from "@sentry/bundler-plugin-core";
 import * as path from "path";
 import { UnpluginOptions } from "unplugin";
 import { v4 as uuidv4 } from "uuid";
@@ -6,6 +11,12 @@ import { v4 as uuidv4 } from "uuid";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore webpack is a peer dep
 import * as webback4or5 from "webpack";
+
+interface BannerPluginCallbackArg {
+  chunk?: {
+    hash?: string;
+  };
+}
 
 function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   return {
@@ -42,7 +53,10 @@ function webpackDebugIdInjectionPlugin(): UnpluginOptions {
         new BannerPlugin({
           raw: true,
           include: /\.(js|ts|jsx|tsx|mjs|cjs)$/,
-          banner: () => getDebugIdSnippet(uuidv4()),
+          banner: (arg?: BannerPluginCallbackArg) => {
+            const debugId = arg?.chunk?.hash ? stringToUUID(arg?.chunk?.hash) : uuidv4();
+            return getDebugIdSnippet(debugId);
+          },
         })
       );
     },
