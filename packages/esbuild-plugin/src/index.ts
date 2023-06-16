@@ -58,6 +58,13 @@ function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
                 originalPath: args.path,
                 originalResolveDir: args.resolveDir,
               },
+              // We need to add a suffix here, otherwise esbuild will mark the entrypoint as resolved and won't traverse
+              // the module tree any further down past the proxy module because we're essentially creating a dependency
+              // loop back to the proxy module.
+              // By setting a suffix we're telling esbuild that the entrypoint and proxy module are two different things,
+              // making it re-resolve the entrypoint when it is imported from the proxy module.
+              // Super confusing? Yes. Works? Apparently... Let's see.
+              suffix: "?sentryProxyModule=true",
             };
           }
         });
@@ -76,11 +83,12 @@ function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
           return {
             loader: "js",
             pluginName,
+            // We need to use JSON.stringify below so that any escape backslashes stay escape backslashes, in order not to break paths on windows
             contents: `
               import "_sentry-debug-id-injection-stub";
-              import * as OriginalModule from "${originalPath}";
+              import * as OriginalModule from ${JSON.stringify(originalPath)};
               export default OriginalModule.default;
-              export * from "${originalPath}";`,
+              export * from ${JSON.stringify(originalPath)};`,
             resolveDir: originalResolveDir,
           };
         });
