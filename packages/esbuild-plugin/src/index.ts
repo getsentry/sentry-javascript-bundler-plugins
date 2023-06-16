@@ -51,6 +51,8 @@ function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
           } else {
             return {
               pluginName,
+              // needs to be an abs path, otherwise esbuild will complain
+              path: path.isAbsolute(args.path) ? args.path : path.join(args.resolveDir, args.path),
               pluginData: {
                 isProxyResolver: true,
                 originalPath: args.path,
