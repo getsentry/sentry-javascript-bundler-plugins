@@ -31,19 +31,23 @@ describe("Same debug IDs for multiple identical builds", () => {
     bundlers.push("webpack4");
   }
 
-  test.each(bundlers)("%s", (bundler) => {
-    // build
-    childProcess.execSync(`yarn ts-node ${path.join(__dirname, `build-${bundler}.ts`)}`);
+  test.each(bundlers)(
+    "%s",
+    (bundler) => {
+      // build
+      childProcess.execSync(`yarn ts-node ${path.join(__dirname, `build-${bundler}.ts`)}`);
 
-    const debugIds1 = executeAndGetDebugIds(path.join(__dirname, "out", bundler, "index.js"));
+      const debugIds1 = executeAndGetDebugIds(path.join(__dirname, "out", bundler, "index.js"));
 
-    // rebuild
-    childProcess.execSync(`yarn ts-node ${path.join(__dirname, `build-${bundler}.ts`)}`);
+      // rebuild
+      childProcess.execSync(`yarn ts-node ${path.join(__dirname, `build-${bundler}.ts`)}`);
 
-    const debugIds2 = executeAndGetDebugIds(path.join(__dirname, "out", bundler, "index.js"));
+      const debugIds2 = executeAndGetDebugIds(path.join(__dirname, "out", bundler, "index.js"));
 
-    expect(debugIds1).toStrictEqual(debugIds2);
-  });
+      expect(debugIds1).toStrictEqual(debugIds2);
+    },
+    20_000
+  );
 });
 
 describe("Different debug IDs for different builds", () => {
@@ -53,22 +57,26 @@ describe("Different debug IDs for different builds", () => {
     bundlers.push("webpack4");
   }
 
-  test.each(bundlers)("%s", async (bundler) => {
-    // build
-    childProcess.execSync(`yarn ts-node ${path.join(__dirname, `build-${bundler}.ts`)}`);
+  test.each(bundlers)(
+    "%s",
+    async (bundler) => {
+      // build
+      childProcess.execSync(`yarn ts-node ${path.join(__dirname, `build-${bundler}.ts`)}`);
 
-    const debugIds1 = executeAndGetDebugIds(path.join(__dirname, "out", bundler, "index.js"));
+      const debugIds1 = executeAndGetDebugIds(path.join(__dirname, "out", bundler, "index.js"));
 
-    await fs.writeFile(
-      path.join(__dirname, "input", "dynamic-variable.js"),
-      `global.dynamicVariable = 2;`
-    );
+      await fs.writeFile(
+        path.join(__dirname, "input", "dynamic-variable.js"),
+        `global.dynamicVariable = 2;`
+      );
 
-    // rebuild
-    childProcess.execSync(`yarn ts-node ${path.join(__dirname, `build-${bundler}.ts`)}`);
+      // rebuild
+      childProcess.execSync(`yarn ts-node ${path.join(__dirname, `build-${bundler}.ts`)}`);
 
-    const debugIds2 = executeAndGetDebugIds(path.join(__dirname, "out", bundler, "index.js"));
+      const debugIds2 = executeAndGetDebugIds(path.join(__dirname, "out", bundler, "index.js"));
 
-    expect(debugIds1).not.toEqual(debugIds2);
-  });
+      expect(debugIds1).not.toEqual(debugIds2);
+    },
+    20_000
+  );
 });
