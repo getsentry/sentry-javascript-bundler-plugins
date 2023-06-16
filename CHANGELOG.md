@@ -4,6 +4,17 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.3.0
+
+- feat(webpack): Generate deterministic debug IDs (#321)
+- feat: Add `filesToDeleteAfterUpload` alias for `deleteFilesAfterUpload` (#313)
+- feat: Sort globbed files to ensure deterministic bundle IDs (#318)
+- fix(esbuild): Don't override user code with proxy module (#322)
+- fix(esbuild): Fix debug ID generation (#325)
+- fix: Use `SENTRY_RELEASE` environment variable to set `release.name` option (#317)
+
+Work in this release contributed by @smbroadley. Thank you for your contribution!
+
 ## 2.2.2
 
 - fix(esbuild): Don't use namespace for esbuild proxy resolving (#311)
