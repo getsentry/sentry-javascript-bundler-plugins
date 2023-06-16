@@ -172,6 +172,6 @@ describe("getDependencies", () => {
 
 describe("stringToUUID", () => {
   test("should return a deterministic UUID", () => {
-    expect(stringToUUID("Nothing personnel kid")).toBe("52c7a762-5ddf-49a7-6f16-6874a8cb2512");
+    expect(stringToUUID("Nothing personnel kid")).toBe("52c7a762-5ddf-49a7-af16-6874a8cb2512");
   });
 });
