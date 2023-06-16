@@ -54,7 +54,7 @@ function webpackDebugIdInjectionPlugin(): UnpluginOptions {
           raw: true,
           include: /\.(js|ts|jsx|tsx|mjs|cjs)$/,
           banner: (arg?: BannerPluginCallbackArg) => {
-            const debugId = arg?.chunk?.hash ? stringToUUID(arg?.chunk?.hash) : uuidv4();
+            const debugId = arg?.chunk?.hash ? stringToUUID(arg.chunk.hash) : uuidv4();
             return getDebugIdSnippet(debugId);
           },
         })
