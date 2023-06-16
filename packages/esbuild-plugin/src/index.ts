@@ -51,6 +51,8 @@ function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
           } else {
             return {
               pluginName,
+              // needs to be an abs path, otherwise esbuild will complain
+              path: path.isAbsolute(args.path) ? args.path : path.join(args.resolveDir, args.path),
               pluginData: {
                 isProxyResolver: true,
                 originalPath: args.path,
@@ -81,11 +83,12 @@ function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
           return {
             loader: "js",
             pluginName,
+            // We need to use JSON.stringify below so that any escape backslashes stay escape backslashes, in order not to break paths on windows
             contents: `
               import "_sentry-debug-id-injection-stub";
-              import * as OriginalModule from "${originalPath}";
+              import * as OriginalModule from ${JSON.stringify(originalPath)};
               export default OriginalModule.default;
-              export * from "${originalPath}";`,
+              export * from ${JSON.stringify(originalPath)};`,
             resolveDir: originalResolveDir,
           };
         });
