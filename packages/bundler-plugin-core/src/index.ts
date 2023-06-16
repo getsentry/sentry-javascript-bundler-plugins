@@ -398,4 +398,6 @@ export function getDebugIdSnippet(debugId: string): string {
   return `;!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{},n=(new Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="${debugId}",e._sentryDebugIdIdentifier="sentry-dbid-${debugId}")}catch(e){}}();`;
 }
 
+export { stringToUUID } from "./utils";
+
 export type { Options } from "./types";

@@ -6,5 +6,8 @@ const fixturePaths = fs
   .map((fixtureDir) => path.join(__dirname, "..", "fixtures", fixtureDir));
 
 fixturePaths.forEach((fixturePath) => {
-  require(path.join(fixturePath, "setup.ts"));
+  const setupScriptPath = path.join(fixturePath, "setup.ts");
+  if (fs.existsSync(setupScriptPath)) {
+    require(setupScriptPath);
+  }
 });
