@@ -85,9 +85,9 @@ function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
             pluginName,
             contents: `
               import "_sentry-debug-id-injection-stub";
-              import * as OriginalModule from "${originalPath}";
+              import * as OriginalModule from ${JSON.stringify(originalPath)};
               export default OriginalModule.default;
-              export * from "${originalPath}";`,
+              export * from ${JSON.stringify(originalPath)};`,
             resolveDir: originalResolveDir,
           };
         });
