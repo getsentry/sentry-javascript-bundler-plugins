@@ -83,7 +83,7 @@ function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
           return {
             loader: "js",
             pluginName,
-            // We need to use JSON.stringify below in order not to break paths on windows
+            // We need to use JSON.stringify below so that any escape backslashes stay escape backslashes, in order not to break paths on windows
             contents: `
               import "_sentry-debug-id-injection-stub";
               import * as OriginalModule from ${JSON.stringify(originalPath)};
