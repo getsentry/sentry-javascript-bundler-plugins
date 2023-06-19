@@ -357,7 +357,7 @@ function generateTableOfContents(
     .map((node) => {
       const id = `${parentId}-${node.name.toLowerCase()}`;
       let output = `${"    ".repeat(depth)}-   [\`${node.name}\`](#${id
-        .replace(/\./g, "")
+        .replace(/-/g, "")
         .toLowerCase()})`;
       if (node.children && depth <= 0) {
         output += "\n";
