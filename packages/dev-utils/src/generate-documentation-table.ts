@@ -370,13 +370,11 @@ function generateTableOfContents(
 
 function generateDescriptions(
   parentName: string | undefined,
-  parentId: string,
   nodes: OptionDocumentation[]
 ): string {
   return nodes
     .map((node) => {
       const name = parentName === undefined ? node.name : `${parentName}.${node.name}`;
-      const id = `${parentId}-${node.name.toLowerCase()}`;
       let output = `### \`${name}\`
 
 ${node.type === undefined ? "" : `Type: \`${node.type}\``}
@@ -384,7 +382,7 @@ ${node.type === undefined ? "" : `Type: \`${node.type}\``}
 ${node.fullDescription}
 `;
       if (node.children) {
-        output += generateDescriptions(name, id, node.children);
+        output += generateDescriptions(name, node.children);
       }
       return output;
     })
@@ -394,8 +392,8 @@ ${node.fullDescription}
 export function generateOptionsDocumentation(): string {
   return `## Options
 
-${generateTableOfContents(0, "option", options)}
+${generateTableOfContents(0, "", options)}
 
-${generateDescriptions(undefined, "option", options)}
+${generateDescriptions(undefined, options)}
 `;
 }
