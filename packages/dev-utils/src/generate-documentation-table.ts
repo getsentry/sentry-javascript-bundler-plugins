@@ -46,7 +46,7 @@ const options: OptionDocumentation[] = [
   {
     name: "errorHandler",
     type: "(err: Error) => void",
-    fullDescription: `When an error occurs during rlease creation or sourcemaps upload, the plugin will call this function.
+    fullDescription: `When an error occurs during release creation or sourcemaps upload, the plugin will call this function.
 
 By default, the plugin will simply throw an error, thereby stopping the bundling process. If an \`errorHandler\` callback is provided, compilation will continue, unless an error is thrown in the provided callback.
 
