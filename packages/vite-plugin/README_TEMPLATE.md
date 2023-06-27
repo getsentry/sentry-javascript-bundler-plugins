@@ -63,6 +63,10 @@ export default defineConfig({
 
 #OPTIONS_SECTION_INSERT#
 
+### Configuration File
+
+As an additional configuration method, the Sentry Vite plugin will pick up environment variables configured inside a `.env.sentry-build-plugin` file located in the current working directory when building your app.
+
 ## More information
 
 - [Sentry Documentation](https://docs.sentry.io/quickstart/)
