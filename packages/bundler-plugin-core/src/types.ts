@@ -241,8 +241,25 @@ export interface Options {
      * Defaults to `false`.
      */
     injectBuildInformation?: boolean;
+
+    /**
+     * Metadata associated with this module.
+     * The metadata is serialized and can be looked up at runtime by URL.
+     *
+     * Note: This option is currently only supported by `@sentry/webpack-plugin`.
+     */
+    moduleMetadata?: object | ModuleMetadataCallback;
   };
 }
+
+export interface ModuleMetadataCallbackArgs {
+  org?: string;
+  project?: string;
+  release?: string;
+  dist?: string;
+}
+
+export type ModuleMetadataCallback = (args: ModuleMetadataCallbackArgs) => object;
 
 export type IncludeEntry = {
   /**
