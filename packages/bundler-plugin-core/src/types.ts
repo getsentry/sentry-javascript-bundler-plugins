@@ -50,7 +50,7 @@ export interface Options {
   silent?: boolean;
 
   /**
-   * When an error occurs during rlease creation or sourcemaps upload, the plugin will call this function.
+   * When an error occurs during release creation or sourcemaps upload, the plugin will call this function.
    *
    * By default, the plugin will simply throw an error, thereby stopping the bundling process.
    * If an `errorHandler` callback is provided, compilation will continue, unless an error is

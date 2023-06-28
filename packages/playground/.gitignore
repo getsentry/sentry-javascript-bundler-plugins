@@ -1,3 +1,4 @@
 out/
 .env
+.env.sentry-build-plugin
 scripts/request-logger-logs/*.txt
