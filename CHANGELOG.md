@@ -4,6 +4,15 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.4.0
+
+- docs: Update instructions to install Vite plugin via pnpm (#331)
+- docs: Update minimum supported Node.js version to 14 (#327)
+- feat: Add configuration via `.env.sentry-build-plugin` file (#333)
+- ref: Use full git SHA for release name (#330)
+
+Work in this release contributed by @ffxsam and @emilsivervik. Thank you for your contributions!
+
 ## 2.3.0
 
 - feat(webpack): Generate deterministic debug IDs (#321)
