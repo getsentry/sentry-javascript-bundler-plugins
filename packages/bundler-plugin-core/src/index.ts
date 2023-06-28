@@ -69,7 +69,12 @@ export function sentryUnpluginFactory({
       path: path.join(process.cwd(), ".env.sentry-build-plugin"),
     });
 
-    if ("parsed" in dotenvResult) {
+    // Ignore "file not found" errors but throw all others
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore Accessing `code` on error should be safe
+    if (dotenvResult.error && dotenvResult.error.code !== "ENOENT") {
+      throw dotenvResult.error;
+    } else if (dotenvResult.parsed) {
       logger.info('Using environment variables configured in ".env.sentry-build-plugin".');
     }
 
