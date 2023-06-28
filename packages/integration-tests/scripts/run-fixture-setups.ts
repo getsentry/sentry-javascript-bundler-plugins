@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import childProcess from "child_process";
 
 const fixturePaths = fs
   .readdirSync(path.join(__dirname, "..", "fixtures"))
@@ -8,6 +9,8 @@ const fixturePaths = fs
 fixturePaths.forEach((fixturePath) => {
   const setupScriptPath = path.join(fixturePath, "setup.ts");
   if (fs.existsSync(setupScriptPath)) {
-    require(setupScriptPath);
+    childProcess.execSync(`yarn ts-node --transpileOnly ${setupScriptPath}`, {
+      stdio: "inherit",
+    });
   }
 });

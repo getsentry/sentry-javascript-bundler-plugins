@@ -18,6 +18,7 @@ import {
   stringToUUID,
   stripQueryAndHashFromPath,
 } from "./utils";
+import * as dotenv from "dotenv";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
@@ -58,6 +59,25 @@ export function sentryUnpluginFactory({
   debugIdUploadPlugin,
 }: SentryUnpluginFactoryOptions) {
   return createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
+    const logger = createLogger({
+      prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
+      silent: userOptions.silent ?? false,
+      debug: userOptions.debug ?? false,
+    });
+
+    const dotenvResult = dotenv.config({
+      path: path.join(process.cwd(), ".env.sentry-build-plugin"),
+    });
+
+    // Ignore "file not found" errors but throw all others
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore Accessing `code` on error should be safe
+    if (dotenvResult.error && dotenvResult.error.code !== "ENOENT") {
+      throw dotenvResult.error;
+    } else if (dotenvResult.parsed) {
+      logger.info('Using environment variables configured in ".env.sentry-build-plugin".');
+    }
+
     const options = normalizeUserOptions(userOptions);
 
     if (unpluginMetaContext.watchMode || options.disable) {
@@ -84,12 +104,6 @@ export function sentryUnpluginFactory({
         sentryHub.endSession();
         sentEndSession = true;
       }
-    });
-
-    const logger = createLogger({
-      prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
-      silent: options.silent,
-      debug: options.debug,
     });
 
     // Set the User-Agent that Sentry CLI will use when interacting with Sentry
