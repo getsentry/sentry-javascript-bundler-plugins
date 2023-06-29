@@ -183,7 +183,6 @@ export function sentryUnpluginFactory({
           org: options.org,
           project: options.project,
           release: options.release.name,
-          dist: options.release.dist,
         };
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         metadata = options._experiments.moduleMetadata(args);

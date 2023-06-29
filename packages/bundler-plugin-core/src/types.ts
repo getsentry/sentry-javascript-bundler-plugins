@@ -256,7 +256,6 @@ export interface ModuleMetadataCallbackArgs {
   org?: string;
   project?: string;
   release?: string;
-  dist?: string;
 }
 
 export type ModuleMetadataCallback = (args: ModuleMetadataCallbackArgs) => object;
