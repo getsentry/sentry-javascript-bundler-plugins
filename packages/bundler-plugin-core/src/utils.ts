@@ -278,8 +278,8 @@ export function generateModuleMetadataInjectorCode(metadata: any) {
             self :
             {};
 
-    _global2.__MODULE_METADATA__ = _global2.__MODULE_METADATA__ || {};
-    _global2.__MODULE_METADATA__[new Error().stack] = ${JSON.stringify(metadata)};`;
+    _global2._sentryModuleMetadata = _global2._sentryModuleMetadata || {};
+    _global2._sentryModuleMetadata[new Error().stack] = ${JSON.stringify(metadata)};`;
 }
 
 function getBuildInformation() {

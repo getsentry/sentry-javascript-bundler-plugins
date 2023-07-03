@@ -244,11 +244,20 @@ export interface Options {
 
     /**
      * Metadata associated with this module.
+     *
      * The metadata is serialized and can be looked up at runtime by URL.
+     *
+     * Metadata can either be passed directly or alternatively a callback can be provided that will be
+     * called with the following arguments:
+     * - `org`: The organization slug.
+     * - `project`: The project slug.
+     * - `release`: The release name.
+     *
      *
      * Note: This option is currently only supported by `@sentry/webpack-plugin`.
      */
-    moduleMetadata?: object | ModuleMetadataCallback;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    moduleMetadata?: any | ModuleMetadataCallback;
   };
 }
 
