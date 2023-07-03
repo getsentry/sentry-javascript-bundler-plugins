@@ -12,7 +12,6 @@ import { sentryEsbuildPlugin } from "@sentry/esbuild-plugin";
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 
 export function createCjsBundles(
-  bundlers: string[],
   entrypoints: { [name: string]: string },
   outFolder: string,
   sentryUnpluginOptions: Options
@@ -22,144 +21,134 @@ export function createCjsBundles(
     return;
   }
 
-  if (bundlers.includes("vite")) {
-    void vite.build({
-      clearScreen: false,
-      build: {
-        sourcemap: true,
-        outDir: path.join(outFolder, "vite"),
-        rollupOptions: {
-          input: entrypoints,
-          output: {
-            format: "cjs",
-            entryFileNames: "[name].js",
-          },
-        },
-      },
-      plugins: [
-        sentryVitePlugin({
-          ...sentryUnpluginOptions,
-          release: {
-            name: `${sentryUnpluginOptions.release.name!}-vite`,
-            uploadLegacySourcemaps: `${
-              sentryUnpluginOptions.release.uploadLegacySourcemaps as string
-            }/vite`,
-          },
-        }),
-      ],
-    });
-  }
-
-  if (bundlers.includes("rollup")) {
-    void rollup
-      .rollup({
-        input: entrypoints,
-        plugins: [
-          sentryRollupPlugin({
-            ...sentryUnpluginOptions,
-            release: {
-              name: `${sentryUnpluginOptions.release.name!}-rollup`,
-              uploadLegacySourcemaps: `${
-                sentryUnpluginOptions.release.uploadLegacySourcemaps as string
-              }/rollup`,
-            },
-          }),
-        ],
-      })
-      .then((bundle) =>
-        bundle.write({
-          sourcemap: true,
-          dir: path.join(outFolder, "rollup"),
-          format: "cjs",
-          exports: "named",
-        })
-      );
-  }
-
-  if (bundlers.includes("esbuild")) {
-    void esbuild.build({
-      entryPoints: entrypoints,
-      outdir: path.join(outFolder, "esbuild"),
+  void vite.build({
+    clearScreen: false,
+    build: {
       sourcemap: true,
+      outDir: path.join(outFolder, "vite"),
+      rollupOptions: {
+        input: entrypoints,
+        output: {
+          format: "cjs",
+          entryFileNames: "[name].js",
+        },
+      },
+    },
+    plugins: [
+      sentryVitePlugin({
+        ...sentryUnpluginOptions,
+        release: {
+          name: `${sentryUnpluginOptions.release.name!}-vite`,
+          uploadLegacySourcemaps: `${
+            sentryUnpluginOptions.release.uploadLegacySourcemaps as string
+          }/vite`,
+        },
+      }),
+    ],
+  });
+
+  void rollup
+    .rollup({
+      input: entrypoints,
       plugins: [
-        sentryEsbuildPlugin({
+        sentryRollupPlugin({
           ...sentryUnpluginOptions,
           release: {
-            name: `${sentryUnpluginOptions.release.name!}-esbuild`,
+            name: `${sentryUnpluginOptions.release.name!}-rollup`,
             uploadLegacySourcemaps: `${
               sentryUnpluginOptions.release.uploadLegacySourcemaps as string
-            }/esbuild`,
+            }/rollup`,
           },
         }),
       ],
-      minify: true,
-      bundle: true,
-      format: "cjs",
-    });
-  }
-
-  if (bundlers.includes("webpack4")) {
-    webpack4(
-      {
-        devtool: "source-map",
-        mode: "production",
-        entry: entrypoints,
-        cache: false,
-        output: {
-          path: path.join(outFolder, "webpack4"),
-          libraryTarget: "commonjs",
-        },
-        target: "node", // needed for webpack 4 so we can access node api
-        plugins: [
-          sentryWebpackPlugin({
-            ...sentryUnpluginOptions,
-            release: {
-              name: `${sentryUnpluginOptions.release.name!}-webpack4`,
-              uploadLegacySourcemaps: `${
-                sentryUnpluginOptions.release.uploadLegacySourcemaps as string
-              }/webpack4`,
-            },
-          }),
-        ],
-      },
-      (err) => {
-        if (err) {
-          throw err;
-        }
-      }
+    })
+    .then((bundle) =>
+      bundle.write({
+        sourcemap: true,
+        dir: path.join(outFolder, "rollup"),
+        format: "cjs",
+        exports: "named",
+      })
     );
-  }
 
-  if (bundlers.includes("webpack5")) {
-    webpack5(
-      {
-        devtool: "source-map",
-        cache: false,
-        entry: entrypoints,
-        output: {
-          path: path.join(outFolder, "webpack5"),
-          library: {
-            type: "commonjs",
+  void esbuild.build({
+    entryPoints: entrypoints,
+    outdir: path.join(outFolder, "esbuild"),
+    sourcemap: true,
+    plugins: [
+      sentryEsbuildPlugin({
+        ...sentryUnpluginOptions,
+        release: {
+          name: `${sentryUnpluginOptions.release.name!}-esbuild`,
+          uploadLegacySourcemaps: `${
+            sentryUnpluginOptions.release.uploadLegacySourcemaps as string
+          }/esbuild`,
+        },
+      }),
+    ],
+    minify: true,
+    bundle: true,
+    format: "cjs",
+  });
+
+  webpack4(
+    {
+      devtool: "source-map",
+      mode: "production",
+      entry: entrypoints,
+      cache: false,
+      output: {
+        path: path.join(outFolder, "webpack4"),
+        libraryTarget: "commonjs",
+      },
+      target: "node", // needed for webpack 4 so we can access node api
+      plugins: [
+        sentryWebpackPlugin({
+          ...sentryUnpluginOptions,
+          release: {
+            name: `${sentryUnpluginOptions.release.name!}-webpack4`,
+            uploadLegacySourcemaps: `${
+              sentryUnpluginOptions.release.uploadLegacySourcemaps as string
+            }/webpack4`,
           },
-        },
-        mode: "production",
-        plugins: [
-          sentryWebpackPlugin({
-            ...sentryUnpluginOptions,
-            release: {
-              name: `${sentryUnpluginOptions.release.name!}-webpack5`,
-              uploadLegacySourcemaps: `${
-                sentryUnpluginOptions.release.uploadLegacySourcemaps as string
-              }/webpack5`,
-            },
-          }),
-        ],
-      },
-      (err) => {
-        if (err) {
-          throw err;
-        }
+        }),
+      ],
+    },
+    (err) => {
+      if (err) {
+        throw err;
       }
-    );
-  }
+    }
+  );
+
+  webpack5(
+    {
+      devtool: "source-map",
+      cache: false,
+      entry: entrypoints,
+      output: {
+        path: path.join(outFolder, "webpack5"),
+        library: {
+          type: "commonjs",
+        },
+      },
+      mode: "production",
+      plugins: [
+        sentryWebpackPlugin({
+          ...sentryUnpluginOptions,
+          release: {
+            name: `${sentryUnpluginOptions.release.name!}-webpack5`,
+            uploadLegacySourcemaps: `${
+              sentryUnpluginOptions.release.uploadLegacySourcemaps as string
+            }/webpack5`,
+          },
+        }),
+      ],
+    },
+    (err) => {
+      if (err) {
+        throw err;
+      }
+    }
+  );
 }
