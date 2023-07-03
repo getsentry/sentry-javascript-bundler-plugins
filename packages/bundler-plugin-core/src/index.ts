@@ -184,9 +184,10 @@ export function sentryUnpluginFactory({
           project: options.project,
           release: options.release.name,
         };
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
         metadata = options._experiments.moduleMetadata(args);
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         metadata = options._experiments.moduleMetadata;
       }
 

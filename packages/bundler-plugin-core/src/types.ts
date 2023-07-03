@@ -245,7 +245,7 @@ export interface Options {
     /**
      * Metadata associated with this module.
      *
-     * The metadata is serialized and can be looked up at runtime by URL.
+     * The metadata is serialized and can be looked up at runtime by filename.
      *
      * Metadata can either be passed directly or alternatively a callback can be provided that will be
      * called with the following arguments:
