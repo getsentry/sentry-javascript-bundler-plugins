@@ -12,6 +12,7 @@ import { allowedToSendTelemetry, createSentryInstance } from "./sentry/telemetry
 import { Options } from "./types";
 import {
   generateGlobalInjectorCode,
+  generateModuleMetadataInjectorCode,
   getDependencies,
   getPackageJson,
   parseMajorVersion,
@@ -22,6 +23,7 @@ import * as dotenv from "dotenv";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
+  moduleMetadataInjectionPlugin?: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
 }
@@ -55,6 +57,7 @@ interface SentryUnpluginFactoryOptions {
  */
 export function sentryUnpluginFactory({
   releaseInjectionPlugin,
+  moduleMetadataInjectionPlugin,
   debugIdInjectionPlugin,
   debugIdUploadPlugin,
 }: SentryUnpluginFactoryOptions) {
@@ -171,6 +174,27 @@ export function sentryUnpluginFactory({
         injectBuildInformation: options._experiments.injectBuildInformation || false,
       });
       plugins.push(releaseInjectionPlugin(injectionCode));
+    }
+
+    if (moduleMetadataInjectionPlugin && options._experiments.moduleMetadata) {
+      let metadata: object;
+      if (typeof options._experiments.moduleMetadata === "function") {
+        const args = {
+          org: options.org,
+          project: options.project,
+          release: options.release.name,
+        };
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+        metadata = options._experiments.moduleMetadata(args);
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        metadata = options._experiments.moduleMetadata;
+      }
+
+      const injectionCode = generateModuleMetadataInjectorCode(metadata);
+      plugins.push(moduleMetadataInjectionPlugin(injectionCode));
+    } else if (options._experiments.moduleMetadata) {
+      logger.warn("'moduleMetadata' is currently only supported by '@sentry/webpack-plugin'");
     }
 
     if (!options.release.name) {

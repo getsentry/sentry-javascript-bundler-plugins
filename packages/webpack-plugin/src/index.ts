@@ -84,8 +84,30 @@ function webpackDebugIdUploadPlugin(
   };
 }
 
+function webpackModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOptions {
+  return {
+    name: "sentry-webpack-module-metadata-injection-plugin",
+    webpack(compiler) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore webpack version compatibility shenanigans
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      const BannerPlugin = compiler?.webpack?.BannerPlugin || webback4or5?.BannerPlugin;
+      compiler.options.plugins = compiler.options.plugins || [];
+      compiler.options.plugins.push(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
+        new BannerPlugin({
+          raw: true,
+          include: /\.(js|ts|jsx|tsx|mjs|cjs)$/,
+          banner: injectionCode,
+        })
+      );
+    },
+  };
+}
+
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: webpackReleaseInjectionPlugin,
+  moduleMetadataInjectionPlugin: webpackModuleMetadataInjectionPlugin,
   debugIdInjectionPlugin: webpackDebugIdInjectionPlugin,
   debugIdUploadPlugin: webpackDebugIdUploadPlugin,
 });

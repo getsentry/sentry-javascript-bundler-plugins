@@ -16,47 +16,53 @@ const nodejsMajorversion = process.version.split(".")[0]!.slice(1);
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
   outFolder: string,
-  sentryUnpluginOptions: Options
+  sentryUnpluginOptions: Options,
+  plugins: string[] = []
 ): void {
-  void vite.build({
-    clearScreen: false,
-    build: {
-      outDir: path.join(outFolder, "vite"),
-      rollupOptions: {
-        input: entrypoints,
-        output: {
-          format: "cjs",
-          entryFileNames: "[name].js",
+  if (plugins.length === 0 || plugins.includes("vite")) {
+    void vite.build({
+      clearScreen: false,
+      build: {
+        outDir: path.join(outFolder, "vite"),
+        rollupOptions: {
+          input: entrypoints,
+          output: {
+            format: "cjs",
+            entryFileNames: "[name].js",
+          },
         },
       },
-    },
-    plugins: [sentryVitePlugin(sentryUnpluginOptions)],
-  });
-
-  void rollup
-    .rollup({
-      input: entrypoints,
-      plugins: [sentryRollupPlugin(sentryUnpluginOptions)],
-    })
-    .then((bundle) =>
-      bundle.write({
-        dir: path.join(outFolder, "rollup"),
-        format: "cjs",
-        exports: "named",
+      plugins: [sentryVitePlugin(sentryUnpluginOptions)],
+    });
+  }
+  if (plugins.length === 0 || plugins.includes("rollup")) {
+    void rollup
+      .rollup({
+        input: entrypoints,
+        plugins: [sentryRollupPlugin(sentryUnpluginOptions)],
       })
-    );
+      .then((bundle) =>
+        bundle.write({
+          dir: path.join(outFolder, "rollup"),
+          format: "cjs",
+          exports: "named",
+        })
+      );
+  }
 
-  void esbuild.build({
-    entryPoints: entrypoints,
-    outdir: path.join(outFolder, "esbuild"),
-    plugins: [sentryEsbuildPlugin(sentryUnpluginOptions)],
-    minify: true,
-    bundle: true,
-    format: "cjs",
-  });
+  if (plugins.length === 0 || plugins.includes("esbuild")) {
+    void esbuild.build({
+      entryPoints: entrypoints,
+      outdir: path.join(outFolder, "esbuild"),
+      plugins: [sentryEsbuildPlugin(sentryUnpluginOptions)],
+      minify: true,
+      bundle: true,
+      format: "cjs",
+    });
+  }
 
   // Webpack 4 doesn't work on Node.js versions >= 18
-  if (parseInt(nodejsMajorversion) < 18) {
+  if (parseInt(nodejsMajorversion) < 18 && (plugins.length === 0 || plugins.includes("webpack4"))) {
     webpack4(
       {
         mode: "production",
@@ -77,23 +83,25 @@ export function createCjsBundles(
     );
   }
 
-  webpack5(
-    {
-      cache: false,
-      entry: entrypoints,
-      output: {
-        path: path.join(outFolder, "webpack5"),
-        library: {
-          type: "commonjs",
+  if (plugins.length === 0 || plugins.includes("webpack5")) {
+    webpack5(
+      {
+        cache: false,
+        entry: entrypoints,
+        output: {
+          path: path.join(outFolder, "webpack5"),
+          library: {
+            type: "commonjs",
+          },
         },
+        mode: "production",
+        plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
       },
-      mode: "production",
-      plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
-    },
-    (err) => {
-      if (err) {
-        throw err;
+      (err) => {
+        if (err) {
+          throw err;
+        }
       }
-    }
-  );
+    );
+  }
 }
