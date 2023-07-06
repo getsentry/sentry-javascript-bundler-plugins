@@ -87,7 +87,6 @@ export interface Options {
 
   /**
    * Options for source maps uploading.
-   * Leave this option undefined if you do not want to upload source maps to Sentry.
    */
   sourcemaps?: {
     /**

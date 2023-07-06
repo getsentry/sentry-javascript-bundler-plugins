@@ -72,8 +72,7 @@ errorHandler: (err) => {
   },
   {
     name: "sourcemaps",
-    fullDescription:
-      "Options for source maps uploading. Leave this option undefined if you do not want to upload source maps to Sentry.",
+    fullDescription: "Options for source maps uploading.",
     children: [
       {
         name: "assets",
