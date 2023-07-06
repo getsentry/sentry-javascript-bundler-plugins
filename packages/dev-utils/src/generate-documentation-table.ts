@@ -72,7 +72,7 @@ errorHandler: (err) => {
   },
   {
     name: "sourcemaps",
-    fullDescription: "Options for source maps uploading.",
+    fullDescription: "Options for uploading source maps.",
     children: [
       {
         name: "assets",
