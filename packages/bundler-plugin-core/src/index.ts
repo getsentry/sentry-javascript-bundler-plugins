@@ -166,7 +166,7 @@ export function sentryUnpluginFactory({
       );
     } else if (!options.release.name) {
       logger.warn(
-        "No release name provided. Will not inject release. Please set the `release.name` option to identifiy your release."
+        "No release name provided. Will not inject release. Please set the `release.name` option to identify your release."
       );
     } else {
       const injectionCode = generateGlobalInjectorCode({
@@ -199,7 +199,7 @@ export function sentryUnpluginFactory({
 
     if (!options.release.name) {
       logger.warn(
-        "No release name provided. Will not create release. Please set the `release.name` option to identifiy your release."
+        "No release name provided. Will not create release. Please set the `release.name` option to identify your release."
       );
     } else if (!options.authToken) {
       logger.warn(
