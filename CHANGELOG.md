@@ -4,6 +4,15 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.5.0
+
+- deps: Bump and unpin Sentry SDK deps (#353)
+- docs: Remove misleading documentation (#339)
+- feat: Add experimental module metadata injection (#334)
+- fix: Fix 'identifiy' typo in log messages (#341)
+
+Work in this release contributed by @chunfeilung. Thank you for your contribution!
+
 ## 2.4.0
 
 - docs: Update instructions to install Vite plugin via pnpm (#331)
