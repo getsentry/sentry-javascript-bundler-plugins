@@ -86,7 +86,8 @@ export function createDebugIdUploadFunction({
         (debugIdChunkFilePath) =>
           debugIdChunkFilePath.endsWith(".js") ||
           debugIdChunkFilePath.endsWith(".mjs") ||
-          debugIdChunkFilePath.endsWith(".cjs")
+          debugIdChunkFilePath.endsWith(".cjs") ||
+          debugIdChunkFilePath.endsWith(".jsbundle")
       );
 
       // The order of the files output by glob() is not deterministic
