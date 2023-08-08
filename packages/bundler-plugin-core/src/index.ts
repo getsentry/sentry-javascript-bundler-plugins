@@ -20,6 +20,7 @@ import {
   stripQueryAndHashFromPath,
 } from "./utils";
 import * as dotenv from "dotenv";
+import { glob } from "glob";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
@@ -420,7 +421,11 @@ export function createRollupDebugIdUploadHooks(
     ) {
       if (outputOptions.dir) {
         const outputDir = outputOptions.dir;
-        const buildArtifacts = Object.keys(bundle).map((asset) => path.join(outputDir, asset));
+        const buildArtifacts = await glob(["/**/*.js", "/**/*.js.map"], {
+          root: outputDir,
+          absolute: true,
+          nodir: true,
+        });
         await upload(buildArtifacts);
       } else if (outputOptions.file) {
         await upload([outputOptions.file]);
