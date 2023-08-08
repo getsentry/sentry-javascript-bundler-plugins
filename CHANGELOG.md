@@ -4,6 +4,12 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.6.0
+
+- deps: Bump sentry-cli to 2.20.1 (#355)
+- feat: Allow ommiting `org` when using organization auth token (#368)
+- ref: Make asset detection more robust (#369)
+
 ## 2.5.0
 
 - deps: Bump and unpin Sentry SDK deps (#353)
