@@ -27,7 +27,7 @@ interface DebugIdUploadPluginOptions {
   sentryCliOptions: {
     url: string;
     authToken: string;
-    org: string;
+    org?: string;
     project: string;
     vcsRemote: string;
     silent: boolean;

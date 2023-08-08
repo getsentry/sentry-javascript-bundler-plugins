@@ -205,7 +205,7 @@ export function sentryUnpluginFactory({
       logger.warn(
         "No auth token provided. Will not create release. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
       );
-    } else if (!options.org) {
+    } else if (!options.org && !options.authToken.startsWith("sntrys_")) {
       logger.warn(
         "No organization slug provided. Will not create release. Please set the `org` option to your Sentry organization slug."
       );
@@ -247,7 +247,7 @@ export function sentryUnpluginFactory({
       logger.warn(
         "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
       );
-    } else if (!options.org) {
+    } else if (!options.org && !options.authToken.startsWith("sntrys_")) {
       logger.warn(
         "No org provided. Will not upload source maps. Please set the `org` option to your Sentry organization slug."
       );
