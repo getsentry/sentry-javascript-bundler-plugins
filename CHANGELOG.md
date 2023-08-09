@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.6.1
+
+- fix: Don't crash on failed delete after upload (#373)
+
 ## 2.6.0
 
 - deps: Bump sentry-cli to 2.20.1 (#355)
