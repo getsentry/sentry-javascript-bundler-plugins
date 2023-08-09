@@ -181,7 +181,13 @@ export function createDebugIdUploadFunction({
         });
         await Promise.all(
           filePathsToDelete.map((filePathToDelete) =>
-            fs.promises.rm(filePathToDelete, { force: true })
+            fs.promises.rm(filePathToDelete, { force: true }).catch((e) => {
+              // This is allowed to fail - we just don't do anything
+              logger.debug(
+                `An error occured while attempting to delete asset: ${filePathToDelete}`,
+                e
+              );
+            })
           )
         );
         deleteSpan.finish();
