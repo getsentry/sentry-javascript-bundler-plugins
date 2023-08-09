@@ -70,6 +70,9 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
     );
   }
 
+  hub.setTag("module-metadata", !!options._experiments.moduleMetadata);
+  hub.setTag("inject-build-information", !!options._experiments.injectBuildInformation);
+
   // Optional release pipeline steps
   hub.setTag("clean-artifacts", release.cleanArtifacts);
   if (release.setCommits) {
