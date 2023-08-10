@@ -299,16 +299,23 @@ async function determineSourceMapPathFromBundle(
   if (sourceMappingUrlMatch) {
     const sourceMappingUrl = path.normalize(sourceMappingUrlMatch[1] as string);
 
+    let isUrl;
     let isSupportedUrl;
     try {
       const url = new URL(sourceMappingUrl);
+      isUrl = true;
       isSupportedUrl = url.protocol === "file:";
     } catch {
+      isUrl = false;
       isSupportedUrl = false;
     }
 
     let absoluteSourceMapPath;
-    if (isSupportedUrl || path.isAbsolute(sourceMappingUrl)) {
+    if (isSupportedUrl) {
+      absoluteSourceMapPath = sourceMappingUrl;
+    } else if (isUrl) {
+      return;
+    } else if (path.isAbsolute(sourceMappingUrl)) {
       absoluteSourceMapPath = sourceMappingUrl;
     } else {
       absoluteSourceMapPath = path.join(path.dirname(bundlePath), sourceMappingUrl);
