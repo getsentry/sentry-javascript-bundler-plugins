@@ -295,7 +295,7 @@ async function determineSourceMapPathFromBundle(
   logger: Logger
 ): Promise<string | undefined> {
   // 1. try to find source map at `sourceMappingURL` location
-  const sourceMappingUrlMatch = bundleSource.match(/^\/\/# sourceMappingURL=(.*)$/);
+  const sourceMappingUrlMatch = bundleSource.match(/^\s*\/\/# sourceMappingURL=(.*)$/m);
   if (sourceMappingUrlMatch) {
     const sourceMappingUrl = path.normalize(sourceMappingUrlMatch[1] as string);
     if (path.isAbsolute(sourceMappingUrl)) {
