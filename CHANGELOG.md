@@ -4,6 +4,13 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.6.2
+
+- fix: Fix regex in source map locating heuristic via `sourceMappingURL` (#376)
+- fix: Make sourceMappingURL heuristic more resilient (#378)
+
+Thanks to @tomyam1 for identifying and pinpointing a bug that was hard to spot!
+
 ## 2.6.1
 
 - fix: Don't crash on failed delete after upload (#373)
