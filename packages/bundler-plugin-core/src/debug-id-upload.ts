@@ -105,8 +105,11 @@ export function createDebugIdUploadFunction({
         const prepareSpan = artifactBundleUploadTransaction.startChild({
           description: "prepare-bundles",
         });
-        await Promise.all(
-          debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
+
+        // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
+        // instead we do it with a maximum of 8 concurrent workers
+        const preparationTasks = debugIdChunkFilePaths.map(
+          (chunkFilePath, chunkIndex) => async (): Promise<void> => {
             await prepareBundleForDebugIdUpload(
               chunkFilePath,
               tmpUploadFolder,
@@ -114,8 +117,22 @@ export function createDebugIdUploadFunction({
               logger,
               rewriteSourcesHook ?? defaultRewriteSourcesHook
             );
-          })
+          }
         );
+        const workers: Promise<void>[] = [];
+        const worker = async () => {
+          while (preparationTasks.length > 0) {
+            const task = preparationTasks.shift();
+            if (task) {
+              await task();
+            }
+          }
+        };
+        for (let workerIndex = 0; workerIndex <= 8; workerIndex++) {
+          workers.push(worker());
+        }
+        await Promise.all(workers);
+
         prepareSpan.finish();
 
         const files = await fs.promises.readdir(tmpUploadFolder);
