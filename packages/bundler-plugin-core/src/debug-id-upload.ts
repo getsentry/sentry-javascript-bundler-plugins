@@ -128,7 +128,7 @@ export function createDebugIdUploadFunction({
             }
           }
         };
-        for (let workerIndex = 0; workerIndex <= 16; workerIndex++) {
+        for (let workerIndex = 0; workerIndex < 16; workerIndex++) {
           workers.push(worker());
         }
         await Promise.all(workers);
