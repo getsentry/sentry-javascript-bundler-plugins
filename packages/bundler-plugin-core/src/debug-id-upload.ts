@@ -109,7 +109,7 @@ export function createDebugIdUploadFunction({
         // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
         // instead we do it with a maximum of 16 concurrent workers
         const preparationTasks = debugIdChunkFilePaths.map(
-          (chunkFilePath, chunkIndex) => async (): Promise<void> => {
+          (chunkFilePath, chunkIndex) => async () => {
             await prepareBundleForDebugIdUpload(
               chunkFilePath,
               tmpUploadFolder,
