@@ -107,7 +107,7 @@ export function createDebugIdUploadFunction({
         });
 
         // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
-        // instead we do it with a maximum of 8 concurrent workers
+        // instead we do it with a maximum of 16 concurrent workers
         const preparationTasks = debugIdChunkFilePaths.map(
           (chunkFilePath, chunkIndex) => async (): Promise<void> => {
             await prepareBundleForDebugIdUpload(
@@ -128,7 +128,7 @@ export function createDebugIdUploadFunction({
             }
           }
         };
-        for (let workerIndex = 0; workerIndex <= 8; workerIndex++) {
+        for (let workerIndex = 0; workerIndex <= 16; workerIndex++) {
           workers.push(worker());
         }
         await Promise.all(workers);
@@ -268,9 +268,9 @@ export async function prepareBundleForDebugIdUpload(
     bundleFilePath,
     bundleContent,
     logger
-  ).then(async (sourceMapPath): Promise<void> => {
+  ).then(async (sourceMapPath) => {
     if (sourceMapPath) {
-      return await prepareSourceMapForDebugIdUpload(
+      await prepareSourceMapForDebugIdUpload(
         sourceMapPath,
         path.join(uploadFolder, `${uniqueUploadName}.js.map`),
         debugId,
@@ -280,7 +280,8 @@ export async function prepareBundleForDebugIdUpload(
     }
   });
 
-  return Promise.all([writeSourceFilePromise, writeSourceMapFilePromise]);
+  await writeSourceFilePromise;
+  await writeSourceMapFilePromise;
 }
 
 /**
