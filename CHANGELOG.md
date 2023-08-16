@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 0.6.1
+
+- ref: Run upload preparation with maximum concurrency (#382)
+
 ## 0.6.0
 
 - feat(webpack): Add debug ID injection to the webpack plugin (#198)
