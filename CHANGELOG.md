@@ -137,6 +137,10 @@ plugin({
 - fix(core): Also do debug ID injection for `.cjs` files (#203)
 - fix: Add typing exports to packages (#208)
 
+## 0.6.1
+
+- ref: Run upload preparation with maximum concurrency (#382)
+
 ## 0.6.0
 
 - feat(webpack): Add debug ID injection to the webpack plugin (#198)
