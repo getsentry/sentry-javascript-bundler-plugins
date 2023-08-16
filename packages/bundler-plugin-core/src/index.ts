@@ -365,7 +365,7 @@ export function createRollupReleaseInjectionHooks(injectionCode: string) {
 
       return {
         code: ms.toString(),
-        map: ms.generateMap(),
+        map: ms.generateMap({ hires: true }),
       };
     },
   };
@@ -402,7 +402,7 @@ export function createRollupDebugIdInjectionHooks() {
 
         return {
           code: ms.toString(),
-          map: ms.generateMap({ file: chunk.fileName }),
+          map: ms.generateMap({ file: chunk.fileName, hires: true }),
         };
       } else {
         return null; // returning null means not modifying the chunk at all
@@ -433,7 +433,7 @@ export function createRollupModuleMetadataInjectionHooks(injectionCode: string) 
 
         return {
           code: ms.toString(),
-          map: ms.generateMap({ file: chunk.fileName }),
+          map: ms.generateMap({ file: chunk.fileName, hires: true }),
         };
       } else {
         return null; // returning null means not modifying the chunk at all
