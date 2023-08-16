@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.7.0
+
+- feat: Add module metadata injection for vite and rollup (#380)
+- ref: Run upload preparation with maximum concurrency (#379)
+
 ## 2.6.2
 
 - fix: Fix regex in source map locating heuristic via `sourceMappingURL` (#376)
