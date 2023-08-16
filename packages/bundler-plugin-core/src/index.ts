@@ -321,16 +321,31 @@ const unplugin = createUnplugin<Options>((options, unpluginMetaContext) => {
               path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
             );
 
-            await Promise.all(
-              debugIdChunkFilePaths.map(async (chunkFilePath, chunkIndex): Promise<void> => {
+            // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
+            // instead we do it with a maximum of 16 concurrent workers
+            const preparationTasks = debugIdChunkFilePaths.map(
+              (chunkFilePath, chunkIndex) => async () => {
                 await prepareBundleForDebugIdUpload(
                   chunkFilePath,
                   await sourceFileUploadFolderPromise,
                   String(chunkIndex),
                   logger
                 );
-              })
+              }
             );
+            const workers: Promise<void>[] = [];
+            const worker = async () => {
+              while (preparationTasks.length > 0) {
+                const task = preparationTasks.shift();
+                if (task) {
+                  await task();
+                }
+              }
+            };
+            for (let workerIndex = 0; workerIndex < 16; workerIndex++) {
+              workers.push(worker());
+            }
+            await Promise.all(workers);
 
             tmpUploadFolder = await sourceFileUploadFolderPromise;
             await uploadDebugIdSourcemaps(internalOptions, ctx, tmpUploadFolder, releaseName);

@@ -67,9 +67,9 @@ export async function prepareBundleForDebugIdUpload(
     bundleFilePath,
     bundleContent,
     logger
-  ).then(async (sourceMapPath): Promise<void> => {
+  ).then(async (sourceMapPath) => {
     if (sourceMapPath) {
-      return await prepareSourceMapForDebugIdUpload(
+      await prepareSourceMapForDebugIdUpload(
         sourceMapPath,
         path.join(uploadFolder, `${uniqueUploadName}.js.map`),
         debugId,
@@ -78,7 +78,8 @@ export async function prepareBundleForDebugIdUpload(
     }
   });
 
-  return Promise.all([writeSourceFilePromise, writeSourceMapFilePromise]);
+  await writeSourceFilePromise;
+  await writeSourceMapFilePromise;
 }
 
 /**
