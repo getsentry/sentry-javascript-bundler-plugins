@@ -6,7 +6,9 @@
 
 ## 2.7.0
 
+- feat: Add module metadata injection for esbuild (#381)
 - feat: Add module metadata injection for vite and rollup (#380)
+- ref: Emit high resolution source-maps with `magic-string` (#383)
 - ref: Run upload preparation with maximum concurrency (#379)
 
 ## 2.6.2
