@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.7.0
+
+- feat: Add module metadata injection for vite and rollup (#380)
+- ref: Run upload preparation with maximum concurrency (#379)
+
 ## 2.6.2
 
 - fix: Fix regex in source map locating heuristic via `sourceMappingURL` (#376)
@@ -136,6 +141,10 @@ plugin({
 - feat: Promote debug ID uploading to stable via `sourcemaps` option (#204)
 - fix(core): Also do debug ID injection for `.cjs` files (#203)
 - fix: Add typing exports to packages (#208)
+
+## 0.6.1
+
+- ref: Run upload preparation with maximum concurrency (#382)
 
 ## 0.6.0
 
