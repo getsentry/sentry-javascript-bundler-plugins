@@ -251,9 +251,6 @@ export interface Options {
      * - `org`: The organization slug.
      * - `project`: The project slug.
      * - `release`: The release name.
-     *
-     *
-     * Note: This option is currently only supported by `@sentry/webpack-plugin`.
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     moduleMetadata?: any | ModuleMetadataCallback;

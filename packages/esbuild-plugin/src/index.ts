@@ -133,7 +133,7 @@ function esbuildModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
               // needs to be an abs path, otherwise esbuild will complain
               path: path.isAbsolute(args.path) ? args.path : path.join(args.resolveDir, args.path),
               pluginData: {
-                isProxyResolver: true,
+                isMetadataProxyResolver: true,
                 originalPath: args.path,
                 originalResolveDir: args.resolveDir,
               },
@@ -143,14 +143,14 @@ function esbuildModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
               // By setting a suffix we're telling esbuild that the entrypoint and proxy module are two different things,
               // making it re-resolve the entrypoint when it is imported from the proxy module.
               // Super confusing? Yes. Works? Apparently... Let's see.
-              suffix: "?sentryProxyModule=true",
+              suffix: "?sentryMetadataProxyModule=true",
             };
           }
         });
 
         onLoad({ filter: /.*/ }, (args) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          if (!(args.pluginData?.isProxyResolver as undefined | boolean)) {
+          if (!(args.pluginData?.isMetadataProxyResolver as undefined | boolean)) {
             return null;
           }
 
