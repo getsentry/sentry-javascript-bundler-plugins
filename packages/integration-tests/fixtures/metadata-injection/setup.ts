@@ -13,5 +13,5 @@ createCjsBundles(
       moduleMetadata: { team: "frontend" },
     },
   },
-  ["webpack4", "webpack5", "esbuild"]
+  ["webpack4", "webpack5", "esbuild", "rollup", "vite"]
 );

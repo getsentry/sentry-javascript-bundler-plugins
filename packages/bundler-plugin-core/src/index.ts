@@ -371,6 +371,12 @@ export function createRollupReleaseInjectionHooks(injectionCode: string) {
   };
 }
 
+// We need to be careful not to inject the snippet before any `"use strict";`s.
+// As an additional complication `"use strict";`s may come after any number of comments.
+const COMMENT_USE_STRICT_REGEX =
+  // Note: CodeQL complains that this regex potentially has n^2 runtime. This likely won't affect realistic files.
+  /^(?:\s*|\/\*(?:.|\r|\n)*?\*\/|\/\/.*[\n\r])*(?:"[^"]*";|'[^']*';)?/;
+
 export function createRollupDebugIdInjectionHooks() {
   return {
     renderChunk(code: string, chunk: { fileName: string }) {
@@ -382,13 +388,7 @@ export function createRollupDebugIdInjectionHooks() {
 
         const ms = new MagicString(code, { filename: chunk.fileName });
 
-        // We need to be careful not to inject the snippet before any `"use strict";`s.
-        // As an additional complication `"use strict";`s may come after any number of comments.
-        const commentUseStrictRegex =
-          // Note: CodeQL complains that this regex potentially has n^2 runtime. This likely won't affect realistic files.
-          /^(?:\s*|\/\*(?:.|\r|\n)*?\*\/|\/\/.*[\n\r])*(?:"[^"]*";|'[^']*';)?/;
-
-        const match = code.match(commentUseStrictRegex)?.[0];
+        const match = code.match(COMMENT_USE_STRICT_REGEX)?.[0];
 
         if (match) {
           // Add injected code after any comments or "use strict" at the beginning of the bundle.
@@ -398,6 +398,37 @@ export function createRollupDebugIdInjectionHooks() {
           // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
           // need this special case here.
           ms.prepend(codeToInject);
+        }
+
+        return {
+          code: ms.toString(),
+          map: ms.generateMap({ file: chunk.fileName }),
+        };
+      } else {
+        return null; // returning null means not modifying the chunk at all
+      }
+    },
+  };
+}
+
+export function createRollupModuleMetadataInjectionHooks(injectionCode: string) {
+  return {
+    renderChunk(code: string, chunk: { fileName: string }) {
+      if (
+        [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+      ) {
+        const ms = new MagicString(code, { filename: chunk.fileName });
+
+        const match = code.match(COMMENT_USE_STRICT_REGEX)?.[0];
+
+        if (match) {
+          // Add injected code after any comments or "use strict" at the beginning of the bundle.
+          ms.appendLeft(match.length, injectionCode);
+        } else {
+          // ms.replace() doesn't work when there is an empty string match (which happens if
+          // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
+          // need this special case here.
+          ms.prepend(injectionCode);
         }
 
         return {

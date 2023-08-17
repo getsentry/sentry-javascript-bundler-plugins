@@ -2,6 +2,7 @@ import {
   sentryUnpluginFactory,
   Options,
   createRollupReleaseInjectionHooks,
+  createRollupModuleMetadataInjectionHooks,
   createRollupDebugIdInjectionHooks,
   createRollupDebugIdUploadHooks,
 } from "@sentry/bundler-plugin-core";
@@ -21,6 +22,13 @@ function rollupDebugIdInjectionPlugin(): UnpluginOptions {
   };
 }
 
+function rollupModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOptions {
+  return {
+    name: "sentry-rollup-module-metadata-injection-plugin",
+    rollup: createRollupModuleMetadataInjectionHooks(injectionCode),
+  };
+}
+
 function rollupDebugIdUploadPlugin(
   upload: (buildArtifacts: string[]) => Promise<void>
 ): UnpluginOptions {
@@ -33,6 +41,7 @@ function rollupDebugIdUploadPlugin(
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: rollupReleaseInjectionPlugin,
   debugIdInjectionPlugin: rollupDebugIdInjectionPlugin,
+  moduleMetadataInjectionPlugin: rollupModuleMetadataInjectionPlugin,
   debugIdUploadPlugin: rollupDebugIdUploadPlugin,
 });
 

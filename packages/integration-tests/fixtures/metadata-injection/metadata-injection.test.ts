@@ -27,4 +27,12 @@ describe("metadata injection", () => {
   test("esbuild bundle", () => {
     checkBundle(path.join(__dirname, "out", "esbuild", "bundle.js"));
   });
+
+  test("rollup bundle", () => {
+    checkBundle(path.join(__dirname, "out", "rollup", "bundle.js"));
+  });
+
+  test("vite bundle", () => {
+    checkBundle(path.join(__dirname, "out", "vite", "bundle.js"));
+  });
 });
