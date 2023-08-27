@@ -396,7 +396,7 @@ async function prepareSourceMapForDebugIdUpload(
   }
 
   if (map["sources"] && Array.isArray(map["sources"])) {
-    map["sources"].map((source: string) => rewriteSourcesHook(source, map));
+    map["sources"] = map["sources"].map((source: string) => rewriteSourcesHook(source, map));
   }
 
   try {
