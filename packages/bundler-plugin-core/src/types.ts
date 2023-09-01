@@ -13,7 +13,7 @@ export interface Options {
 
   /**
    * The authentication token to use for all communication with Sentry.
-   * Can be obtained from https://sentry.io/settings/account/api/auth-tokens/.
+   * Can be obtained from https://sentry.io/orgredirect/organizations/:orgslug/settings/auth-tokens/.
    * Required scopes: project:releases (and org:read if setCommits option is used).
    *
    * This value can also be specified via the `SENTRY_AUTH_TOKEN` environment variable.
