@@ -4,6 +4,14 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.7.1
+
+- docs: Point to org auth token page (#393)
+- fix(webpack): Add `default` fallback to webpack import (#395)
+- fix: Save results of `rewriteSourcesHook` (#390)
+
+Work in this release contributed by @adonskoy. Thank you for your contribution!
+
 ## 2.7.0
 
 - feat: Add module metadata injection for esbuild (#381)
