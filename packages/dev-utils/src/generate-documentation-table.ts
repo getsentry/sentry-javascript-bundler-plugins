@@ -20,7 +20,7 @@ const options: OptionDocumentation[] = [
     name: "authToken",
     type: "string",
     fullDescription:
-      "The authentication token to use for all communication with Sentry. Can be obtained from https://sentry.io/orgredirect/organizations/:orgslug/settings/auth-tokens/. Required scopes: project:releases (and org:read if setCommits option is used).\n\nThis value can also be specified via the `SENTRY_AUTH_TOKEN` environment variable.",
+      "The authentication token to use for all communication with Sentry. Can be obtained from https://sentry.io/orgredirect/organizations/:orgslug/settings/auth-tokens/.\n\nThis value can also be specified via the `SENTRY_AUTH_TOKEN` environment variable.",
   },
   {
     name: "url",
