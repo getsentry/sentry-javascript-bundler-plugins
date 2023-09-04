@@ -25,7 +25,13 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore webpack version compatibility shenanigans
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const BannerPlugin = compiler?.webpack?.BannerPlugin || webback4or5?.BannerPlugin;
+      const BannerPlugin =
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore webpack version compatibility shenanigans
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        compiler?.webpack?.BannerPlugin ||
+        webback4or5?.BannerPlugin ||
+        webback4or5?.default?.BannerPlugin;
       compiler.options.plugins = compiler.options.plugins || [];
       compiler.options.plugins.push(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
@@ -46,7 +52,13 @@ function webpackDebugIdInjectionPlugin(): UnpluginOptions {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore webpack version compatibility shenanigans
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const BannerPlugin = compiler?.webpack?.BannerPlugin || webback4or5?.BannerPlugin;
+      const BannerPlugin =
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore webpack version compatibility shenanigans
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        compiler?.webpack?.BannerPlugin ||
+        webback4or5?.BannerPlugin ||
+        webback4or5?.default?.BannerPlugin;
       compiler.options.plugins = compiler.options.plugins || [];
       compiler.options.plugins.push(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
@@ -91,7 +103,13 @@ function webpackModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore webpack version compatibility shenanigans
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const BannerPlugin = compiler?.webpack?.BannerPlugin || webback4or5?.BannerPlugin;
+      const BannerPlugin =
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore webpack version compatibility shenanigans
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        compiler?.webpack?.BannerPlugin ||
+        webback4or5?.BannerPlugin ||
+        webback4or5?.default?.BannerPlugin;
       compiler.options.plugins = compiler.options.plugins || [];
       compiler.options.plugins.push(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
