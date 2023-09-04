@@ -48,7 +48,6 @@ module.exports = {
       project: process.env.SENTRY_PROJECT,
 
       // Auth tokens can be obtained from https://sentry.io/orgredirect/organizations/:orgslug/settings/auth-tokens/
-      // and need `project:releases` and `org:read` scopes
       authToken: process.env.SENTRY_AUTH_TOKEN,
     }),
   ],
