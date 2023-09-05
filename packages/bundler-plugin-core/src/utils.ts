@@ -194,17 +194,20 @@ export function stringToUUID(str: string): string {
   ).toLowerCase();
 }
 
-/**
- * Tries to guess a release name based on environmental data.
- */
-export function determineReleaseName(): string | undefined {
+function gitRevision(): string | undefined {
   let gitRevision: string | undefined;
   try {
     gitRevision = childProcess.execSync("git rev-parse HEAD").toString().trim();
   } catch (e) {
     // noop
   }
+  return gitRevision;
+}
 
+/**
+ * Tries to guess a release name based on environmental data.
+ */
+export function determineReleaseName(): string | undefined {
   return (
     // GitHub Actions - https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
     process.env["GITHUB_SHA"] ||
@@ -225,7 +228,7 @@ export function determineReleaseName(): string | undefined {
     process.env["ZEIT_GITHUB_COMMIT_SHA"] ||
     process.env["ZEIT_GITLAB_COMMIT_SHA"] ||
     process.env["ZEIT_BITBUCKET_COMMIT_SHA"] ||
-    gitRevision
+    gitRevision()
   );
 }
 
