@@ -12,6 +12,7 @@ This document serves as a migration guide, documenting all breaking changes betw
 - The `cliBinaryExists` function was renamed to `sentryCliBinaryExists`
 - Removed the `configFile` option. Options should now be set explicitly or via environment variables.
 - The minimum supported Node.js version is now 14 and newer.
+- Removed `dryRun` option.
 
 ## Upgrading from 1.x to 2.x (Webpack Plugin Only)
 
