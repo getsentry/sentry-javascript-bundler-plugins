@@ -9,7 +9,7 @@ const options: OptionDocumentation[] = [
   {
     name: "org",
     type: "string",
-    fullDescription: "The slug of the Sentry organization associated with the app.",
+    fullDescription: "The slug of the Sentry organization associated with the app.\n\nThis value can also be specified via the `SENTRY_ORG` environment variable.",
   },
   {
     name: "project",
