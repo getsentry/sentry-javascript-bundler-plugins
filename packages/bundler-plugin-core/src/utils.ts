@@ -217,6 +217,8 @@ export function determineReleaseName(): string | undefined {
     process.env["CF_PAGES_COMMIT_SHA"] ||
     // AWS CodeBuild - https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
     process.env["CODEBUILD_RESOLVED_SOURCE_VERSION"] ||
+    // Bitbucket - https://support.atlassian.com/bitbucket-cloud/docs/variables-and-secrets/
+    process.env["BITBUCKET_COMMIT"] ||
     // CircleCI - https://circleci.com/docs/2.0/env-vars/
     process.env["CIRCLE_SHA1"] ||
     // Vercel - https://vercel.com/docs/v2/build-step#system-environment-variables
