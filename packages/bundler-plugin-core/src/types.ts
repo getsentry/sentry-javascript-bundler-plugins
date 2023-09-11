@@ -1,6 +1,8 @@
 export interface Options {
   /**
    * The slug of the Sentry organization associated with the app.
+   *
+   * This value can also be specified via the `SENTRY_ORG` environment variable.
    */
   org?: string;
 
