@@ -4,6 +4,16 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.8.0
+
+- build(core): Bump Sentry CLI to v2.21.2 (#415)
+- feat: Detect release name for Bitbucket pipelines (#404)
+- feat: Detect release name for Flightcontrol (#411)
+- fix(core): Move git revision to a separate function (#399)
+- fix(esbuild): Don't inject debug IDs into injected modules (#417)
+
+Work in this release contributed by @hoslmelq, @mjomble, and @aquacash5. Thank you for your contributions!
+
 ## 2.7.1
 
 - docs: Point to org auth token page (#393)
