@@ -44,11 +44,17 @@ function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
     name: pluginName,
 
     esbuild: {
-      setup({ onLoad, onResolve }) {
+      setup({ initialOptions, onLoad, onResolve }) {
         onResolve({ filter: /.*/ }, (args) => {
           if (args.kind !== "entry-point") {
             return;
           } else {
+            // Injected modules via the esbuild `inject` option do also have `kind == "entry-point"`.
+            // We do not want to inject debug IDs into those files because they are already bundled into the entrypoints
+            if (initialOptions.inject?.includes(args.path)) {
+              return;
+            }
+
             return {
               pluginName,
               // needs to be an abs path, otherwise esbuild will complain
@@ -123,11 +129,17 @@ function esbuildModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
     name: pluginName,
 
     esbuild: {
-      setup({ onLoad, onResolve }) {
+      setup({ initialOptions, onLoad, onResolve }) {
         onResolve({ filter: /.*/ }, (args) => {
           if (args.kind !== "entry-point") {
             return;
           } else {
+            // Injected modules via the esbuild `inject` option do also have `kind == "entry-point"`.
+            // We do not want to inject debug IDs into those files because they are already bundled into the entrypoints
+            if (initialOptions.inject?.includes(args.path)) {
+              return;
+            }
+
             return {
               pluginName,
               // needs to be an abs path, otherwise esbuild will complain
