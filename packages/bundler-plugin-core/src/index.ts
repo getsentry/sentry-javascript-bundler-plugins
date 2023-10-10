@@ -452,11 +452,14 @@ export function createRollupDebugIdUploadHooks(
     ) {
       if (outputOptions.dir) {
         const outputDir = outputOptions.dir;
-        const buildArtifacts = await glob(["/**/*.js", "/**/*.js.map"], {
-          root: outputDir,
-          absolute: true,
-          nodir: true,
-        });
+        const buildArtifacts = await glob(
+          ["/**/*.js", "/**/*.js.map", "/**/*.mjs.map", "/**/*.cjs.map"],
+          {
+            root: outputDir,
+            absolute: true,
+            nodir: true,
+          }
+        );
         await upload(buildArtifacts);
       } else if (outputOptions.file) {
         await upload([outputOptions.file]);
