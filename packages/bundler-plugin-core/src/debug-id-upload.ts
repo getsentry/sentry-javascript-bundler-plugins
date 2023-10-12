@@ -332,19 +332,21 @@ async function determineSourceMapPathFromBundle(
     if (isSupportedUrl) {
       absoluteSourceMapPath = sourceMappingUrl;
     } else if (isUrl) {
-      return;
+      // noop
     } else if (path.isAbsolute(sourceMappingUrl)) {
       absoluteSourceMapPath = sourceMappingUrl;
     } else {
       absoluteSourceMapPath = path.join(path.dirname(bundlePath), sourceMappingUrl);
     }
 
-    try {
-      // Check if the file actually exists
-      await util.promisify(fs.access)(absoluteSourceMapPath);
-      return absoluteSourceMapPath;
-    } catch (e) {
-      // noop
+    if (absoluteSourceMapPath) {
+      try {
+        // Check if the file actually exists
+        await util.promisify(fs.access)(absoluteSourceMapPath);
+        return absoluteSourceMapPath;
+      } catch (e) {
+        // noop
+      }
     }
   }
 
