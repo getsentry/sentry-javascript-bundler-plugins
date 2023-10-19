@@ -1,4 +1,10 @@
-import { getDependencies, getPackageJson, parseMajorVersion, stringToUUID } from "../src/utils";
+import {
+  getDependencies,
+  getPackageJson,
+  parseMajorVersion,
+  replaceBooleanFlagsInCode,
+  stringToUUID,
+} from "../src/utils";
 import path from "node:path";
 
 type PackageJson = Record<string, unknown>;
@@ -173,5 +179,38 @@ describe("getDependencies", () => {
 describe("stringToUUID", () => {
   test("should return a deterministic UUID", () => {
     expect(stringToUUID("Nothing personnel kid")).toBe("52c7a762-5ddf-49a7-af16-6874a8cb2512");
+  });
+});
+
+describe("replaceBooleanFlagsInCode", () => {
+  test("it works without a match", () => {
+    const code = "const a = 1;";
+    const result = replaceBooleanFlagsInCode(code, { __DEBUG_BUILD__: false });
+    expect(result).toBeNull();
+  });
+
+  test("it works with matches", () => {
+    const code = `const a = 1;
+if (__DEBUG_BUILD__ && checkMe()) {
+  // do something
+}
+if (__DEBUG_BUILD__ && __RRWEB_EXCLUDE_CANVAS__) {
+  const a = __RRWEB_EXCLUDE_CANVAS__ ? 1 : 2;
+}`;
+    const result = replaceBooleanFlagsInCode(code, {
+      __DEBUG_BUILD__: false,
+      __RRWEB_EXCLUDE_CANVAS__: true,
+    });
+    expect(result).toEqual({
+      code: `const a = 1;
+if (false && checkMe()) {
+  // do something
+}
+if (false && true) {
+  const a = true ? 1 : 2;
+}`,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      map: expect.anything(),
+    });
   });
 });

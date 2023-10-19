@@ -3,6 +3,7 @@ import {
   Options,
   sentryUnpluginFactory,
   stringToUUID,
+  SentrySDKBuildFlags,
 } from "@sentry/bundler-plugin-core";
 import * as path from "path";
 import { UnpluginOptions } from "unplugin";
@@ -39,6 +40,31 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
           raw: true,
           include: /\.(js|ts|jsx|tsx|mjs|cjs)$/,
           banner: injectionCode,
+        })
+      );
+    },
+  };
+}
+
+function webpackBundleSizeOptimizationsPlugin(values: SentrySDKBuildFlags): UnpluginOptions {
+  return {
+    name: "sentry-webpack-bundle-size-optimizations-plugin",
+    webpack(compiler) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore webpack version compatibility shenanigans
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      const DefinePlugin =
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore webpack version compatibility shenanigans
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        compiler?.webpack?.DefinePlugin ||
+        webback4or5?.DefinePlugin ||
+        webback4or5?.default?.DefinePlugin;
+      compiler.options.plugins = compiler.options.plugins || [];
+      compiler.options.plugins.push(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
+        new DefinePlugin({
+          ...values,
         })
       );
     },
@@ -128,6 +154,7 @@ const sentryUnplugin = sentryUnpluginFactory({
   moduleMetadataInjectionPlugin: webpackModuleMetadataInjectionPlugin,
   debugIdInjectionPlugin: webpackDebugIdInjectionPlugin,
   debugIdUploadPlugin: webpackDebugIdUploadPlugin,
+  bundleSizeOptimizationsPlugin: webpackBundleSizeOptimizationsPlugin,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

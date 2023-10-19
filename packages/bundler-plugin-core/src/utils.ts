@@ -4,6 +4,7 @@ import fs from "fs";
 import os from "os";
 import crypto from "crypto";
 import childProcess from "child_process";
+import MagicString, { SourceMap } from "magic-string";
 
 /**
  * Checks whether the given input is already an array, and if it isn't, wraps it in one.
@@ -306,4 +307,28 @@ function getBuildInformation() {
 export function stripQueryAndHashFromPath(path: string): string {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return path.split("?")[0]!.split("#")[0]!;
+}
+
+export function replaceBooleanFlagsInCode(
+  code: string,
+  values: Record<string, boolean | undefined>
+): { code: string; map: SourceMap } | null {
+  const ms = new MagicString(code);
+
+  Object.keys(values).forEach((key) => {
+    const value = values[key];
+
+    if (typeof value === "boolean") {
+      ms.replaceAll(key, value ? "true" : "false");
+    }
+  });
+
+  if (ms.hasChanged()) {
+    return {
+      code: ms.toString(),
+      map: ms.generateMap({ hires: true }),
+    };
+  }
+
+  return null;
 }
