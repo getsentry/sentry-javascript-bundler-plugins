@@ -311,15 +311,15 @@ export function stripQueryAndHashFromPath(path: string): string {
 
 export function replaceBooleanFlagsInCode(
   code: string,
-  values: Record<string, boolean | undefined>
+  replacementValues: Record<string, boolean | undefined>
 ): { code: string; map: SourceMap } | null {
   const ms = new MagicString(code);
 
-  Object.keys(values).forEach((key) => {
-    const value = values[key];
+  Object.keys(replacementValues).forEach((key) => {
+    const value = replacementValues[key];
 
     if (typeof value === "boolean") {
-      ms.replaceAll(key, value ? "true" : "false");
+      ms.replaceAll(key, JSON.stringify(value));
     }
   });
 

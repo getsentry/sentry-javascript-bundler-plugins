@@ -40,10 +40,12 @@ function rollupDebugIdUploadPlugin(
   };
 }
 
-function rollupBundleSizeOptimizationsPlugin(values: SentrySDKBuildFlags): UnpluginOptions {
+function rollupBundleSizeOptimizationsPlugin(
+  replacementValues: SentrySDKBuildFlags
+): UnpluginOptions {
   return {
     name: "sentry-rollup-bundle-size-optimizations-plugin",
-    rollup: createRollupBundleSizeOptimizationHooks(values),
+    rollup: createRollupBundleSizeOptimizationHooks(replacementValues),
   };
 }
 

@@ -233,7 +233,9 @@ function esbuildDebugIdUploadPlugin(
   };
 }
 
-function esbuildBundleSizeOptimizationsPlugin(values: SentrySDKBuildFlags): UnpluginOptions {
+function esbuildBundleSizeOptimizationsPlugin(
+  replacementValues: SentrySDKBuildFlags
+): UnpluginOptions {
   return {
     name: "sentry-esbuild-bundle-size-optimizations-plugin",
     esbuild: {
@@ -241,7 +243,7 @@ function esbuildBundleSizeOptimizationsPlugin(values: SentrySDKBuildFlags): Unpl
         onLoad({ filter: /./ }, async (args) => {
           const source = await fs.promises.readFile(args.path, "utf8");
 
-          const contents = replaceBooleanFlagsInCode(source, values);
+          const contents = replaceBooleanFlagsInCode(source, replacementValues);
 
           if (!contents) {
             return null;

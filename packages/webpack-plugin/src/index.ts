@@ -46,7 +46,9 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-function webpackBundleSizeOptimizationsPlugin(values: SentrySDKBuildFlags): UnpluginOptions {
+function webpackBundleSizeOptimizationsPlugin(
+  replacementValues: SentrySDKBuildFlags
+): UnpluginOptions {
   return {
     name: "sentry-webpack-bundle-size-optimizations-plugin",
     webpack(compiler) {
@@ -64,7 +66,7 @@ function webpackBundleSizeOptimizationsPlugin(values: SentrySDKBuildFlags): Unpl
       compiler.options.plugins.push(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
         new DefinePlugin({
-          ...values,
+          ...replacementValues,
         })
       );
     },

@@ -166,26 +166,26 @@ export function sentryUnpluginFactory({
 
     if (options.bundleSizeOptimizations) {
       const { bundleSizeOptimizations } = options;
-      const values: SentrySDKBuildFlags = {};
+      const replacementValues: SentrySDKBuildFlags = {};
 
       if (bundleSizeOptimizations.excludeDebugStatements) {
-        values["__SENTRY_DEBUG__"] = false;
+        replacementValues["__SENTRY_DEBUG__"] = false;
       }
       if (bundleSizeOptimizations.excludePerformanceMonitoring) {
-        values["__SENTRY_TRACE__"] = false;
+        replacementValues["__SENTRY_TRACE__"] = false;
       }
       if (bundleSizeOptimizations.excludeReplayCanvas) {
-        values["__RRWEB_EXCLUDE_CANVAS__"] = true;
+        replacementValues["__RRWEB_EXCLUDE_CANVAS__"] = true;
       }
       if (bundleSizeOptimizations.excludeReplayIframe) {
-        values["__RRWEB_EXCLUDE_IFRAME__"] = true;
+        replacementValues["__RRWEB_EXCLUDE_IFRAME__"] = true;
       }
       if (bundleSizeOptimizations.excludeReplayShadowDom) {
-        values["__RRWEB_EXCLUDE_SHADOW_DOM__"] = true;
+        replacementValues["__RRWEB_EXCLUDE_SHADOW_DOM__"] = true;
       }
 
-      if (Object.keys(values).length > 0) {
-        plugins.push(bundleSizeOptimizationsPlugin(values));
+      if (Object.keys(replacementValues).length > 0) {
+        plugins.push(bundleSizeOptimizationsPlugin(replacementValues));
       }
     }
 
@@ -399,14 +399,10 @@ export function createRollupReleaseInjectionHooks(injectionCode: string) {
   };
 }
 
-export function createRollupBundleSizeOptimizationHooks(values: SentrySDKBuildFlags) {
+export function createRollupBundleSizeOptimizationHooks(replacementValues: SentrySDKBuildFlags) {
   return {
-    renderChunk(code: string) {
-      return replaceBooleanFlagsInCode(code, values);
-    },
-
     transform(code: string) {
-      return replaceBooleanFlagsInCode(code, values);
+      return replaceBooleanFlagsInCode(code, replacementValues);
     },
   };
 }

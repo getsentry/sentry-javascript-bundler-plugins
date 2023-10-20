@@ -41,10 +41,12 @@ function viteDebugIdUploadPlugin(
   };
 }
 
-function viteBundleSizeOptimizationsPlugin(values: SentrySDKBuildFlags): UnpluginOptions {
+function viteBundleSizeOptimizationsPlugin(
+  replacementValues: SentrySDKBuildFlags
+): UnpluginOptions {
   return {
     name: "sentry-vite-bundle-size-optimizations-plugin",
-    vite: createRollupBundleSizeOptimizationHooks(values),
+    vite: createRollupBundleSizeOptimizationHooks(replacementValues),
   };
 }
 
