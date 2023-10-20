@@ -8,8 +8,9 @@ function checkBundle(bundler: string, bundlePath: string): void {
   const actualPath = path.join(__dirname, "out", bundler, bundlePath);
   const expectedPath = path.join(__dirname, "expected", bundler, bundlePath);
 
-  const actual = fs.readFileSync(actualPath, "utf-8");
-  const expected = fs.readFileSync(expectedPath, "utf-8");
+  // We want to ignore whitespace differences, as they may not be stable
+  const actual = fs.readFileSync(actualPath, "utf-8").replace(/\s*/gm, "");
+  const expected = fs.readFileSync(expectedPath, "utf-8").replace(/\s*/gm, "");
 
   expect(actual).toContain(expected);
 }
