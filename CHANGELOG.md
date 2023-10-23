@@ -4,6 +4,12 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.9.0
+
+- feat: Allow to configure `bundleSizeOptimizations` (#428)
+- fix(core): Don't abort source map location guessing when the reference is a URL (#424)
+- fix(core): Widen detection of source maps with `.cjs.map` and `.mjs.map` (#422)
+
 ## 2.8.0
 
 - build(core): Bump Sentry CLI to v2.21.2 (#415)
