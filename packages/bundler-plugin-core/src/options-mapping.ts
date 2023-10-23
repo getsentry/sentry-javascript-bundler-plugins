@@ -28,6 +28,7 @@ export function normalizeUserOptions(userOptions: UserOptions) {
       vcsRemote: userOptions.release?.vcsRemote ?? process.env["SENTRY_VSC_REMOTE"] ?? "origin",
       cleanArtifacts: userOptions.release?.cleanArtifacts ?? false,
     },
+    bundleSizeOptimizations: userOptions.bundleSizeOptimizations,
     _experiments: userOptions._experiments ?? {},
   };
 

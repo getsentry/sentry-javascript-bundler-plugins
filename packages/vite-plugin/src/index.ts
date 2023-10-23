@@ -5,6 +5,8 @@ import {
   createRollupModuleMetadataInjectionHooks,
   createRollupDebugIdInjectionHooks,
   createRollupDebugIdUploadHooks,
+  SentrySDKBuildFlags,
+  createRollupBundleSizeOptimizationHooks,
 } from "@sentry/bundler-plugin-core";
 import { UnpluginOptions } from "unplugin";
 
@@ -39,11 +41,21 @@ function viteDebugIdUploadPlugin(
   };
 }
 
+function viteBundleSizeOptimizationsPlugin(
+  replacementValues: SentrySDKBuildFlags
+): UnpluginOptions {
+  return {
+    name: "sentry-vite-bundle-size-optimizations-plugin",
+    vite: createRollupBundleSizeOptimizationHooks(replacementValues),
+  };
+}
+
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: viteReleaseInjectionPlugin,
   debugIdInjectionPlugin: viteDebugIdInjectionPlugin,
   moduleMetadataInjectionPlugin: viteModuleMetadataInjectionPlugin,
   debugIdUploadPlugin: viteDebugIdUploadPlugin,
+  bundleSizeOptimizationsPlugin: viteBundleSizeOptimizationsPlugin,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

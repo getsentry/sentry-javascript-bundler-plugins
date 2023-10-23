@@ -1,4 +1,9 @@
-import { sentryUnpluginFactory, Options, getDebugIdSnippet } from "@sentry/bundler-plugin-core";
+import {
+  sentryUnpluginFactory,
+  Options,
+  getDebugIdSnippet,
+  SentrySDKBuildFlags,
+} from "@sentry/bundler-plugin-core";
 import type { UnpluginOptions } from "unplugin";
 import * as path from "path";
 
@@ -226,11 +231,30 @@ function esbuildDebugIdUploadPlugin(
   };
 }
 
+function esbuildBundleSizeOptimizationsPlugin(
+  replacementValues: SentrySDKBuildFlags
+): UnpluginOptions {
+  return {
+    name: "sentry-esbuild-bundle-size-optimizations-plugin",
+    esbuild: {
+      setup({ initialOptions }) {
+        const replacementStringValues: Record<string, string> = {};
+        Object.entries(replacementValues).forEach(([key, value]) => {
+          replacementStringValues[key] = JSON.stringify(value);
+        });
+
+        initialOptions.define = { ...initialOptions.define, ...replacementStringValues };
+      },
+    },
+  };
+}
+
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: esbuildReleaseInjectionPlugin,
   debugIdInjectionPlugin: esbuildDebugIdInjectionPlugin,
   moduleMetadataInjectionPlugin: esbuildModuleMetadataInjectionPlugin,
   debugIdUploadPlugin: esbuildDebugIdUploadPlugin,
+  bundleSizeOptimizationsPlugin: esbuildBundleSizeOptimizationsPlugin,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -229,6 +229,47 @@ export interface Options {
   };
 
   /**
+   * Options related to bundle size optimizations.
+   */
+  bundleSizeOptimizations?: {
+    /**
+     * If set to true, the plugin will try to tree-shake debug statements out.
+     * Note that the success of this depends on tree shaking generally being enabled in your build.
+     */
+    excludeDebugStatements?: boolean;
+
+    /**
+     * If set to true, the plugin will try to tree-shake performance monitoring statements out.
+     * Note that the success of this depends on tree shaking generally being enabled in your build.
+     * Attention: DO NOT enable this when you're using any performance monitoring-related SDK features (e.g. Sentry.startTransaction()).
+     * This flag is intended to be used in combination with packages like @sentry/next or @sentry/sveltekit,
+     * which automatically include performance monitoring functionality.
+     */
+    excludePerformanceMonitoring?: boolean;
+
+    /**
+     * If set to true, the plugin will try to tree-shake Session Replay's Canvas recording functionality out.
+     * You can safely do this when you do not want to capture any Canvas activity via Replay.
+     * Note that the success of this depends on tree shaking generally being enabled in your build.
+     */
+    excludeReplayCanvas?: boolean;
+
+    /**
+     * If set to true, the plugin will try to tree-shake Session Replay's Shadow DOM recording functionality out.
+     * You can safely do this when you do not want to capture any Shadow DOM activity via Replay.
+     * Note that the success of this depends on tree shaking generally being enabled in your build.
+     */
+    excludeReplayShadowDom?: boolean;
+
+    /**
+     * If set to true, the plugin will try to tree-shake Session Replay's IFrame recording functionality out.
+     * You can safely do this when you do not want to capture any IFrame activity via Replay.
+     * Note that the success of this depends on tree shaking generally being enabled in your build.
+     */
+    excludeReplayIframe?: boolean;
+  };
+
+  /**
    * Options that are considered experimental and subject to change.
    *
    * @experimental API that does not follow semantic versioning and may change in any release
@@ -347,6 +388,14 @@ export type IncludeEntry = {
    */
   validate?: boolean;
 };
+
+export interface SentrySDKBuildFlags extends Record<string, boolean | undefined> {
+  __SENTRY_DEBUG__?: boolean;
+  __SENTRY_TRACE__?: boolean;
+  __RRWEB_EXCLUDE_CANVAS__?: boolean;
+  __RRWEB_EXCLUDE_IFRAME__?: boolean;
+  __RRWEB_EXCLUDE_SHADOW_DOM__?: boolean;
+}
 
 type SetCommitsOptions = (AutoSetCommitsOptions | ManualSetCommitsOptions) & {
   /**

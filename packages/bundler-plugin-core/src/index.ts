@@ -9,13 +9,14 @@ import { releaseManagementPlugin } from "./plugins/release-management";
 import { telemetryPlugin } from "./plugins/telemetry";
 import { createLogger } from "./sentry/logger";
 import { allowedToSendTelemetry, createSentryInstance } from "./sentry/telemetry";
-import { Options } from "./types";
+import { Options, SentrySDKBuildFlags } from "./types";
 import {
   generateGlobalInjectorCode,
   generateModuleMetadataInjectorCode,
   getDependencies,
   getPackageJson,
   parseMajorVersion,
+  replaceBooleanFlagsInCode,
   stringToUUID,
   stripQueryAndHashFromPath,
 } from "./utils";
@@ -27,6 +28,7 @@ interface SentryUnpluginFactoryOptions {
   moduleMetadataInjectionPlugin?: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
+  bundleSizeOptimizationsPlugin: (buildFlags: SentrySDKBuildFlags) => UnpluginOptions;
 }
 
 /**
@@ -61,6 +63,7 @@ export function sentryUnpluginFactory({
   moduleMetadataInjectionPlugin,
   debugIdInjectionPlugin,
   debugIdUploadPlugin,
+  bundleSizeOptimizationsPlugin,
 }: SentryUnpluginFactoryOptions) {
   return createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
     const logger = createLogger({
@@ -160,6 +163,31 @@ export function sentryUnpluginFactory({
         shouldSendTelemetry,
       })
     );
+
+    if (options.bundleSizeOptimizations) {
+      const { bundleSizeOptimizations } = options;
+      const replacementValues: SentrySDKBuildFlags = {};
+
+      if (bundleSizeOptimizations.excludeDebugStatements) {
+        replacementValues["__SENTRY_DEBUG__"] = false;
+      }
+      if (bundleSizeOptimizations.excludePerformanceMonitoring) {
+        replacementValues["__SENTRY_TRACE__"] = false;
+      }
+      if (bundleSizeOptimizations.excludeReplayCanvas) {
+        replacementValues["__RRWEB_EXCLUDE_CANVAS__"] = true;
+      }
+      if (bundleSizeOptimizations.excludeReplayIframe) {
+        replacementValues["__RRWEB_EXCLUDE_IFRAME__"] = true;
+      }
+      if (bundleSizeOptimizations.excludeReplayShadowDom) {
+        replacementValues["__RRWEB_EXCLUDE_SHADOW_DOM__"] = true;
+      }
+
+      if (Object.keys(replacementValues).length > 0) {
+        plugins.push(bundleSizeOptimizationsPlugin(replacementValues));
+      }
+    }
 
     if (!options.release.inject) {
       logger.debug(
@@ -371,6 +399,14 @@ export function createRollupReleaseInjectionHooks(injectionCode: string) {
   };
 }
 
+export function createRollupBundleSizeOptimizationHooks(replacementValues: SentrySDKBuildFlags) {
+  return {
+    transform(code: string) {
+      return replaceBooleanFlagsInCode(code, replacementValues);
+    },
+  };
+}
+
 // We need to be careful not to inject the snippet before any `"use strict";`s.
 // As an additional complication `"use strict";`s may come after any number of comments.
 const COMMENT_USE_STRICT_REGEX =
@@ -475,6 +511,6 @@ export function getDebugIdSnippet(debugId: string): string {
   return `;!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{},n=(new Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="${debugId}",e._sentryDebugIdIdentifier="sentry-dbid-${debugId}")}catch(e){}}();`;
 }
 
-export { stringToUUID } from "./utils";
+export { stringToUUID, replaceBooleanFlagsInCode } from "./utils";
 
-export type { Options } from "./types";
+export type { Options, SentrySDKBuildFlags } from "./types";
