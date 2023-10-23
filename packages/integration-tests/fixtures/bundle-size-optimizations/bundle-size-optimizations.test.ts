@@ -6,8 +6,8 @@ import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 const expectedOutputs: Record<string, Record<string, string>> = {
   esbuild: {
-    "bundle1.js": `console.log(1);`,
-    "bundle2.js": `console.log({debug:"b",trace:"b",replayCanvas:"a",replayIframe:"a",replayShadowDom:"a"});`,
+    "bundle1.js": `console.log(1)`,
+    "bundle2.js": `console.log({debug:"b",trace:"b",replayCanvas:"a",replayIframe:"a",replayShadowDom:"a"})`,
   },
   rollup: {
     "bundle1.js": `console.log(1 );`,

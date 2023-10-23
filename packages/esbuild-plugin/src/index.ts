@@ -3,11 +3,9 @@ import {
   Options,
   getDebugIdSnippet,
   SentrySDKBuildFlags,
-  replaceBooleanFlagsInCode,
 } from "@sentry/bundler-plugin-core";
 import type { UnpluginOptions } from "unplugin";
 import * as path from "path";
-import * as fs from "fs";
 
 import { v4 as uuidv4 } from "uuid";
 
@@ -239,18 +237,14 @@ function esbuildBundleSizeOptimizationsPlugin(
   return {
     name: "sentry-esbuild-bundle-size-optimizations-plugin",
     esbuild: {
-      setup({ onLoad }) {
-        onLoad({ filter: /./ }, async (args) => {
-          const source = await fs.promises.readFile(args.path, "utf8");
+      setup({ initialOptions }) {
+        const replacementStringValues: Record<string, string> = Object.entries(
+          replacementValues
+        ).reduce((acc, [key, value]) => {
+          return { ...acc, [key]: JSON.stringify(value) };
+        }, {});
 
-          const contents = replaceBooleanFlagsInCode(source, replacementValues);
-
-          if (!contents) {
-            return null;
-          }
-
-          return { contents: contents.code, loader: "default" };
-        });
+        initialOptions.define = { ...initialOptions.define, ...replacementStringValues };
       },
     },
   };
