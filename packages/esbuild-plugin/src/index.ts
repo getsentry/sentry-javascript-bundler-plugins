@@ -238,11 +238,10 @@ function esbuildBundleSizeOptimizationsPlugin(
     name: "sentry-esbuild-bundle-size-optimizations-plugin",
     esbuild: {
       setup({ initialOptions }) {
-        const replacementStringValues: Record<string, string> = Object.entries(
-          replacementValues
-        ).reduce((acc, [key, value]) => {
-          return { ...acc, [key]: JSON.stringify(value) };
-        }, {});
+        const replacementStringValues: Record<string, string> = {};
+        Object.entries(replacementValues).forEach(([key, value]) => {
+          replacementStringValues[key] = JSON.stringify(value);
+        });
 
         initialOptions.define = { ...initialOptions.define, ...replacementStringValues };
       },
