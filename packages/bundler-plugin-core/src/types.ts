@@ -267,6 +267,13 @@ export interface Options {
      * Note that the success of this depends on tree shaking generally being enabled in your build.
      */
     excludeReplayIframe?: boolean;
+
+    /**
+     * If set to true, the plugin will try to tree-shake Session Replay's Compression Web Worker out.
+     * You should only do this if you manually host a compression worker and configure it in your Replay config via `workerUrl`.
+     * Note that the success of this depends on tree shaking generally being enabled in your build.
+     */
+    excludeReplayWorker?: boolean;
   };
 
   /**
@@ -395,6 +402,7 @@ export interface SentrySDKBuildFlags extends Record<string, boolean | undefined>
   __RRWEB_EXCLUDE_CANVAS__?: boolean;
   __RRWEB_EXCLUDE_IFRAME__?: boolean;
   __RRWEB_EXCLUDE_SHADOW_DOM__?: boolean;
+  __SENTRY_EXCLUDE_REPLAY_WORKER__?: boolean;
 }
 
 type SetCommitsOptions = (AutoSetCommitsOptions | ManualSetCommitsOptions) & {
