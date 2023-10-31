@@ -20,6 +20,7 @@ createCjsBundles(
       excludeReplayCanvas: true,
       excludeReplayIframe: true,
       excludeReplayShadowDom: true,
+      excludeReplayWorker: true,
     },
   }
 );

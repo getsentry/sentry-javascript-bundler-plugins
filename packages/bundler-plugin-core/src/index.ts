@@ -183,6 +183,9 @@ export function sentryUnpluginFactory({
       if (bundleSizeOptimizations.excludeReplayShadowDom) {
         replacementValues["__RRWEB_EXCLUDE_SHADOW_DOM__"] = true;
       }
+      if (bundleSizeOptimizations.excludeReplayWorker) {
+        replacementValues["__SENTRY_EXCLUDE_REPLAY_WORKER__"] = true;
+      }
 
       if (Object.keys(replacementValues).length > 0) {
         plugins.push(bundleSizeOptimizationsPlugin(replacementValues));
