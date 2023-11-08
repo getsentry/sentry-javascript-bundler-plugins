@@ -251,6 +251,10 @@ export interface Options {
      * If set to true, the plugin will try to tree-shake Session Replay's Canvas recording functionality out.
      * You can safely do this when you do not want to capture any Canvas activity via Replay.
      * Note that the success of this depends on tree shaking generally being enabled in your build.
+     *
+     * This option is not needed since v7.78.0 of the JavaScript SDK, because canvas is automatically excluded from the build.
+     *
+     * @deprecated Since v7.78.0 of the JavaScript SDK, this is excluded by default - no need to configure anything!
      */
     excludeReplayCanvas?: boolean;
 
