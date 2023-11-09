@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@sentry/bundler-plugin-core": "2.10.0",
-    "unplugin": "1.0.1",
+    "unplugin": "1.5.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
