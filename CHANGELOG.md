@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.10.0
+
+- feat: deprecate `excludeReplayCanvas` config (#436)
+- feat: Add `excludeReplayWorker` to `bundleSizeOptimizations` (#433)
+
 ## 2.9.0
 
 - feat: Allow to configure `bundleSizeOptimizations` (#428)
