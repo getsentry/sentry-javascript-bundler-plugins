@@ -3519,6 +3519,11 @@ acorn@^7.1.1:
   resolved "https://registry.npmjs.org/acorn/-/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
 
+acorn@^8.10.0:
+  version "8.11.2"
+  resolved "https://registry.npmjs.org/acorn/-/acorn-8.11.2.tgz#ca0d78b51895be5390a5903c5b3bdcdaf78ae40b"
+  integrity sha512-nc0Axzp/0FILLEVsm4fNwLCwMttvhEI263QtVPQcbpfZZ3ts0hLsZGOpE6czNlid7CJ9MlyH8reXkpsf3YUY4w==
+
 acorn@^8.2.4, acorn@^8.4.1, acorn@^8.5.0, acorn@^8.7.1, acorn@^8.8.0, acorn@^8.8.1:
   version "8.8.2"
   resolved "https://registry.npmjs.org/acorn/-/acorn-8.8.2.tgz#1b2f25db02af965399b9776b0c2c391276d37c4a"
@@ -12259,6 +12264,16 @@ unplugin@1.0.1:
   integrity sha512-aqrHaVBWW1JVKBHmGo33T5TxeL0qWzfvjWokObHA9bYmN7eNDkwOxmLjhioHl9878qDFMAaT51XNroRyuz7WxA==
   dependencies:
     acorn "^8.8.1"
+    chokidar "^3.5.3"
+    webpack-sources "^3.2.3"
+    webpack-virtual-modules "^0.5.0"
+
+unplugin@1.5.0:
+  version "1.5.0"
+  resolved "https://registry.npmjs.org/unplugin/-/unplugin-1.5.0.tgz#8938ae84defe62afc7757df9ca05d27160f6c20c"
+  integrity sha512-9ZdRwbh/4gcm1JTOkp9lAkIDrtOyOxgHmY7cjuwI8L/2RTikMcVG25GsZwNAgRuap3iDw2jeq7eoqtAsz5rW3A==
+  dependencies:
+    acorn "^8.10.0"
     chokidar "^3.5.3"
     webpack-sources "^3.2.3"
     webpack-virtual-modules "^0.5.0"

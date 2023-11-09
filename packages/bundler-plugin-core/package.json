@@ -59,7 +59,7 @@
     "find-up": "5.0.0",
     "glob": "9.3.2",
     "magic-string": "0.27.0",
-    "unplugin": "1.0.1"
+    "unplugin": "1.5.0"
   },
   "devDependencies": {
     "@babel/core": "7.18.5",
