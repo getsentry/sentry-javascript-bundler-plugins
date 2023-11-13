@@ -22,6 +22,7 @@ import {
 } from "./utils";
 import * as dotenv from "dotenv";
 import { glob } from "glob";
+import { warnForMismatchedSentryPackages } from "./sentry-packages/warn-for-mismatched-sentry-packages";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
@@ -84,6 +85,8 @@ export function sentryUnpluginFactory({
     } else if (dotenvResult.parsed) {
       logger.info('Using environment variables configured in ".env.sentry-build-plugin".');
     }
+
+    void warnForMismatchedSentryPackages(logger);
 
     const options = normalizeUserOptions(userOptions);
 

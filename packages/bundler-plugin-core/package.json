@@ -52,9 +52,13 @@
     "fix": "eslint ./src ./test --format stylish --fix"
   },
   "dependencies": {
+    "@pnpm/lockfile-file": "^7.0.6",
+    "@pnpm/logger": "^5.0.0",
     "@sentry/cli": "^2.21.2",
     "@sentry/node": "^7.60.0",
     "@sentry/utils": "^7.60.0",
+    "@types/yarnpkg__lockfile": "^1.1.9",
+    "@yarnpkg/lockfile": "^1.1.0",
     "dotenv": "^16.3.1",
     "find-up": "5.0.0",
     "glob": "9.3.2",
