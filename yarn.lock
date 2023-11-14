@@ -2369,10 +2369,10 @@
     "@sentry/utils" "7.60.0"
     tslib "^2.4.1 || ^1.9.3"
 
-"@sentry/cli@^2.21.2":
-  version "2.21.2"
-  resolved "https://registry.npmjs.org/@sentry/cli/-/cli-2.21.2.tgz#89e5633ff48a83d078c76c6997fffd4b68b2da1c"
-  integrity sha512-X1nye89zl+QV3FSuQDGItfM51tW9PQ7ce0TtV/12DgGgTVEgnVp5uvO3wX5XauHvulQzRPzwUL3ZK+yS5bAwCw==
+"@sentry/cli@^2.21.4":
+  version "2.21.4"
+  resolved "https://registry.npmjs.org/@sentry/cli/-/cli-2.21.4.tgz#58d62afd22bdca832f4faf52ee120420e1c293ef"
+  integrity sha512-KIgvgl1DB/i41GmXfJkv96TdtKeJIhiV6l5OLRmxtnvA2JTqAQaeH+YMHE+vpZ/0FqtLK5clIkt5ReQNpmigPg==
   dependencies:
     https-proxy-agent "^5.0.0"
     node-fetch "^2.6.7"
