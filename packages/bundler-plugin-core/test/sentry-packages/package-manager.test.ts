@@ -1,4 +1,4 @@
-import { NPM, PNPM, YARN, detectPackageManager } from "../../src/sentry-packages/packageManager";
+import { NPM, PNPM, YARN, detectPackageManager } from "../../src/sentry-packages/package-manager";
 import { join } from "node:path";
 
 describe("detectPackageManager", () => {
