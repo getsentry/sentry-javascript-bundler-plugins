@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.10.1
+
+- chore: bump @sentry/cli dependency to 2.21.4 (#440)
+
 ## 2.10.0
 
 - feat: deprecate `excludeReplayCanvas` config (#436)
