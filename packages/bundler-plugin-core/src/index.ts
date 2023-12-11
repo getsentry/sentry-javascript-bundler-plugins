@@ -4,7 +4,7 @@ import * as path from "path";
 import MagicString from "magic-string";
 import { createUnplugin, UnpluginOptions } from "unplugin";
 import { normalizeUserOptions, validateOptions } from "./options-mapping";
-import { createDebugIdUploadFunction } from "./debug-id-upload";
+import { createDebugIdUploadFunction, InMemoryBundleAsset } from "./debug-id-upload";
 import { releaseManagementPlugin } from "./plugins/release-management";
 import { telemetryPlugin } from "./plugins/telemetry";
 import { createLogger } from "./sentry/logger";
@@ -27,7 +27,9 @@ interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
   moduleMetadataInjectionPlugin?: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
-  debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
+  debugIdUploadPlugin: (
+    upload: (buildArtifacts: string[] | InMemoryBundleAsset[]) => Promise<void>
+  ) => UnpluginOptions;
   bundleSizeOptimizationsPlugin: (buildFlags: SentrySDKBuildFlags) => UnpluginOptions;
 }
 
@@ -517,3 +519,4 @@ export function getDebugIdSnippet(debugId: string): string {
 export { stringToUUID, replaceBooleanFlagsInCode } from "./utils";
 
 export type { Options, SentrySDKBuildFlags } from "./types";
+export type { InMemoryBundleAsset } from "./debug-id-upload";

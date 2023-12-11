@@ -35,6 +35,15 @@ interface DebugIdUploadPluginOptions {
   };
 }
 
+export interface InMemoryBundleAsset {
+  content: string;
+  path: string;
+}
+
+function isFilePaths(files: string[] | InMemoryBundleAsset[]): files is string[] {
+  return (files as string[]).every((file) => typeof file === "string");
+}
+
 export function createDebugIdUploadFunction({
   assets,
   ignore,
@@ -48,7 +57,7 @@ export function createDebugIdUploadFunction({
   rewriteSourcesHook,
   filesToDeleteAfterUpload,
 }: DebugIdUploadPluginOptions) {
-  return async (buildArtifactPaths: string[]) => {
+  return async (buildArtifactPaths: string[] | InMemoryBundleAsset[]) => {
     const artifactBundleUploadTransaction = sentryHub.startTransaction({
       name: "debug-id-sourcemap-upload",
     });
@@ -75,29 +84,45 @@ export function createDebugIdUploadFunction({
       }
 
       const globSpan = artifactBundleUploadTransaction.startChild({ description: "glob" });
-      const globResult = await glob(globAssets, {
-        absolute: true,
-        nodir: true,
-        ignore: ignore,
-      });
+      let globResult: InMemoryBundleAsset[] | string[];
+      if (typeof globAssets === "string" || isFilePaths(globAssets)) {
+        globResult = await glob(globAssets, {
+          absolute: true,
+          nodir: true,
+          ignore: ignore,
+        });
+      } else {
+        globResult = globAssets;
+      }
       globSpan.finish();
 
-      const debugIdChunkFilePaths = globResult.filter(
-        (debugIdChunkFilePath) =>
-          debugIdChunkFilePath.endsWith(".js") ||
-          debugIdChunkFilePath.endsWith(".mjs") ||
-          debugIdChunkFilePath.endsWith(".cjs")
-      );
+      // Combining types to make `.filter()` callable (TS2345)
+      const debugIdChunkFiles = (globResult as Array<string | InMemoryBundleAsset>).filter(
+        (debugIdChunkFile: InMemoryBundleAsset | string) => {
+          const debugIdChunkFilePath =
+            typeof debugIdChunkFile === "string" ? debugIdChunkFile : debugIdChunkFile.path;
+
+          return (
+            debugIdChunkFilePath.endsWith(".js") ||
+            debugIdChunkFilePath.endsWith(".mjs") ||
+            debugIdChunkFilePath.endsWith(".cjs")
+          );
+        }
+      ) as string[] | InMemoryBundleAsset[];
 
       // The order of the files output by glob() is not deterministic
       // Ensure order within the files so that {debug-id}-{chunkIndex} coupling is consistent
-      debugIdChunkFilePaths.sort();
+      debugIdChunkFiles.sort((a, b) => {
+        const debugIdChunkFilePathA = typeof a === "string" ? a : a.path;
+        const debugIdChunkFilePathB = typeof b === "string" ? b : b.path;
+        return debugIdChunkFilePathA.localeCompare(debugIdChunkFilePathB);
+      });
 
       if (Array.isArray(assets) && assets.length === 0) {
         logger.debug(
           "Empty `sourcemaps.assets` option provided. Will not upload sourcemaps with debug ID."
         );
-      } else if (debugIdChunkFilePaths.length === 0) {
+      } else if (debugIdChunkFiles.length === 0) {
         logger.warn(
           "Didn't find any matching sources for debug ID upload. Please check the `sourcemaps.assets` option."
         );
@@ -108,17 +133,15 @@ export function createDebugIdUploadFunction({
 
         // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
         // instead we do it with a maximum of 16 concurrent workers
-        const preparationTasks = debugIdChunkFilePaths.map(
-          (chunkFilePath, chunkIndex) => async () => {
-            await prepareBundleForDebugIdUpload(
-              chunkFilePath,
-              tmpUploadFolder,
-              chunkIndex,
-              logger,
-              rewriteSourcesHook ?? defaultRewriteSourcesHook
-            );
-          }
-        );
+        const preparationTasks = debugIdChunkFiles.map((chunkFilePath, chunkIndex) => async () => {
+          await prepareBundleForDebugIdUpload(
+            chunkFilePath,
+            tmpUploadFolder,
+            chunkIndex,
+            logger,
+            rewriteSourcesHook ?? defaultRewriteSourcesHook
+          );
+        });
         const workers: Promise<void>[] = [];
         const worker = async () => {
           while (preparationTasks.length > 0) {
@@ -230,21 +253,25 @@ export function createDebugIdUploadFunction({
 }
 
 export async function prepareBundleForDebugIdUpload(
-  bundleFilePath: string,
+  bundleFile: string | InMemoryBundleAsset,
   uploadFolder: string,
   chunkIndex: number,
   logger: Logger,
   rewriteSourcesHook: RewriteSourcesHook
 ) {
-  let bundleContent;
-  try {
-    bundleContent = await promisify(fs.readFile)(bundleFilePath, "utf8");
-  } catch (e) {
-    logger.error(
-      `Could not read bundle to determine debug ID and source map: ${bundleFilePath}`,
-      e
-    );
-    return;
+  let bundleContent: string;
+  let bundleFilePath: string;
+  if (typeof bundleFile === "string") {
+    bundleFilePath = bundleFile;
+    try {
+      bundleContent = await promisify(fs.readFile)(bundleFile, "utf8");
+    } catch (e) {
+      logger.error(`Could not read bundle to determine debug ID and source map: ${bundleFile}`, e);
+      return;
+    }
+  } else {
+    bundleContent = bundleFile.content;
+    bundleFilePath = bundleFile.path;
   }
 
   const debugId = determineDebugIdFromBundleSource(bundleContent);

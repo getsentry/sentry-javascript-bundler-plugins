@@ -3,6 +3,7 @@ import {
   Options,
   getDebugIdSnippet,
   SentrySDKBuildFlags,
+  InMemoryBundleAsset,
 } from "@sentry/bundler-plugin-core";
 import type { UnpluginOptions } from "unplugin";
 import * as path from "path";
@@ -215,7 +216,7 @@ function esbuildModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
 }
 
 function esbuildDebugIdUploadPlugin(
-  upload: (buildArtifacts: string[]) => Promise<void>
+  upload: (buildArtifacts: InMemoryBundleAsset[]) => Promise<void>
 ): UnpluginOptions {
   return {
     name: "sentry-esbuild-debug-id-upload-plugin",
@@ -223,8 +224,11 @@ function esbuildDebugIdUploadPlugin(
       setup({ initialOptions, onEnd }) {
         initialOptions.metafile = true;
         onEnd(async (result) => {
-          const buildArtifacts = result.metafile ? Object.keys(result.metafile.outputs) : [];
-          await upload(buildArtifacts);
+          const buildArtifacts = result.outputFiles?.map((file) => ({
+            path: file.path,
+            content: file.text,
+          }));
+          await upload(buildArtifacts ?? []);
         });
       },
     },
