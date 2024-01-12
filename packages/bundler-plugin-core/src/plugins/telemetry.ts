@@ -1,6 +1,7 @@
 import { Hub, NodeClient } from "@sentry/node";
 import { UnpluginOptions } from "unplugin";
 import { Logger } from "../sentry/logger";
+import { safeFlushTelemetry } from "../sentry/telemetry";
 
 interface TelemetryPluginOptions {
   sentryHub: Hub;
@@ -23,7 +24,7 @@ export function telemetryPlugin({
           "Sending error and performance telemetry data to Sentry. To disable telemetry, set `options.telemetry` to `false`."
         );
         sentryHub.startTransaction({ name: "Sentry Bundler Plugin execution" }).finish();
-        await sentryClient.flush(3000);
+        await safeFlushTelemetry(sentryClient);
       }
     },
   };
