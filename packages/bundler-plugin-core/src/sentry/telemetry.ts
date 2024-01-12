@@ -147,3 +147,15 @@ export async function allowedToSendTelemetry(options: NormalizedOptions): Promis
 
   return new URL(cliInfoUrl).hostname === SENTRY_SAAS_HOSTNAME;
 }
+
+/**
+ * Flushing the SDK client can fail. We never want to crash the plugin because of telemetry.
+ */
+export async function safeFlushTelemetry(sentryClient: NodeClient) {
+  try {
+    await sentryClient.flush(2000);
+  } catch {
+    // Noop when flushing fails.
+    // We don't even need to log anything because there's likely nothing the user can do and they likely will not care.
+  }
+}
