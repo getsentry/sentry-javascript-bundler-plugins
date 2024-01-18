@@ -80,8 +80,6 @@ export function sentryUnpluginFactory({
       debug: userOptions.debug ?? false,
     });
 
-    logger.warn("creating the unplugin noice!!");
-
     const dotenvResult = dotenv.config({
       path: path.join(process.cwd(), ".env.sentry-build-plugin"),
     });
