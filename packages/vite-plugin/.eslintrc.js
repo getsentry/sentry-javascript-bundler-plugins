@@ -8,6 +8,9 @@ module.exports = {
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ["./src/tsconfig.json", "./test/tsconfig.json"],
+    babelOptions: {
+      presets: ["@babel/preset-react"],
+    },
   },
   env: {
     node: true,

@@ -151,8 +151,28 @@ function webpackModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
   };
 }
 
+function webpackReactAnnotatePlugin(): UnpluginOptions {
+  return {
+    name: "sentry-webpack-react-annotate-plugin",
+    webpack(compiler) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore webpack version compatibility shenanigans
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      const BannerPlugin =
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore webpack version compatibility shenanigans
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        compiler?.webpack?.BannerPlugin ||
+        webback4or5?.BannerPlugin ||
+        webback4or5?.default?.BannerPlugin;
+      compiler.options.plugins = compiler.options.plugins || [];
+    },
+  };
+}
+
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: webpackReleaseInjectionPlugin,
+  reactAnnotatePlugin: webpackReactAnnotatePlugin,
   moduleMetadataInjectionPlugin: webpackModuleMetadataInjectionPlugin,
   debugIdInjectionPlugin: webpackDebugIdInjectionPlugin,
   debugIdUploadPlugin: webpackDebugIdUploadPlugin,

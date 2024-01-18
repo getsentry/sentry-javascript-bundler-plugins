@@ -249,8 +249,18 @@ function esbuildBundleSizeOptimizationsPlugin(
   };
 }
 
+function esbuildReactAnnotatePlugin(): UnpluginOptions {
+  return {
+    name: "sentry-esbuild-react-annotate-plugin",
+    esbuild: {
+      setup({ initialOptions }) {},
+    },
+  };
+}
+
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: esbuildReleaseInjectionPlugin,
+  reactAnnotatePlugin: esbuildReactAnnotatePlugin,
   debugIdInjectionPlugin: esbuildDebugIdInjectionPlugin,
   moduleMetadataInjectionPlugin: esbuildModuleMetadataInjectionPlugin,
   debugIdUploadPlugin: esbuildDebugIdUploadPlugin,

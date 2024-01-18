@@ -1,4 +1,5 @@
 import SentryCli from "@sentry/cli";
+import { transformAsync } from "@babel/core";
 import * as fs from "fs";
 import * as path from "path";
 import MagicString from "magic-string";
@@ -22,9 +23,15 @@ import {
 } from "./utils";
 import * as dotenv from "dotenv";
 import { glob } from "glob";
+import pkg from "@sentry/utils";
+const { logger } = pkg;
+
+// @ts-ignore
+import reactAnnotate from "./plugins/react-annotate-plugin";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
+  reactAnnotatePlugin: () => UnpluginOptions;
   moduleMetadataInjectionPlugin?: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
@@ -60,6 +67,7 @@ interface SentryUnpluginFactoryOptions {
  */
 export function sentryUnpluginFactory({
   releaseInjectionPlugin,
+  reactAnnotatePlugin,
   moduleMetadataInjectionPlugin,
   debugIdInjectionPlugin,
   debugIdUploadPlugin,
@@ -71,6 +79,8 @@ export function sentryUnpluginFactory({
       silent: userOptions.silent ?? false,
       debug: userOptions.debug ?? false,
     });
+
+    logger.warn("creating the unplugin noice!!");
 
     const dotenvResult = dotenv.config({
       path: path.join(process.cwd(), ".env.sentry-build-plugin"),
@@ -317,7 +327,29 @@ export function sentryUnpluginFactory({
       );
     }
 
+    plugins.push(reactAnnotatePlugin());
+
     return plugins;
+
+    // return {
+    //   ...plugins,
+    //   async transform(code: string, id: string) {
+    //     logger.warn(id);
+    //     const isReact = id.endsWith(".tsx") || id.endsWith(".jsx");
+    //     logger.warn(`Is this a React file? --- ${isReact ? "Yes" : "No"}`);
+
+    //     const plugins = [];
+
+    //     if (isReact) {
+    //       plugins.push(["@fullstory/babel-plugin-annotate-react"]);
+    //       const result = await transformAsync(code, { plugins, filename: id });
+    //       logger.warn(result?.code ?? "null");
+    //       return result?.code || null;
+    //     }
+
+    //     return code;
+    //   },
+    // };
   });
 }
 
@@ -346,7 +378,6 @@ export function sentryCliBinaryExists(): boolean {
 
 export function createRollupReleaseInjectionHooks(injectionCode: string) {
   const virtualReleaseInjectionFileId = "\0sentry-release-injection-file";
-
   return {
     resolveId(id: string) {
       if (id === virtualReleaseInjectionFileId) {
@@ -506,6 +537,86 @@ export function createRollupDebugIdUploadHooks(
         const buildArtifacts = Object.keys(bundle).map((asset) => path.join(path.resolve(), asset));
         await upload(buildArtifacts);
       }
+    },
+  };
+}
+
+export function createRollupReactAnnotateHooks() {
+  logger.warn("rollup annotation plugin");
+  console.log("i am in the rollup annotation hooks");
+  // const virtualReleaseInjectionFileId = "\0sentry-release-injection-file";
+
+  return {
+    // resolveId(id: string) {
+    //   if (id === virtualReleaseInjectionFileId) {
+    //     return {
+    //       id: virtualReleaseInjectionFileId,
+    //       external: false,
+    //       moduleSideEffects: true,
+    //     };
+    //   } else {
+    //     return null;
+    //   }
+    // },
+
+    // load(id: string) {
+    //   if (id === virtualReleaseInjectionFileId) {
+    //     return injectionCode;
+    //   } else {
+    //     return null;
+    //   }
+    // },
+
+    // TODO: Copy the configs that the Vite React plugin uses to run babel plugins here:
+    // https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/src/index.ts#L244
+    // It seems like the problem is the way we are transforming the code via our plugin here.
+    // ESBuild cannot convert the transformed code into modules, we will have to do something a bit different
+
+    async transform(code: string, id: string) {
+      // id may contain query and hash which will trip up our file extension logic below
+      const idWithoutQueryAndHash = stripQueryAndHashFromPath(id);
+
+      if (idWithoutQueryAndHash.match(/\\node_modules\\|\/node_modules\//)) {
+        return null;
+      }
+
+      if (
+        ![".js", ".ts", ".jsx", ".tsx", ".mjs"].some((ending) =>
+          idWithoutQueryAndHash.endsWith(ending)
+        )
+      ) {
+        return null;
+      }
+
+      if (idWithoutQueryAndHash.endsWith("jsx") || idWithoutQueryAndHash.endsWith("tsx")) {
+        console.log(`Is React file: ${id}`);
+
+        try {
+          const result = await transformAsync(code, {
+            plugins: [[reactAnnotate]],
+            filename: id,
+            presets: [["@babel/react"], ["@babel/typescript"]],
+            parserOpts: {
+              sourceType: "module",
+              allowAwaitOutsideFunction: true,
+            },
+            generatorOpts: {
+              decoratorsBeforeExport: true,
+            },
+            sourceMaps: true,
+          });
+          console.dir(result?.code);
+
+          return {
+            code: result?.code,
+            map: result?.map,
+          };
+        } catch (e) {
+          console.dir(e);
+        }
+      }
+
+      return null;
     },
   };
 }
