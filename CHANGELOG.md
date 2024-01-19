@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.10.3
+
+- fix(core): Safely flush telemetry
+
 ## 2.10.2
 
 - deps(core): Bump `@sentry/cli` to `^2.22.3` (#451)
