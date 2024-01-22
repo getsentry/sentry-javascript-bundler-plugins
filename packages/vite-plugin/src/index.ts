@@ -25,15 +25,6 @@ function viteReactAnnotatePlugin(): UnpluginOptions {
   return {
     name: "sentry-vite-react-annotate-plugin",
     enforce: "pre" as const,
-    config() {
-      return {
-        esbuild: {
-          jsx: "automatic",
-          jsxImportSource: jsxImportDevRuntime,
-        },
-        optimizeDeps: { esbuildOptions: { jsx: "automatic" } },
-      };
-    },
     // @ts-ignore
     vite: createRollupReactAnnotateHooks(),
   };

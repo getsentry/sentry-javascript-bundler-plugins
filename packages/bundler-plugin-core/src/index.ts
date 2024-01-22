@@ -542,29 +542,7 @@ export function createRollupDebugIdUploadHooks(
 export function createRollupReactAnnotateHooks() {
   logger.warn("rollup annotation plugin");
   console.log("i am in the rollup annotation hooks");
-  // const virtualReleaseInjectionFileId = "\0sentry-release-injection-file";
-
   return {
-    // resolveId(id: string) {
-    //   if (id === virtualReleaseInjectionFileId) {
-    //     return {
-    //       id: virtualReleaseInjectionFileId,
-    //       external: false,
-    //       moduleSideEffects: true,
-    //     };
-    //   } else {
-    //     return null;
-    //   }
-    // },
-
-    // load(id: string) {
-    //   if (id === virtualReleaseInjectionFileId) {
-    //     return injectionCode;
-    //   } else {
-    //     return null;
-    //   }
-    // },
-
     // TODO: Copy the configs that the Vite React plugin uses to run babel plugins here:
     // https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/src/index.ts#L244
     // It seems like the problem is the way we are transforming the code via our plugin here.
@@ -593,10 +571,10 @@ export function createRollupReactAnnotateHooks() {
           const result = await transformAsync(code, {
             plugins: [[reactAnnotate]],
             filename: id,
-            presets: [["@babel/react"], ["@babel/typescript"]],
             parserOpts: {
               sourceType: "module",
               allowAwaitOutsideFunction: true,
+              plugins: ["jsx", "typescript"],
             },
             generatorOpts: {
               decoratorsBeforeExport: true,
