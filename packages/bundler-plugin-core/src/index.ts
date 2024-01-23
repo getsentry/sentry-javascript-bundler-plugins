@@ -328,26 +328,6 @@ export function sentryUnpluginFactory({
     plugins.push(reactAnnotatePlugin());
 
     return plugins;
-
-    // return {
-    //   ...plugins,
-    //   async transform(code: string, id: string) {
-    //     logger.warn(id);
-    //     const isReact = id.endsWith(".tsx") || id.endsWith(".jsx");
-    //     logger.warn(`Is this a React file? --- ${isReact ? "Yes" : "No"}`);
-
-    //     const plugins = [];
-
-    //     if (isReact) {
-    //       plugins.push(["@fullstory/babel-plugin-annotate-react"]);
-    //       const result = await transformAsync(code, { plugins, filename: id });
-    //       logger.warn(result?.code ?? "null");
-    //       return result?.code || null;
-    //     }
-
-    //     return code;
-    //   },
-    // };
   });
 }
 
@@ -540,14 +520,7 @@ export function createRollupDebugIdUploadHooks(
 }
 
 export function createRollupReactAnnotateHooks() {
-  logger.warn("rollup annotation plugin");
-  console.log("i am in the rollup annotation hooks");
   return {
-    // TODO: Copy the configs that the Vite React plugin uses to run babel plugins here:
-    // https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/src/index.ts#L244
-    // It seems like the problem is the way we are transforming the code via our plugin here.
-    // ESBuild cannot convert the transformed code into modules, we will have to do something a bit different
-
     async transform(code: string, id: string) {
       // id may contain query and hash which will trip up our file extension logic below
       const idWithoutQueryAndHash = stripQueryAndHashFromPath(id);
@@ -564,8 +537,8 @@ export function createRollupReactAnnotateHooks() {
       const parserPlugins = [];
       if (idWithoutQueryAndHash.endsWith(".jsx")) {
         parserPlugins.push("jsx");
-      }
-      if (idWithoutQueryAndHash.endsWith(".tsx")) {
+      } else if (idWithoutQueryAndHash.endsWith(".tsx")) {
+        parserPlugins.push("jsx");
         parserPlugins.push("typescript");
       }
 
@@ -577,7 +550,7 @@ export function createRollupReactAnnotateHooks() {
             sourceType: "module",
             allowAwaitOutsideFunction: true,
             // @ts-ignore Parser plugins will always be valid here
-            plugins: ["jsx", "typescript"],
+            plugins: parserPlugins,
           },
           generatorOpts: {
             decoratorsBeforeExport: true,
