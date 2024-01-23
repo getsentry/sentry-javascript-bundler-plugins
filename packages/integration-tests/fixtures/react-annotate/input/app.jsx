@@ -1,7 +1,5 @@
-import { ComponentA } from "./component-a";
-
-function falseRender(component) {
-  console.log(component);
+export function ComponentA() {
+  return <span>Component A</span>;
 }
 
-falseRender(<ComponentA />);
+window.A = ComponentA;
