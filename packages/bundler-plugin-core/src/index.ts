@@ -556,40 +556,44 @@ export function createRollupReactAnnotateHooks() {
         return null;
       }
 
-      if (
-        ![".js", ".ts", ".jsx", ".tsx", ".mjs"].some((ending) =>
-          idWithoutQueryAndHash.endsWith(ending)
-        )
-      ) {
+      // We will only apply this plugin on jsx and tsx files
+      if (![".jsx", ".tsx"].some((ending) => idWithoutQueryAndHash.endsWith(ending))) {
         return null;
       }
 
-      if (idWithoutQueryAndHash.endsWith("jsx") || idWithoutQueryAndHash.endsWith("tsx")) {
-        console.log(`Is React file: ${id}`);
+      const parserPlugins = [];
+      if (idWithoutQueryAndHash.endsWith(".jsx")) {
+        parserPlugins.push("jsx");
+      }
+      if (idWithoutQueryAndHash.endsWith(".tsx")) {
+        parserPlugins.push("typescript");
+      }
 
-        try {
-          const result = await transformAsync(code, {
-            plugins: [[reactAnnotate]],
-            filename: id,
-            parserOpts: {
-              sourceType: "module",
-              allowAwaitOutsideFunction: true,
-              plugins: ["jsx", "typescript"],
-            },
-            generatorOpts: {
-              decoratorsBeforeExport: true,
-            },
-            sourceMaps: true,
-          });
-          console.dir(result?.code);
+      try {
+        const result = await transformAsync(code, {
+          plugins: [[reactAnnotate]],
+          filename: id,
+          parserOpts: {
+            sourceType: "module",
+            allowAwaitOutsideFunction: true,
+            // @ts-ignore Parser plugins will always be valid here
+            plugins: ["jsx", "typescript"],
+          },
+          generatorOpts: {
+            decoratorsBeforeExport: true,
+          },
+          sourceMaps: true,
+        });
 
-          return {
-            code: result?.code,
-            map: result?.map,
-          };
-        } catch (e) {
-          console.dir(e);
-        }
+        console.dir(result?.code);
+
+        return {
+          code: result?.code,
+          map: result?.map,
+        };
+      } catch (e) {
+        logger.error(e);
+        console.dir(e);
       }
 
       return null;

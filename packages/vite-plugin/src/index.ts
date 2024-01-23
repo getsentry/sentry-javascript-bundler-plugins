@@ -19,12 +19,20 @@ function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-const jsxImportDevRuntime = `react/jsx-dev-runtime`;
-
 function viteReactAnnotatePlugin(): UnpluginOptions {
   return {
     name: "sentry-vite-react-annotate-plugin",
     enforce: "pre" as const,
+    config() {
+      return {
+        esbuild: {
+          jsx: "automatic",
+          // TODO: Allow this to be configured, as users could be using custom react libraries
+          jsxImportSource: "react",
+        },
+        optimizeDeps: { esbuildOptions: { jsx: "automatic" } },
+      };
+    },
     // @ts-ignore
     vite: createRollupReactAnnotateHooks(),
   };
