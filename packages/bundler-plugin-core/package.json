@@ -52,7 +52,7 @@
     "fix": "eslint ./src ./test --format stylish --fix"
   },
   "dependencies": {
-    "@babel/core": "^7.23.3",
+    "@babel/core": "7.18.5",
     "@fullstory/babel-plugin-annotate-react": "^2.3.0",
     "@sentry/cli": "^2.21.2",
     "@sentry/node": "^7.60.0",
