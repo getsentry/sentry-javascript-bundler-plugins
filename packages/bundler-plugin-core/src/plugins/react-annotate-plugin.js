@@ -1,3 +1,8 @@
+/**
+ * This plugin is vendored in from FullStory's Babel React Annotate plugin:
+ * https://github.com/fullstorydev/fullstory-babel-plugin-annotate-react/tree/master
+ */
+
 const webComponentName = "data-sentry-component";
 const webElementName = "data-sentry-element";
 const webSourceFileName = "data-sentry-source-file";
@@ -15,37 +20,6 @@ const knownIncompatiblePlugins = [
   "react-native-testfairy",
   // This module checks for unexpected property keys and throws an exception.
   "@react-navigation",
-  // The victory* modules use `dataComponent` and we get a collision.
-  "victory",
-  "victory-area",
-  "victory-axis",
-  "victory-bar",
-  "victory-box-plot",
-  "victory-brush-container",
-  "victory-brush-line",
-  "victory-candlestick",
-  "victory-canvas",
-  "victory-chart",
-  "victory-core",
-  "victory-create-container",
-  "victory-cursor-container",
-  "victory-errorbar",
-  "victory-group",
-  "victory-histogram",
-  "victory-legend",
-  "victory-line",
-  "victory-native",
-  "victory-pie",
-  "victory-polar-axis",
-  "victory-scatter",
-  "victory-selection-container",
-  "victory-shared-events",
-  "victory-stack",
-  "victory-tooltip",
-  "victory-vendor",
-  "victory-voronoi",
-  "victory-voronoi-container",
-  "victory-zoom-container",
 ];
 
 export default function reactAnnotate({ types: t }) {
