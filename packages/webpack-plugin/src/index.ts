@@ -4,6 +4,7 @@ import {
   sentryUnpluginFactory,
   stringToUUID,
   SentrySDKBuildFlags,
+  createReactAnnotateHooks,
 } from "@sentry/bundler-plugin-core";
 import * as path from "path";
 import { UnpluginOptions } from "unplugin";
@@ -43,6 +44,16 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
         })
       );
     },
+  };
+}
+
+function webpackReactAnnotatePlugin(): UnpluginOptions {
+  return {
+    name: "sentry-webpack-react-annotate-plugin",
+    ...createReactAnnotateHooks(),
+    enforce: "pre",
+    // @ts-ignore
+    transform: createReactAnnotateHooks().transform,
   };
 }
 
@@ -147,25 +158,6 @@ function webpackModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
           banner: injectionCode,
         })
       );
-    },
-  };
-}
-
-function webpackReactAnnotatePlugin(): UnpluginOptions {
-  return {
-    name: "sentry-webpack-react-annotate-plugin",
-    webpack(compiler) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore webpack version compatibility shenanigans
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const BannerPlugin =
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore webpack version compatibility shenanigans
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        compiler?.webpack?.BannerPlugin ||
-        webback4or5?.BannerPlugin ||
-        webback4or5?.default?.BannerPlugin;
-      compiler.options.plugins = compiler.options.plugins || [];
     },
   };
 }

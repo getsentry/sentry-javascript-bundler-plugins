@@ -7,7 +7,7 @@ import {
   createRollupDebugIdUploadHooks,
   SentrySDKBuildFlags,
   createRollupBundleSizeOptimizationHooks,
-  createRollupReactAnnotateHooks,
+  createReactAnnotateHooks,
 } from "@sentry/bundler-plugin-core";
 import type { UnpluginOptions } from "unplugin";
 
@@ -22,7 +22,7 @@ function rollupReactAnnotatePlugin(): UnpluginOptions {
   return {
     name: "sentry-rollup-react-annotate-plugin",
     // @ts-ignore
-    rollup: createRollupReactAnnotateHooks(),
+    rollup: createReactAnnotateHooks(),
   };
 }
 

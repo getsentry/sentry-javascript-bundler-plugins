@@ -7,7 +7,7 @@ import {
   createRollupDebugIdUploadHooks,
   SentrySDKBuildFlags,
   createRollupBundleSizeOptimizationHooks,
-  createRollupReactAnnotateHooks,
+  createReactAnnotateHooks,
 } from "@sentry/bundler-plugin-core";
 import { UnpluginOptions } from "unplugin";
 
@@ -34,7 +34,7 @@ function viteReactAnnotatePlugin(): UnpluginOptions {
       };
     },
     // @ts-ignore
-    vite: createRollupReactAnnotateHooks(),
+    vite: createReactAnnotateHooks(),
   };
 }
 
