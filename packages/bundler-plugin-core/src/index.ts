@@ -31,7 +31,7 @@ import reactAnnotate from "./plugins/react-annotate-plugin";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
-  reactAnnotatePlugin: () => UnpluginOptions;
+  reactAnnotatePlugin?: () => UnpluginOptions;
   moduleMetadataInjectionPlugin?: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
@@ -325,7 +325,9 @@ export function sentryUnpluginFactory({
       );
     }
 
-    plugins.push(reactAnnotatePlugin());
+    if (reactAnnotatePlugin) {
+      plugins.push(reactAnnotatePlugin());
+    }
 
     return plugins;
   });

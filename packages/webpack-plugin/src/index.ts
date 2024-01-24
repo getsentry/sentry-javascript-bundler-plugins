@@ -164,7 +164,6 @@ function webpackModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
 
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: webpackReleaseInjectionPlugin,
-  reactAnnotatePlugin: webpackReactAnnotatePlugin,
   moduleMetadataInjectionPlugin: webpackModuleMetadataInjectionPlugin,
   debugIdInjectionPlugin: webpackDebugIdInjectionPlugin,
   debugIdUploadPlugin: webpackDebugIdUploadPlugin,
