@@ -25,7 +25,6 @@ export function createCjsBundles(
       build: {
         outDir: path.join(outFolder, "vite"),
         rollupOptions: {
-          external: "react/jsx-runtime",
           input: entrypoints,
           output: {
             format: "cjs",

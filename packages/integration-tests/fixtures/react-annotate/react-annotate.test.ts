@@ -1,14 +1,9 @@
-import fs from "fs";
+import childProcess from "child_process";
 import path from "path";
 
 function checkBundle(bundlePath: string): void {
-  const output = fs.readFileSync(bundlePath, "utf-8");
-
-  expect(output).toMatch('"data-sentry-component":"App"');
-  expect(output).toMatch('"data-sentry-source-file":"app.jsx"');
-
-  expect(output).toMatch('"data-sentry-component":"ComponentA"');
-  expect(output).toMatch('"data-sentry-source-file":"component-a.jsx"');
+  const processOutput = childProcess.execSync(`node ${bundlePath}`, { encoding: "utf-8" });
+  expect(processOutput).toMatchSnapshot();
 }
 
 test.todo("esbuild bundle");
@@ -16,7 +11,7 @@ test.todo("esbuild bundle");
 test.todo("rollup bundle");
 
 test("vite bundle", () => {
-  expect.assertions(4);
+  expect.assertions(1);
   checkBundle(path.join(__dirname, "./out/vite/index.js"));
 });
 

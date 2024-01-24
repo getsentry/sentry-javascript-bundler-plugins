@@ -1,7 +1,14 @@
+import { renderToString } from "react-dom/server";
 import { ComponentA } from "./component-a";
 
 export function App() {
   return <ComponentA />;
 }
 
-global.App = App;
+console.log(
+  renderToString(
+    <div>
+      <App />
+    </div>
+  )
+);
