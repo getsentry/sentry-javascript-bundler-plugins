@@ -4,6 +4,9 @@ import * as rollup from "rollup";
 import { default as webpack4 } from "webpack4";
 import { webpack as webpack5 } from "webpack5";
 import * as esbuild from "esbuild";
+import { babel as babelPlugin } from "@rollup/plugin-babel";
+import resolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
 import { Options } from "@sentry/bundler-plugin-core";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
@@ -39,7 +42,18 @@ export function createCjsBundles(
     void rollup
       .rollup({
         input: entrypoints,
-        plugins: [sentryRollupPlugin(sentryUnpluginOptions)],
+        plugins: [
+          resolve({
+            extensions: [".js", ".jsx", ".ts", ".tsx", ".json"],
+          }),
+          commonjs(),
+          babelPlugin({
+            babelHelpers: "bundled",
+            presets: ["@babel/preset-react"],
+            extensions: [".js", ".jsx", ".ts", ".tsx"],
+          }),
+          sentryRollupPlugin(sentryUnpluginOptions),
+        ],
       })
       .then((bundle) =>
         bundle.write({

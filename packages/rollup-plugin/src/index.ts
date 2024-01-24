@@ -59,6 +59,7 @@ function rollupBundleSizeOptimizationsPlugin(
 }
 
 const sentryUnplugin = sentryUnpluginFactory({
+  reactAnnotatePlugin: rollupReactAnnotatePlugin,
   releaseInjectionPlugin: rollupReleaseInjectionPlugin,
   debugIdInjectionPlugin: rollupDebugIdInjectionPlugin,
   moduleMetadataInjectionPlugin: rollupModuleMetadataInjectionPlugin,

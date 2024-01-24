@@ -12,7 +12,6 @@ createCjsBundles(
   },
   // TODO: Webpack 4
   // TODO: Webpack 5
-  // TODO: Rollup
   // TODO: Esbuild
-  ["vite"]
+  ["rollup", "vite"]
 );

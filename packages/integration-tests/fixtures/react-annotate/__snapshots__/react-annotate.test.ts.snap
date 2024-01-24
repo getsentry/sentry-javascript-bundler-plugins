@@ -1,5 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`rollup bundle 1`] = `
+"<div><span data-sentry-component=\\"ComponentA\\" data-sentry-source-file=\\"component-a.jsx\\">Component A</span></div>
+"
+`;
+
 exports[`vite bundle 1`] = `
 "<div><span data-sentry-component=\\"ComponentA\\" data-sentry-source-file=\\"component-a.jsx\\">Component A</span></div>
 "

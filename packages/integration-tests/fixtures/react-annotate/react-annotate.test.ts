@@ -8,7 +8,10 @@ function checkBundle(bundlePath: string): void {
 
 test.todo("esbuild bundle");
 
-test.todo("rollup bundle");
+test("rollup bundle", () => {
+  expect.assertions(1);
+  checkBundle(path.join(__dirname, "./out/vite/index.js"));
+});
 
 test("vite bundle", () => {
   expect.assertions(1);
