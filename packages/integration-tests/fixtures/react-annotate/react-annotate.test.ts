@@ -1,15 +1,11 @@
-import childProcess from "child_process";
+import fs from "fs";
 import path from "path";
 
-/**
- * Runs a node file in a seprate process.
- *
- * @param bundlePath Path of node file to run
- * @returns Stdout of the process
- */
 function checkBundle(bundlePath: string): void {
-  const processOutput = childProcess.execSync(`node ${bundlePath}`, { encoding: "utf-8" });
-  expect(processOutput).toBe("<div>");
+  const output = fs.readFileSync(bundlePath, "utf-8");
+
+  expect(output).toMatch('"data-sentry-component":"ComponentA"');
+  expect(output).toMatch('"data-sentry-source-file":"app.jsx"');
 }
 
 test.todo("esbuild bundle");
@@ -17,7 +13,7 @@ test.todo("esbuild bundle");
 test.todo("rollup bundle");
 
 test("vite bundle", () => {
-  expect.assertions(1);
+  expect.assertions(2);
   checkBundle(path.join(__dirname, "./out/vite/index.js"));
 });
 
