@@ -1,5 +1,7 @@
-export function ComponentA() {
-  return <span>Component A</span>;
+import { ComponentA } from "./component-a";
+
+export function App() {
+  return <ComponentA />;
 }
 
-window.A = ComponentA;
+global.App = App;
