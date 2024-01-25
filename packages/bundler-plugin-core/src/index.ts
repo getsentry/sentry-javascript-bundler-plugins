@@ -31,7 +31,7 @@ import reactAnnotate from "./plugins/react-annotate-plugin";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
-  reactAnnotatePlugin?: () => UnpluginOptions;
+  reactAnnotatePlugin: () => UnpluginOptions;
   moduleMetadataInjectionPlugin?: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
@@ -325,7 +325,8 @@ export function sentryUnpluginFactory({
       );
     }
 
-    if (reactAnnotatePlugin) {
+    // TODO: When reactAnnotate is added to all bundlers, do not need the second part of this condition
+    if (options.reactAnnotate && reactAnnotatePlugin) {
       plugins.push(reactAnnotatePlugin());
     }
 

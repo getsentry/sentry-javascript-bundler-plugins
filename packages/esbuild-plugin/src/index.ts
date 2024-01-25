@@ -258,6 +258,7 @@ function esbuildReactAnnotatePlugin(): UnpluginOptions {
   };
 }
 
+// @ts-ignore TODO: Create an esbuild plugin for React annotate so we dont have to ignore this error
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: esbuildReleaseInjectionPlugin,
   debugIdInjectionPlugin: esbuildDebugIdInjectionPlugin,
