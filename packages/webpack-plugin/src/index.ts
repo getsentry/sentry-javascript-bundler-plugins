@@ -164,11 +164,11 @@ function webpackModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
 
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: webpackReleaseInjectionPlugin,
+  reactAnnotatePlugin: webpackReactAnnotatePlugin,
   moduleMetadataInjectionPlugin: webpackModuleMetadataInjectionPlugin,
   debugIdInjectionPlugin: webpackDebugIdInjectionPlugin,
   debugIdUploadPlugin: webpackDebugIdUploadPlugin,
   bundleSizeOptimizationsPlugin: webpackBundleSizeOptimizationsPlugin,
-  reactAnnotatePlugin: webpackReactAnnotatePlugin,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
