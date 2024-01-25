@@ -51,13 +51,9 @@ function webpackReactAnnotatePlugin(): UnpluginOptions {
   return {
     name: "sentry-webpack-react-annotate-plugin",
     enforce: "pre",
-    loadInclude(id) {
-      console.log(id);
-      if (id.endsWith(".tsx") || id.endsWith(".jsx")) {
-        return true;
-      }
-
-      return false;
+    // Webpack needs this hook for loader logic, so the plugin is not run on unsupported file types
+    transformInclude(id) {
+      return id.endsWith(".tsx") || id.endsWith(".jsx");
     },
     // @ts-ignore
     transform: createReactAnnotateHooks().transform,

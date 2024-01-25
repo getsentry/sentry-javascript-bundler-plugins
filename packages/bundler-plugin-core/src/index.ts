@@ -558,7 +558,7 @@ export function createReactAnnotateHooks() {
           sourceMaps: true,
         });
 
-        console.dir(result?.code);
+        // console.dir(result?.code);
 
         return {
           code: result?.code,
