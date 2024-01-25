@@ -31,7 +31,7 @@ import reactAnnotate from "./plugins/react-annotate-plugin";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
-  reactAnnotatePlugin: () => UnpluginOptions;
+  reactAnnotatePlugin: (importSource: string, excludedComponents: string[]) => UnpluginOptions;
   moduleMetadataInjectionPlugin?: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
@@ -325,9 +325,25 @@ export function sentryUnpluginFactory({
       );
     }
 
-    // TODO: When reactAnnotate is added to all bundlers, do not need the second part of this condition
-    if (options.reactAnnotate && reactAnnotatePlugin) {
-      plugins.push(reactAnnotatePlugin());
+    if (!options.reactAnnotate) {
+      logger.warn(
+        "No options provided for the react annotate plugin. Please set `reactAnnotate.enabled` to `true` if you would like to have your React components automatically annotated at build-time."
+      );
+    } else if (!options.reactAnnotate.enabled) {
+      logger.info(
+        "The react annotate plugin is currently disabled. Skipping react component name annotations."
+      );
+    } else {
+      {
+        // TODO: When reactAnnotate is added to esbuild, do not need this conditional expression
+        reactAnnotatePlugin &&
+          plugins.push(
+            reactAnnotatePlugin(
+              options.reactAnnotate.importSource,
+              options.reactAnnotate.excludedComponents
+            )
+          );
+      }
     }
 
     return plugins;

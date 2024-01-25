@@ -31,6 +31,7 @@ export function normalizeUserOptions(userOptions: UserOptions) {
     bundleSizeOptimizations: userOptions.bundleSizeOptimizations,
     reactAnnotate: userOptions.reactAnnotate
       ? {
+          enabled: userOptions.reactAnnotate.enabled ?? false,
           importSource: userOptions.reactAnnotate.importSource ?? "react",
           excludedComponents: userOptions.reactAnnotate.excludedComponents ?? [],
         }

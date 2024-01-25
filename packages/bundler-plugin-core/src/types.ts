@@ -284,6 +284,11 @@ export interface Options {
    */
   reactAnnotate?: {
     /**
+     * Whether the react annotate plugin should be enabled or not
+     */
+    enabled?: boolean;
+
+    /**
      * The name of the library that React is being imported from.
      * Defaults to `'react'`.
      * Should be changed only if you are using React from a custom library.
