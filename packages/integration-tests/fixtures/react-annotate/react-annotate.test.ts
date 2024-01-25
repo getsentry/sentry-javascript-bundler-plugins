@@ -7,6 +7,8 @@ function checkBundle(bundlePath: string): void {
   expect(processOutput).toMatchSnapshot();
 }
 
+test.todo("esbuild bundle");
+
 test("rollup bundle", () => {
   expect.assertions(1);
   checkBundle(path.join(__dirname, "./out/vite/index.js"));
@@ -26,5 +28,3 @@ test("webpack 5 bundle", () => {
   expect.assertions(1);
   checkBundle(path.join(__dirname, "./out/webpack5/index.js"));
 });
-
-test.todo("esbuild bundle");
