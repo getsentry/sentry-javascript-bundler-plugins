@@ -46,13 +46,13 @@ export function createCjsBundles(
         input: entrypoints,
         plugins: [
           resolve({
-            extensions: [".js", ".jsx", ".ts", ".tsx", ".json"],
+            extensions: RESOLVABLE_EXTENSIONS,
           }),
           commonjs(),
           babelPlugin({
             babelHelpers: "bundled",
             presets: ["@babel/preset-react"],
-            extensions: [".js", ".jsx", ".ts", ".tsx"],
+            extensions: RESOLVABLE_EXTENSIONS,
           }),
           sentryRollupPlugin(sentryUnpluginOptions),
         ],
@@ -88,7 +88,7 @@ export function createCjsBundles(
           minimize: false,
         },
         resolve: {
-          extensions: [".js", ".jsx", ".ts", ".tsx"],
+          extensions: RESOLVABLE_EXTENSIONS,
         },
         output: {
           path: path.join(outFolder, "webpack4"),
@@ -97,7 +97,7 @@ export function createCjsBundles(
         module: {
           rules: [
             {
-              test: /\.?(j|t)sx$/,
+              test: RESOLVABLE_JSX_EXTENSIONS_REGEX,
               exclude: /node_modules/,
               use: {
                 loader: "babel-loader",
@@ -131,12 +131,12 @@ export function createCjsBundles(
         },
         mode: "production",
         resolve: {
-          extensions: [".js", ".jsx", ".ts", ".tsx"],
+          extensions: RESOLVABLE_EXTENSIONS,
         },
         module: {
           rules: [
             {
-              test: /\.?(j|t)sx$/,
+              test: RESOLVABLE_JSX_EXTENSIONS_REGEX,
               exclude: /node_modules/,
               use: {
                 loader: "babel-loader",
@@ -153,6 +153,9 @@ export function createCjsBundles(
     );
   }
 }
+
+const RESOLVABLE_EXTENSIONS = [".js", ".jsx", ".ts", ".tsx"];
+const RESOLVABLE_JSX_EXTENSIONS_REGEX = /\.?(j|t)sx$/;
 
 function handleWebpack(err: Error | undefined, stats: Webpack4Stats | Webpack5Stats | undefined) {
   if (err) {
