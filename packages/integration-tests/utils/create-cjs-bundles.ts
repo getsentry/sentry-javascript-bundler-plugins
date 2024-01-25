@@ -111,9 +111,20 @@ export function createCjsBundles(
         mode: "production",
         plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
       },
-      (err) => {
+      (err, stats) => {
         if (err) {
           throw err;
+        }
+
+        const info = stats?.toJson();
+        if (!stats || !info) return;
+
+        if (stats.hasErrors()) {
+          console.error(info.errors);
+        }
+
+        if (stats.hasWarnings()) {
+          console.warn(info.warnings);
         }
       }
     );
