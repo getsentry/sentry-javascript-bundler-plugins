@@ -50,8 +50,15 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
 function webpackReactAnnotatePlugin(): UnpluginOptions {
   return {
     name: "sentry-webpack-react-annotate-plugin",
-    ...createReactAnnotateHooks(),
     enforce: "pre",
+    loadInclude(id) {
+      console.log(id);
+      if (id.endsWith(".tsx") || id.endsWith(".jsx")) {
+        return true;
+      }
+
+      return false;
+    },
     // @ts-ignore
     transform: createReactAnnotateHooks().transform,
   };
