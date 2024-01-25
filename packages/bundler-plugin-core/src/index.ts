@@ -538,7 +538,7 @@ export function createRollupDebugIdUploadHooks(
   };
 }
 
-export function createReactAnnotateHooks() {
+export function createReactAnnotateHooks(importSource: string, excludedComponents: string[]) {
   return {
     async transform(code: string, id: string) {
       // id may contain query and hash which will trip up our file extension logic below

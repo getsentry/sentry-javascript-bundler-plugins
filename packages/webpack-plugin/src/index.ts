@@ -47,7 +47,10 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-function webpackReactAnnotatePlugin(): UnpluginOptions {
+function webpackReactAnnotatePlugin(
+  importSource: string,
+  excludedComponents: string[]
+): UnpluginOptions {
   return {
     name: "sentry-webpack-react-annotate-plugin",
     enforce: "pre",
@@ -56,7 +59,7 @@ function webpackReactAnnotatePlugin(): UnpluginOptions {
       return id.endsWith(".tsx") || id.endsWith(".jsx");
     },
     // @ts-ignore
-    transform: createReactAnnotateHooks().transform,
+    transform: createReactAnnotateHooks(importSource, excludedComponents).transform,
   };
 }
 

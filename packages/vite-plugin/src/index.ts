@@ -19,7 +19,10 @@ function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-function viteReactAnnotatePlugin(): UnpluginOptions {
+function viteReactAnnotatePlugin(
+  importSource: string,
+  excludedComponents: string[]
+): UnpluginOptions {
   return {
     name: "sentry-vite-react-annotate-plugin",
     enforce: "pre" as const,
@@ -34,7 +37,7 @@ function viteReactAnnotatePlugin(): UnpluginOptions {
       };
     },
     // @ts-ignore
-    vite: createReactAnnotateHooks(),
+    vite: createReactAnnotateHooks(importSource, excludedComponents),
   };
 }
 
