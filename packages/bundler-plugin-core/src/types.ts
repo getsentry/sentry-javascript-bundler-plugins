@@ -251,6 +251,8 @@ export interface Options {
      * If set to true, the plugin will try to tree-shake Session Replay's Canvas recording functionality out.
      * You can safely do this when you do not want to capture any Canvas activity via Replay.
      * Note that the success of this depends on tree shaking generally being enabled in your build.
+     *
+     * @deprecated Versions v7.78.0 and later of the Sentry JavaScript SDKs do not include canvas support by default, making this option redundant.
      */
     excludeReplayCanvas?: boolean;
 

@@ -11,6 +11,8 @@ This document serves as a migration guide, documenting all breaking changes betw
 - Removed `customHeader` option in favor of `headers` option which allows for multiple headers to be attached to outgoing requests.
 - The `cliBinaryExists` function was renamed to `sentryCliBinaryExists`
 - Removed the `configFile` option. Options should now be set explicitly or via environment variables.
+  This also means that `.sentryclirc` files will no longer work as a means of configuration.
+  Please manually pass in options, or use a configuration file ([Webpack plugin docs](https://www.npmjs.com/package/@sentry/webpack-plugin#configuration-file), [Vite plugin docs](https://www.npmjs.com/package/@sentry/vite-plugin#configuration-file), [esbuild plugin docs](https://www.npmjs.com/package/@sentry/esbuild-plugin#configuration-file), [Rollup plugin docs](https://www.npmjs.com/package/@sentry/rollup-plugin#configuration-file)).
 - The minimum supported Node.js version is now 14 and newer.
 - Removed `dryRun` option.
 

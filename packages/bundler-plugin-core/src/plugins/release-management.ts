@@ -2,6 +2,7 @@ import SentryCli, { SentryCliCommitsOptions, SentryCliNewDeployOptions } from "@
 import { Hub, NodeClient } from "@sentry/node";
 import { UnpluginOptions } from "unplugin";
 import { Logger } from "../sentry/logger";
+import { safeFlushTelemetry } from "../sentry/telemetry";
 import { IncludeEntry } from "../types";
 import { arrayify } from "../utils";
 
@@ -93,7 +94,7 @@ export function releaseManagementPlugin({
         }
       } catch (e) {
         sentryHub.captureException('Error in "releaseManagementPlugin" writeBundle hook');
-        await sentryClient.flush();
+        await safeFlushTelemetry(sentryClient);
         handleRecoverableError(e);
       }
     },

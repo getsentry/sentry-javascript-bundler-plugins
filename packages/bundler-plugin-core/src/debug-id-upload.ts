@@ -8,6 +8,7 @@ import { promisify } from "util";
 import { Hub, NodeClient } from "@sentry/node";
 import SentryCli from "@sentry/cli";
 import { dynamicSamplingContextToSentryBaggageHeader } from "@sentry/utils";
+import { safeFlushTelemetry } from "./sentry/telemetry";
 
 interface RewriteSourcesHook {
   (source: string, map: any): string;
@@ -224,7 +225,7 @@ export function createDebugIdUploadFunction({
         cleanupSpan.finish();
       }
       artifactBundleUploadTransaction.finish();
-      await sentryClient.flush();
+      await safeFlushTelemetry(sentryClient);
     }
   };
 }
