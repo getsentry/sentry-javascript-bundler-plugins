@@ -7,6 +7,8 @@ import * as esbuild from "esbuild";
 import { babel as babelPlugin } from "@rollup/plugin-babel";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
+import type { Stats as Webpack5Stats } from "webpack5";
+import type { Stats as Webpack4Stats } from "webpack4";
 import { Options } from "@sentry/bundler-plugin-core";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
@@ -109,22 +111,7 @@ export function createCjsBundles(
         target: "node", // needed for webpack 4 so we can access node api
         plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
       },
-      (err, stats) => {
-        if (err) {
-          throw err;
-        }
-
-        const info = stats?.toJson();
-        if (!stats || !info) return;
-
-        if (stats.hasErrors()) {
-          console.error(info.errors);
-        }
-
-        if (stats.hasWarnings()) {
-          console.warn(info.warnings);
-        }
-      }
+      handleWebpack
     );
   }
 
@@ -162,22 +149,24 @@ export function createCjsBundles(
         },
         plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
       },
-      (err, stats) => {
-        if (err) {
-          throw err;
-        }
-
-        const info = stats?.toJson();
-        if (!stats || !info) return;
-
-        if (stats.hasErrors()) {
-          console.error(info.errors);
-        }
-
-        if (stats.hasWarnings()) {
-          console.warn(info.warnings);
-        }
-      }
+      handleWebpack
     );
+  }
+}
+
+function handleWebpack(err: Error | undefined, stats: Webpack4Stats | Webpack5Stats | undefined) {
+  if (err) {
+    throw err;
+  }
+
+  const info = stats?.toJson();
+  if (!stats || !info) return;
+
+  if (stats.hasErrors()) {
+    console.error(info.errors);
+  }
+
+  if (stats.hasWarnings()) {
+    console.warn(info.warnings);
   }
 }
