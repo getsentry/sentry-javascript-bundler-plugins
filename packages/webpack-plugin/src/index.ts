@@ -168,6 +168,7 @@ const sentryUnplugin = sentryUnpluginFactory({
   debugIdInjectionPlugin: webpackDebugIdInjectionPlugin,
   debugIdUploadPlugin: webpackDebugIdUploadPlugin,
   bundleSizeOptimizationsPlugin: webpackBundleSizeOptimizationsPlugin,
+  reactAnnotatePlugin: webpackReactAnnotatePlugin,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -9,3 +9,8 @@ exports[`vite bundle 1`] = `
 "<div><span data-sentry-component=\\"ComponentA\\" data-sentry-source-file=\\"component-a.jsx\\">Component A</span></div>
 "
 `;
+
+exports[`webpack 5 bundle 1`] = `
+"<div><span data-sentry-component=\\"ComponentA\\" data-sentry-source-file=\\"component-a.jsx\\">Component A</span></div>
+"
+`;

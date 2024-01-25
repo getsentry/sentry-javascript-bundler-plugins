@@ -20,4 +20,7 @@ test("vite bundle", () => {
 
 test.todo("webpack 4 bundle if node is < 18");
 
-test.todo("webpack 5 bundle");
+test("webpack 5 bundle", () => {
+  expect.assertions(1);
+  checkBundle(path.join(__dirname, "./out/webpack5/index.js"));
+});
