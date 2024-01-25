@@ -260,7 +260,6 @@ function esbuildReactAnnotatePlugin(): UnpluginOptions {
 
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: esbuildReleaseInjectionPlugin,
-  reactAnnotatePlugin: esbuildReactAnnotatePlugin,
   debugIdInjectionPlugin: esbuildDebugIdInjectionPlugin,
   moduleMetadataInjectionPlugin: esbuildModuleMetadataInjectionPlugin,
   debugIdUploadPlugin: esbuildDebugIdUploadPlugin,
