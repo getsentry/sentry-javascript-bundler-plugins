@@ -82,9 +82,29 @@ export function createCjsBundles(
         mode: "production",
         entry: entrypoints,
         cache: false,
+        optimization: {
+          minimize: false,
+        },
+        resolve: {
+          extensions: [".js", ".jsx", ".ts", ".tsx"],
+        },
         output: {
           path: path.join(outFolder, "webpack4"),
           libraryTarget: "commonjs",
+        },
+        module: {
+          rules: [
+            {
+              test: /\.?(j|t)sx$/,
+              exclude: /node_modules/,
+              use: {
+                loader: "babel-loader",
+                options: {
+                  presets: [["@babel/preset-react", { runtime: "automatic" }]],
+                },
+              },
+            },
+          ],
         },
         target: "node", // needed for webpack 4 so we can access node api
         plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],

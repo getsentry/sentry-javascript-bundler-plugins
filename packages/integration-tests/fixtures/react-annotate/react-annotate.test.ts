@@ -1,12 +1,11 @@
 import childProcess from "child_process";
 import path from "path";
+import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 function checkBundle(bundlePath: string): void {
   const processOutput = childProcess.execSync(`node ${bundlePath}`, { encoding: "utf-8" });
   expect(processOutput).toMatchSnapshot();
 }
-
-test.todo("esbuild bundle");
 
 test("rollup bundle", () => {
   expect.assertions(1);
@@ -18,9 +17,14 @@ test("vite bundle", () => {
   checkBundle(path.join(__dirname, "./out/vite/index.js"));
 });
 
-test.todo("webpack 4 bundle if node is < 18");
+testIfNodeMajorVersionIsLessThan18("webpack 4 bundle if node is < 18", () => {
+  expect.assertions(1);
+  checkBundle(path.join(__dirname, "./out/webpack4/index.js"));
+});
 
 test("webpack 5 bundle", () => {
   expect.assertions(1);
   checkBundle(path.join(__dirname, "./out/webpack5/index.js"));
 });
+
+test.todo("esbuild bundle");
