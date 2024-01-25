@@ -558,7 +558,7 @@ export function createReactAnnotateHooks(importSource: string, excludedComponent
 
       try {
         const result = await transformAsync(code, {
-          plugins: [[reactAnnotate]],
+          plugins: [[reactAnnotate, { excludedComponents }]],
           filename: id,
           parserOpts: {
             sourceType: "module",
@@ -571,8 +571,6 @@ export function createReactAnnotateHooks(importSource: string, excludedComponent
           },
           sourceMaps: true,
         });
-
-        // console.dir(result?.code);
 
         return {
           code: result?.code,

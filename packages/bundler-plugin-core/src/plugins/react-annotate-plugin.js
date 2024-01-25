@@ -13,7 +13,7 @@ const nativeSourceFileName = "dataSentrySourceFile";
 const fsTagName = "fsTagName";
 
 const annotateFragmentsOptionName = "annotate-fragments";
-const ignoreComponentsOptionName = "ignoreComponents";
+const excludedComponentsOptionName = "excludedComponents";
 
 const knownIncompatiblePlugins = [
   // This module might be causing an issue preventing clicks. For safety, we won't run on this module.
@@ -25,7 +25,7 @@ const knownIncompatiblePlugins = [
 export default function reactAnnotate({ types: t }) {
   return {
     pre() {
-      this.ignoreComponentsFromOption = this.opts[ignoreComponentsOptionName] || [];
+      this.excludedComponents = this.opts[excludedComponentsOptionName] || [];
       if (this.opts.setFSTagName && !this.opts.native) {
         throw new Error(
           "`setFSTagName: true` is invalid unless `native: true` is also set in the configuration for @fullstory/babel-plugin-annotate-react"
@@ -43,7 +43,7 @@ export default function reactAnnotate({ types: t }) {
           path.node.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          this.ignoreComponentsFromOption
+          this.excludedComponents
         );
       },
       ArrowFunctionExpression(path, state) {
@@ -56,7 +56,7 @@ export default function reactAnnotate({ types: t }) {
           path.parent.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          this.ignoreComponentsFromOption
+          this.excludedComponents
         );
       },
       ClassDeclaration(path, state) {
@@ -69,7 +69,7 @@ export default function reactAnnotate({ types: t }) {
         if (!render || !render.traverse) return;
         if (isKnownIncompatiblePluginFromState(state)) return;
 
-        const ignoreComponentsFromOption = this.ignoreComponentsFromOption;
+        const excludedComponents = this.excludedComponents;
 
         render.traverse({
           ReturnStatement(returnStatement) {
@@ -83,7 +83,7 @@ export default function reactAnnotate({ types: t }) {
               name.node && name.node.name,
               sourceFileNameFromState(state),
               attributeNamesFromState(state),
-              ignoreComponentsFromOption
+              excludedComponents
             );
           },
         });
@@ -178,7 +178,7 @@ function applyAttributes(
   componentName,
   sourceFileName,
   attributeNames,
-  ignoreComponentsFromOption
+  excludedComponents
 ) {
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
   if (
@@ -194,8 +194,8 @@ function applyAttributes(
   const elementName = openingElement.node.name.name || "unknown";
 
   const ignoredComponentFromOptions =
-    ignoreComponentsFromOption &&
-    !!ignoreComponentsFromOption.find(
+    excludedComponents &&
+    !!excludedComponents.find(
       (component) =>
         matchesIgnoreRule(component[0], sourceFileName) &&
         matchesIgnoreRule(component[1], componentName) &&
@@ -250,7 +250,7 @@ function processJSX(
   componentName,
   sourceFileName,
   attributeNames,
-  ignoreComponentsFromOption
+  excludedComponents
 ) {
   if (!jsxNode) {
     return;
@@ -265,7 +265,7 @@ function processJSX(
     componentName,
     sourceFileName,
     attributeNames,
-    ignoreComponentsFromOption
+    excludedComponents
   );
 
   const children = jsxNode.get("children");
@@ -287,7 +287,7 @@ function processJSX(
           componentName,
           sourceFileName,
           attributeNames,
-          ignoreComponentsFromOption
+          excludedComponents
         );
       } else {
         processJSX(
@@ -297,7 +297,7 @@ function processJSX(
           null,
           sourceFileName,
           attributeNames,
-          ignoreComponentsFromOption
+          excludedComponents
         );
       }
     }
@@ -311,7 +311,7 @@ function functionBodyPushAttributes(
   componentName,
   sourceFileName,
   attributeNames,
-  ignoreComponentsFromOption
+  excludedComponents
 ) {
   let jsxNode = null;
   const functionBody = path.get("body").get("body");
@@ -348,7 +348,7 @@ function functionBodyPushAttributes(
     componentName,
     sourceFileName,
     attributeNames,
-    ignoreComponentsFromOption
+    excludedComponents
   );
 }
 

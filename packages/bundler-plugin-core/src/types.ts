@@ -292,10 +292,13 @@ export interface Options {
      * The name of the library that React is being imported from.
      * Defaults to `'react'`.
      * Should be changed only if you are using React from a custom library.
+     * This option is currently only supported by the Vite plugin
      */
     importSource?: string;
 
     /**
+     * **NOTE: This option is not currently functional but will be supported in a later release!**
+     *
      * A list of component names that you do not want the annotate plugin to apply to.
      * I.e. if you want to prevent a component named `MyComponent` from being annotated, you would pass this in as `['MyComponent']`.
      */

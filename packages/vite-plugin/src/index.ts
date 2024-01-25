@@ -31,7 +31,7 @@ function viteReactAnnotatePlugin(
         esbuild: {
           jsx: "automatic",
           // TODO: Allow this to be configured, as users could be using custom react libraries
-          jsxImportSource: "react",
+          jsxImportSource: importSource,
         },
         optimizeDeps: { esbuildOptions: { jsx: "automatic" } },
       };
