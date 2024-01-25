@@ -10,7 +10,7 @@ import { releaseManagementPlugin } from "./plugins/release-management";
 import { telemetryPlugin } from "./plugins/telemetry";
 import { createLogger } from "./sentry/logger";
 import { allowedToSendTelemetry, createSentryInstance } from "./sentry/telemetry";
-import { Options, ReactAnnotatePluginOptions, SentrySDKBuildFlags } from "./types";
+import { Options, SentrySDKBuildFlags } from "./types";
 import {
   generateGlobalInjectorCode,
   generateModuleMetadataInjectorCode,
@@ -31,7 +31,7 @@ import reactAnnotate from "./plugins/react-annotate-plugin";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
-  reactAnnotatePlugin: (options: ReactAnnotatePluginOptions) => UnpluginOptions;
+  reactAnnotatePlugin: (importSource: string, excludedComponents: string[]) => UnpluginOptions;
   moduleMetadataInjectionPlugin?: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
@@ -337,8 +337,7 @@ export function sentryUnpluginFactory({
       {
         const { importSource, excludedComponents } = options.reactAnnotate;
         // TODO: When reactAnnotate is added to esbuild, do not need this conditional expression
-        reactAnnotatePlugin &&
-          plugins.push(reactAnnotatePlugin({ importSource, excludedComponents }));
+        reactAnnotatePlugin && plugins.push(reactAnnotatePlugin(importSource, excludedComponents));
       }
     }
 
@@ -534,9 +533,7 @@ export function createRollupDebugIdUploadHooks(
   };
 }
 
-export function createReactAnnotateHooks(options: ReactAnnotatePluginOptions) {
-  const { importSource, excludedComponents } = options;
-
+export function createReactAnnotateHooks(importSource: string, excludedComponents: string[]) {
   return {
     async transform(code: string, id: string) {
       // id may contain query and hash which will trip up our file extension logic below

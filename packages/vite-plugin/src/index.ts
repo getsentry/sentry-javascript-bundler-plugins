@@ -1,4 +1,3 @@
-import { ReactAnnotatePluginOptions } from "./../../bundler-plugin-core/src/types";
 import {
   sentryUnpluginFactory,
   Options,
@@ -20,7 +19,10 @@ function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-function viteReactAnnotatePlugin(options: ReactAnnotatePluginOptions): UnpluginOptions {
+function viteReactAnnotatePlugin(
+  importSource: string,
+  excludedComponents: string[]
+): UnpluginOptions {
   return {
     name: "sentry-vite-react-annotate-plugin",
     enforce: "pre" as const,
@@ -35,7 +37,7 @@ function viteReactAnnotatePlugin(options: ReactAnnotatePluginOptions): UnpluginO
       };
     },
     // @ts-ignore
-    vite: createReactAnnotateHooks(options),
+    vite: createReactAnnotateHooks(importSource, excludedComponents),
   };
 }
 
