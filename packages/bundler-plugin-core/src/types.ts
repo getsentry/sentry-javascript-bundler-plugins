@@ -525,3 +525,8 @@ type DeployOptions = {
    */
   url?: string;
 };
+
+export type ReactAnnotatePluginOptions = {
+  importSource: string;
+  excludedComponents: string[];
+};

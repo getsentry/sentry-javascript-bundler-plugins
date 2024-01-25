@@ -1,3 +1,4 @@
+import { ReactAnnotatePluginOptions } from "./../../bundler-plugin-core/src/types";
 import {
   sentryUnpluginFactory,
   Options,
@@ -18,14 +19,11 @@ function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-function rollupReactAnnotatePlugin(
-  importSource: string,
-  excludedComponents: string[]
-): UnpluginOptions {
+function rollupReactAnnotatePlugin(options: ReactAnnotatePluginOptions): UnpluginOptions {
   return {
     name: "sentry-rollup-react-annotate-plugin",
     // @ts-ignore
-    rollup: createReactAnnotateHooks(importSource, excludedComponents),
+    rollup: createReactAnnotateHooks(options),
   };
 }
 
