@@ -89,9 +89,20 @@ export function createCjsBundles(
         target: "node", // needed for webpack 4 so we can access node api
         plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
       },
-      (err) => {
+      (err, stats) => {
         if (err) {
           throw err;
+        }
+
+        const info = stats?.toJson();
+        if (!stats || !info) return;
+
+        if (stats.hasErrors()) {
+          console.error(info.errors);
+        }
+
+        if (stats.hasWarnings()) {
+          console.warn(info.warnings);
         }
       }
     );
