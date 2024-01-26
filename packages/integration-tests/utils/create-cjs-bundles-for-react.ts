@@ -50,12 +50,12 @@ export function createCjsBundles(
             extensions: RESOLVABLE_EXTENSIONS,
           }),
           commonjs(),
+          sentryRollupPlugin(sentryUnpluginOptions),
           babelPlugin({
             babelHelpers: "bundled",
-            presets: ["@babel/preset-react"],
+            presets: [["@babel/preset-react", { runtime: "automatic" }]],
             extensions: RESOLVABLE_EXTENSIONS,
           }),
-          sentryRollupPlugin(sentryUnpluginOptions),
         ],
       })
       .then((bundle) =>
