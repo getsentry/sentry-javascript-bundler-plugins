@@ -1,4 +1,5 @@
 import * as vite from "vite";
+import react from "@vitejs/plugin-react";
 import * as path from "path";
 import * as rollup from "rollup";
 import { default as webpack4 } from "webpack4";
@@ -37,7 +38,7 @@ export function createCjsBundles(
           },
         },
       },
-      plugins: [sentryVitePlugin(sentryUnpluginOptions)],
+      plugins: [react({ jsxRuntime: "automatic" }), sentryVitePlugin(sentryUnpluginOptions)],
     });
   }
   if (plugins.length === 0 || plugins.includes("rollup")) {
