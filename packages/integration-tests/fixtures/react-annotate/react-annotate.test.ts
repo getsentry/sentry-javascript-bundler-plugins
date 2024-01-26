@@ -14,7 +14,7 @@ test("esbuild bundle", () => {
 
 test("rollup bundle", () => {
   expect.assertions(1);
-  checkBundle(path.join(__dirname, "./out/vite/index.js"));
+  checkBundle(path.join(__dirname, "./out/rollup/index.js"));
 });
 
 test("vite bundle", () => {
