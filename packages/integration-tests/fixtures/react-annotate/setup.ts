@@ -9,6 +9,7 @@ createCjsBundles(
   outputDir,
   {
     telemetry: false,
+    reactAnnotate: { enabled: true },
   },
   // TODO: esbuild
   ["rollup", "vite", "webpack4", "webpack5"]
