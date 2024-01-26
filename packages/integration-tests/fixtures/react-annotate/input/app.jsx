@@ -1,7 +1,7 @@
 import { renderToString } from "react-dom/server";
 import { ComponentA } from "./component-a";
 
-export function App() {
+export default function App() {
   return <ComponentA />;
 }
 
