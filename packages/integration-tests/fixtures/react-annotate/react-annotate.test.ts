@@ -7,11 +7,14 @@ function checkBundle(bundlePath: string): void {
   expect(processOutput).toMatchSnapshot();
 }
 
-test.todo("esbuild bundle");
+test("esbuild bundle", () => {
+  expect.assertions(1);
+  checkBundle(path.join(__dirname, "./out/esbuild/index.js"));
+});
 
 test("rollup bundle", () => {
   expect.assertions(1);
-  checkBundle(path.join(__dirname, "./out/vite/index.js"));
+  checkBundle(path.join(__dirname, "./out/rollup/index.js"));
 });
 
 test("vite bundle", () => {

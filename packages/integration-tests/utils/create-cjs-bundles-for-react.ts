@@ -1,9 +1,10 @@
 import * as vite from "vite";
+import react from "@vitejs/plugin-react";
 import * as path from "path";
 import * as rollup from "rollup";
 import { default as webpack4 } from "webpack4";
 import { webpack as webpack5 } from "webpack5";
-import * as esbuild from "esbuild";
+import esbuild from "esbuild019";
 import { babel as babelPlugin } from "@rollup/plugin-babel";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
@@ -37,7 +38,7 @@ export function createCjsBundles(
           },
         },
       },
-      plugins: [sentryVitePlugin(sentryUnpluginOptions)],
+      plugins: [react({ jsxRuntime: "automatic" }), sentryVitePlugin(sentryUnpluginOptions)],
     });
   }
   if (plugins.length === 0 || plugins.includes("rollup")) {
@@ -49,12 +50,12 @@ export function createCjsBundles(
             extensions: RESOLVABLE_EXTENSIONS,
           }),
           commonjs(),
+          sentryRollupPlugin(sentryUnpluginOptions),
           babelPlugin({
             babelHelpers: "bundled",
-            presets: ["@babel/preset-react"],
+            presets: [["@babel/preset-react", { runtime: "automatic" }]],
             extensions: RESOLVABLE_EXTENSIONS,
           }),
-          sentryRollupPlugin(sentryUnpluginOptions),
         ],
       })
       .then((bundle) =>
@@ -73,6 +74,7 @@ export function createCjsBundles(
       plugins: [sentryEsbuildPlugin(sentryUnpluginOptions)],
       minify: true,
       bundle: true,
+      jsx: "automatic",
       format: "cjs",
     });
   }
