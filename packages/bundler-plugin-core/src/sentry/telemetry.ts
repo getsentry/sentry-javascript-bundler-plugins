@@ -60,7 +60,7 @@ export function createSentryInstance(
 }
 
 export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bundler: string) {
-  const { org, project, release, errorHandler, sourcemaps } = options;
+  const { org, project, release, errorHandler, sourcemaps, reactAnnotate } = options;
 
   hub.setTag("upload-legacy-sourcemaps", !!release.uploadLegacySourcemaps);
   if (release.uploadLegacySourcemaps) {
@@ -90,6 +90,8 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
     "delete-after-upload",
     !!sourcemaps?.deleteFilesAfterUpload || !!sourcemaps?.filesToDeleteAfterUpload
   );
+
+  hub.setTag("react-annotate", !!reactAnnotate?.enabled);
 
   hub.setTag("node", process.version);
   hub.setTag("platform", process.platform);
