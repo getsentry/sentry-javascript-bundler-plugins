@@ -31,7 +31,7 @@ import reactAnnotate from "./plugins/react-annotate-plugin";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
-  reactAnnotatePlugin: (importSource: string, excludedComponents: string[]) => UnpluginOptions;
+  reactAnnotatePlugin: () => UnpluginOptions;
   moduleMetadataInjectionPlugin?: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
@@ -335,9 +335,8 @@ export function sentryUnpluginFactory({
       );
     } else {
       {
-        const { importSource, excludedComponents } = options.reactAnnotate;
         // TODO: When reactAnnotate is added to esbuild, do not need this conditional expression
-        reactAnnotatePlugin && plugins.push(reactAnnotatePlugin(importSource, excludedComponents));
+        reactAnnotatePlugin && plugins.push(reactAnnotatePlugin());
       }
     }
 
@@ -533,7 +532,7 @@ export function createRollupDebugIdUploadHooks(
   };
 }
 
-export function createReactAnnotateHooks(importSource: string, excludedComponents: string[]) {
+export function createReactAnnotateHooks() {
   return {
     async transform(code: string, id: string) {
       // id may contain query and hash which will trip up our file extension logic below
@@ -558,7 +557,7 @@ export function createReactAnnotateHooks(importSource: string, excludedComponent
 
       try {
         const result = await transformAsync(code, {
-          plugins: [[reactAnnotate, { excludedComponents }]],
+          plugins: [[reactAnnotate]],
           filename: id,
           parserOpts: {
             sourceType: "module",

@@ -18,14 +18,11 @@ function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-function rollupReactAnnotatePlugin(
-  importSource: string,
-  excludedComponents: string[]
-): UnpluginOptions {
+function rollupReactAnnotatePlugin(): UnpluginOptions {
   return {
     name: "sentry-rollup-react-annotate-plugin",
     // @ts-ignore
-    rollup: createReactAnnotateHooks(importSource, excludedComponents),
+    rollup: createReactAnnotateHooks(),
   };
 }
 

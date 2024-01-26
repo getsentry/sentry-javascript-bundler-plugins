@@ -253,7 +253,10 @@ function esbuildReactAnnotatePlugin(): UnpluginOptions {
   return {
     name: "sentry-esbuild-react-annotate-plugin",
     esbuild: {
-      setup({ initialOptions }) {},
+      // setup({ onLoad }) {
+      //   onLoad({ filter: /\.(t|j)sx$/ }, async (args) => {
+      //   })
+      // },
     },
   };
 }

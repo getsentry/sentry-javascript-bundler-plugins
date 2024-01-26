@@ -19,25 +19,12 @@ function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-function viteReactAnnotatePlugin(
-  importSource: string,
-  excludedComponents: string[]
-): UnpluginOptions {
+function viteReactAnnotatePlugin(): UnpluginOptions {
   return {
     name: "sentry-vite-react-annotate-plugin",
     enforce: "pre" as const,
-    config() {
-      return {
-        esbuild: {
-          jsx: "automatic",
-          // TODO: Allow this to be configured, as users could be using custom react libraries
-          jsxImportSource: importSource,
-        },
-        optimizeDeps: { esbuildOptions: { jsx: "automatic" } },
-      };
-    },
     // @ts-ignore
-    vite: createReactAnnotateHooks(importSource, excludedComponents),
+    vite: createReactAnnotateHooks(),
   };
 }
 
