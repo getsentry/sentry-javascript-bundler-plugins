@@ -335,8 +335,7 @@ export function sentryUnpluginFactory({
       );
     } else {
       {
-        // TODO: When reactAnnotate is added to esbuild, do not need this conditional expression
-        reactAnnotatePlugin && plugins.push(reactAnnotatePlugin());
+        plugins.push(reactAnnotatePlugin());
       }
     }
 
