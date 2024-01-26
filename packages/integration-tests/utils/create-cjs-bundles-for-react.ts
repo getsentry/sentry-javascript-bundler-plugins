@@ -3,7 +3,7 @@ import * as path from "path";
 import * as rollup from "rollup";
 import { default as webpack4 } from "webpack4";
 import { webpack as webpack5 } from "webpack5";
-import * as esbuild from "esbuild";
+import esbuild from "esbuild019";
 import { babel as babelPlugin } from "@rollup/plugin-babel";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
@@ -73,6 +73,7 @@ export function createCjsBundles(
       plugins: [sentryEsbuildPlugin(sentryUnpluginOptions)],
       minify: true,
       bundle: true,
+      jsx: "automatic",
       format: "cjs",
     });
   }

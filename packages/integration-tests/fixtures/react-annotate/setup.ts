@@ -4,13 +4,7 @@ import { createCjsBundles } from "../../utils/create-cjs-bundles-for-react";
 const entryPointPath = path.resolve(__dirname, "input", "app.jsx");
 const outputDir = path.resolve(__dirname, "out");
 
-createCjsBundles(
-  { index: entryPointPath },
-  outputDir,
-  {
-    telemetry: false,
-    reactAnnotate: { enabled: true },
-  },
-  // TODO: esbuild
-  ["rollup", "vite", "webpack4", "webpack5"]
-);
+createCjsBundles({ index: entryPointPath }, outputDir, {
+  telemetry: false,
+  reactAnnotate: { enabled: true },
+});
