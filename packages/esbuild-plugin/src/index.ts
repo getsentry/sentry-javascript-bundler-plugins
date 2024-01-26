@@ -1,8 +1,10 @@
+import { promises as fsPromises } from "fs";
 import {
   sentryUnpluginFactory,
   Options,
   getDebugIdSnippet,
   SentrySDKBuildFlags,
+  createReactAnnotateHooks,
 } from "@sentry/bundler-plugin-core";
 import type { UnpluginOptions } from "unplugin";
 import * as path from "path";
@@ -34,6 +36,28 @@ function esbuildReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
             loader: "js",
             pluginName,
             contents: injectionCode,
+          };
+        });
+      },
+    },
+  };
+}
+
+function esbuildReactAnnotatePlugin(): UnpluginOptions {
+  const pluginName = "sentry-esbuild-react-annotate-plugin";
+  return {
+    name: pluginName,
+    esbuild: {
+      setup({ onLoad }) {
+        onLoad({ filter: /\.(t|j)sx$/ }, async (args) => {
+          let code = await fsPromises.readFile(args.path, "utf8");
+          const loader = args.path.endsWith(".tsx") ? "tsx" : "jsx";
+          const results = await createReactAnnotateHooks().transform(code, args.path);
+          console.dir(results);
+          return {
+            loader,
+            pluginName,
+            contents: results?.code ?? undefined,
           };
         });
       },
@@ -249,21 +273,10 @@ function esbuildBundleSizeOptimizationsPlugin(
   };
 }
 
-function esbuildReactAnnotatePlugin(): UnpluginOptions {
-  return {
-    name: "sentry-esbuild-react-annotate-plugin",
-    esbuild: {
-      // setup({ onLoad }) {
-      //   onLoad({ filter: /\.(t|j)sx$/ }, async (args) => {
-      //   })
-      // },
-    },
-  };
-}
-
 // @ts-ignore TODO: Create an esbuild plugin for React annotate so we dont have to ignore this error
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: esbuildReleaseInjectionPlugin,
+  reactAnnotatePlugin: esbuildReactAnnotatePlugin,
   debugIdInjectionPlugin: esbuildDebugIdInjectionPlugin,
   moduleMetadataInjectionPlugin: esbuildModuleMetadataInjectionPlugin,
   debugIdUploadPlugin: esbuildDebugIdUploadPlugin,

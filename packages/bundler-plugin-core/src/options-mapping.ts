@@ -32,8 +32,6 @@ export function normalizeUserOptions(userOptions: UserOptions) {
     reactAnnotate: userOptions.reactAnnotate
       ? {
           enabled: userOptions.reactAnnotate.enabled ?? false,
-          importSource: userOptions.reactAnnotate.importSource ?? "react",
-          excludedComponents: userOptions.reactAnnotate.excludedComponents ?? [],
         }
       : null,
     _experiments: userOptions._experiments ?? {},
