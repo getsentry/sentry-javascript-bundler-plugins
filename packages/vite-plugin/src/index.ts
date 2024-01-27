@@ -23,7 +23,6 @@ function viteReactAnnotatePlugin(): UnpluginOptions {
   return {
     name: "sentry-vite-react-annotate-plugin",
     enforce: "pre" as const,
-    // @ts-ignore
     vite: createReactAnnotateHooks(),
   };
 }

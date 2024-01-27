@@ -55,7 +55,6 @@ function webpackReactAnnotatePlugin(): UnpluginOptions {
     transformInclude(id) {
       return id.endsWith(".tsx") || id.endsWith(".jsx");
     },
-    // @ts-ignore
     transform: createReactAnnotateHooks().transform,
   };
 }

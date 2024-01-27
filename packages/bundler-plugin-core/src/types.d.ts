@@ -255,17 +255,6 @@ export interface Options {
      * Whether the react annotate plugin should be enabled or not
      */
     enabled?: boolean;
-    /**
-     * The name of the library that React is being imported from.
-     * Defaults to `'react'`.
-     * Should be changed only if you are using React from a custom library.
-     */
-    importSource?: string;
-    /**
-     * A list of component names that you do not want the annotate plugin to apply to.
-     * I.e. if you want to prevent a component named `MyComponent` from being annotated, you would pass this in as `['MyComponent']`.
-     */
-    excludedComponents?: string[];
   };
   /**
    * Options that are considered experimental and subject to change.

@@ -3,7 +3,7 @@ import { transformAsync } from "@babel/core";
 import * as fs from "fs";
 import * as path from "path";
 import MagicString from "magic-string";
-import { createUnplugin, UnpluginOptions } from "unplugin";
+import { createUnplugin, TransformResult, UnpluginOptions } from "unplugin";
 import { normalizeUserOptions, validateOptions } from "./options-mapping";
 import { createDebugIdUploadFunction } from "./debug-id-upload";
 import { releaseManagementPlugin } from "./plugins/release-management";
@@ -26,7 +26,8 @@ import { glob } from "glob";
 import pkg from "@sentry/utils";
 const { logger } = pkg;
 
-// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore Importing the annotate plugin which is not concerned with types
 import reactAnnotate from "./plugins/react-annotate-plugin";
 
 interface SentryUnpluginFactoryOptions {
@@ -533,7 +534,7 @@ export function createRollupDebugIdUploadHooks(
 
 export function createReactAnnotateHooks() {
   return {
-    async transform(code: string, id: string) {
+    async transform(code: string, id: string): Promise<TransformResult> {
       // id may contain query and hash which will trip up our file extension logic below
       const idWithoutQueryAndHash = stripQueryAndHashFromPath(id);
 
@@ -561,7 +562,8 @@ export function createReactAnnotateHooks() {
           parserOpts: {
             sourceType: "module",
             allowAwaitOutsideFunction: true,
-            // @ts-ignore Parser plugins will always be valid here
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore This array will always be type compliant when using 'jsx' or 'typescript'
             plugins: parserPlugins,
           },
           generatorOpts: {
@@ -571,15 +573,14 @@ export function createReactAnnotateHooks() {
         });
 
         return {
-          code: result?.code,
+          code: result?.code ?? code,
           map: result?.map,
         };
       } catch (e) {
-        logger.error(e);
-        console.dir(e);
+        logger.error(`Failed to apply react annotate plugin: ${e}`);
       }
 
-      return null;
+      return { code };
     },
   };
 }

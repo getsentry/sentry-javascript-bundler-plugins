@@ -50,14 +50,16 @@ function esbuildReactAnnotatePlugin(): UnpluginOptions {
     esbuild: {
       setup({ onLoad }) {
         onLoad({ filter: /\.(t|j)sx$/ }, async (args) => {
-          let code = await fsPromises.readFile(args.path, "utf8");
+          const code = await fsPromises.readFile(args.path, "utf8");
           const loader = args.path.endsWith(".tsx") ? "tsx" : "jsx";
           const results = await createReactAnnotateHooks().transform(code, args.path);
-          console.dir(results);
+
           return {
             loader,
             pluginName,
-            contents: results?.code ?? undefined,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore Weird typing on TransformResult, it will not ever return just a string in this case
+            contents: results?.code ?? code,
           };
         });
       },
