@@ -28,7 +28,7 @@ const { logger } = pkg;
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore Importing the annotate plugin which is not concerned with types
-import reactAnnotate from "./plugins/react-annotate-plugin";
+import { reactAnnotate } from "./plugins/react-annotate-plugin";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;

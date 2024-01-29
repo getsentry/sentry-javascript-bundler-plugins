@@ -22,7 +22,7 @@ const knownIncompatiblePlugins = [
   "@react-navigation",
 ];
 
-export default function reactAnnotate({ types: t }) {
+export function reactAnnotate({ types: t }) {
   return {
     pre() {
       this.excludedComponents = this.opts[excludedComponentsOptionName] || [];
