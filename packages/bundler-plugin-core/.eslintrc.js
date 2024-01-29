@@ -12,6 +12,7 @@ module.exports = {
     "test/fixtures/**/*",
     "sentry-release-injection-file.js",
     "sentry-esbuild-debugid-injection-file.js",
+    "react-annotate-plugin.js",
   ],
   parserOptions: {
     tsconfigRootDir: __dirname,

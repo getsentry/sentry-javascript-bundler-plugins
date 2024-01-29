@@ -168,10 +168,12 @@ function handleWebpack(err: Error | undefined, stats: Webpack4Stats | Webpack5St
   if (!stats || !info) return;
 
   if (stats.hasErrors()) {
+    // eslint-disable-next-line no-console
     console.error(info.errors);
   }
 
   if (stats.hasWarnings()) {
+    // eslint-disable-next-line no-console
     console.warn(info.warnings);
   }
 }
