@@ -18,7 +18,19 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "index.js",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.mjs",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.mjs",
+  "types": "dist/types/index.d.ts",
   "scripts": {
     "build": "rimraf ./out && run-p build:rollup build:types",
     "build:watch": "run-p build:rollup:watch build:types:watch",
@@ -43,6 +55,7 @@
       "<rootDir>/__tests__/"
     ]
   },
+  "dependencies": {},
   "devDependencies": {
     "@babel/core": "7.18.5",
     "@babel/preset-env": "7.18.2",

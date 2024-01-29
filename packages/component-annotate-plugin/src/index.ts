@@ -28,6 +28,8 @@
  * with Sentry products
  */
 
+// @ts-nocheck
+
 const webComponentName = "data-sentry-component";
 const webElementName = "data-sentry-element";
 const webSourceFileName = "data-sentry-source-file";
@@ -78,7 +80,7 @@ const knownIncompatiblePlugins = [
   "victory-zoom-container",
 ];
 
-module.exports = function ({ types: t }) {
+export function componentNameAnnotatePlugin({ types: t }) {
   return {
     pre() {
       this.ignoreComponentsFromOption = this.opts[ignoreComponentsOptionName] || [];
@@ -146,7 +148,7 @@ module.exports = function ({ types: t }) {
       },
     },
   };
-};
+}
 
 function fullSourceFileNameFromState(state) {
   const name = state.file.opts.parserOpts.sourceFileName;
