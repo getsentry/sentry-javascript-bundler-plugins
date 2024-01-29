@@ -15,7 +15,7 @@ exports[`vite bundle 1`] = `
 "
 `;
 
-exports[`webpack 4 bundle 1`] = `
+exports[`webpack 4 bundle if node is < 18 1`] = `
 "<div><span data-sentry-component=\\"ComponentA\\" data-sentry-source-file=\\"component-a.jsx\\">Component A</span></div>
 "
 `;
