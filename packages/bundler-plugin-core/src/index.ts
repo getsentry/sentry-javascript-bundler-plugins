@@ -534,7 +534,7 @@ export function createRollupDebugIdUploadHooks(
 
 export function createReactAnnotateHooks() {
   return {
-    async transform(code: string, id: string): Promise<TransformResult> {
+    async transform(this: void, code: string, id: string): Promise<TransformResult> {
       // id may contain query and hash which will trip up our file extension logic below
       const idWithoutQueryAndHash = stripQueryAndHashFromPath(id);
 
