@@ -577,7 +577,7 @@ export function createReactAnnotateHooks() {
           map: result?.map,
         };
       } catch (e) {
-        logger.error(`Failed to apply react annotate plugin: ${e}`);
+        logger.error(`Failed to apply react annotate plugin`, e);
       }
 
       return { code };
