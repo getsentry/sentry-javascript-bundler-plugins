@@ -551,8 +551,7 @@ export function createReactAnnotateHooks() {
       if (idWithoutQueryAndHash.endsWith(".jsx")) {
         parserPlugins.push("jsx");
       } else if (idWithoutQueryAndHash.endsWith(".tsx")) {
-        parserPlugins.push("jsx");
-        parserPlugins.push("typescript");
+        parserPlugins.push("jsx", "typescript");
       }
 
       try {
