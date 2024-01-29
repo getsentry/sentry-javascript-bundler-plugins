@@ -2,9 +2,12 @@ import childProcess from "child_process";
 import path from "path";
 import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
+// prettier-ignore
+const SNAPSHOT = `"<div><span data-sentry-component=\\"ComponentA\\" data-sentry-source-file=\\"component-a.jsx\\">Component A</span></div>"`
+
 function checkBundle(bundlePath: string): void {
   const processOutput = childProcess.execSync(`node ${bundlePath}`, { encoding: "utf-8" });
-  expect(processOutput).toMatchSnapshot();
+  expect(processOutput.trim()).toMatchInlineSnapshot(SNAPSHOT);
 }
 
 test("esbuild bundle", () => {
