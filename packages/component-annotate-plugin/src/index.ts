@@ -268,10 +268,11 @@ function applyAttributes(
 ) {
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
 
-  if (isReactFragment(openingElement)) return;
+  if (isReactFragment(t, openingElement)) return;
+  if (!openingElement.node) return; // e.g., Raw JSX text like the `A` in `<h1>a</h1>`
 
   if (!openingElement.node.attributes) openingElement.node.attributes = [];
-  const elementName = getPathName(openingElement);
+  const elementName = getPathName(t, openingElement);
 
   const isAnIgnoredComponent = excludedComponents.some(
     (excludedComponent) =>
@@ -382,12 +383,12 @@ function attributeNamesFromState(state: AnnotationPluginPass): [string, string, 
   return [webComponentName, webElementName, webSourceFileName];
 }
 
-function isReactFragment(openingElement: Babel.NodePath): boolean {
+function isReactFragment(t: typeof Babel.types, openingElement: Babel.NodePath): boolean {
   if (openingElement.isJSXFragment()) {
     return true;
   }
 
-  const elementName = getPathName(openingElement);
+  const elementName = getPathName(t, openingElement);
   if (elementName === "Fragment" || elementName === "React.Fragment") return true;
 
   return false;
@@ -413,19 +414,20 @@ function hasAttributeWithName(
   });
 }
 
-function getPathName(path: Babel.NodePath): string {
+function getPathName(t: typeof Babel.types, path: Babel.NodePath): string {
   if (!path.node) return UNKNOWN_ELEMENT_NAME;
   if (!("name" in path.node)) return UNKNOWN_ELEMENT_NAME;
 
   const name = path.node.name;
+
   if (typeof name === "string") return name;
 
-  if (path.isIdentifier() || path.isJSXIdentifier()) {
-    return path.node.name;
+  if (t.isIdentifier(name) || t.isJSXIdentifier(name)) {
+    return name.name;
   }
 
-  if (path.isJSXNamespacedName()) {
-    return path.node.name.name;
+  if (t.isJSXNamespacedName(name)) {
+    return name.name.name;
   }
 
   return UNKNOWN_ELEMENT_NAME;
