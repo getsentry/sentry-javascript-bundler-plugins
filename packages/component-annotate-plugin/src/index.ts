@@ -357,20 +357,21 @@ function fullSourceFileNameFromState(state: AnnotationPluginPass) {
 
 function isKnownIncompatiblePluginFromState(state: AnnotationPluginPass) {
   const fullSourceFileName = fullSourceFileNameFromState(state);
+
   if (fullSourceFileName == undefined) {
     return false;
   }
-  for (let i = 0; i < KNOWN_INCOMPATIBLE_PLUGINS.length; i += 1) {
-    const pluginName = KNOWN_INCOMPATIBLE_PLUGINS[i] as string;
+
+  return KNOWN_INCOMPATIBLE_PLUGINS.some((pluginName) => {
     if (
       fullSourceFileName.includes("/node_modules/" + pluginName + "/") ||
       fullSourceFileName.includes("\\node_modules\\" + pluginName + "\\")
     ) {
       return true;
     }
-  }
 
-  return false;
+    return false;
+  });
 }
 
 function attributeNamesFromState(state: AnnotationPluginPass): [string, string, string] {
