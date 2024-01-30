@@ -53,6 +53,8 @@ interface AnnotationPluginPass extends PluginPass {
   opts: AnnotationOpts;
 }
 
+type ExcludedComponent = [file: string, component: string, element: string];
+
 type AnnotationPlugin = PluginObj<AnnotationPluginPass>;
 
 export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlugin {
@@ -77,7 +79,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
           path.node.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          this["excludedComponents"] as string[]
+          this["excludedComponents"] as ExcludedComponent[]
         );
       },
       ArrowFunctionExpression(path, state) {
@@ -97,7 +99,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
           parent.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          this["excludedComponents"] as string[]
+          this["excludedComponents"] as ExcludedComponent[]
         );
       },
       ClassDeclaration(path, state) {
@@ -124,7 +126,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
               name.node && name.node.name,
               sourceFileNameFromState(state),
               attributeNamesFromState(state),
-              excludedComponents as string[]
+              excludedComponents as ExcludedComponent[]
             );
           },
         });
@@ -140,7 +142,7 @@ function functionBodyPushAttributes(
   componentName: string,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  excludedComponents?: string[]
+  excludedComponents: ExcludedComponent[]
 ) {
   let jsxNode: Babel.NodePath;
 
@@ -202,24 +204,27 @@ function processJSX(
   componentName: string | null,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  excludedComponents?: string[]
+  excludedComponents: ExcludedComponent[]
 ) {
   if (!jsxNode) {
     return;
   }
 
-  // only a JSXElement contains openingElement
-  const openingElement = jsxNode.get("openingElement");
-  if (Array.isArray(openingElement)) return;
+  // NOTE: I don't know of a case where `openingElement` would have more than one item,
+  // but it's safer to always iterate
+  const paths = jsxNode.get("openingElement");
+  const openingElements = Array.isArray(paths) ? paths : [paths];
 
-  applyAttributes(
-    t,
-    openingElement,
-    componentName,
-    sourceFileName,
-    attributeNames,
-    excludedComponents
-  );
+  openingElements.forEach((openingElement) => {
+    applyAttributes(
+      t,
+      openingElement as Babel.NodePath<Babel.types.JSXOpeningElement>,
+      componentName,
+      sourceFileName,
+      attributeNames,
+      excludedComponents
+    );
+  });
 
   let children = jsxNode.get("children");
 
@@ -265,74 +270,73 @@ function processJSX(
 
 function applyAttributes(
   t: typeof Babel.types,
-  openingElement: Babel.NodePath,
+  openingElement: Babel.NodePath<Babel.types.JSXOpeningElement>,
   componentName: string | null,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  excludedComponents?: string[]
+  excludedComponents: ExcludedComponent[]
 ) {
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
 
-  if (
-    !openingElement ||
-    isReactFragment(openingElement) ||
-    !openingElement.node ||
-    !("name" in openingElement.node)
-  ) {
-    return;
-  }
+  if (isReactFragment(openingElement)) return;
 
-  if (!openingElement.node.attributes) openingElement.node.attributes = {};
+  if (!openingElement.node.attributes) openingElement.node.attributes = [];
+  const elementName = getPathName(openingElement);
 
-  const elementName = openingElement.node.name.name || "unknown";
+  const isAnIgnoredComponent = excludedComponents.some(
+    (excludedComponent) =>
+      matchesIgnoreRule(excludedComponent[0], sourceFileName) &&
+      matchesIgnoreRule(excludedComponent[1], componentName) &&
+      matchesIgnoreRule(excludedComponent[2], elementName)
+  );
 
-  const ignoredComponentFromOptions =
-    excludedComponents &&
-    !!excludedComponents.find(
-      (component) =>
-        matchesIgnoreRule(component[0], sourceFileName) &&
-        matchesIgnoreRule(component[1], componentName) &&
-        matchesIgnoreRule(component[2], elementName)
-    );
-
-  let ignoredElement = false;
   // Add a stable attribute for the element name but only for non-DOM names
+  let isAnIgnoredElement = false;
   if (
-    !ignoredComponentFromOptions &&
-    !hasNodeNamed(openingElement, componentAttributeName) &&
+    !isAnIgnoredComponent &&
+    !hasAttributeWithName(openingElement, componentAttributeName) &&
     // if componentAttributeName and elementAttributeName are set to the same thing (fsTagName), then only set the element attribute when we don't have a component attribute
     (componentAttributeName !== elementAttributeName || !componentName)
   ) {
     if (DEFAULT_IGNORED_ELEMENTS.includes(elementName)) {
-      ignoredElement = true;
+      isAnIgnoredElement = true;
     } else {
-      openingElement.node.attributes.push(
-        t.jSXAttribute(t.jSXIdentifier(elementAttributeName), t.stringLiteral(elementName))
-      );
+      // TODO: Is it possible to avoid this null check?
+      if (elementAttributeName) {
+        openingElement.node.attributes.push(
+          t.jSXAttribute(t.jSXIdentifier(elementAttributeName), t.stringLiteral(elementName))
+        );
+      }
     }
   }
 
   // Add a stable attribute for the component name (absent for non-root elements)
   if (
     componentName &&
-    !ignoredComponentFromOptions &&
-    !hasNodeNamed(openingElement, componentAttributeName)
+    !isAnIgnoredComponent &&
+    !hasAttributeWithName(openingElement, componentAttributeName)
   ) {
-    openingElement.node.attributes.push(
-      t.jSXAttribute(t.jSXIdentifier(componentAttributeName), t.stringLiteral(componentName))
-    );
+    // TODO: Is it possible to avoid this null check?
+    if (componentAttributeName) {
+      openingElement.node.attributes.push(
+        t.jSXAttribute(t.jSXIdentifier(componentAttributeName), t.stringLiteral(componentName))
+      );
+    }
   }
 
   // Add a stable attribute for the source file name (absent for non-root elements)
   if (
     sourceFileName &&
-    !ignoredComponentFromOptions &&
-    (componentName || ignoredElement === false) &&
-    !hasNodeNamed(openingElement, sourceFileAttributeName)
+    !isAnIgnoredComponent &&
+    (componentName || isAnIgnoredElement === false) &&
+    !hasAttributeWithName(openingElement, sourceFileAttributeName)
   ) {
-    openingElement.node.attributes.push(
-      t.jSXAttribute(t.jSXIdentifier(sourceFileAttributeName), t.stringLiteral(sourceFileName))
-    );
+    // TODO: Is it possible to avoid this null check?
+    if (sourceFileAttributeName) {
+      openingElement.node.attributes.push(
+        t.jSXAttribute(t.jSXIdentifier(sourceFileAttributeName), t.stringLiteral(sourceFileName))
+      );
+    }
   }
 }
 
@@ -430,9 +434,29 @@ function matchesIgnoreRule(rule, name) {
   return rule === "*" || rule === name;
 }
 
-function hasNodeNamed(openingElement, name) {
+function hasAttributeWithName(openingElement, name) {
   return openingElement.node.attributes.find((node) => {
     if (!node.name) return;
     return node.name.name === name;
   });
 }
+
+function getPathName(path: Babel.NodePath): string {
+  if (!path.node) return UNKNOWN_ELEMENT_NAME;
+  if (!("name" in path.node)) return UNKNOWN_ELEMENT_NAME;
+
+  const name = path.node.name;
+  if (typeof name === "string") return name;
+
+  if (path.isIdentifier() || path.isJSXIdentifier()) {
+    return path.node.name;
+  }
+
+  if (path.isJSXNamespacedName()) {
+    return path.node.name.name;
+  }
+
+  return UNKNOWN_ELEMENT_NAME;
+}
+
+const UNKNOWN_ELEMENT_NAME = "unknown";
