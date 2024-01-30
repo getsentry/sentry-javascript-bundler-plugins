@@ -44,7 +44,7 @@ const nativeSourceFileName = "dataSentrySourceFile";
 interface AnnotationOpts {
   native?: boolean;
   "annotate-fragments"?: boolean;
-  excludedComponents?: boolean;
+  excludedComponents?: ExcludedComponent[];
 }
 
 interface AnnotationPluginPass extends PluginPass {
@@ -57,9 +57,6 @@ type AnnotationPlugin = PluginObj<AnnotationPluginPass>;
 
 export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlugin {
   return {
-    pre() {
-      this["excludedComponents"] = this.opts["excludedComponents"] || [];
-    },
     visitor: {
       FunctionDeclaration(path, state) {
         if (!path.node.id || !path.node.id.name) return;
@@ -72,7 +69,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
           path.node.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          this["excludedComponents"] as ExcludedComponent[]
+          state.opts.excludedComponents ?? []
         );
       },
       ArrowFunctionExpression(path, state) {
@@ -92,7 +89,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
           parent.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          this["excludedComponents"] as ExcludedComponent[]
+          state.opts.excludedComponents ?? []
         );
       },
       ClassDeclaration(path, state) {
@@ -105,7 +102,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
         if (!render || !render.traverse) return;
         if (isKnownIncompatiblePluginFromState(state)) return;
 
-        const excludedComponents = this["excludedComponents"];
+        const excludedComponents = state.opts.excludedComponents ?? [];
 
         render.traverse({
           ReturnStatement(returnStatement) {
@@ -119,7 +116,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
               name.node && name.node.name,
               sourceFileNameFromState(state),
               attributeNamesFromState(state),
-              excludedComponents as ExcludedComponent[]
+              excludedComponents
             );
           },
         });
