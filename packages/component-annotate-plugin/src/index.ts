@@ -410,10 +410,16 @@ function matchesIgnoreRule(rule: string, name: string) {
   return rule === "*" || rule === name;
 }
 
-function hasAttributeWithName(openingElement, name) {
-  return openingElement.node.attributes.find((node) => {
-    if (!node.name) return;
-    return node.name.name === name;
+function hasAttributeWithName(
+  openingElement: Babel.NodePath<Babel.types.JSXOpeningElement>,
+  name: string
+): boolean {
+  return openingElement.node.attributes.some((node) => {
+    if (node.type === "JSXAttribute") {
+      return node.name.name === name;
+    }
+
+    return false;
   });
 }
 
