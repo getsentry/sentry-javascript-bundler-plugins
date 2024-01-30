@@ -217,45 +217,46 @@ function processJSX(
   });
 
   let children = jsxNode.get("children");
-
-  if (children && !Array.isArray(children)) {
+  // TODO: See why `Array.isArray` doesn't have correct behaviour here
+  if (children && !("length" in children)) {
+    // A single child was found, maybe a bit of static text
     children = [children];
   }
 
-  if (children && children.length) {
-    let shouldSetComponentName = annotateFragments;
+  let shouldSetComponentName = annotateFragments;
 
-    for (let i = 0; i < children.length; i += 1) {
-      const child = children[i];
-      if (!child) continue;
-      // Children don't receive the data-component attribute so we pass null for componentName unless it's the first child of a Fragment with a node and `annotateFragments` is true
-      const openingElement = child.get("openingElement");
-      if (Array.isArray(openingElement)) continue;
+  children.forEach((child) => {
+    if (!child.node) return; // Happens for some node types like plain text
 
-      if (shouldSetComponentName && openingElement && openingElement.node) {
-        shouldSetComponentName = false;
-        processJSX(
-          annotateFragments,
-          t,
-          child,
-          componentName,
-          sourceFileName,
-          attributeNames,
-          excludedComponents
-        );
-      } else {
-        processJSX(
-          annotateFragments,
-          t,
-          child,
-          null,
-          sourceFileName,
-          attributeNames,
-          excludedComponents
-        );
-      }
+    // Children don't receive the data-component attribute so we pass null for componentName unless it's the first child of a Fragment with a node and `annotateFragments` is true
+    const openingElement = child.get("openingElement");
+    // TODO: Improve this. We never expect to have multiple opening elements
+    // but if it's possible, this should work
+    if (Array.isArray(openingElement)) return;
+
+    if (shouldSetComponentName && openingElement && openingElement.node) {
+      shouldSetComponentName = false;
+      processJSX(
+        annotateFragments,
+        t,
+        child,
+        componentName,
+        sourceFileName,
+        attributeNames,
+        excludedComponents
+      );
+    } else {
+      processJSX(
+        annotateFragments,
+        t,
+        child,
+        null,
+        sourceFileName,
+        attributeNames,
+        excludedComponents
+      );
     }
-  }
+  });
 }
 
 function applyAttributes(
