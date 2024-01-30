@@ -406,7 +406,7 @@ function isReactFragment(openingElement: Babel.NodePath): boolean {
   return false;
 }
 
-function matchesIgnoreRule(rule, name) {
+function matchesIgnoreRule(rule: string, name: string) {
   return rule === "*" || rule === name;
 }
 
