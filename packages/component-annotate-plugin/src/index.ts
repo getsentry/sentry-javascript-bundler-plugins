@@ -388,7 +388,45 @@ function isReactFragment(t: typeof Babel.types, openingElement: Babel.NodePath):
   }
 
   const elementName = getPathName(t, openingElement);
+
   if (elementName === "Fragment" || elementName === "React.Fragment") return true;
+
+  // TODO: All these objects are typed as unknown, maybe an oversight in Babel types?
+  if (
+    openingElement.node &&
+    "name" in openingElement.node &&
+    openingElement.node.name &&
+    typeof openingElement.node.name === "object" &&
+    "type" in openingElement.node.name &&
+    openingElement.node.name.type === "JSXMemberExpression"
+  ) {
+    if (!("name" in openingElement.node)) return false;
+
+    const nodeName = openingElement.node.name;
+    if (typeof nodeName !== "object" || !nodeName) {
+      return false;
+    }
+
+    if ("object" in nodeName && "property" in nodeName) {
+      const nodeNameObject = nodeName.object;
+      const nodeNameProperty = nodeName.property;
+
+      if (typeof nodeNameObject !== "object" || typeof nodeNameProperty !== "object") {
+        return false;
+      }
+
+      if (!nodeNameObject || !nodeNameProperty) {
+        return false;
+      }
+
+      const objectName = "name" in nodeNameObject && nodeNameObject.name;
+      const propertyName = "name" in nodeNameProperty && nodeNameProperty.name;
+
+      if (objectName === "React" && propertyName === "Fragment") {
+        return true;
+      }
+    }
+  }
 
   return false;
 }
