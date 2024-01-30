@@ -1219,7 +1219,8 @@ class componentName extends Component {
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [plugin],
     }
@@ -1240,7 +1241,8 @@ class componentName extends Component {
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [plugin],
     }
@@ -1261,7 +1263,8 @@ class componentName extends Component {
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [plugin],
     }
@@ -1282,7 +1285,8 @@ class componentName extends Component {
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [plugin],
     }
@@ -1303,7 +1307,8 @@ class componentName extends Component {
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [plugin],
     }
@@ -1326,7 +1331,8 @@ class componentName extends Component {
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [[plugin, { "annotate-fragments": true }]],
     }
@@ -1349,7 +1355,8 @@ class componentName extends Component {
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [[plugin, { "annotate-fragments": true }]],
     }
@@ -1370,7 +1377,8 @@ const componentName = () => (
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [plugin],
     }
@@ -1391,7 +1399,8 @@ const componentName = () => (
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [plugin],
     }
@@ -1430,7 +1439,8 @@ const componentName = () => (
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [[plugin, { "annotate-fragments": true }]],
     }
@@ -1451,7 +1461,8 @@ const componentName = () => (
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [[plugin, { "annotate-fragments": true }]],
     }
@@ -1472,7 +1483,8 @@ const componentName = () => (
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [[plugin, { "annotate-fragments": true }]],
     }
@@ -1493,7 +1505,8 @@ const componentName = () => (
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [[plugin, { "annotate-fragments": true }]],
     }
@@ -1515,7 +1528,8 @@ const componentName = () => (
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [[plugin, { "annotate-fragments": true }]],
     }
@@ -1534,7 +1548,8 @@ const componentName = () => (
 export default componentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [[plugin, { "annotate-fragments": true }]],
     }
@@ -1825,7 +1840,8 @@ const styles = StyleSheet.create({
 });
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [[plugin, { native: true }]],
     }
@@ -2140,7 +2156,8 @@ class PureComponentName extends React.PureComponent {
 export default PureComponentName;
 `,
     {
-      filename: "./filename-test.js",
+      filename: "/filename-test.js",
+      configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [[plugin, { native: true }]],
     }
@@ -2150,7 +2167,8 @@ export default PureComponentName;
 
 it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=nomatch dataSentryElement=nomatch snapshot matches", () => {
   const result = transform(BananasStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "nomatch", "nomatch"]] }]],
   });
@@ -2210,7 +2228,8 @@ it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=n
 
 it("ignore components dataSentrySourceFile=* dataSentryComponent=nomatch dataSentryElement=nomatch snapshot matches", () => {
   const result = transform(BananasStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["*", "nomatch", "nomatch"]] }]],
   });
@@ -2270,7 +2289,8 @@ it("ignore components dataSentrySourceFile=* dataSentryComponent=nomatch dataSen
 
 it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=* dataSentryElement=nomatch snapshot matches", () => {
   const result = transform(BananasStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "*", "nomatch"]] }]],
   });
@@ -2330,7 +2350,8 @@ it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=*
 
 it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=nomatch dataSentryElement=* snapshot matches", () => {
   const result = transform(BananasStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "nomatch", "*"]] }]],
   });
@@ -2390,7 +2411,8 @@ it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=n
 
 it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=* dataSentryElement=nomatch snapshot matches", () => {
   const result = transform(BananasStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "nomatch", "nomatch"]] }]],
   });
@@ -2450,7 +2472,8 @@ it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=* dataS
 
 it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=nomatch dataSentryElement=* snapshot matches", () => {
   const result = transform(BananasStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "nomatch", "nomatch"]] }]],
   });
@@ -2510,7 +2533,8 @@ it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=nomatch
 
 it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=* dataSentryElement=* snapshot matches", () => {
   const result = transform(BananasStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "nomatch", "nomatch"]] }]],
   });
@@ -2571,7 +2595,8 @@ it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=*
 // This tests out matching only `dataSentryElement`, with * for the others
 it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=* dataSentryElement=match snapshot matches", () => {
   const result = transform(BananasStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["*", "*", "Image"]] }]],
   });
@@ -2629,7 +2654,8 @@ it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=* dataS
 // This tests out matching only `dataSentryElement` and `dataSentryComponent`, with * for `dataSentrySourceFile`
 it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
   const result = transform(BananasStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["*", "Bananas", "Image"]] }]],
   });
@@ -2687,7 +2713,8 @@ it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=match d
 // This tests out matching on all 3 of our ignore list values
 it("Bananas ignore components dataSentrySourceFile=match dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
   const result = transform(BananasStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [
       [plugin, { native: true, ignoreComponents: [["filename-test.js", "Bananas", "Image"]] }],
@@ -2747,7 +2774,8 @@ it("Bananas ignore components dataSentrySourceFile=match dataSentryComponent=mat
 // This tests out matching on all 3 of our ignore list values via *
 it("Bananas/Pizza/App ignore components dataSentrySourceFile=* dataSentryComponent=* dataSentryElement=* snapshot matches", () => {
   const result = transform(BananasPizzaAppStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["*", "*", "*"]] }]],
   });
@@ -2875,7 +2903,8 @@ it("Bananas/Pizza/App ignore components dataSentrySourceFile=* dataSentryCompone
 // This tests out matching on all 3 of our ignore list values
 it("Bananas/Pizza/App ignore components dataSentrySourceFile=nomatch dataSentryComponent=* dataSentryElement=* snapshot matches", () => {
   const result = transform(BananasPizzaAppStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "*", "*"]] }]],
   });
@@ -3023,7 +3052,8 @@ it("Bananas/Pizza/App ignore components dataSentrySourceFile=nomatch dataSentryC
 
 it("Bananas/Pizza/App only Bananas dataSentrySourceFile=match dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
   const result = transform(BananasPizzaAppStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [
       [
@@ -3178,7 +3208,8 @@ it("Bananas/Pizza/App only Bananas dataSentrySourceFile=match dataSentryComponen
 
 it("Bananas/Pizza/App only Pizza dataSentrySourceFile=match dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
   const result = transform(BananasPizzaAppStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [
       [
@@ -3333,7 +3364,8 @@ it("Bananas/Pizza/App only Pizza dataSentrySourceFile=match dataSentryComponent=
 
 it("Bananas/Pizza/App only App dataSentrySourceFile=match dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
   const result = transform(BananasPizzaAppStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [
       [
@@ -3488,7 +3520,8 @@ it("Bananas/Pizza/App only App dataSentrySourceFile=match dataSentryComponent=ma
 
 it("Bananas/Pizza/App No Pizza Elements dataSentrySourceFile=match dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
   const result = transform(BananasPizzaAppStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [
       [
@@ -3644,7 +3677,8 @@ it("Bananas/Pizza/App No Pizza Elements dataSentrySourceFile=match dataSentryCom
 
 it("Bananas/Pizza/App No Bananas Elements dataSentrySourceFile=match dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
   const result = transform(BananasPizzaAppStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [
       [
@@ -3801,7 +3835,8 @@ it("Bananas/Pizza/App No Bananas Elements dataSentrySourceFile=match dataSentryC
 
 it("Bananas/Pizza/App No Bananas/Pizza Elements dataSentrySourceFile=match dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
   const result = transform(BananasPizzaAppStandardInput, {
-    filename: "./filename-test.js",
+    filename: "/filename-test.js",
+    configFile: false,
     presets: ["@babel/preset-react"],
     plugins: [
       [
