@@ -1,3 +1,4 @@
 dist
 README.md
 .DS_Store
+test/__snapshots__

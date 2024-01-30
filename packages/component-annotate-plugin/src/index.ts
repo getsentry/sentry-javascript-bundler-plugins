@@ -28,8 +28,6 @@
  * with Sentry products
  */
 
-// @ts-nocheck
-
 const webComponentName = "data-sentry-component";
 const webElementName = "data-sentry-element";
 const webSourceFileName = "data-sentry-source-file";

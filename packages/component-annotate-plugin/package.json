@@ -50,15 +50,11 @@
     "lint": "eslint ./src ./test",
     "prepack": "ts-node ./src/prepack.ts"
   },
-  "jest": {
-    "roots": [
-      "<rootDir>/__tests__/"
-    ]
-  },
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "7.18.5",
     "@babel/preset-env": "7.18.2",
+    "@babel/preset-react": "^7.23.3",
     "@babel/preset-typescript": "7.17.12",
     "@rollup/plugin-babel": "5.3.1",
     "@rollup/plugin-node-resolve": "13.3.0",
