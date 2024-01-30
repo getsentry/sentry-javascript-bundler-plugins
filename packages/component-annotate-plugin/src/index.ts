@@ -395,39 +395,15 @@ function attributeNamesFromState(state: AnnotationPluginPass): [string, string, 
   return [webComponentName, webElementName, webSourceFileName];
 }
 
-function isReactFragment(openingElement: Babel.NodePath) {
+function isReactFragment(openingElement: Babel.NodePath): boolean {
   if (openingElement.isJSXFragment()) {
     return true;
   }
 
-  if (!openingElement.node) return;
-  if (!("name" in openingElement.node)) return;
-  if (!openingElement.node.name) return;
+  const elementName = getPathName(openingElement);
+  if (elementName === "Fragment" || elementName === "React.Fragment") return true;
 
-  let name;
-  if (typeof openingElement.node.name === "string") {
-    name = openingElement.node.name;
-  } else if ("name" in openingElement.node.name) {
-    name = openingElement.node.name.name;
-  }
-
-  if (!name) return;
-
-  if (name === "Fragment" || name === "React.Fragment") return true;
-
-  if (!("type" in openingElement))
-    if (
-      !openingElement.node.name.type ||
-      !openingElement.node.name.object ||
-      !openingElement.node.name.property
-    )
-      return;
-
-  return (
-    openingElement.node.name.type === "JSXMemberExpression" &&
-    openingElement.node.name.object.name === "React" &&
-    openingElement.node.name.property.name === "Fragment"
-  );
+  return false;
 }
 
 function matchesIgnoreRule(rule, name) {
