@@ -40,10 +40,8 @@ const webSourceFileName = "data-sentry-source-file";
 const nativeComponentName = "dataSentryComponent";
 const nativeElementName = "dataSentryElement";
 const nativeSourceFileName = "dataSentrySourceFile";
-const fsTagName = "fsTagName";
 
 interface AnnotationOpts {
-  setFSTagName?: boolean;
   native?: boolean;
   "annotate-fragments"?: boolean;
   excludedComponents?: boolean;
@@ -61,11 +59,6 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
   return {
     pre() {
       this["excludedComponents"] = this.opts["excludedComponents"] || [];
-      if (this.opts.setFSTagName && !this.opts.native) {
-        throw new Error(
-          "`setFSTagName: true` is invalid unless `native: true` is also set in the configuration for @fullstory/babel-plugin-annotate-react"
-        );
-      }
     },
     visitor: {
       FunctionDeclaration(path, state) {
@@ -295,7 +288,6 @@ function applyAttributes(
   if (
     !isAnIgnoredComponent &&
     !hasAttributeWithName(openingElement, componentAttributeName) &&
-    // if componentAttributeName and elementAttributeName are set to the same thing (fsTagName), then only set the element attribute when we don't have a component attribute
     (componentAttributeName !== elementAttributeName || !componentName)
   ) {
     if (DEFAULT_IGNORED_ELEMENTS.includes(elementName)) {
@@ -386,12 +378,9 @@ function isKnownIncompatiblePluginFromState(state: AnnotationPluginPass) {
 
 function attributeNamesFromState(state: AnnotationPluginPass): [string, string, string] {
   if (state.opts.native) {
-    if (state.opts.setFSTagName) {
-      return [fsTagName, fsTagName, nativeSourceFileName];
-    } else {
-      return [nativeComponentName, nativeElementName, nativeSourceFileName];
-    }
+    return [nativeComponentName, nativeElementName, nativeSourceFileName];
   }
+
   return [webComponentName, webElementName, webSourceFileName];
 }
 
