@@ -133,94 +133,134 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
   };
 }
 
-function fullSourceFileNameFromState(state: AnnotationPluginPass) {
-  // NOTE: This was originally written as `sourceFileName` which is incorrect according to Babel types
-  const name = state.file.opts.parserOpts?.sourceFilename;
+function functionBodyPushAttributes(
+  annotateFragments: boolean,
+  t: typeof Babel.types,
+  path: Babel.NodePath<Babel.types.Function>,
+  componentName: string,
+  sourceFileName: string | undefined,
+  attributeNames: string[],
+  excludedComponents?: string[]
+) {
+  let jsxNode: Babel.NodePath;
 
-  if (typeof name !== "string") {
-    return undefined;
-  }
+  const functionBody = path.get("body").get("body");
+  if (Array.isArray(functionBody)) return;
 
-  return name;
-}
+  if (
+    functionBody.parent &&
+    (functionBody.parent.type === "JSXElement" || functionBody.parent.type === "JSXFragment")
+  ) {
+    const maybeJsxNode = functionBody.find((c) => {
+      return c.type === "JSXElement" || c.type === "JSXFragment";
+    });
 
-function sourceFileNameFromState(state: AnnotationPluginPass) {
-  const name = fullSourceFileNameFromState(state);
-  if (name === undefined) {
-    return undefined;
-  }
+    if (!maybeJsxNode) return;
 
-  if (name.indexOf("/") !== -1) {
-    return name.split("/").pop();
-  } else if (name.indexOf("\\") !== -1) {
-    return name.split("\\").pop();
+    jsxNode = maybeJsxNode;
   } else {
-    return name;
-  }
-}
-
-function isKnownIncompatiblePluginFromState(state: AnnotationPluginPass) {
-  const fullSourceFileName = fullSourceFileNameFromState(state);
-  if (fullSourceFileName == undefined) {
-    return false;
-  }
-  for (let i = 0; i < KNOWN_INCOMPATIBLE_PLUGINS.length; i += 1) {
-    const pluginName = KNOWN_INCOMPATIBLE_PLUGINS[i] as string;
-    if (
-      fullSourceFileName.includes("/node_modules/" + pluginName + "/") ||
-      fullSourceFileName.includes("\\node_modules\\" + pluginName + "\\")
-    ) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-function attributeNamesFromState(state: AnnotationPluginPass): [string, string, string] {
-  if (state.opts.native) {
-    if (state.opts.setFSTagName) {
-      return [fsTagName, fsTagName, nativeSourceFileName];
-    } else {
-      return [nativeComponentName, nativeElementName, nativeSourceFileName];
-    }
-  }
-  return [webComponentName, webElementName, webSourceFileName];
-}
-
-function isReactFragment(openingElement: Babel.NodePath) {
-  if (openingElement.isJSXFragment()) {
-    return true;
-  }
-
-  if (!openingElement.node) return;
-  if (!("name" in openingElement.node)) return;
-  if (!openingElement.node.name) return;
-
-  let name;
-  if (typeof openingElement.node.name === "string") {
-    name = openingElement.node.name;
-  } else if ("name" in openingElement.node.name) {
-    name = openingElement.node.name.name;
-  }
-
-  if (!name) return;
-
-  if (name === "Fragment" || name === "React.Fragment") return true;
-
-  if (!("type" in openingElement))
-    if (
-      !openingElement.node.name.type ||
-      !openingElement.node.name.object ||
-      !openingElement.node.name.property
-    )
+    const returnStatement = functionBody.find((c) => {
+      return c.type === "ReturnStatement";
+    });
+    if (!returnStatement) {
       return;
+    }
 
-  return (
-    openingElement.node.name.type === "JSXMemberExpression" &&
-    openingElement.node.name.object.name === "React" &&
-    openingElement.node.name.property.name === "Fragment"
+    const arg = returnStatement.get("argument");
+    if (!arg) {
+      return;
+    }
+
+    if (Array.isArray(arg)) {
+      return;
+    }
+
+    if (!arg.isJSXFragment() && !arg.isJSXElement()) {
+      return;
+    }
+
+    jsxNode = arg;
+  }
+
+  if (!jsxNode) return;
+
+  processJSX(
+    annotateFragments,
+    t,
+    jsxNode,
+    componentName,
+    sourceFileName,
+    attributeNames,
+    excludedComponents
   );
+}
+
+function processJSX(
+  annotateFragments: boolean,
+  t: typeof Babel.types,
+  jsxNode: Babel.NodePath,
+  componentName: string | null,
+  sourceFileName: string | undefined,
+  attributeNames: string[],
+  excludedComponents?: string[]
+) {
+  if (!jsxNode) {
+    return;
+  }
+
+  // only a JSXElement contains openingElement
+  const openingElement = jsxNode.get("openingElement");
+  if (Array.isArray(openingElement)) return;
+
+  applyAttributes(
+    t,
+    openingElement,
+    componentName,
+    sourceFileName,
+    attributeNames,
+    excludedComponents
+  );
+
+  let children = jsxNode.get("children");
+
+  if (children && !Array.isArray(children)) {
+    children = [children];
+  }
+
+  if (children && children.length) {
+    let shouldSetComponentName = annotateFragments;
+
+    for (let i = 0; i < children.length; i += 1) {
+      const child = children[i];
+      if (!child) continue;
+      // Children don't receive the data-component attribute so we pass null for componentName unless it's the first child of a Fragment with a node and `annotateFragments` is true
+      const openingElement = child.get("openingElement");
+      if (Array.isArray(openingElement)) continue;
+
+      if (shouldSetComponentName && openingElement && openingElement.node) {
+        shouldSetComponentName = false;
+        processJSX(
+          annotateFragments,
+          t,
+          child,
+          componentName,
+          sourceFileName,
+          attributeNames,
+          excludedComponents
+        );
+      } else {
+        processJSX(
+          annotateFragments,
+          t,
+          child,
+          null,
+          sourceFileName,
+          attributeNames,
+          excludedComponents
+        );
+      }
+    }
+  }
 }
 
 function applyAttributes(
@@ -296,133 +336,93 @@ function applyAttributes(
   }
 }
 
-function processJSX(
-  annotateFragments: boolean,
-  t: typeof Babel.types,
-  jsxNode: Babel.NodePath,
-  componentName: string | null,
-  sourceFileName: string | undefined,
-  attributeNames: string[],
-  excludedComponents?: string[]
-) {
-  if (!jsxNode) {
-    return;
+function sourceFileNameFromState(state: AnnotationPluginPass) {
+  const name = fullSourceFileNameFromState(state);
+  if (name === undefined) {
+    return undefined;
   }
 
-  // only a JSXElement contains openingElement
-  const openingElement = jsxNode.get("openingElement");
-  if (Array.isArray(openingElement)) return;
-
-  applyAttributes(
-    t,
-    openingElement,
-    componentName,
-    sourceFileName,
-    attributeNames,
-    excludedComponents
-  );
-
-  let children = jsxNode.get("children");
-
-  if (children && !Array.isArray(children)) {
-    children = [children];
-  }
-
-  if (children && children.length) {
-    let shouldSetComponentName = annotateFragments;
-
-    for (let i = 0; i < children.length; i += 1) {
-      const child = children[i];
-      if (!child) continue;
-      // Children don't receive the data-component attribute so we pass null for componentName unless it's the first child of a Fragment with a node and `annotateFragments` is true
-      const openingElement = child.get("openingElement");
-      if (Array.isArray(openingElement)) continue;
-
-      if (shouldSetComponentName && openingElement && openingElement.node) {
-        shouldSetComponentName = false;
-        processJSX(
-          annotateFragments,
-          t,
-          child,
-          componentName,
-          sourceFileName,
-          attributeNames,
-          excludedComponents
-        );
-      } else {
-        processJSX(
-          annotateFragments,
-          t,
-          child,
-          null,
-          sourceFileName,
-          attributeNames,
-          excludedComponents
-        );
-      }
-    }
+  if (name.indexOf("/") !== -1) {
+    return name.split("/").pop();
+  } else if (name.indexOf("\\") !== -1) {
+    return name.split("\\").pop();
+  } else {
+    return name;
   }
 }
 
-function functionBodyPushAttributes(
-  annotateFragments: boolean,
-  t: typeof Babel.types,
-  path: Babel.NodePath<Babel.types.Function>,
-  componentName: string,
-  sourceFileName: string | undefined,
-  attributeNames: string[],
-  excludedComponents?: string[]
-) {
-  let jsxNode: Babel.NodePath;
+function fullSourceFileNameFromState(state: AnnotationPluginPass) {
+  // NOTE: This was originally written as `sourceFileName` which is incorrect according to Babel types
+  const name = state.file.opts.parserOpts?.sourceFilename;
 
-  const functionBody = path.get("body").get("body");
-  if (Array.isArray(functionBody)) return;
-
-  if (
-    functionBody.parent &&
-    (functionBody.parent.type === "JSXElement" || functionBody.parent.type === "JSXFragment")
-  ) {
-    const maybeJsxNode = functionBody.find((c) => {
-      return c.type === "JSXElement" || c.type === "JSXFragment";
-    });
-
-    if (!maybeJsxNode) return;
-
-    jsxNode = maybeJsxNode;
-  } else {
-    const returnStatement = functionBody.find((c) => {
-      return c.type === "ReturnStatement";
-    });
-    if (!returnStatement) {
-      return;
-    }
-
-    const arg = returnStatement.get("argument");
-    if (!arg) {
-      return;
-    }
-
-    if (Array.isArray(arg)) {
-      return;
-    }
-
-    if (!arg.isJSXFragment() && !arg.isJSXElement()) {
-      return;
-    }
-
-    jsxNode = arg;
+  if (typeof name !== "string") {
+    return undefined;
   }
 
-  if (!jsxNode) return;
+  return name;
+}
 
-  processJSX(
-    annotateFragments,
-    t,
-    jsxNode,
-    componentName,
-    sourceFileName,
-    attributeNames,
-    excludedComponents
+function isKnownIncompatiblePluginFromState(state: AnnotationPluginPass) {
+  const fullSourceFileName = fullSourceFileNameFromState(state);
+  if (fullSourceFileName == undefined) {
+    return false;
+  }
+  for (let i = 0; i < KNOWN_INCOMPATIBLE_PLUGINS.length; i += 1) {
+    const pluginName = KNOWN_INCOMPATIBLE_PLUGINS[i] as string;
+    if (
+      fullSourceFileName.includes("/node_modules/" + pluginName + "/") ||
+      fullSourceFileName.includes("\\node_modules\\" + pluginName + "\\")
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function attributeNamesFromState(state: AnnotationPluginPass): [string, string, string] {
+  if (state.opts.native) {
+    if (state.opts.setFSTagName) {
+      return [fsTagName, fsTagName, nativeSourceFileName];
+    } else {
+      return [nativeComponentName, nativeElementName, nativeSourceFileName];
+    }
+  }
+  return [webComponentName, webElementName, webSourceFileName];
+}
+
+function isReactFragment(openingElement: Babel.NodePath) {
+  if (openingElement.isJSXFragment()) {
+    return true;
+  }
+
+  if (!openingElement.node) return;
+  if (!("name" in openingElement.node)) return;
+  if (!openingElement.node.name) return;
+
+  let name;
+  if (typeof openingElement.node.name === "string") {
+    name = openingElement.node.name;
+  } else if ("name" in openingElement.node.name) {
+    name = openingElement.node.name.name;
+  }
+
+  if (!name) return;
+
+  if (name === "Fragment" || name === "React.Fragment") return true;
+
+  if (!("type" in openingElement))
+    if (
+      !openingElement.node.name.type ||
+      !openingElement.node.name.object ||
+      !openingElement.node.name.property
+    )
+      return;
+
+  return (
+    openingElement.node.name.type === "JSXMemberExpression" &&
+    openingElement.node.name.object.name === "React" &&
+    openingElement.node.name.property.name === "Fragment"
   );
 }
 
