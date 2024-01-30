@@ -44,14 +44,14 @@ const nativeSourceFileName = "dataSentrySourceFile";
 interface AnnotationOpts {
   native?: boolean;
   "annotate-fragments"?: boolean;
-  excludedComponents?: ExcludedComponent[];
+  ignoredComponents?: IgnoredComponent[];
 }
 
 interface AnnotationPluginPass extends PluginPass {
   opts: AnnotationOpts;
 }
 
-type ExcludedComponent = [file: string, component: string, element: string];
+type IgnoredComponent = [file: string, component: string, element: string];
 
 type AnnotationPlugin = PluginObj<AnnotationPluginPass>;
 
@@ -69,7 +69,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
           path.node.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          state.opts.excludedComponents ?? []
+          state.opts.ignoredComponents ?? []
         );
       },
       ArrowFunctionExpression(path, state) {
@@ -89,7 +89,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
           parent.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          state.opts.excludedComponents ?? []
+          state.opts.ignoredComponents ?? []
         );
       },
       ClassDeclaration(path, state) {
@@ -102,7 +102,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
         if (!render || !render.traverse) return;
         if (isKnownIncompatiblePluginFromState(state)) return;
 
-        const excludedComponents = state.opts.excludedComponents ?? [];
+        const ignoredComponents = state.opts.ignoredComponents ?? [];
 
         render.traverse({
           ReturnStatement(returnStatement) {
@@ -116,7 +116,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
               name.node && name.node.name,
               sourceFileNameFromState(state),
               attributeNamesFromState(state),
-              excludedComponents
+              ignoredComponents
             );
           },
         });
@@ -132,7 +132,7 @@ function functionBodyPushAttributes(
   componentName: string,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  excludedComponents: ExcludedComponent[]
+  ignoredComponents: IgnoredComponent[]
 ) {
   let jsxNode: Babel.NodePath;
 
@@ -183,7 +183,7 @@ function functionBodyPushAttributes(
     componentName,
     sourceFileName,
     attributeNames,
-    excludedComponents
+    ignoredComponents
   );
 }
 
@@ -194,7 +194,7 @@ function processJSX(
   componentName: string | null,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  excludedComponents: ExcludedComponent[]
+  ignoredComponents: IgnoredComponent[]
 ) {
   if (!jsxNode) {
     return;
@@ -212,7 +212,7 @@ function processJSX(
       componentName,
       sourceFileName,
       attributeNames,
-      excludedComponents
+      ignoredComponents
     );
   });
 
@@ -243,7 +243,7 @@ function processJSX(
         componentName,
         sourceFileName,
         attributeNames,
-        excludedComponents
+        ignoredComponents
       );
     } else {
       processJSX(
@@ -253,7 +253,7 @@ function processJSX(
         null,
         sourceFileName,
         attributeNames,
-        excludedComponents
+        ignoredComponents
       );
     }
   });
@@ -265,7 +265,7 @@ function applyAttributes(
   componentName: string | null,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  excludedComponents: ExcludedComponent[]
+  ignoredComponents: IgnoredComponent[]
 ) {
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
 
@@ -275,11 +275,11 @@ function applyAttributes(
   if (!openingElement.node.attributes) openingElement.node.attributes = [];
   const elementName = getPathName(t, openingElement);
 
-  const isAnIgnoredComponent = excludedComponents.some(
-    (excludedComponent) =>
-      matchesIgnoreRule(excludedComponent[0], sourceFileName) &&
-      matchesIgnoreRule(excludedComponent[1], componentName) &&
-      matchesIgnoreRule(excludedComponent[2], elementName)
+  const isAnIgnoredComponent = ignoredComponents.some(
+    (ignoredComponent) =>
+      matchesIgnoreRule(ignoredComponent[0], sourceFileName) &&
+      matchesIgnoreRule(ignoredComponent[1], componentName) &&
+      matchesIgnoreRule(ignoredComponent[2], elementName)
   );
 
   // Add a stable attribute for the element name but only for non-DOM names
