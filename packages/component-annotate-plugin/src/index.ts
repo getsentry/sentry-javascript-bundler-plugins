@@ -406,14 +406,17 @@ function isReactFragment(openingElement: Babel.NodePath): boolean {
   return false;
 }
 
-function matchesIgnoreRule(rule: string, name: string) {
+function matchesIgnoreRule(rule: string, name: string | undefined | null) {
+  if (!name) return false;
   return rule === "*" || rule === name;
 }
 
 function hasAttributeWithName(
   openingElement: Babel.NodePath<Babel.types.JSXOpeningElement>,
-  name: string
+  name: string | undefined | null
 ): boolean {
+  if (!name) return false;
+
   return openingElement.node.attributes.some((node) => {
     if (node.type === "JSXAttribute") {
       return node.name.name === name;
