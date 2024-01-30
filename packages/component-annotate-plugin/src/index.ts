@@ -137,9 +137,9 @@ function functionBodyPushAttributes(
   let jsxNode: Babel.NodePath;
 
   const functionBody = path.get("body").get("body");
-  if (Array.isArray(functionBody)) return;
 
   if (
+    !("length" in functionBody) &&
     functionBody.parent &&
     (functionBody.parent.type === "JSXElement" || functionBody.parent.type === "JSXFragment")
   ) {
