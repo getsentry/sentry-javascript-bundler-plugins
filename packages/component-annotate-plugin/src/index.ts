@@ -44,7 +44,7 @@ const nativeSourceFileName = "dataSentrySourceFile";
 interface AnnotationOpts {
   native?: boolean;
   "annotate-fragments"?: boolean;
-  ignoredComponents?: IgnoredComponent[];
+  ignoreComponents?: IgnoredComponent[];
 }
 
 interface AnnotationPluginPass extends PluginPass {
@@ -69,7 +69,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
           path.node.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          state.opts.ignoredComponents ?? []
+          state.opts.ignoreComponents ?? []
         );
       },
       ArrowFunctionExpression(path, state) {
@@ -89,7 +89,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
           parent.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          state.opts.ignoredComponents ?? []
+          state.opts.ignoreComponents ?? []
         );
       },
       ClassDeclaration(path, state) {
@@ -102,7 +102,7 @@ export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlu
         if (!render || !render.traverse) return;
         if (isKnownIncompatiblePluginFromState(state)) return;
 
-        const ignoredComponents = state.opts.ignoredComponents ?? [];
+        const ignoredComponents = state.opts.ignoreComponents ?? [];
 
         render.traverse({
           ReturnStatement(returnStatement) {
