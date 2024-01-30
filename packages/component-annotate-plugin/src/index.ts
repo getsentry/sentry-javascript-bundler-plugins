@@ -333,7 +333,7 @@ function applyAttributes(
 
 function sourceFileNameFromState(state: AnnotationPluginPass) {
   const name = fullSourceFileNameFromState(state);
-  if (name === undefined) {
+  if (!name) {
     return undefined;
   }
 
@@ -346,23 +346,21 @@ function sourceFileNameFromState(state: AnnotationPluginPass) {
   }
 }
 
-function fullSourceFileNameFromState(state: AnnotationPluginPass) {
-  // NOTE: This was originally written as `sourceFileName` which is incorrect according to Babel types
-  const name = state.file.opts.parserOpts?.sourceFilename;
+function fullSourceFileNameFromState(state: AnnotationPluginPass): string | null {
+  // @ts-expect-error This type is incorrect in Babel, `sourceFileName` is the correct type
+  const name = state.file.opts.parserOpts?.sourceFileName as unknown;
 
-  if (typeof name !== "string") {
-    return undefined;
+  if (typeof name === "string") {
+    return name;
   }
 
-  return name;
+  return null;
 }
 
 function isKnownIncompatiblePluginFromState(state: AnnotationPluginPass) {
   const fullSourceFileName = fullSourceFileNameFromState(state);
 
-  if (fullSourceFileName == undefined) {
-    return false;
-  }
+  if (!fullSourceFileName) return false;
 
   return KNOWN_INCOMPATIBLE_PLUGINS.some((pluginName) => {
     if (
