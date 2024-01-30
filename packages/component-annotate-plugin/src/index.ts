@@ -432,7 +432,6 @@ function isReactFragment(t: typeof Babel.types, openingElement: Babel.NodePath):
 }
 
 function matchesIgnoreRule(rule: string, name: string | undefined | null) {
-  if (!name) return false;
   return rule === "*" || rule === name;
 }
 
