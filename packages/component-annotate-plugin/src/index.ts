@@ -31,6 +31,8 @@
 import type * as Babel from "@babel/core";
 import type { PluginObj, PluginPass } from "@babel/core";
 
+import { DEFAULT_IGNORED_ELEMENTS, KNOWN_INCOMPATIBLE_PLUGINS } from "./constants";
+
 const webComponentName = "data-sentry-component";
 const webElementName = "data-sentry-element";
 const webSourceFileName = "data-sentry-source-file";
@@ -39,13 +41,6 @@ const nativeComponentName = "dataSentryComponent";
 const nativeElementName = "dataSentryElement";
 const nativeSourceFileName = "dataSentrySourceFile";
 const fsTagName = "fsTagName";
-
-const knownIncompatiblePlugins = [
-  // This module might be causing an issue preventing clicks. For safety, we won't run on this module.
-  "react-native-testfairy",
-  // This module checks for unexpected property keys and throws an exception.
-  "@react-navigation",
-];
 
 interface AnnotationOpts {
   setFSTagName?: boolean;
@@ -169,8 +164,8 @@ function isKnownIncompatiblePluginFromState(state: AnnotationPluginPass) {
   if (fullSourceFileName == undefined) {
     return false;
   }
-  for (let i = 0; i < knownIncompatiblePlugins.length; i += 1) {
-    const pluginName = knownIncompatiblePlugins[i] as string;
+  for (let i = 0; i < KNOWN_INCOMPATIBLE_PLUGINS.length; i += 1) {
+    const pluginName = KNOWN_INCOMPATIBLE_PLUGINS[i] as string;
     if (
       fullSourceFileName.includes("/node_modules/" + pluginName + "/") ||
       fullSourceFileName.includes("\\node_modules\\" + pluginName + "\\")
@@ -268,7 +263,7 @@ function applyAttributes(
     // if componentAttributeName and elementAttributeName are set to the same thing (fsTagName), then only set the element attribute when we don't have a component attribute
     (componentAttributeName !== elementAttributeName || !componentName)
   ) {
-    if (defaultIgnoredElements.includes(elementName)) {
+    if (DEFAULT_IGNORED_ELEMENTS.includes(elementName)) {
       ignoredElement = true;
     } else {
       openingElement.node.attributes.push(
@@ -441,119 +436,3 @@ function hasNodeNamed(openingElement, name) {
     return node.name.name === name;
   });
 }
-
-// We don't write data-element attributes for these names
-const defaultIgnoredElements = [
-  "a",
-  "abbr",
-  "address",
-  "area",
-  "article",
-  "aside",
-  "audio",
-  "b",
-  "base",
-  "bdi",
-  "bdo",
-  "blockquote",
-  "body",
-  "br",
-  "button",
-  "canvas",
-  "caption",
-  "cite",
-  "code",
-  "col",
-  "colgroup",
-  "data",
-  "datalist",
-  "dd",
-  "del",
-  "details",
-  "dfn",
-  "dialog",
-  "div",
-  "dl",
-  "dt",
-  "em",
-  "embed",
-  "fieldset",
-  "figure",
-  "footer",
-  "form",
-  "h1",
-  "h2",
-  "h3",
-  "h4",
-  "h5",
-  "h6",
-  "head",
-  "header",
-  "hgroup",
-  "hr",
-  "html",
-  "i",
-  "iframe",
-  "img",
-  "input",
-  "ins",
-  "kbd",
-  "keygen",
-  "label",
-  "legend",
-  "li",
-  "link",
-  "main",
-  "map",
-  "mark",
-  "menu",
-  "menuitem",
-  "meter",
-  "nav",
-  "noscript",
-  "object",
-  "ol",
-  "optgroup",
-  "option",
-  "output",
-  "p",
-  "param",
-  "pre",
-  "progress",
-  "q",
-  "rb",
-  "rp",
-  "rt",
-  "rtc",
-  "ruby",
-  "s",
-  "samp",
-  "script",
-  "section",
-  "select",
-  "small",
-  "source",
-  "span",
-  "strong",
-  "style",
-  "sub",
-  "summary",
-  "sup",
-  "table",
-  "tbody",
-  "td",
-  "template",
-  "textarea",
-  "tfoot",
-  "th",
-  "thead",
-  "time",
-  "title",
-  "tr",
-  "track",
-  "u",
-  "ul",
-  "var",
-  "video",
-  "wbr",
-];
