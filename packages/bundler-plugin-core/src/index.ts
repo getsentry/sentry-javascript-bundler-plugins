@@ -1,8 +1,10 @@
 import SentryCli from "@sentry/cli";
+import { transformAsync } from "@babel/core";
+import { componentNameAnnotatePlugin } from "@sentry/component-annotate-plugin";
 import * as fs from "fs";
 import * as path from "path";
 import MagicString from "magic-string";
-import { createUnplugin, UnpluginOptions } from "unplugin";
+import { createUnplugin, TransformResult, UnpluginOptions } from "unplugin";
 import { normalizeUserOptions, validateOptions } from "./options-mapping";
 import { createDebugIdUploadFunction } from "./debug-id-upload";
 import { releaseManagementPlugin } from "./plugins/release-management";
@@ -22,9 +24,12 @@ import {
 } from "./utils";
 import * as dotenv from "dotenv";
 import { glob } from "glob";
+import pkg from "@sentry/utils";
+const { logger } = pkg;
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
+  componentNameAnnotatePlugin: () => UnpluginOptions;
   moduleMetadataInjectionPlugin?: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
@@ -60,6 +65,7 @@ interface SentryUnpluginFactoryOptions {
  */
 export function sentryUnpluginFactory({
   releaseInjectionPlugin,
+  componentNameAnnotatePlugin,
   moduleMetadataInjectionPlugin,
   debugIdInjectionPlugin,
   debugIdUploadPlugin,
@@ -317,6 +323,20 @@ export function sentryUnpluginFactory({
       );
     }
 
+    if (!options.componentNameAnnotate) {
+      logger.warn(
+        "No options provided for the component name annotate plugin. Please set `componentNameAnnotatePlugin.enabled` to `true` if you would like to have your frontend components automatically annotated at build-time."
+      );
+    } else if (!options.componentNameAnnotatePlugin.enabled) {
+      logger.info(
+        "The component name annotate plugin is currently disabled. Skipping component name annotations."
+      );
+    } else {
+      {
+        plugins.push(componentNameAnnotatePlugin());
+      }
+    }
+
     return plugins;
   });
 }
@@ -346,7 +366,6 @@ export function sentryCliBinaryExists(): boolean {
 
 export function createRollupReleaseInjectionHooks(injectionCode: string) {
   const virtualReleaseInjectionFileId = "\0sentry-release-injection-file";
-
   return {
     resolveId(id: string) {
       if (id === virtualReleaseInjectionFileId) {
@@ -506,6 +525,60 @@ export function createRollupDebugIdUploadHooks(
         const buildArtifacts = Object.keys(bundle).map((asset) => path.join(path.resolve(), asset));
         await upload(buildArtifacts);
       }
+    },
+  };
+}
+
+export function createComponentNameAnnotateHooks() {
+  type ParserPlugins = NonNullable<
+    NonNullable<Parameters<typeof transformAsync>[1]>["parserOpts"]
+  >["plugins"];
+
+  return {
+    async transform(this: void, code: string, id: string): Promise<TransformResult> {
+      // id may contain query and hash which will trip up our file extension logic below
+      const idWithoutQueryAndHash = stripQueryAndHashFromPath(id);
+
+      if (idWithoutQueryAndHash.match(/\\node_modules\\|\/node_modules\//)) {
+        return null;
+      }
+
+      // We will only apply this plugin on jsx and tsx files
+      if (![".jsx", ".tsx"].some((ending) => idWithoutQueryAndHash.endsWith(ending))) {
+        return null;
+      }
+
+      const parserPlugins: ParserPlugins = [];
+      if (idWithoutQueryAndHash.endsWith(".jsx")) {
+        parserPlugins.push("jsx");
+      } else if (idWithoutQueryAndHash.endsWith(".tsx")) {
+        parserPlugins.push("jsx", "typescript");
+      }
+
+      try {
+        const result = await transformAsync(code, {
+          plugins: [[componentNameAnnotatePlugin]],
+          filename: id,
+          parserOpts: {
+            sourceType: "module",
+            allowAwaitOutsideFunction: true,
+            plugins: parserPlugins,
+          },
+          generatorOpts: {
+            decoratorsBeforeExport: true,
+          },
+          sourceMaps: true,
+        });
+
+        return {
+          code: result?.code ?? code,
+          map: result?.map,
+        };
+      } catch (e) {
+        logger.error(`Failed to apply react annotate plugin`, e);
+      }
+
+      return { code };
     },
   };
 }
