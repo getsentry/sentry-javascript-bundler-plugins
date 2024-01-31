@@ -1,6 +1,6 @@
 {
   "name": "@sentry/component-annotate-plugin",
-  "version": "1.0.0",
+  "version": "2.10.3",
   "description": "A Babel plugin that annotates frontend components with additional data to enrich the experience in Sentry",
   "repository": "git://github.com/getsentry/sentry-javascript-bundler-plugins.git",
   "homepage": "https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/component-annotate-plugin",
