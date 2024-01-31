@@ -57,6 +57,7 @@ pnpm install @sentry/component-annotate-plugin --dev
   // ... other config above ...
 
   plugins: [
+    // Put this plugin before any other plugins you have that transform JSX code
     ['@sentry/component-annotate-plugin']
   ],
 }
@@ -73,6 +74,7 @@ import {componentNameAnnotatePlugin} from '@sentry/component-annotate-plugin';
   // ... other config above ...
 
   plugins: [
+    // Put this plugin before any other plugins you have that transform JSX code
     [componentNameAnnotatePlugin]
   ],
 }
