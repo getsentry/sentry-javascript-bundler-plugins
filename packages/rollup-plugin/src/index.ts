@@ -7,6 +7,7 @@ import {
   createRollupDebugIdUploadHooks,
   SentrySDKBuildFlags,
   createRollupBundleSizeOptimizationHooks,
+  createComponentNameAnnotateHooks,
 } from "@sentry/bundler-plugin-core";
 import type { UnpluginOptions } from "unplugin";
 
@@ -14,6 +15,13 @@ function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   return {
     name: "sentry-rollup-release-injection-plugin",
     rollup: createRollupReleaseInjectionHooks(injectionCode),
+  };
+}
+
+function rollupComponentNameAnnotatePlugin(): UnpluginOptions {
+  return {
+    name: "sentry-rollup-react-annotate-plugin",
+    rollup: createComponentNameAnnotateHooks(),
   };
 }
 
@@ -51,6 +59,7 @@ function rollupBundleSizeOptimizationsPlugin(
 
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: rollupReleaseInjectionPlugin,
+  componentNameAnnotatePlugin: rollupComponentNameAnnotatePlugin,
   debugIdInjectionPlugin: rollupDebugIdInjectionPlugin,
   moduleMetadataInjectionPlugin: rollupModuleMetadataInjectionPlugin,
   debugIdUploadPlugin: rollupDebugIdUploadPlugin,
