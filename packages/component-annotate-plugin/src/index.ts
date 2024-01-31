@@ -25,7 +25,11 @@
 
 /**
  * The following code is based on the FullStory Babel plugin, but has been modified to work
- * with Sentry products
+ * with Sentry products:
+ *
+ * - Added `sentry` to data properties, i.e `data-sentry-component`
+ * - Converted to TypeScript
+ * - Code cleanups
  */
 
 import type * as Babel from "@babel/core";
