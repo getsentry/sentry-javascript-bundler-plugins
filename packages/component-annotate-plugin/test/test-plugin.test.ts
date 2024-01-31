@@ -2147,58 +2147,29 @@ it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=n
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "nomatch", "nomatch"]] }]],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { Image } from 'react-native';
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\",
+          dataSentryElement: \\"Image\\",
+          dataSentryComponent: \\"Bananas\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\",
-            dataSentryElement: \\"Image\\",
-            dataSentryComponent: \\"Bananas\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);"
-  `
-  );
+    }"
+  `);
 });
 
 it("ignore components dataSentrySourceFile=* dataSentryComponent=nomatch dataSentryElement=nomatch snapshot matches", () => {
@@ -2208,58 +2179,29 @@ it("ignore components dataSentrySourceFile=* dataSentryComponent=nomatch dataSen
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["*", "nomatch", "nomatch"]] }]],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { Image } from 'react-native';
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\",
+          dataSentryElement: \\"Image\\",
+          dataSentryComponent: \\"Bananas\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\",
-            dataSentryElement: \\"Image\\",
-            dataSentryComponent: \\"Bananas\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);"
-  `
-  );
+    }"
+  `);
 });
 
 it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=* dataSentryElement=nomatch snapshot matches", () => {
@@ -2269,58 +2211,29 @@ it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=*
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "*", "nomatch"]] }]],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { Image } from 'react-native';
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\",
+          dataSentryElement: \\"Image\\",
+          dataSentryComponent: \\"Bananas\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\",
-            dataSentryElement: \\"Image\\",
-            dataSentryComponent: \\"Bananas\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);"
-  `
-  );
+    }"
+  `);
 });
 
 it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=nomatch dataSentryElement=* snapshot matches", () => {
@@ -2330,58 +2243,29 @@ it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=n
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "nomatch", "*"]] }]],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { Image } from 'react-native';
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\",
+          dataSentryElement: \\"Image\\",
+          dataSentryComponent: \\"Bananas\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\",
-            dataSentryElement: \\"Image\\",
-            dataSentryComponent: \\"Bananas\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);"
-  `
-  );
+    }"
+  `);
 });
 
 it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=* dataSentryElement=nomatch snapshot matches", () => {
@@ -2391,58 +2275,29 @@ it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=* dataS
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "nomatch", "nomatch"]] }]],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { Image } from 'react-native';
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\",
+          dataSentryElement: \\"Image\\",
+          dataSentryComponent: \\"Bananas\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\",
-            dataSentryElement: \\"Image\\",
-            dataSentryComponent: \\"Bananas\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);"
-  `
-  );
+    }"
+  `);
 });
 
 it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=nomatch dataSentryElement=* snapshot matches", () => {
@@ -2452,58 +2307,29 @@ it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=nomatch
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "nomatch", "nomatch"]] }]],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { Image } from 'react-native';
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\",
+          dataSentryElement: \\"Image\\",
+          dataSentryComponent: \\"Bananas\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\",
-            dataSentryElement: \\"Image\\",
-            dataSentryComponent: \\"Bananas\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);"
-  `
-  );
+    }"
+  `);
 });
 
 it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=* dataSentryElement=* snapshot matches", () => {
@@ -2513,58 +2339,29 @@ it("Bananas ignore components dataSentrySourceFile=nomatch dataSentryComponent=*
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "nomatch", "nomatch"]] }]],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { Image } from 'react-native';
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\",
+          dataSentryElement: \\"Image\\",
+          dataSentryComponent: \\"Bananas\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\",
-            dataSentryElement: \\"Image\\",
-            dataSentryComponent: \\"Bananas\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);"
-  `
-  );
+    }"
+  `);
 });
 
 // This tests out matching only `dataSentryElement`, with * for the others
@@ -2575,55 +2372,26 @@ it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=* dataS
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["*", "*", "Image"]] }]],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { Image } from 'react-native';
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);"
-  `
-  );
+    }"
+  `);
 });
 
 // This tests out matching only `dataSentryElement` and `dataSentryComponent`, with * for `dataSentrySourceFile`
@@ -2634,55 +2402,26 @@ it("Bananas ignore components dataSentrySourceFile=* dataSentryComponent=match d
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["*", "Bananas", "Image"]] }]],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { Image } from 'react-native';
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);"
-  `
-  );
+    }"
+  `);
 });
 
 // This tests out matching on all 3 of our ignore list values
@@ -2695,55 +2434,26 @@ it("Bananas ignore components dataSentrySourceFile=match dataSentryComponent=mat
       [plugin, { native: true, ignoreComponents: [["filename-test.js", "Bananas", "Image"]] }],
     ],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { Image } from 'react-native';
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);"
-  `
-  );
+    }"
+  `);
 });
 
 // This tests out matching on all 3 of our ignore list values via *
@@ -2754,125 +2464,78 @@ it("Bananas/Pizza/App ignore components dataSentrySourceFile=* dataSentryCompone
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["*", "*", "*"]] }]],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    Object.defineProperty(exports, \\"__esModule\\", {
-      value: true
-    });
-    exports[\\"default\\"] = App;
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    var _container;
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    _reactNative.UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { StyleSheet, Text, TextInput, View, Image, UIManager } from 'react-native';
+    UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);
-    var PizzaTranslator = /*#__PURE__*/function (_Component2) {
-      _inherits(PizzaTranslator, _Component2);
-      var _super2 = _createSuper(PizzaTranslator);
-      function PizzaTranslator(props) {
-        var _this;
-        _classCallCheck(this, PizzaTranslator);
-        _this = _super2.call(this, props);
-        _this.state = {
+    }
+    class PizzaTranslator extends Component {
+      constructor(props) {
+        super(props);
+        this.state = {
           text: ''
         };
-        return _this;
       }
-      _createClass(PizzaTranslator, [{
-        key: \\"render\\",
-        value: function render() {
-          var _this2 = this;
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
-            style: {
-              padding: 10
-            }
-          }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.TextInput, {
-            style: {
-              backgroundColor: '#000',
-              color: '#eee',
-              padding: 8
-            },
-            placeholder: \\"Type here to translate!\\" // not supported on iOS
-            ,
-            onChangeText: function onChangeText(text) {
-              return _this2.setState({
-                text: text
-              });
-            },
-            value: this.state.text
-          }), /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
-            style: {
-              padding: 10,
-              fontSize: 42
-            }
-          }, this.state.text.split(' ').map(function (word) {
-            return word && '🍕';
-          }).join(' ')));
-        }
-      }]);
-      return PizzaTranslator;
-    }(_react.Component);
-    function App() {
-      return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
+      render() {
+        return /*#__PURE__*/React.createElement(View, {
+          style: {
+            padding: 10
+          }
+        }, /*#__PURE__*/React.createElement(TextInput, {
+          style: {
+            backgroundColor: '#000',
+            color: '#eee',
+            padding: 8
+          },
+          placeholder: \\"Type here to translate!\\" // not supported on iOS
+          ,
+          onChangeText: text => this.setState({
+            text
+          }),
+          value: this.state.text
+        }), /*#__PURE__*/React.createElement(Text, {
+          style: {
+            padding: 10,
+            fontSize: 42
+          }
+        }, this.state.text.split(' ').map(word => word && '🍕').join(' ')));
+      }
+    }
+    export default function App() {
+      return /*#__PURE__*/React.createElement(View, {
         style: styles.container
-      }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
+      }, /*#__PURE__*/React.createElement(Text, {
         style: {
           color: '#eee'
         }
-      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/_react[\\"default\\"].createElement(Bananas, null), /*#__PURE__*/_react[\\"default\\"].createElement(PizzaTranslator, null));
+      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/React.createElement(Bananas, null), /*#__PURE__*/React.createElement(PizzaTranslator, null));
     }
-    var styles = _reactNative.StyleSheet.create({
-      container: (_container = {
+    const styles = StyleSheet.create({
+      container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'stretch',
-        backgroundColor: '#222'
-      }, _defineProperty(_container, \\"alignItems\\", 'center'), _defineProperty(_container, \\"justifyContent\\", 'center'), _container)
+        backgroundColor: '#222',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
     });"
-  `
-  );
+  `);
 });
 
 // This tests out matching on all 3 of our ignore list values
@@ -2883,146 +2546,99 @@ it("Bananas/Pizza/App ignore components dataSentrySourceFile=nomatch dataSentryC
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true, ignoreComponents: [["nomatch.js", "*", "*"]] }]],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    Object.defineProperty(exports, \\"__esModule\\", {
-      value: true
-    });
-    exports[\\"default\\"] = App;
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    var _container;
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    _reactNative.UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { StyleSheet, Text, TextInput, View, Image, UIManager } from 'react-native';
+    UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\",
+          dataSentryElement: \\"Image\\",
+          dataSentryComponent: \\"Bananas\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\",
-            dataSentryElement: \\"Image\\",
-            dataSentryComponent: \\"Bananas\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);
-    var PizzaTranslator = /*#__PURE__*/function (_Component2) {
-      _inherits(PizzaTranslator, _Component2);
-      var _super2 = _createSuper(PizzaTranslator);
-      function PizzaTranslator(props) {
-        var _this;
-        _classCallCheck(this, PizzaTranslator);
-        _this = _super2.call(this, props);
-        _this.state = {
+    }
+    class PizzaTranslator extends Component {
+      constructor(props) {
+        super(props);
+        this.state = {
           text: ''
         };
-        return _this;
       }
-      _createClass(PizzaTranslator, [{
-        key: \\"render\\",
-        value: function render() {
-          var _this2 = this;
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
-            style: {
-              padding: 10
-            },
-            dataSentryElement: \\"View\\",
-            dataSentryComponent: \\"PizzaTranslator\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.TextInput, {
-            style: {
-              backgroundColor: '#000',
-              color: '#eee',
-              padding: 8
-            },
-            placeholder: \\"Type here to translate!\\" // not supported on iOS
-            ,
-            onChangeText: function onChangeText(text) {
-              return _this2.setState({
-                text: text
-              });
-            },
-            value: this.state.text,
-            dataSentryElement: \\"TextInput\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }), /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
-            style: {
-              padding: 10,
-              fontSize: 42
-            },
-            dataSentryElement: \\"Text\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }, this.state.text.split(' ').map(function (word) {
-            return word && '🍕';
-          }).join(' ')));
-        }
-      }]);
-      return PizzaTranslator;
-    }(_react.Component);
-    function App() {
-      return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
+      render() {
+        return /*#__PURE__*/React.createElement(View, {
+          style: {
+            padding: 10
+          },
+          dataSentryElement: \\"View\\",
+          dataSentryComponent: \\"PizzaTranslator\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }, /*#__PURE__*/React.createElement(TextInput, {
+          style: {
+            backgroundColor: '#000',
+            color: '#eee',
+            padding: 8
+          },
+          placeholder: \\"Type here to translate!\\" // not supported on iOS
+          ,
+          onChangeText: text => this.setState({
+            text
+          }),
+          value: this.state.text,
+          dataSentryElement: \\"TextInput\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }), /*#__PURE__*/React.createElement(Text, {
+          style: {
+            padding: 10,
+            fontSize: 42
+          },
+          dataSentryElement: \\"Text\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }, this.state.text.split(' ').map(word => word && '🍕').join(' ')));
+      }
+    }
+    export default function App() {
+      return /*#__PURE__*/React.createElement(View, {
         style: styles.container,
         dataSentryElement: \\"View\\",
         dataSentryComponent: \\"App\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
+      }, /*#__PURE__*/React.createElement(Text, {
         style: {
           color: '#eee'
         },
         dataSentryElement: \\"Text\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/_react[\\"default\\"].createElement(Bananas, {
+      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/React.createElement(Bananas, {
         dataSentryElement: \\"Bananas\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }), /*#__PURE__*/_react[\\"default\\"].createElement(PizzaTranslator, {
+      }), /*#__PURE__*/React.createElement(PizzaTranslator, {
         dataSentryElement: \\"PizzaTranslator\\",
         dataSentrySourceFile: \\"filename-test.js\\"
       }));
     }
-    var styles = _reactNative.StyleSheet.create({
-      container: (_container = {
+    const styles = StyleSheet.create({
+      container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'stretch',
-        backgroundColor: '#222'
-      }, _defineProperty(_container, \\"alignItems\\", 'center'), _defineProperty(_container, \\"justifyContent\\", 'center'), _container)
+        backgroundColor: '#222',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
     });"
-  `
-  );
+  `);
 });
 
 it("Bananas/Pizza/App only Bananas dataSentrySourceFile=match dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
@@ -3045,140 +2661,93 @@ it("Bananas/Pizza/App only Bananas dataSentrySourceFile=match dataSentryComponen
       ],
     ],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    Object.defineProperty(exports, \\"__esModule\\", {
-      value: true
-    });
-    exports[\\"default\\"] = App;
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    var _container;
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    _reactNative.UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { StyleSheet, Text, TextInput, View, Image, UIManager } from 'react-native';
+    UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\",
+          dataSentryElement: \\"Image\\",
+          dataSentryComponent: \\"Bananas\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\",
-            dataSentryElement: \\"Image\\",
-            dataSentryComponent: \\"Bananas\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);
-    var PizzaTranslator = /*#__PURE__*/function (_Component2) {
-      _inherits(PizzaTranslator, _Component2);
-      var _super2 = _createSuper(PizzaTranslator);
-      function PizzaTranslator(props) {
-        var _this;
-        _classCallCheck(this, PizzaTranslator);
-        _this = _super2.call(this, props);
-        _this.state = {
+    }
+    class PizzaTranslator extends Component {
+      constructor(props) {
+        super(props);
+        this.state = {
           text: ''
         };
-        return _this;
       }
-      _createClass(PizzaTranslator, [{
-        key: \\"render\\",
-        value: function render() {
-          var _this2 = this;
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
-            style: {
-              padding: 10
-            }
-          }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.TextInput, {
-            style: {
-              backgroundColor: '#000',
-              color: '#eee',
-              padding: 8
-            },
-            placeholder: \\"Type here to translate!\\" // not supported on iOS
-            ,
-            onChangeText: function onChangeText(text) {
-              return _this2.setState({
-                text: text
-              });
-            },
-            value: this.state.text,
-            dataSentryElement: \\"TextInput\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }), /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
-            style: {
-              padding: 10,
-              fontSize: 42
-            },
-            dataSentryElement: \\"Text\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }, this.state.text.split(' ').map(function (word) {
-            return word && '🍕';
-          }).join(' ')));
-        }
-      }]);
-      return PizzaTranslator;
-    }(_react.Component);
-    function App() {
-      return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
+      render() {
+        return /*#__PURE__*/React.createElement(View, {
+          style: {
+            padding: 10
+          }
+        }, /*#__PURE__*/React.createElement(TextInput, {
+          style: {
+            backgroundColor: '#000',
+            color: '#eee',
+            padding: 8
+          },
+          placeholder: \\"Type here to translate!\\" // not supported on iOS
+          ,
+          onChangeText: text => this.setState({
+            text
+          }),
+          value: this.state.text,
+          dataSentryElement: \\"TextInput\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }), /*#__PURE__*/React.createElement(Text, {
+          style: {
+            padding: 10,
+            fontSize: 42
+          },
+          dataSentryElement: \\"Text\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }, this.state.text.split(' ').map(word => word && '🍕').join(' ')));
+      }
+    }
+    export default function App() {
+      return /*#__PURE__*/React.createElement(View, {
         style: styles.container
-      }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
+      }, /*#__PURE__*/React.createElement(Text, {
         style: {
           color: '#eee'
         },
         dataSentryElement: \\"Text\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/_react[\\"default\\"].createElement(Bananas, {
+      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/React.createElement(Bananas, {
         dataSentryElement: \\"Bananas\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }), /*#__PURE__*/_react[\\"default\\"].createElement(PizzaTranslator, {
+      }), /*#__PURE__*/React.createElement(PizzaTranslator, {
         dataSentryElement: \\"PizzaTranslator\\",
         dataSentrySourceFile: \\"filename-test.js\\"
       }));
     }
-    var styles = _reactNative.StyleSheet.create({
-      container: (_container = {
+    const styles = StyleSheet.create({
+      container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'stretch',
-        backgroundColor: '#222'
-      }, _defineProperty(_container, \\"alignItems\\", 'center'), _defineProperty(_container, \\"justifyContent\\", 'center'), _container)
+        backgroundColor: '#222',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
     });"
-  `
-  );
+  `);
 });
 
 it("Bananas/Pizza/App only Pizza dataSentrySourceFile=match dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
@@ -3201,140 +2770,93 @@ it("Bananas/Pizza/App only Pizza dataSentrySourceFile=match dataSentryComponent=
       ],
     ],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    Object.defineProperty(exports, \\"__esModule\\", {
-      value: true
-    });
-    exports[\\"default\\"] = App;
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    var _container;
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    _reactNative.UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { StyleSheet, Text, TextInput, View, Image, UIManager } from 'react-native';
+    UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);
-    var PizzaTranslator = /*#__PURE__*/function (_Component2) {
-      _inherits(PizzaTranslator, _Component2);
-      var _super2 = _createSuper(PizzaTranslator);
-      function PizzaTranslator(props) {
-        var _this;
-        _classCallCheck(this, PizzaTranslator);
-        _this = _super2.call(this, props);
-        _this.state = {
+    }
+    class PizzaTranslator extends Component {
+      constructor(props) {
+        super(props);
+        this.state = {
           text: ''
         };
-        return _this;
       }
-      _createClass(PizzaTranslator, [{
-        key: \\"render\\",
-        value: function render() {
-          var _this2 = this;
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
-            style: {
-              padding: 10
-            },
-            dataSentryElement: \\"View\\",
-            dataSentryComponent: \\"PizzaTranslator\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.TextInput, {
-            style: {
-              backgroundColor: '#000',
-              color: '#eee',
-              padding: 8
-            },
-            placeholder: \\"Type here to translate!\\" // not supported on iOS
-            ,
-            onChangeText: function onChangeText(text) {
-              return _this2.setState({
-                text: text
-              });
-            },
-            value: this.state.text,
-            dataSentryElement: \\"TextInput\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }), /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
-            style: {
-              padding: 10,
-              fontSize: 42
-            },
-            dataSentryElement: \\"Text\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }, this.state.text.split(' ').map(function (word) {
-            return word && '🍕';
-          }).join(' ')));
-        }
-      }]);
-      return PizzaTranslator;
-    }(_react.Component);
-    function App() {
-      return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
+      render() {
+        return /*#__PURE__*/React.createElement(View, {
+          style: {
+            padding: 10
+          },
+          dataSentryElement: \\"View\\",
+          dataSentryComponent: \\"PizzaTranslator\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }, /*#__PURE__*/React.createElement(TextInput, {
+          style: {
+            backgroundColor: '#000',
+            color: '#eee',
+            padding: 8
+          },
+          placeholder: \\"Type here to translate!\\" // not supported on iOS
+          ,
+          onChangeText: text => this.setState({
+            text
+          }),
+          value: this.state.text,
+          dataSentryElement: \\"TextInput\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }), /*#__PURE__*/React.createElement(Text, {
+          style: {
+            padding: 10,
+            fontSize: 42
+          },
+          dataSentryElement: \\"Text\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }, this.state.text.split(' ').map(word => word && '🍕').join(' ')));
+      }
+    }
+    export default function App() {
+      return /*#__PURE__*/React.createElement(View, {
         style: styles.container
-      }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
+      }, /*#__PURE__*/React.createElement(Text, {
         style: {
           color: '#eee'
         },
         dataSentryElement: \\"Text\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/_react[\\"default\\"].createElement(Bananas, {
+      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/React.createElement(Bananas, {
         dataSentryElement: \\"Bananas\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }), /*#__PURE__*/_react[\\"default\\"].createElement(PizzaTranslator, {
+      }), /*#__PURE__*/React.createElement(PizzaTranslator, {
         dataSentryElement: \\"PizzaTranslator\\",
         dataSentrySourceFile: \\"filename-test.js\\"
       }));
     }
-    var styles = _reactNative.StyleSheet.create({
-      container: (_container = {
+    const styles = StyleSheet.create({
+      container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'stretch',
-        backgroundColor: '#222'
-      }, _defineProperty(_container, \\"alignItems\\", 'center'), _defineProperty(_container, \\"justifyContent\\", 'center'), _container)
+        backgroundColor: '#222',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
     });"
-  `
-  );
+  `);
 });
 
 it("Bananas/Pizza/App only App dataSentrySourceFile=match dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
@@ -3357,140 +2879,93 @@ it("Bananas/Pizza/App only App dataSentrySourceFile=match dataSentryComponent=ma
       ],
     ],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    Object.defineProperty(exports, \\"__esModule\\", {
-      value: true
-    });
-    exports[\\"default\\"] = App;
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    var _container;
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    _reactNative.UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { StyleSheet, Text, TextInput, View, Image, UIManager } from 'react-native';
+    UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);
-    var PizzaTranslator = /*#__PURE__*/function (_Component2) {
-      _inherits(PizzaTranslator, _Component2);
-      var _super2 = _createSuper(PizzaTranslator);
-      function PizzaTranslator(props) {
-        var _this;
-        _classCallCheck(this, PizzaTranslator);
-        _this = _super2.call(this, props);
-        _this.state = {
+    }
+    class PizzaTranslator extends Component {
+      constructor(props) {
+        super(props);
+        this.state = {
           text: ''
         };
-        return _this;
       }
-      _createClass(PizzaTranslator, [{
-        key: \\"render\\",
-        value: function render() {
-          var _this2 = this;
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
-            style: {
-              padding: 10
-            }
-          }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.TextInput, {
-            style: {
-              backgroundColor: '#000',
-              color: '#eee',
-              padding: 8
-            },
-            placeholder: \\"Type here to translate!\\" // not supported on iOS
-            ,
-            onChangeText: function onChangeText(text) {
-              return _this2.setState({
-                text: text
-              });
-            },
-            value: this.state.text,
-            dataSentryElement: \\"TextInput\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }), /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
-            style: {
-              padding: 10,
-              fontSize: 42
-            },
-            dataSentryElement: \\"Text\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }, this.state.text.split(' ').map(function (word) {
-            return word && '🍕';
-          }).join(' ')));
-        }
-      }]);
-      return PizzaTranslator;
-    }(_react.Component);
-    function App() {
-      return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
+      render() {
+        return /*#__PURE__*/React.createElement(View, {
+          style: {
+            padding: 10
+          }
+        }, /*#__PURE__*/React.createElement(TextInput, {
+          style: {
+            backgroundColor: '#000',
+            color: '#eee',
+            padding: 8
+          },
+          placeholder: \\"Type here to translate!\\" // not supported on iOS
+          ,
+          onChangeText: text => this.setState({
+            text
+          }),
+          value: this.state.text,
+          dataSentryElement: \\"TextInput\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }), /*#__PURE__*/React.createElement(Text, {
+          style: {
+            padding: 10,
+            fontSize: 42
+          },
+          dataSentryElement: \\"Text\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }, this.state.text.split(' ').map(word => word && '🍕').join(' ')));
+      }
+    }
+    export default function App() {
+      return /*#__PURE__*/React.createElement(View, {
         style: styles.container,
         dataSentryElement: \\"View\\",
         dataSentryComponent: \\"App\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
+      }, /*#__PURE__*/React.createElement(Text, {
         style: {
           color: '#eee'
         },
         dataSentryElement: \\"Text\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/_react[\\"default\\"].createElement(Bananas, {
+      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/React.createElement(Bananas, {
         dataSentryElement: \\"Bananas\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }), /*#__PURE__*/_react[\\"default\\"].createElement(PizzaTranslator, {
+      }), /*#__PURE__*/React.createElement(PizzaTranslator, {
         dataSentryElement: \\"PizzaTranslator\\",
         dataSentrySourceFile: \\"filename-test.js\\"
       }));
     }
-    var styles = _reactNative.StyleSheet.create({
-      container: (_container = {
+    const styles = StyleSheet.create({
+      container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'stretch',
-        backgroundColor: '#222'
-      }, _defineProperty(_container, \\"alignItems\\", 'center'), _defineProperty(_container, \\"justifyContent\\", 'center'), _container)
+        backgroundColor: '#222',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
     });"
-  `
-  );
+  `);
 });
 
 it("Bananas/Pizza/App No Pizza Elements dataSentrySourceFile=match dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
@@ -3511,143 +2986,96 @@ it("Bananas/Pizza/App No Pizza Elements dataSentrySourceFile=match dataSentryCom
       ],
     ],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    Object.defineProperty(exports, \\"__esModule\\", {
-      value: true
-    });
-    exports[\\"default\\"] = App;
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    var _container;
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    _reactNative.UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { StyleSheet, Text, TextInput, View, Image, UIManager } from 'react-native';
+    UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\",
+          dataSentryElement: \\"Image\\",
+          dataSentryComponent: \\"Bananas\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\",
-            dataSentryElement: \\"Image\\",
-            dataSentryComponent: \\"Bananas\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);
-    var PizzaTranslator = /*#__PURE__*/function (_Component2) {
-      _inherits(PizzaTranslator, _Component2);
-      var _super2 = _createSuper(PizzaTranslator);
-      function PizzaTranslator(props) {
-        var _this;
-        _classCallCheck(this, PizzaTranslator);
-        _this = _super2.call(this, props);
-        _this.state = {
+    }
+    class PizzaTranslator extends Component {
+      constructor(props) {
+        super(props);
+        this.state = {
           text: ''
         };
-        return _this;
       }
-      _createClass(PizzaTranslator, [{
-        key: \\"render\\",
-        value: function render() {
-          var _this2 = this;
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
-            style: {
-              padding: 10
-            },
-            dataSentryElement: \\"View\\",
-            dataSentryComponent: \\"PizzaTranslator\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.TextInput, {
-            style: {
-              backgroundColor: '#000',
-              color: '#eee',
-              padding: 8
-            },
-            placeholder: \\"Type here to translate!\\" // not supported on iOS
-            ,
-            onChangeText: function onChangeText(text) {
-              return _this2.setState({
-                text: text
-              });
-            },
-            value: this.state.text,
-            dataSentryElement: \\"TextInput\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }), /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
-            style: {
-              padding: 10,
-              fontSize: 42
-            },
-            dataSentryElement: \\"Text\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }, this.state.text.split(' ').map(function (word) {
-            return word && '🍕';
-          }).join(' ')));
-        }
-      }]);
-      return PizzaTranslator;
-    }(_react.Component);
-    function App() {
-      return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
+      render() {
+        return /*#__PURE__*/React.createElement(View, {
+          style: {
+            padding: 10
+          },
+          dataSentryElement: \\"View\\",
+          dataSentryComponent: \\"PizzaTranslator\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }, /*#__PURE__*/React.createElement(TextInput, {
+          style: {
+            backgroundColor: '#000',
+            color: '#eee',
+            padding: 8
+          },
+          placeholder: \\"Type here to translate!\\" // not supported on iOS
+          ,
+          onChangeText: text => this.setState({
+            text
+          }),
+          value: this.state.text,
+          dataSentryElement: \\"TextInput\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }), /*#__PURE__*/React.createElement(Text, {
+          style: {
+            padding: 10,
+            fontSize: 42
+          },
+          dataSentryElement: \\"Text\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }, this.state.text.split(' ').map(word => word && '🍕').join(' ')));
+      }
+    }
+    export default function App() {
+      return /*#__PURE__*/React.createElement(View, {
         style: styles.container,
         dataSentryElement: \\"View\\",
         dataSentryComponent: \\"App\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
+      }, /*#__PURE__*/React.createElement(Text, {
         style: {
           color: '#eee'
         },
         dataSentryElement: \\"Text\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/_react[\\"default\\"].createElement(Bananas, {
+      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/React.createElement(Bananas, {
         dataSentryElement: \\"Bananas\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }), /*#__PURE__*/_react[\\"default\\"].createElement(PizzaTranslator, null));
+      }), /*#__PURE__*/React.createElement(PizzaTranslator, null));
     }
-    var styles = _reactNative.StyleSheet.create({
-      container: (_container = {
+    const styles = StyleSheet.create({
+      container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'stretch',
-        backgroundColor: '#222'
-      }, _defineProperty(_container, \\"alignItems\\", 'center'), _defineProperty(_container, \\"justifyContent\\", 'center'), _container)
+        backgroundColor: '#222',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
     });"
-  `
-  );
+  `);
 });
 
 it("Bananas/Pizza/App No Bananas Elements dataSentrySourceFile=match dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
@@ -3669,143 +3097,96 @@ it("Bananas/Pizza/App No Bananas Elements dataSentrySourceFile=match dataSentryC
     ],
   });
 
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    Object.defineProperty(exports, \\"__esModule\\", {
-      value: true
-    });
-    exports[\\"default\\"] = App;
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    var _container;
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    _reactNative.UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { StyleSheet, Text, TextInput, View, Image, UIManager } from 'react-native';
+    UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\",
+          dataSentryElement: \\"Image\\",
+          dataSentryComponent: \\"Bananas\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\",
-            dataSentryElement: \\"Image\\",
-            dataSentryComponent: \\"Bananas\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);
-    var PizzaTranslator = /*#__PURE__*/function (_Component2) {
-      _inherits(PizzaTranslator, _Component2);
-      var _super2 = _createSuper(PizzaTranslator);
-      function PizzaTranslator(props) {
-        var _this;
-        _classCallCheck(this, PizzaTranslator);
-        _this = _super2.call(this, props);
-        _this.state = {
+    }
+    class PizzaTranslator extends Component {
+      constructor(props) {
+        super(props);
+        this.state = {
           text: ''
         };
-        return _this;
       }
-      _createClass(PizzaTranslator, [{
-        key: \\"render\\",
-        value: function render() {
-          var _this2 = this;
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
-            style: {
-              padding: 10
-            },
-            dataSentryElement: \\"View\\",
-            dataSentryComponent: \\"PizzaTranslator\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.TextInput, {
-            style: {
-              backgroundColor: '#000',
-              color: '#eee',
-              padding: 8
-            },
-            placeholder: \\"Type here to translate!\\" // not supported on iOS
-            ,
-            onChangeText: function onChangeText(text) {
-              return _this2.setState({
-                text: text
-              });
-            },
-            value: this.state.text,
-            dataSentryElement: \\"TextInput\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }), /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
-            style: {
-              padding: 10,
-              fontSize: 42
-            },
-            dataSentryElement: \\"Text\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }, this.state.text.split(' ').map(function (word) {
-            return word && '🍕';
-          }).join(' ')));
-        }
-      }]);
-      return PizzaTranslator;
-    }(_react.Component);
-    function App() {
-      return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
+      render() {
+        return /*#__PURE__*/React.createElement(View, {
+          style: {
+            padding: 10
+          },
+          dataSentryElement: \\"View\\",
+          dataSentryComponent: \\"PizzaTranslator\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }, /*#__PURE__*/React.createElement(TextInput, {
+          style: {
+            backgroundColor: '#000',
+            color: '#eee',
+            padding: 8
+          },
+          placeholder: \\"Type here to translate!\\" // not supported on iOS
+          ,
+          onChangeText: text => this.setState({
+            text
+          }),
+          value: this.state.text,
+          dataSentryElement: \\"TextInput\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }), /*#__PURE__*/React.createElement(Text, {
+          style: {
+            padding: 10,
+            fontSize: 42
+          },
+          dataSentryElement: \\"Text\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }, this.state.text.split(' ').map(word => word && '🍕').join(' ')));
+      }
+    }
+    export default function App() {
+      return /*#__PURE__*/React.createElement(View, {
         style: styles.container,
         dataSentryElement: \\"View\\",
         dataSentryComponent: \\"App\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
+      }, /*#__PURE__*/React.createElement(Text, {
         style: {
           color: '#eee'
         },
         dataSentryElement: \\"Text\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/_react[\\"default\\"].createElement(Bananas, null), /*#__PURE__*/_react[\\"default\\"].createElement(PizzaTranslator, {
+      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/React.createElement(Bananas, null), /*#__PURE__*/React.createElement(PizzaTranslator, {
         dataSentryElement: \\"PizzaTranslator\\",
         dataSentrySourceFile: \\"filename-test.js\\"
       }));
     }
-    var styles = _reactNative.StyleSheet.create({
-      container: (_container = {
+    const styles = StyleSheet.create({
+      container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'stretch',
-        backgroundColor: '#222'
-      }, _defineProperty(_container, \\"alignItems\\", 'center'), _defineProperty(_container, \\"justifyContent\\", 'center'), _container)
+        backgroundColor: '#222',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
     });"
-  `
-  );
+  `);
 });
 
 it("Bananas/Pizza/App No Bananas/Pizza Elements dataSentrySourceFile=match dataSentryComponent=match dataSentryElement=match snapshot matches", () => {
@@ -3828,140 +3209,93 @@ it("Bananas/Pizza/App No Bananas/Pizza Elements dataSentrySourceFile=match dataS
       ],
     ],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
-    "\\"use strict\\";
-
-    function _typeof(obj) { \\"@babel/helpers - typeof\\"; return _typeof = \\"function\\" == typeof Symbol && \\"symbol\\" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && \\"function\\" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? \\"symbol\\" : typeof obj; }, _typeof(obj); }
-    Object.defineProperty(exports, \\"__esModule\\", {
-      value: true
-    });
-    exports[\\"default\\"] = App;
-    var _react = _interopRequireWildcard(require(\\"react\\"));
-    var _reactNative = require(\\"react-native\\");
-    var _container;
-    function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== \\"function\\") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-    function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== \\"object\\" && typeof obj !== \\"function\\") { return { \\"default\\": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== \\"default\\" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj[\\"default\\"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-    function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\\"Cannot call a class as a function\\"); } }
-    function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\\"value\\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-    function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \\"prototype\\", { writable: false }); return Constructor; }
-    function _toPropertyKey(arg) { var key = _toPrimitive(arg, \\"string\\"); return _typeof(key) === \\"symbol\\" ? key : String(key); }
-    function _toPrimitive(input, hint) { if (_typeof(input) !== \\"object\\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \\"default\\"); if (_typeof(res) !== \\"object\\") return res; throw new TypeError(\\"@@toPrimitive must return a primitive value.\\"); } return (hint === \\"string\\" ? String : Number)(input); }
-    function _inherits(subClass, superClass) { if (typeof superClass !== \\"function\\" && superClass !== null) { throw new TypeError(\\"Super expression must either be null or a function\\"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, \\"prototype\\", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-    function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-    function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-    function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === \\"object\\" || typeof call === \\"function\\")) { return call; } else if (call !== void 0) { throw new TypeError(\\"Derived constructors may only return object or undefined\\"); } return _assertThisInitialized(self); }
-    function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError(\\"this hasn't been initialised - super() hasn't been called\\"); } return self; }
-    function _isNativeReflectConstruct() { if (typeof Reflect === \\"undefined\\" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === \\"function\\") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-    function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-    _reactNative.UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
-    var Bananas = /*#__PURE__*/function (_Component) {
-      _inherits(Bananas, _Component);
-      var _super = _createSuper(Bananas);
-      function Bananas() {
-        _classCallCheck(this, Bananas);
-        return _super.apply(this, arguments);
+  expect(result?.code).toMatchInlineSnapshot(`
+    "import React, { Component } from 'react';
+    import { StyleSheet, Text, TextInput, View, Image, UIManager } from 'react-native';
+    UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
+    class Bananas extends Component {
+      render() {
+        let pic = {
+          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
+        };
+        return /*#__PURE__*/React.createElement(Image, {
+          source: pic,
+          style: {
+            width: 193,
+            height: 110,
+            marginTop: 10
+          },
+          fsClass: \\"test-class\\",
+          dataSentryElement: \\"Image\\",
+          dataSentryComponent: \\"Bananas\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        });
       }
-      _createClass(Bananas, [{
-        key: \\"render\\",
-        value: function render() {
-          var pic = {
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-          };
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Image, {
-            source: pic,
-            style: {
-              width: 193,
-              height: 110,
-              marginTop: 10
-            },
-            fsClass: \\"test-class\\",
-            dataSentryElement: \\"Image\\",
-            dataSentryComponent: \\"Bananas\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          });
-        }
-      }]);
-      return Bananas;
-    }(_react.Component);
-    var PizzaTranslator = /*#__PURE__*/function (_Component2) {
-      _inherits(PizzaTranslator, _Component2);
-      var _super2 = _createSuper(PizzaTranslator);
-      function PizzaTranslator(props) {
-        var _this;
-        _classCallCheck(this, PizzaTranslator);
-        _this = _super2.call(this, props);
-        _this.state = {
+    }
+    class PizzaTranslator extends Component {
+      constructor(props) {
+        super(props);
+        this.state = {
           text: ''
         };
-        return _this;
       }
-      _createClass(PizzaTranslator, [{
-        key: \\"render\\",
-        value: function render() {
-          var _this2 = this;
-          return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
-            style: {
-              padding: 10
-            },
-            dataSentryElement: \\"View\\",
-            dataSentryComponent: \\"PizzaTranslator\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.TextInput, {
-            style: {
-              backgroundColor: '#000',
-              color: '#eee',
-              padding: 8
-            },
-            placeholder: \\"Type here to translate!\\" // not supported on iOS
-            ,
-            onChangeText: function onChangeText(text) {
-              return _this2.setState({
-                text: text
-              });
-            },
-            value: this.state.text,
-            dataSentryElement: \\"TextInput\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }), /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
-            style: {
-              padding: 10,
-              fontSize: 42
-            },
-            dataSentryElement: \\"Text\\",
-            dataSentrySourceFile: \\"filename-test.js\\"
-          }, this.state.text.split(' ').map(function (word) {
-            return word && '🍕';
-          }).join(' ')));
-        }
-      }]);
-      return PizzaTranslator;
-    }(_react.Component);
-    function App() {
-      return /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.View, {
+      render() {
+        return /*#__PURE__*/React.createElement(View, {
+          style: {
+            padding: 10
+          },
+          dataSentryElement: \\"View\\",
+          dataSentryComponent: \\"PizzaTranslator\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }, /*#__PURE__*/React.createElement(TextInput, {
+          style: {
+            backgroundColor: '#000',
+            color: '#eee',
+            padding: 8
+          },
+          placeholder: \\"Type here to translate!\\" // not supported on iOS
+          ,
+          onChangeText: text => this.setState({
+            text
+          }),
+          value: this.state.text,
+          dataSentryElement: \\"TextInput\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }), /*#__PURE__*/React.createElement(Text, {
+          style: {
+            padding: 10,
+            fontSize: 42
+          },
+          dataSentryElement: \\"Text\\",
+          dataSentrySourceFile: \\"filename-test.js\\"
+        }, this.state.text.split(' ').map(word => word && '🍕').join(' ')));
+      }
+    }
+    export default function App() {
+      return /*#__PURE__*/React.createElement(View, {
         style: styles.container,
         dataSentryElement: \\"View\\",
         dataSentryComponent: \\"App\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }, /*#__PURE__*/_react[\\"default\\"].createElement(_reactNative.Text, {
+      }, /*#__PURE__*/React.createElement(Text, {
         style: {
           color: '#eee'
         },
         dataSentryElement: \\"Text\\",
         dataSentrySourceFile: \\"filename-test.js\\"
-      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/_react[\\"default\\"].createElement(Bananas, null), /*#__PURE__*/_react[\\"default\\"].createElement(PizzaTranslator, null));
+      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/React.createElement(Bananas, null), /*#__PURE__*/React.createElement(PizzaTranslator, null));
     }
-    var styles = _reactNative.StyleSheet.create({
-      container: (_container = {
+    const styles = StyleSheet.create({
+      container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'stretch',
-        backgroundColor: '#222'
-      }, _defineProperty(_container, \\"alignItems\\", 'center'), _defineProperty(_container, \\"justifyContent\\", 'center'), _container)
+        backgroundColor: '#222',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }
     });"
-  `
-  );
+  `);
 });
 
 it("Bananas incompatible plugin @react-navigation source snapshot matches", () => {
@@ -3970,8 +3304,7 @@ it("Bananas incompatible plugin @react-navigation source snapshot matches", () =
     presets: ["@babel/preset-react"],
     plugins: [[plugin, { native: true }]],
   });
-  expect(result?.code).toMatchInlineSnapshot(
-    `
+  expect(result?.code).toMatchInlineSnapshot(`
     "import React, { Component } from 'react';
     import { Image } from 'react-native';
     class Bananas extends Component {
@@ -3990,6 +3323,5 @@ it("Bananas incompatible plugin @react-navigation source snapshot matches", () =
         });
       }
     }"
-  `
-  );
+  `);
 });
