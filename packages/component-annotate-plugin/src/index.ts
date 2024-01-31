@@ -59,8 +59,12 @@ export function componentNameAnnotatePlugin({ types: t }: typeof Babel): Annotat
   return {
     visitor: {
       FunctionDeclaration(path, state) {
-        if (!path.node.id || !path.node.id.name) return;
-        if (isKnownIncompatiblePluginFromState(state)) return;
+        if (!path.node.id || !path.node.id.name) {
+          return;
+        }
+        if (isKnownIncompatiblePluginFromState(state)) {
+          return;
+        }
 
         functionBodyPushAttributes(
           state.opts["annotate-fragments"] === true,
@@ -74,11 +78,15 @@ export function componentNameAnnotatePlugin({ types: t }: typeof Babel): Annotat
       },
       ArrowFunctionExpression(path, state) {
         const parent = path.parent; // We're expecting a `VariableDeclarator` like `const MyComponent =`
-        if (!parent) return;
-        if (!("id" in parent)) return;
-        if (!parent.id) return;
-        if (!("name" in parent.id)) return;
-        if (!parent.id.name) return;
+        if (
+          !parent ||
+          !("id" in parent) ||
+          !parent.id ||
+          !("name" in parent.id) ||
+          !parent.id.name
+        ) {
+          return;
+        }
 
         if (isKnownIncompatiblePluginFromState(state)) return;
 
@@ -99,8 +107,9 @@ export function componentNameAnnotatePlugin({ types: t }: typeof Babel): Annotat
           return prop.isClassMethod() && prop.get("key").isIdentifier({ name: "render" });
         });
 
-        if (!render || !render.traverse) return;
-        if (isKnownIncompatiblePluginFromState(state)) return;
+        if (!render || !render.traverse || isKnownIncompatiblePluginFromState(state)) {
+          return;
+        }
 
         const ignoredComponents = state.opts.ignoreComponents ?? [];
 
@@ -108,7 +117,10 @@ export function componentNameAnnotatePlugin({ types: t }: typeof Babel): Annotat
           ReturnStatement(returnStatement) {
             const arg = returnStatement.get("argument");
 
-            if (!arg.isJSXElement() && !arg.isJSXFragment()) return;
+            if (!arg.isJSXElement() && !arg.isJSXFragment()) {
+              return;
+            }
+
             processJSX(
               state.opts["annotate-fragments"] === true,
               t,
@@ -147,7 +159,9 @@ function functionBodyPushAttributes(
       return c.type === "JSXElement" || c.type === "JSXFragment";
     });
 
-    if (!maybeJsxNode) return;
+    if (!maybeJsxNode) {
+      return;
+    }
 
     jsxNode = maybeJsxNode;
   } else {
@@ -174,7 +188,9 @@ function functionBodyPushAttributes(
     jsxNode = arg;
   }
 
-  if (!jsxNode) return;
+  if (!jsxNode) {
+    return;
+  }
 
   processJSX(
     annotateFragments,
@@ -226,13 +242,18 @@ function processJSX(
   let shouldSetComponentName = annotateFragments;
 
   children.forEach((child) => {
-    if (!child.node) return; // Happens for some node types like plain text
+    // Happens for some node types like plain text
+    if (!child.node) {
+      return;
+    }
 
     // Children don't receive the data-component attribute so we pass null for componentName unless it's the first child of a Fragment with a node and `annotateFragments` is true
     const openingElement = child.get("openingElement");
     // TODO: Improve this. We never expect to have multiple opening elements
     // but if it's possible, this should work
-    if (Array.isArray(openingElement)) return;
+    if (Array.isArray(openingElement)) {
+      return;
+    }
 
     if (shouldSetComponentName && openingElement && openingElement.node) {
       shouldSetComponentName = false;
@@ -269,8 +290,13 @@ function applyAttributes(
 ) {
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
 
-  if (isReactFragment(t, openingElement)) return;
-  if (!openingElement.node) return; // e.g., Raw JSX text like the `A` in `<h1>a</h1>`
+  if (isReactFragment(t, openingElement)) {
+    return;
+  }
+  // e.g., Raw JSX text like the `A` in `<h1>a</h1>`
+  if (!openingElement.node) {
+    return;
+  }
 
   if (!openingElement.node.attributes) openingElement.node.attributes = [];
   const elementName = getPathName(t, openingElement);
@@ -389,7 +415,9 @@ function isReactFragment(t: typeof Babel.types, openingElement: Babel.NodePath):
 
   const elementName = getPathName(t, openingElement);
 
-  if (elementName === "Fragment" || elementName === "React.Fragment") return true;
+  if (elementName === "Fragment" || elementName === "React.Fragment") {
+    return true;
+  }
 
   // TODO: All these objects are typed as unknown, maybe an oversight in Babel types?
   if (
@@ -400,7 +428,9 @@ function isReactFragment(t: typeof Babel.types, openingElement: Babel.NodePath):
     "type" in openingElement.node.name &&
     openingElement.node.name.type === "JSXMemberExpression"
   ) {
-    if (!("name" in openingElement.node)) return false;
+    if (!("name" in openingElement.node)) {
+      return false;
+    }
 
     const nodeName = openingElement.node.name;
     if (typeof nodeName !== "object" || !nodeName) {
@@ -439,7 +469,9 @@ function hasAttributeWithName(
   openingElement: Babel.NodePath<Babel.types.JSXOpeningElement>,
   name: string | undefined | null
 ): boolean {
-  if (!name) return false;
+  if (!name) {
+    return false;
+  }
 
   return openingElement.node.attributes.some((node) => {
     if (node.type === "JSXAttribute") {
@@ -452,11 +484,15 @@ function hasAttributeWithName(
 
 function getPathName(t: typeof Babel.types, path: Babel.NodePath): string {
   if (!path.node) return UNKNOWN_ELEMENT_NAME;
-  if (!("name" in path.node)) return UNKNOWN_ELEMENT_NAME;
+  if (!("name" in path.node)) {
+    return UNKNOWN_ELEMENT_NAME;
+  }
 
   const name = path.node.name;
 
-  if (typeof name === "string") return name;
+  if (typeof name === "string") {
+    return name;
+  }
 
   if (t.isIdentifier(name) || t.isJSXIdentifier(name)) {
     return name.name;
