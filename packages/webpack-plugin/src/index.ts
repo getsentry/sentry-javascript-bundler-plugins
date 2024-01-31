@@ -49,7 +49,7 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
 
 function webpackComponentNameAnnotatePlugin(): UnpluginOptions {
   return {
-    name: "sentry-webpack-react-annotate-plugin",
+    name: "sentry-webpack-component-name-annotate-plugin",
     enforce: "pre",
     // Webpack needs this hook for loader logic, so the plugin is not run on unsupported file types
     transformInclude(id) {

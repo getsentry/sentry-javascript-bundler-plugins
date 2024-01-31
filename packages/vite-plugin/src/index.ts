@@ -21,7 +21,7 @@ function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
 
 function viteComponentNameAnnotatePlugin(): UnpluginOptions {
   return {
-    name: "sentry-vite-react-annotate-plugin",
+    name: "sentry-vite-component-name-annotate-plugin",
     enforce: "pre" as const,
     vite: createComponentNameAnnotateHooks(),
   };

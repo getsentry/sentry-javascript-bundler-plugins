@@ -20,7 +20,7 @@ function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
 
 function rollupComponentNameAnnotatePlugin(): UnpluginOptions {
   return {
-    name: "sentry-rollup-react-annotate-plugin",
+    name: "sentry-rollup-component-name-annotate-plugin",
     rollup: createComponentNameAnnotateHooks(),
   };
 }
