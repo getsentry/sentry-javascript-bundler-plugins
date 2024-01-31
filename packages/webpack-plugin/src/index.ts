@@ -4,6 +4,7 @@ import {
   sentryUnpluginFactory,
   stringToUUID,
   SentrySDKBuildFlags,
+  createComponentNameAnnotateHooks,
 } from "@sentry/bundler-plugin-core";
 import * as path from "path";
 import { UnpluginOptions } from "unplugin";
@@ -43,6 +44,18 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
         })
       );
     },
+  };
+}
+
+function webpackComponentNameAnnotatePlugin(): UnpluginOptions {
+  return {
+    name: "sentry-webpack-react-annotate-plugin",
+    enforce: "pre",
+    // Webpack needs this hook for loader logic, so the plugin is not run on unsupported file types
+    transformInclude(id) {
+      return id.endsWith(".tsx") || id.endsWith(".jsx");
+    },
+    transform: createComponentNameAnnotateHooks().transform,
   };
 }
 
@@ -153,6 +166,7 @@ function webpackModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
 
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: webpackReleaseInjectionPlugin,
+  componentNameAnnotatePlugin: webpackComponentNameAnnotatePlugin,
   moduleMetadataInjectionPlugin: webpackModuleMetadataInjectionPlugin,
   debugIdInjectionPlugin: webpackDebugIdInjectionPlugin,
   debugIdUploadPlugin: webpackDebugIdUploadPlugin,
