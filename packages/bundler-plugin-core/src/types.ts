@@ -279,6 +279,21 @@ export interface Options {
   };
 
   /**
+   * Options related to component name annotations.
+   * Disabled by default, unless a value is set for this option.
+   * Please note that this feature is not currently supported by the esbuild bundler plugins, and will only annotate React components
+   */
+  componentNameAnnotate?: {
+    /**
+     * Whether the component name annotate plugin should be enabled or not.
+     * When enabled, your app's DOM will automatically be annotated during build-time with their respective component names.
+     * This will unlock the capability to search for Replays in Sentry by component name, as well as see component names in breadcrumbs and performance monitoring.
+     * Please note that this feature is not currently supported by the esbuild bundler plugins, and will only annotate React components
+     */
+    enabled?: boolean;
+  };
+
+  /**
    * Options that are considered experimental and subject to change.
    *
    * @experimental API that does not follow semantic versioning and may change in any release

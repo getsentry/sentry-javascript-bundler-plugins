@@ -327,7 +327,7 @@ export function sentryUnpluginFactory({
       logger.warn(
         "No options provided for the component name annotate plugin. Please set `componentNameAnnotatePlugin.enabled` to `true` if you would like to have your frontend components automatically annotated at build-time."
       );
-    } else if (!options.componentNameAnnotatePlugin.enabled) {
+    } else if (!options.componentNameAnnotate.enabled) {
       logger.info(
         "The component name annotate plugin is currently disabled. Skipping component name annotations."
       );
