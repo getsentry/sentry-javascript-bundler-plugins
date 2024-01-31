@@ -93,7 +93,9 @@ export function componentNameAnnotatePlugin({ types: t }: typeof Babel): Annotat
           return;
         }
 
-        if (isKnownIncompatiblePluginFromState(state)) return;
+        if (isKnownIncompatiblePluginFromState(state)) {
+          return;
+        }
 
         functionBodyPushAttributes(
           state.opts["annotate-fragments"] === true,
