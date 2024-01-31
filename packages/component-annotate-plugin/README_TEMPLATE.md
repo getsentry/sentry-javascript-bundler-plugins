@@ -14,6 +14,7 @@ This plugin is currently in beta. Please help us improve by [reporting any issue
 
 A Babel plugin that automatically annotates your output DOM with their respective frontend component names.
 This will unlock the capability to search for Replays in Sentry by component name, as well as see component names in breadcrumbs and performance monitoring.
+Please note that your Sentry JavaScript SDK version must be at least `7.91.0` to take advantage of these features.
 Currently, this plugin only works with React, and will exclusively parse `.jsx` and `.tsx` files.
 
 ### Note
