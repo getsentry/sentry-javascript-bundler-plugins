@@ -386,12 +386,14 @@ function fullSourceFileNameFromState(state: AnnotationPluginPass): string | null
 function isKnownIncompatiblePluginFromState(state: AnnotationPluginPass) {
   const fullSourceFileName = fullSourceFileNameFromState(state);
 
-  if (!fullSourceFileName) return false;
+  if (!fullSourceFileName) {
+    return false;
+  }
 
   return KNOWN_INCOMPATIBLE_PLUGINS.some((pluginName) => {
     if (
-      fullSourceFileName.includes("/node_modules/" + pluginName + "/") ||
-      fullSourceFileName.includes("\\node_modules\\" + pluginName + "\\")
+      fullSourceFileName.includes(`/node_modules/${pluginName}/`) ||
+      fullSourceFileName.includes(`\\node_modules\\${pluginName}\\`)
     ) {
       return true;
     }
