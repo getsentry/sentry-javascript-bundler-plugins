@@ -27,6 +27,7 @@ Check out the supported bundler plugin packages for installation instructions:
 - [Rollup](https://www.npmjs.com/package/@sentry/rollup-plugin)
 - [Vite](https://www.npmjs.com/package/@sentry/vite-plugin)
 - [Webpack](https://www.npmjs.com/package/@sentry/webpack-plugin)
+- esbuild: Not currently supported
 
 ## Installation
 
