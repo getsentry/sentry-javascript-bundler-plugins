@@ -81,7 +81,8 @@ export function componentNameAnnotatePlugin({ types: t }: typeof Babel): Annotat
         );
       },
       ArrowFunctionExpression(path, state) {
-        const parent = path.parent; // We're expecting a `VariableDeclarator` like `const MyComponent =`
+        // We're expecting a `VariableDeclarator` like `const MyComponent =`
+        const parent = path.parent;
         if (
           !parent ||
           !("id" in parent) ||
