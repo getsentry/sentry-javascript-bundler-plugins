@@ -20,7 +20,7 @@ Currently, this plugin only works with React, and will exclusively parse `.jsx` 
 ### Note
 
 This plugin comes included in Sentry's bundler plugins, alongside many other features to improve your Sentry workflow.
-This plugin may be downloaded individually, but it is recommended that you install the bundler plugins for your respective bundler, and enable this feature through the config object.
+It can be downloaded individually, but it is recommended that you install the bundler plugins for your respective bundler, and enable this feature through the config object.
 
 Check out the supported bundler plugin packages for installation instructions:
 
