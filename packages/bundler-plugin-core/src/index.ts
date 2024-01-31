@@ -29,7 +29,7 @@ const { logger } = pkg;
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
-  componentNameAnnotatePlugin: () => UnpluginOptions;
+  componentNameAnnotatePlugin?: () => UnpluginOptions;
   moduleMetadataInjectionPlugin?: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: () => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
@@ -331,10 +331,12 @@ export function sentryUnpluginFactory({
       logger.info(
         "The component name annotate plugin is currently disabled. Skipping component name annotations."
       );
+    } else if (options.componentNameAnnotate.enabled && !componentNameAnnotatePlugin) {
+      logger.warn(
+        "The component name annotate plugin is currently not supported by '@sentry/esbuild-plugin'"
+      );
     } else {
-      {
-        plugins.push(componentNameAnnotatePlugin());
-      }
+      componentNameAnnotatePlugin && plugins.push(componentNameAnnotatePlugin());
     }
 
     return plugins;
