@@ -55,7 +55,7 @@ type IgnoredComponent = [file: string, component: string, element: string];
 
 type AnnotationPlugin = PluginObj<AnnotationPluginPass>;
 
-export default function reactAnnotate({ types: t }: typeof Babel): AnnotationPlugin {
+export function componentNameAnnotatePlugin({ types: t }: typeof Babel): AnnotationPlugin {
   return {
     visitor: {
       FunctionDeclaration(path, state) {

@@ -24,7 +24,7 @@
  */
 
 import { transform } from "@babel/core";
-import plugin from "../src/index";
+import { componentNameAnnotatePlugin as plugin } from "../src/index";
 
 const BananasPizzaAppStandardInput = `import React, { Component } from 'react';
 import { StyleSheet, Text, TextInput, View, Image, UIManager } from 'react-native';
