@@ -7,6 +7,7 @@ import {
   createRollupDebugIdUploadHooks,
   SentrySDKBuildFlags,
   createRollupBundleSizeOptimizationHooks,
+  createComponentNameAnnotateHooks,
 } from "@sentry/bundler-plugin-core";
 import { UnpluginOptions } from "unplugin";
 
@@ -15,6 +16,14 @@ function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
     name: "sentry-vite-release-injection-plugin",
     enforce: "pre" as const, // need this so that vite runs the resolveId hook
     vite: createRollupReleaseInjectionHooks(injectionCode),
+  };
+}
+
+function viteComponentNameAnnotatePlugin(): UnpluginOptions {
+  return {
+    name: "sentry-vite-react-annotate-plugin",
+    enforce: "pre" as const,
+    vite: createComponentNameAnnotateHooks(),
   };
 }
 
@@ -52,6 +61,7 @@ function viteBundleSizeOptimizationsPlugin(
 
 const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: viteReleaseInjectionPlugin,
+  componentNameAnnotatePlugin: viteComponentNameAnnotatePlugin,
   debugIdInjectionPlugin: viteDebugIdInjectionPlugin,
   moduleMetadataInjectionPlugin: viteModuleMetadataInjectionPlugin,
   debugIdUploadPlugin: viteDebugIdUploadPlugin,
