@@ -6,5 +6,5 @@ const outputDir = path.resolve(__dirname, "out");
 
 createCjsBundles({ index: entryPointPath }, outputDir, {
   telemetry: false,
-  reactAnnotate: { enabled: true },
+  componentNameAnnotate: { enabled: true },
 });
