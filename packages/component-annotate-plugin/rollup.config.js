@@ -9,7 +9,7 @@ const extensions = [".ts"];
 
 export default {
   input,
-  external: [...Object.keys(packageJson.dependencies), ...modulePackage.builtinModules],
+  external: [...Object.keys(packageJson.dependencies ?? []), ...modulePackage.builtinModules],
   onwarn: (warning) => {
     throw new Error(warning.message); // Warnings are usually high-consequence for us so let's throw to catch them
   },
