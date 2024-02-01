@@ -347,8 +347,9 @@ type IncludeEntry = {
     children: [
       {
         name: "enabled",
-        type: "boolean | string[]",
+        type: "boolean",
         fullDescription: "Whether the component name annotate plugin should be enabled or not.",
+        supportedBundlers: ["webpack", "vite", "rollup"],
       },
     ],
   },
@@ -371,17 +372,22 @@ type IncludeEntry = {
 function generateTableOfContents(
   depth: number,
   parentId: string,
-  nodes: OptionDocumentation[]
+  nodes: OptionDocumentation[],
+  bundler: Bundler
 ): string {
   return nodes
     .map((node) => {
+      if (node.supportedBundlers && !node.supportedBundlers?.includes(bundler)) {
+        return "";
+      }
+
       const id = `${parentId}-${node.name.toLowerCase()}`;
       let output = `${"    ".repeat(depth)}-   [\`${node.name}\`](#${id
         .replace(/-/g, "")
         .toLowerCase()})`;
       if (node.children && depth <= 0) {
         output += "\n";
-        output += generateTableOfContents(depth + 1, id, node.children);
+        output += generateTableOfContents(depth + 1, id, node.children, bundler);
       }
       return output;
     })
@@ -390,10 +396,15 @@ function generateTableOfContents(
 
 function generateDescriptions(
   parentName: string | undefined,
-  nodes: OptionDocumentation[]
+  nodes: OptionDocumentation[],
+  bundler: Bundler
 ): string {
   return nodes
     .map((node) => {
+      if (node.supportedBundlers && !node.supportedBundlers?.includes(bundler)) {
+        return "";
+      }
+
       const name = parentName === undefined ? node.name : `${parentName}.${node.name}`;
       let output = `### \`${name}\`
 
@@ -402,7 +413,7 @@ ${node.type === undefined ? "" : `Type: \`${node.type}\``}
 ${node.fullDescription}
 `;
       if (node.children) {
-        output += generateDescriptions(name, node.children);
+        output += generateDescriptions(name, node.children, bundler);
       }
       return output;
     })
@@ -412,8 +423,8 @@ ${node.fullDescription}
 export function generateOptionsDocumentation(bundler: Bundler): string {
   return `## Options
 
-${generateTableOfContents(0, "", options)}
+${generateTableOfContents(0, "", options, bundler)}
 
-${generateDescriptions(undefined, options)}
+${generateDescriptions(undefined, options, bundler)}
 `;
 }
