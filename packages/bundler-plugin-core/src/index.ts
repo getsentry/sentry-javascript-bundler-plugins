@@ -323,20 +323,18 @@ export function sentryUnpluginFactory({
       );
     }
 
-    if (!options.componentNameAnnotate) {
-      logger.warn(
-        "No options provided for the component name annotate plugin. Please set `componentNameAnnotatePlugin.enabled` to `true` if you would like to have your frontend components automatically annotated at build-time."
-      );
-    } else if (!options.componentNameAnnotate.enabled) {
-      logger.info(
-        "The component name annotate plugin is currently disabled. Skipping component name annotations."
-      );
-    } else if (options.componentNameAnnotate.enabled && !componentNameAnnotatePlugin) {
-      logger.warn(
-        "The component name annotate plugin is currently not supported by '@sentry/esbuild-plugin'"
-      );
-    } else {
-      componentNameAnnotatePlugin && plugins.push(componentNameAnnotatePlugin());
+    if (options.componentNameAnnotate) {
+      if (!options.componentNameAnnotate.enabled) {
+        logger.info(
+          "The component name annotate plugin is currently disabled. Skipping component name annotations."
+        );
+      } else if (options.componentNameAnnotate.enabled && !componentNameAnnotatePlugin) {
+        logger.warn(
+          "The component name annotate plugin is currently not supported by '@sentry/esbuild-plugin'"
+        );
+      } else {
+        componentNameAnnotatePlugin && plugins.push(componentNameAnnotatePlugin());
+      }
     }
 
     return plugins;
