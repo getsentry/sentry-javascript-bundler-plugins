@@ -323,12 +323,12 @@ export function sentryUnpluginFactory({
       );
     }
 
-    if (options.componentNameAnnotate) {
-      if (!options.componentNameAnnotate.enabled) {
+    if (options.reactComponentAnnotation) {
+      if (!options.reactComponentAnnotation.enabled) {
         logger.info(
           "The component name annotate plugin is currently disabled. Skipping component name annotations."
         );
-      } else if (options.componentNameAnnotate.enabled && !componentNameAnnotatePlugin) {
+      } else if (options.reactComponentAnnotation.enabled && !componentNameAnnotatePlugin) {
         logger.warn(
           "The component name annotate plugin is currently not supported by '@sentry/esbuild-plugin'"
         );

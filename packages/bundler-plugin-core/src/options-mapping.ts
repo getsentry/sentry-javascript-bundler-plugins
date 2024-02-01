@@ -29,7 +29,7 @@ export function normalizeUserOptions(userOptions: UserOptions) {
       cleanArtifacts: userOptions.release?.cleanArtifacts ?? false,
     },
     bundleSizeOptimizations: userOptions.bundleSizeOptimizations,
-    componentNameAnnotate: userOptions.componentNameAnnotate,
+    reactComponentAnnotation: userOptions.reactComponentAnnotation,
     _experiments: userOptions._experiments ?? {},
   };
 
