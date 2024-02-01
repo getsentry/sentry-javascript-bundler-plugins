@@ -1,8 +1,11 @@
+type Bundler = "webpack" | "vite" | "rollup" | "esbuild";
+
 type OptionDocumentation = {
   name: string;
   fullDescription: string;
   type?: string;
   children?: OptionDocumentation[];
+  supportedBundlers?: Bundler[];
 };
 
 const options: OptionDocumentation[] = [
@@ -333,6 +336,24 @@ type IncludeEntry = {
     ],
   },
   {
+    name: "reactComponentAnnotation",
+    fullDescription: `Options related to react component name annotations.
+      Disabled by default, unless a value is set for this option.
+      When enabled, your app's DOM will automatically be annotated during build-time with their respective component names.
+      This will unlock the capability to search for Replays in Sentry by component name, as well as see component names in breadcrumbs and performance monitoring.
+      Please note that this feature is not currently supported by the esbuild bundler plugins, and will only annotate React components
+    `,
+    supportedBundlers: ["webpack", "vite", "rollup"],
+    children: [
+      {
+        name: "enabled",
+        type: "boolean",
+        fullDescription: "Whether the component name annotate plugin should be enabled or not.",
+        supportedBundlers: ["webpack", "vite", "rollup"],
+      },
+    ],
+  },
+  {
     name: "_experiments",
     type: "string",
     fullDescription:
@@ -351,17 +372,22 @@ type IncludeEntry = {
 function generateTableOfContents(
   depth: number,
   parentId: string,
-  nodes: OptionDocumentation[]
+  nodes: OptionDocumentation[],
+  bundler: Bundler
 ): string {
   return nodes
     .map((node) => {
+      if (node.supportedBundlers && !node.supportedBundlers?.includes(bundler)) {
+        return "";
+      }
+
       const id = `${parentId}-${node.name.toLowerCase()}`;
       let output = `${"    ".repeat(depth)}-   [\`${node.name}\`](#${id
         .replace(/-/g, "")
         .toLowerCase()})`;
       if (node.children && depth <= 0) {
         output += "\n";
-        output += generateTableOfContents(depth + 1, id, node.children);
+        output += generateTableOfContents(depth + 1, id, node.children, bundler);
       }
       return output;
     })
@@ -370,10 +396,15 @@ function generateTableOfContents(
 
 function generateDescriptions(
   parentName: string | undefined,
-  nodes: OptionDocumentation[]
+  nodes: OptionDocumentation[],
+  bundler: Bundler
 ): string {
   return nodes
     .map((node) => {
+      if (node.supportedBundlers && !node.supportedBundlers?.includes(bundler)) {
+        return "";
+      }
+
       const name = parentName === undefined ? node.name : `${parentName}.${node.name}`;
       let output = `### \`${name}\`
 
@@ -382,18 +413,18 @@ ${node.type === undefined ? "" : `Type: \`${node.type}\``}
 ${node.fullDescription}
 `;
       if (node.children) {
-        output += generateDescriptions(name, node.children);
+        output += generateDescriptions(name, node.children, bundler);
       }
       return output;
     })
     .join("\n");
 }
 
-export function generateOptionsDocumentation(): string {
+export function generateOptionsDocumentation(bundler: Bundler): string {
   return `## Options
 
-${generateTableOfContents(0, "", options)}
+${generateTableOfContents(0, "", options, bundler)}
 
-${generateDescriptions(undefined, options)}
+${generateDescriptions(undefined, options, bundler)}
 `;
 }

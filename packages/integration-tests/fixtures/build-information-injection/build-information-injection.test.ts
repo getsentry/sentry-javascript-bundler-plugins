@@ -22,7 +22,7 @@ function checkBundle(bundlePath: string): void {
         "webpack4",
         "webpack5",
       ]) as string[],
-      depsVersions: { rollup: 3, vite: 3 },
+      depsVersions: { rollup: 3, vite: 3, react: 18 },
       // This will differ based on what env this is run on
       nodeVersion: expectedNodeVersion,
     })

@@ -47,8 +47,7 @@
     "clean:build": "rimraf ./dist *.tgz",
     "clean:deps": "rimraf node_modules",
     "test": "jest",
-    "lint": "eslint ./src ./test",
-    "prepack": "ts-node ./src/prepack.ts"
+    "lint": "eslint ./src ./test"
   },
   "dependencies": {},
   "devDependencies": {
