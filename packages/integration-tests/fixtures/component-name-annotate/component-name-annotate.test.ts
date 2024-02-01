@@ -4,15 +4,16 @@ import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 // prettier-ignore
 const SNAPSHOT = `"<div><span data-sentry-component=\\"ComponentA\\" data-sentry-source-file=\\"component-a.jsx\\">Component A</span></div>"`
+const ESBUILD_SNAPSHOT = `"<div><span>Component A</span></div>"`;
 
-function checkBundle(bundlePath: string): void {
+function checkBundle(bundlePath: string, snapshot = SNAPSHOT): void {
   const processOutput = childProcess.execSync(`node ${bundlePath}`, { encoding: "utf-8" });
-  expect(processOutput.trim()).toMatchInlineSnapshot(SNAPSHOT);
+  expect(processOutput.trim()).toMatchInlineSnapshot(snapshot);
 }
 
 test("esbuild bundle", () => {
   expect.assertions(1);
-  checkBundle(path.join(__dirname, "./out/esbuild/index.js"));
+  checkBundle(path.join(__dirname, "./out/esbuild/index.js"), ESBUILD_SNAPSHOT);
 });
 
 test("rollup bundle", () => {
