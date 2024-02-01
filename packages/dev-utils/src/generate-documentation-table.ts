@@ -1,8 +1,11 @@
+type Bundler = "webpack" | "vite" | "rollup" | "esbuild";
+
 type OptionDocumentation = {
   name: string;
   fullDescription: string;
   type?: string;
   children?: OptionDocumentation[];
+  supportedBundlers?: Bundler[];
 };
 
 const options: OptionDocumentation[] = [
@@ -333,6 +336,23 @@ type IncludeEntry = {
     ],
   },
   {
+    name: "reactComponentAnnotation",
+    fullDescription: `Options related to react component name annotations.
+      Disabled by default, unless a value is set for this option.
+      When enabled, your app's DOM will automatically be annotated during build-time with their respective component names.
+      This will unlock the capability to search for Replays in Sentry by component name, as well as see component names in breadcrumbs and performance monitoring.
+      Please note that this feature is not currently supported by the esbuild bundler plugins, and will only annotate React components
+    `,
+    supportedBundlers: ["webpack", "vite", "rollup"],
+    children: [
+      {
+        name: "enabled",
+        type: "boolean | string[]",
+        fullDescription: "Whether the component name annotate plugin should be enabled or not.",
+      },
+    ],
+  },
+  {
     name: "_experiments",
     type: "string",
     fullDescription:
@@ -389,7 +409,7 @@ ${node.fullDescription}
     .join("\n");
 }
 
-export function generateOptionsDocumentation(): string {
+export function generateOptionsDocumentation(bundler: Bundler): string {
   return `## Options
 
 ${generateTableOfContents(0, "", options)}
