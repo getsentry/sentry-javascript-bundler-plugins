@@ -56,6 +56,7 @@
     "@sentry/cli": "^2.22.3",
     "@sentry/node": "^7.60.0",
     "@sentry/utils": "^7.60.0",
+    "@sentry/component-annotate-plugin": "2.10.3",
     "dotenv": "^16.3.1",
     "find-up": "5.0.0",
     "glob": "9.3.2",
