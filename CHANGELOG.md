@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.11.0
+
+- feat(core): Include component name annotation plugin with all bundler plugins except esbuild (#469)
+- feat(component-annotate): Introduce new plugin to annotate frontend components at build-time (#468)
+
 ## 2.10.3
 
 - fix(core): Safely flush telemetry
