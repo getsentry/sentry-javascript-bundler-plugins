@@ -4,7 +4,7 @@
   </a>
 </p>
 
-# Sentry Component Annotate Plugin (Beta)
+# Sentry Babel Component Annotate Plugin (Beta)
 
 [![npm version](https://img.shields.io/npm/v/@sentry/babel-component-annotate-plugin.svg)](https://www.npmjs.com/package/@sentry/babel-component-annotate-plugin)
 [![npm dm](https://img.shields.io/npm/dm/@sentry/babel-component-annotate-plugin.svg)](https://www.npmjs.com/package/@sentry/babel-component-annotate-plugin)
