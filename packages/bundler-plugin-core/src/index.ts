@@ -1,6 +1,6 @@
 import SentryCli from "@sentry/cli";
 import { transformAsync } from "@babel/core";
-import { componentNameAnnotatePlugin } from "@sentry/component-annotate-plugin";
+import { componentNameAnnotatePlugin } from "@sentry/babel-component-annotate-plugin";
 import * as fs from "fs";
 import * as path from "path";
 import MagicString from "magic-string";

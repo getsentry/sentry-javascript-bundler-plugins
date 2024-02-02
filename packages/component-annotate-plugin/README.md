@@ -6,9 +6,9 @@
 
 # Sentry Component Annotate Plugin (Beta)
 
-[![npm version](https://img.shields.io/npm/v/@sentry/component-annotate-plugin.svg)](https://www.npmjs.com/package/@sentry/component-annotate-plugin)
-[![npm dm](https://img.shields.io/npm/dm/@sentry/component-annotate-plugin.svg)](https://www.npmjs.com/package/@sentry/component-annotate-plugin)
-[![npm dt](https://img.shields.io/npm/dt/@sentry/component-annotate-plugin.svg)](https://www.npmjs.com/package/@component-annotate-plugin)
+[![npm version](https://img.shields.io/npm/v/@sentry/babel-component-annotate-plugin.svg)](https://www.npmjs.com/package/@sentry/babel-component-annotate-plugin)
+[![npm dm](https://img.shields.io/npm/dm/@sentry/babel-component-annotate-plugin.svg)](https://www.npmjs.com/package/@sentry/babel-component-annotate-plugin)
+[![npm dt](https://img.shields.io/npm/dt/@sentry/babel-component-annotate-plugin.svg)](https://www.npmjs.com/package/@babel-component-annotate-plugin)
 
 This plugin is currently in beta. Please help us improve by [reporting any issues or giving us feedback](https://github.com/getsentry/sentry-javascript-bundler-plugins/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc).
 
@@ -34,19 +34,19 @@ Check out the supported bundler plugin packages for installation instructions:
 Using npm:
 
 ```bash
-npm install @sentry/component-annotate-plugin --save-dev
+npm install @sentry/babel-component-annotate-plugin --save-dev
 ```
 
 Using yarn:
 
 ```bash
-yarn add @sentry/component-annotate-plugin --dev
+yarn add @sentry/babel-component-annotate-plugin --dev
 ```
 
 Using pnpm:
 
 ```bash
-pnpm install @sentry/component-annotate-plugin --dev
+pnpm install @sentry/babel-component-annotate-plugin --dev
 ```
 
 ## Example
@@ -59,7 +59,7 @@ pnpm install @sentry/component-annotate-plugin --dev
 
   plugins: [
     // Put this plugin before any other plugins you have that transform JSX code
-    ['@sentry/component-annotate-plugin']
+    ['@sentry/babel-component-annotate-plugin']
   ],
 }
 ```
@@ -69,7 +69,7 @@ Or alternatively, configure the plugin by directly importing it:
 ```js
 // babel.config.js
 
-import {componentNameAnnotatePlugin} from '@sentry/component-annotate-plugin';
+import {componentNameAnnotatePlugin} from '@sentry/babel-component-annotate-plugin';
 
 {
   // ... other config above ...
