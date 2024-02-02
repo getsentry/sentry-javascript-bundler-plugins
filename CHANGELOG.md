@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.12.0
+
+- ref(component-annotate): Prefix plugin name with `babel`
+
 ## 2.11.0
 
 - feat(core): Include component name annotation plugin with all bundler plugins except esbuild (#469)
