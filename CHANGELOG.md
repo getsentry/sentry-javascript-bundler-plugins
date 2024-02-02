@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.13.0
+
+- ref(component-annotate): Conform to Babel plugin naming conventions
+
 ## 2.12.0
 
 - ref(component-annotate): Prefix plugin name with `babel`
