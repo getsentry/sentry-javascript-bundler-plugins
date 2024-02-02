@@ -9,7 +9,7 @@ requireNames:
   - /^sentry-rollup-plugin-.*\.tgz$/
   - /^sentry-vite-plugin-.*\.tgz$/
   - /^sentry-webpack-plugin-.*\.tgz$/
-  - /^sentry-component-annotate-plugin-.*\.tgz$/
+  - /^sentry-babel-component-annotate-plugin-.*\.tgz$/
 targets:
   - name: github
     includeNames: /^sentry-.*.tgz$/
