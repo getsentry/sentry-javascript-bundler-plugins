@@ -59,6 +59,7 @@ type IgnoredComponent = [file: string, component: string, element: string];
 
 type AnnotationPlugin = PluginObj<AnnotationPluginPass>;
 
+// We must export the plugin as default, otherwise the Babel loader will not be able to resolve it when configured using its string identifier
 export default function componentNameAnnotatePlugin({ types: t }: typeof Babel): AnnotationPlugin {
   return {
     visitor: {
