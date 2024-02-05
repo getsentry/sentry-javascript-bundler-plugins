@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.14.0
+
+- ref(component-annotate): Use default export (#478)
+
 ## 2.13.0
 
 - ref(component-annotate): Conform to Babel plugin naming conventions
