@@ -69,7 +69,7 @@ Or alternatively, configure the plugin by directly importing it:
 ```js
 // babel.config.js
 
-import {componentNameAnnotatePlugin} from '@sentry/babel-plugin-component-annotate';
+import componentNameAnnotatePlugin from '@sentry/babel-plugin-component-annotate';
 
 {
   // ... other config above ...
