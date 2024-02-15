@@ -23,13 +23,11 @@
     "test:e2e": "nx run @sentry-internal/bundler-plugin-e2e-tests:test",
     "lint": "nx run-many --target=lint --all",
     "check:formatting": "prettier --check .",
-    "fix:formatting": "prettier --write .",
-    "prepare": "husky install"
+    "fix:formatting": "prettier --write ."
   },
   "devDependencies": {
     "@nrwl/cli": "14.5.10",
     "@nrwl/workspace": "14.5.10",
-    "husky": "^8.0.0",
     "lerna": "^6.6.2",
     "nx": "14.5.10",
     "prettier": "^2.7.1",
