@@ -78,17 +78,20 @@ export function sentryUnpluginFactory({
       debug: userOptions.debug ?? false,
     });
 
-    const dotenvResult = dotenv.config({
-      path: path.join(process.cwd(), ".env.sentry-build-plugin"),
-    });
-
-    // Ignore "file not found" errors but throw all others
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore Accessing `code` on error should be safe
-    if (dotenvResult.error && dotenvResult.error.code !== "ENOENT") {
-      throw dotenvResult.error;
-    } else if (dotenvResult.parsed) {
+    try {
+      const dotenvFile = fs.readFileSync(
+        path.join(process.cwd(), ".env.sentry-build-plugin"),
+        "utf-8"
+      );
+      // NOTE: Do not use the dotenv library directly to read the dotenv file! For some ungodly reason, it falls back to reading `${process.cwd()}/.env` which is absolutely not what we want.
+      const dotenvResult = dotenv.parse(dotenvFile);
+      process.env = { ...process.env, ...dotenvResult };
       logger.info('Using environment variables configured in ".env.sentry-build-plugin".');
+    } catch (e: unknown) {
+      // Ignore "file not found" errors but throw all others
+      if (typeof e === "object" && e && "code" in e && e.code !== "ENOENT") {
+        throw e;
+      }
     }
 
     const options = normalizeUserOptions(userOptions);
