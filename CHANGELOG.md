@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.14.1
+
+- fix(core): Stop .env files from being picked up (#486)
+- feat(core): Add telemetry for React component annotations (#482)
+
 ## 2.14.0
 
 - ref(component-annotate): Use default export (#478)
