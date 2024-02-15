@@ -83,7 +83,7 @@ export function sentryUnpluginFactory({
         path.join(process.cwd(), ".env.sentry-build-plugin"),
         "utf-8"
       );
-      // NOTE: Do not use the dotenv library directly to read the dotenv file! For some ungodly reason, it falls back to reading `${process.cwd()}/.env` which is absolutely not what we want.
+      // NOTE: Do not use the dotenv.config API directly to read the dotenv file! For some ungodly reason, it falls back to reading `${process.cwd()}/.env` which is absolutely not what we want.
       const dotenvResult = dotenv.parse(dotenvFile);
       process.env = { ...process.env, ...dotenvResult };
       logger.info('Using environment variables configured in ".env.sentry-build-plugin".');
