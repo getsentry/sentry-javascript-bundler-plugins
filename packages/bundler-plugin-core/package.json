@@ -59,8 +59,7 @@
     "find-up": "5.0.0",
     "glob": "9.3.2",
     "magic-string": "0.27.0",
-    "unplugin": "1.0.1",
-    "https-proxy-agent": "^5.0.0"
+    "unplugin": "1.0.1"
   },
   "devDependencies": {
     "@babel/preset-env": "7.18.2",
@@ -69,8 +68,8 @@
     "@rollup/plugin-json": "4.1.0",
     "@rollup/plugin-node-resolve": "13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
-    "@sentry/node": "7.92.0",
-    "@sentry/utils": "7.92.0",
+    "@sentry/node": "7.102.0",
+    "@sentry/utils": "7.102.0",
     "@sentry-internal/eslint-config": "2.14.1",
     "@sentry-internal/sentry-bundler-plugin-tsconfig": "2.14.1",
     "@swc/core": "^1.2.205",

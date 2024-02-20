@@ -24,8 +24,7 @@ import {
 } from "./utils";
 import * as dotenv from "dotenv";
 import { glob } from "glob";
-import pkg from "@sentry/utils";
-const { logger } = pkg;
+import { logger } from "@sentry/utils";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;

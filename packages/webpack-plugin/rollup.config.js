@@ -11,7 +11,13 @@ export default {
   input,
   external: [...Object.keys(packageJson.dependencies), ...modulePackage.builtinModules, "webpack"],
   onwarn: (warning) => {
-    throw new Error(warning.message); // Warnings are usually high-consequence for us so let's throw to catch them
+    if (warning.code === "CIRCULAR_DEPENDENCY") {
+      // Circular dependencies are usually not a big deal for us so let's just warn about them
+      console.warn(warning.message);
+      return;
+    }
+    // Warnings are usually high-consequence for us so let's throw to catch them
+    throw new Error(warning.message);
   },
   plugins: [
     resolve({
