@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.14.2
+
+- feat(core): Bundle in Sentry SDK deps (#487)
+
 ## 2.14.1
 
 - fix(core): Stop .env files from being picked up (#486)
