@@ -52,12 +52,12 @@
     "fix": "eslint ./src ./test --format stylish --fix"
   },
   "dependencies": {
-    "@babel/core": "7.18.5",
+    "@babel/core": "^7.18.5",
     "@sentry/babel-plugin-component-annotate": "2.14.2",
     "@sentry/cli": "^2.22.3",
     "dotenv": "^16.3.1",
-    "find-up": "5.0.0",
-    "glob": "9.3.2",
+    "find-up": "^5.0.0",
+    "glob": "^9.3.2",
     "magic-string": "0.27.0",
     "unplugin": "1.0.1"
   },
