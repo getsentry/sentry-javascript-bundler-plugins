@@ -4,6 +4,12 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.14.3
+
+- deps(core): Unpin `@babel/core`, `find-up`, and `glob` (#496)
+
+Work in this release contributed by @allanlewis. Thank you for your contribution!
+
 ## 2.14.2
 
 - feat(core): Bundle in Sentry SDK deps (#487)
