@@ -114,7 +114,7 @@ errorHandler: (err) => {
         name: "name",
         type: "string",
         fullDescription:
-          "Unique identifier for the release you want to create.\n\nThis value can also be specified via the `SENTRY_RELEASE` environment variable.\n\nDefaults to automatically detecting a value for your environment. This includes values for Cordova, Heroku, AWS CodeBuild, CircleCI, Xcode, and Gradle, and otherwise uses the git `HEAD`'s commit SHA. (the latterrequires access to git CLI and for the root directory to be a valid repository)\n\nIf you didn't provide a value and the plugin can't automatically detect one, no release will be created.",
+          "Unique identifier for the release you want to create.\n\nThis value can also be specified via the `SENTRY_RELEASE` environment variable.\n\nDefaults to automatically detecting a value for your environment. This includes values for Cordova, Heroku, AWS CodeBuild, CircleCI, Xcode, and Gradle, and otherwise uses the git `HEAD`'s commit SHA. (the latter requires access to git CLI and for the root directory to be a valid repository)\n\nIf you didn't provide a value and the plugin can't automatically detect one, no release will be created.",
       },
       {
         name: "inject",
