@@ -1,6 +1,6 @@
 {
   "name": "@sentry-internal/sentry-bundler-plugin-tsconfig",
-  "version": "2.14.2",
+  "version": "2.14.3",
   "license": "MIT",
   "private": true
 }
