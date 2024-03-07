@@ -154,7 +154,7 @@ export interface Options {
      *
      * Defaults to automatically detecting a value for your environment.
      * This includes values for Cordova, Heroku, AWS CodeBuild, CircleCI, Xcode, and Gradle, and otherwise uses the git `HEAD`'s commit SHA.
-     * (the latterrequires access to git CLI and for the root directory to be a valid repository)
+     * (the latter requires access to git CLI and for the root directory to be a valid repository)
      *
      * If you didn't provide a value and the plugin can't automatically detect one, no release will be created.
      */
