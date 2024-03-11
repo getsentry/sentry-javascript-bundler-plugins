@@ -70,7 +70,7 @@ export function sentryUnpluginFactory({
   debugIdUploadPlugin,
   bundleSizeOptimizationsPlugin,
 }: SentryUnpluginFactoryOptions) {
-  return createUnplugin<Options, true>((userOptions, unpluginMetaContext) => {
+  return createUnplugin<Options | undefined, true>((userOptions = {}, unpluginMetaContext) => {
     const logger = createLogger({
       prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
       silent: userOptions.silent ?? false,
