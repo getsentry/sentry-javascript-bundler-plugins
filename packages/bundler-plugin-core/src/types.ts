@@ -320,6 +320,19 @@ export interface Options {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     moduleMetadata?: any | ModuleMetadataCallback;
   };
+
+  /**
+   * Options that are useful for building wrappers around the plugin. You likely don't need these options unless you
+   * are distributing a tool that depends on this plugin
+   */
+  _metaOptions?: {
+    /**
+     * Overrides the prefix that come before logger messages. (e.g. `[some-prefix] Info: Some log message`)
+     *
+     * Example value: `[sentry-webpack-plugin (client)]`
+     */
+    loggerPrefixOverride?: string;
+  };
 }
 
 export interface ModuleMetadataCallbackArgs {
