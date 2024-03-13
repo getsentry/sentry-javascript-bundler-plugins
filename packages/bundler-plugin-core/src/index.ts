@@ -72,7 +72,9 @@ export function sentryUnpluginFactory({
 }: SentryUnpluginFactoryOptions) {
   return createUnplugin<Options | undefined, true>((userOptions = {}, unpluginMetaContext) => {
     const logger = createLogger({
-      prefix: `[sentry-${unpluginMetaContext.framework}-plugin]`,
+      prefix:
+        userOptions._metaOptions?.loggerPrefixOverride ??
+        `[sentry-${unpluginMetaContext.framework}-plugin]`,
       silent: userOptions.silent ?? false,
       debug: userOptions.debug ?? false,
     });
