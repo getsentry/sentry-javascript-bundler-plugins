@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.16.0
+
+- feat(core): Add `loggerPrefixOverride` meta option (#506)
+
 ## 2.15.0
 
 - feat: Make options argument optional (#502)
