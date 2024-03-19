@@ -515,7 +515,7 @@ export function createRollupDebugIdUploadHooks(
       if (outputOptions.dir) {
         const outputDir = outputOptions.dir;
         const buildArtifacts = await glob(
-          ["/**/*.js", "/**/*.js.map", "/**/*.mjs.map", "/**/*.cjs.map"],
+          ["/**/*.js", "/**/*.mjs", "/**/*.cjs", "/**/*.js.map", "/**/*.mjs.map", "/**/*.cjs.map"],
           {
             root: outputDir,
             absolute: true,
