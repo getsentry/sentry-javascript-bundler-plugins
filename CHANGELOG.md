@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.16.1
+
+- fix: Create word-based fidelity source mapping for code transformations (#513)
+- fix: Also match `.cjs` and `.mjs` files when finding files to upload in rollup-based bundlers (#509)
+
 ## 2.16.0
 
 - feat(core): Add `loggerPrefixOverride` meta option (#506)
