@@ -326,7 +326,7 @@ export function replaceBooleanFlagsInCode(
   if (ms.hasChanged()) {
     return {
       code: ms.toString(),
-      map: ms.generateMap(),
+      map: ms.generateMap({ hires: "boundary" }),
     };
   }
 
