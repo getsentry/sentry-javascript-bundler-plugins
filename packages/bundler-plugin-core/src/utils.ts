@@ -233,6 +233,10 @@ export function determineReleaseName(): string | undefined {
     process.env["ZEIT_BITBUCKET_COMMIT_SHA"] ||
     // Flightcontrol - https://www.flightcontrol.dev/docs/guides/flightcontrol/environment-variables#built-in-environment-variables
     process.env["FC_GIT_COMMIT_SHA"] ||
+    // Heroku #1 https://devcenter.heroku.com/changelog-items/630
+    process.env["SOURCE_VERSION"] ||
+    // Heroku #2 https://docs.sentry.io/product/integrations/deployment/heroku/#configure-releases
+    process.env["HEROKU_SLUG_COMMIT"] ||
     gitRevision()
   );
 }
