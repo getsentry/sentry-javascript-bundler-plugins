@@ -29,7 +29,7 @@ yarn add @sentry/webpack-plugin --dev
 Using pnpm:
 
 ```bash
-pnpm install @sentry/webpack-plugin --dev
+pnpm add @sentry/webpack-plugin --save-dev
 ```
 
 ## Example
