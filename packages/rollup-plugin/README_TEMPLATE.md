@@ -29,7 +29,7 @@ yarn add @sentry/rollup-plugin --dev
 Using pnpm:
 
 ```bash
-pnpm install @sentry/rollup-plugin --dev
+pnpm add @sentry/rollup-plugin --save-dev
 ```
 
 ## Example

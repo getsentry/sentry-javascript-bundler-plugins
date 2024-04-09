@@ -46,7 +46,7 @@ yarn add @sentry/babel-plugin-component-annotate --dev
 Using pnpm:
 
 ```bash
-pnpm install @sentry/babel-plugin-component-annotate --dev
+pnpm add @sentry/babel-plugin-component-annotate --save-dev
 ```
 
 ## Example

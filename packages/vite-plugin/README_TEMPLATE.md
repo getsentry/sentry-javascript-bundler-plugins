@@ -29,7 +29,7 @@ yarn add @sentry/vite-plugin --dev
 Using pnpm:
 
 ```bash
-pnpm add -D @sentry/vite-plugin
+pnpm add @sentry/vite-plugin --save-dev
 ```
 
 ## Example
