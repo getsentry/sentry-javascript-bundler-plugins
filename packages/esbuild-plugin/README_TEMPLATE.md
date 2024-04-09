@@ -29,7 +29,7 @@ yarn add @sentry/esbuild-plugin --dev
 Using pnpm:
 
 ```bash
-pnpm install @sentry/esbuild-plugin --dev
+pnpm add @sentry/esbuild-plugin -D
 ```
 
 ## Example
