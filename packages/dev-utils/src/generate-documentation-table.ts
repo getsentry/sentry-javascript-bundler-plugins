@@ -232,7 +232,7 @@ errorHandler: (err) => {
         name: "cleanArtifacts",
         type: "boolean",
         fullDescription:
-          "Remove all previously uploaded artifacts for this release on Sentry before the upload.\n\nDefaults to `false`.",
+          "Remove all previously uploaded artifacts for this release on Sentry before the upload.\n\nDefaults to `false`.\n\n**Deprecation Notice:** `cleanArtifacts` is deprecated and will does currently not do anything. Historically it was needed since uploading the same artifacts twice was not allowed. Nowadays, when uploading artifacts with the same name more than once to the same release on Sentry, Sentry will prefer the most recent artifact for source mapping.",
       },
       {
         name: "uploadLegacySourcemaps",

@@ -104,7 +104,6 @@ describe("addPluginOptionTagsToHub", () => {
       normalizeUserOptions({
         ...defaultOptions,
         release: {
-          cleanArtifacts: true,
           finalize: true,
         },
       }),

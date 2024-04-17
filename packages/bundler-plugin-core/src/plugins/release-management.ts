@@ -10,7 +10,6 @@ interface ReleaseManagementPluginOptions {
   logger: Logger;
   releaseName: string;
   shouldCreateRelease: boolean;
-  shouldCleanArtifacts: boolean;
   shouldFinalizeRelease: boolean;
   include?: string | IncludeEntry | Array<string | IncludeEntry>;
   setCommitsOption?: SentryCliCommitsOptions;
@@ -36,7 +35,6 @@ export function releaseManagementPlugin({
   dist,
   setCommitsOption,
   shouldCreateRelease,
-  shouldCleanArtifacts,
   shouldFinalizeRelease,
   deployOptions,
   handleRecoverableError,
@@ -52,13 +50,6 @@ export function releaseManagementPlugin({
 
         if (shouldCreateRelease) {
           await cliInstance.releases.new(releaseName);
-        }
-
-        if (shouldCleanArtifacts) {
-          await cliInstance.releases.execute(
-            ["releases", "files", releaseName, "delete", "--all"],
-            true
-          );
         }
 
         if (include) {
