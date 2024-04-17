@@ -9,7 +9,7 @@ import { normalizeUserOptions, validateOptions } from "./options-mapping";
 import { createDebugIdUploadFunction } from "./debug-id-upload";
 import { releaseManagementPlugin } from "./plugins/release-management";
 import { telemetryPlugin } from "./plugins/telemetry";
-import { createLogger } from "./sentry/logger";
+import { createLogger, Logger } from "./sentry/logger";
 import { allowedToSendTelemetry, createSentryInstance } from "./sentry/telemetry";
 import { Options, SentrySDKBuildFlags } from "./types";
 import {
@@ -30,7 +30,7 @@ interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
   componentNameAnnotatePlugin?: () => UnpluginOptions;
   moduleMetadataInjectionPlugin?: (injectionCode: string) => UnpluginOptions;
-  debugIdInjectionPlugin: () => UnpluginOptions;
+  debugIdInjectionPlugin: (logger: Logger) => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
   bundleSizeOptimizationsPlugin: (buildFlags: SentrySDKBuildFlags) => UnpluginOptions;
 }
@@ -283,7 +283,7 @@ export function sentryUnpluginFactory({
       );
     }
 
-    plugins.push(debugIdInjectionPlugin());
+    plugins.push(debugIdInjectionPlugin(logger));
 
     if (!options.authToken) {
       logger.warn(
@@ -594,3 +594,4 @@ export function getDebugIdSnippet(debugId: string): string {
 export { stringToUUID, replaceBooleanFlagsInCode } from "./utils";
 
 export type { Options, SentrySDKBuildFlags } from "./types";
+export type { Logger } from "./sentry/logger";

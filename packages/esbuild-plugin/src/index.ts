@@ -4,6 +4,7 @@ import {
   getDebugIdSnippet,
   SentrySDKBuildFlags,
 } from "@sentry/bundler-plugin-core";
+import type { Logger } from "@sentry/bundler-plugin-core";
 import type { UnpluginOptions } from "unplugin";
 import * as path from "path";
 
@@ -41,7 +42,7 @@ function esbuildReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
+function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
   const pluginName = "sentry-esbuild-debug-id-injection-plugin";
   const stubNamespace = "sentry-debug-id-stub";
 
@@ -50,6 +51,12 @@ function esbuildDebugIdInjectionPlugin(): UnpluginOptions {
 
     esbuild: {
       setup({ initialOptions, onLoad, onResolve }) {
+        if (initialOptions.bundle) {
+          logger.warn(
+            "Esbuild's `bundle` option is currently not supported! Esbuild will probably crash now."
+          );
+        }
+
         onResolve({ filter: /.*/ }, (args) => {
           if (args.kind !== "entry-point") {
             return;
