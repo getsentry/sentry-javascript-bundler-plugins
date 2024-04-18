@@ -26,7 +26,6 @@ export function normalizeUserOptions(userOptions: UserOptions) {
       create: userOptions.release?.create ?? true,
       finalize: userOptions.release?.finalize ?? true,
       vcsRemote: userOptions.release?.vcsRemote ?? process.env["SENTRY_VSC_REMOTE"] ?? "origin",
-      cleanArtifacts: userOptions.release?.cleanArtifacts ?? false,
     },
     bundleSizeOptimizations: userOptions.bundleSizeOptimizations,
     reactComponentAnnotation: userOptions.reactComponentAnnotation,

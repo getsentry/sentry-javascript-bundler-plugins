@@ -74,7 +74,6 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
   hub.setTag("inject-build-information", !!options._experiments.injectBuildInformation);
 
   // Optional release pipeline steps
-  hub.setTag("clean-artifacts", release.cleanArtifacts);
   if (release.setCommits) {
     hub.setTag("set-commits", release.setCommits.auto === true ? "auto" : "manual");
   } else {

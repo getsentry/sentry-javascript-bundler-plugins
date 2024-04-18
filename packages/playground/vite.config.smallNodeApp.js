@@ -23,7 +23,6 @@ export default defineConfig({
       debug: true,
       release: "0.0.14",
       include: "out/vite-smallNodeApp",
-      cleanArtifacts: true,
       // ignore: ["out/*", "!out/vite-smallNodeApp/index.js.map"],
       ignore: ["!out/vite-smallNodeApp/index.js.map"],
       ignoreFile: ".sentryignore",

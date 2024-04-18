@@ -54,11 +54,10 @@ interface SentryUnpluginFactoryOptions {
  * release creation pipeline:
  *
  * 1. Create a new release
- * 2. Delete already uploaded artifacts for this release (if `cleanArtifacts` is enabled)
- * 3. Upload sourcemaps based on `include` and source-map-specific options
- * 4. Associate a range of commits with the release (if `setCommits` is specified)
- * 5. Finalize the release (unless `finalize` is disabled)
- * 6. Add deploy information to the release (if `deploy` is specified)
+ * 2. Upload sourcemaps based on `include` and source-map-specific options
+ * 3. Associate a range of commits with the release (if `setCommits` is specified)
+ * 4. Finalize the release (unless `finalize` is disabled)
+ * 5. Add deploy information to the release (if `deploy` is specified)
  *
  * This release creation pipeline relies on Sentry CLI to execute the different steps.
  */
@@ -261,7 +260,6 @@ export function sentryUnpluginFactory({
           logger,
           releaseName: options.release.name,
           shouldCreateRelease: options.release.create,
-          shouldCleanArtifacts: options.release.cleanArtifacts,
           shouldFinalizeRelease: options.release.finalize,
           include: options.release.uploadLegacySourcemaps,
           setCommitsOption: options.release.setCommits,

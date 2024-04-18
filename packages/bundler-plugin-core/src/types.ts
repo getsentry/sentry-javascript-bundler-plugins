@@ -212,7 +212,12 @@ export interface Options {
      * Remove all previously uploaded artifacts for this release on Sentry before the upload.
      *
      * Defaults to `false`.
+     *
+     * @deprecated `cleanArtifacts` is deprecated and currently doesn't do anything. Historically it was needed
+     * since uploading the same artifacts twice was not allowed. Nowadays, when uploading artifacts with the same name
+     * more than once to the same release on Sentry, Sentry will prefer the most recent artifact for source mapping.
      */
+    // TODO(v3): Remove this option
     cleanArtifacts?: boolean;
 
     /**

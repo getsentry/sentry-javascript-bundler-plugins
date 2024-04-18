@@ -20,7 +20,6 @@ describe("normalizeUserOptions()", () => {
         name: "my-release",
         finalize: true,
         inject: true,
-        cleanArtifacts: false,
         create: true,
         vcsRemote: "origin",
         uploadLegacySourcemaps: "./out",
@@ -62,7 +61,6 @@ describe("normalizeUserOptions()", () => {
         finalize: true,
         create: true,
         inject: true,
-        cleanArtifacts: false,
         uploadLegacySourcemaps: {
           ext: ["js", "map", ".foo"],
           ignore: ["./files"],

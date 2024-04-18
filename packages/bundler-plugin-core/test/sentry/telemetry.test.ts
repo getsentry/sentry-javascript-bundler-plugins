@@ -104,7 +104,6 @@ describe("addPluginOptionTagsToHub", () => {
       normalizeUserOptions({
         ...defaultOptions,
         release: {
-          cleanArtifacts: true,
           finalize: true,
         },
       }),
@@ -112,7 +111,6 @@ describe("addPluginOptionTagsToHub", () => {
       "rollup"
     );
 
-    expect(mockedHub.setTag).toHaveBeenCalledWith("clean-artifacts", true);
     expect(mockedHub.setTag).toHaveBeenCalledWith("finalize-release", true);
   });
 
