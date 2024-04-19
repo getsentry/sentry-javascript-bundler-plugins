@@ -53,7 +53,7 @@ function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
       setup({ initialOptions, onLoad, onResolve }) {
         if (initialOptions.bundle) {
           logger.warn(
-            "Esbuild's `bundle` option is currently not supported! Esbuild will probably crash now."
+            "Esbuild's `bundle: true` option is currently not supported! Esbuild will probably crash now. Sorry about that. If you need to upload sourcemaps with the `bundle` option, it is recommended to use Sentry CLI instead: https://docs.sentry.io/platforms/javascript/sourcemaps/uploading/cli/"
           );
         }
 
