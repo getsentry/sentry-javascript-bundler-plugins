@@ -245,6 +245,8 @@ Each path can be given as a string or an object with more specific options.
 The modern version of doing source maps upload is more robust and way easier to get working but has to inject a very small snippet of JavaScript into your output bundles.
 In situations where this leads to problems (e.g subresource integrity) you can use this option as a fallback.
 
+Please note that this option will not interact with any settings provided in the \`sourcemaps\` option. Using \`uploadLegacySourcemaps\` is a completely separate upload mechanism we provide for backwards-compatibility.
+
 The \`IncludeEntry\` type looks as follows:
 
 \`\`\`ts
