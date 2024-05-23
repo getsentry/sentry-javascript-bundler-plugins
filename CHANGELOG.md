@@ -4,6 +4,15 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.17.0
+
+- feat: Deprecate and noop `cleanArtifacts` (#525)
+- feat: Support Heroku env vars when inferring release name (#517)
+- fix(docs): Update pnpm install commands (#516)
+- misc(esbuild): Log warning when attempting to inject debug IDs with esbuild `bundle` option active (#526)
+
+Work in this release contributed by @et84121, and @duailibe. Thank you for your contributions!
+
 ## 2.16.1
 
 - fix: Create word-based fidelity source mapping for code transformations (#513)
