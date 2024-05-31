@@ -224,8 +224,18 @@ export function sentryUnpluginFactory({
       plugins.push(releaseInjectionPlugin(injectionCode));
     }
 
-    if (options.moduleMetadata) {
-      let metadata: Record<string, unknown>;
+    if (options.moduleMetadata || options.applicationKey) {
+      let metadata: Record<string, unknown> = {};
+
+      if (options.applicationKey) {
+        // We use different keys so that if code receives multiple bundling passes.
+        // It is a bit unfortunate that we have to inject the metadata snippet at the top, which means that if we didn't
+        // have this mechanism, the first bundling pass would always "win". If this weren't the case we would be fine with
+        // the last pass winning but the first pass winning is very bad, because it would prevent any sort of overriding.
+        // We can simply use the `_sentryBundlerPluginAppKey:` to filter for app keys in the SDK.
+        metadata[`_sentryBundlerPluginAppKey:${options.applicationKey}`] = true;
+      }
+
       if (typeof options.moduleMetadata === "function") {
         const args = {
           org: options.org,
@@ -233,10 +243,10 @@ export function sentryUnpluginFactory({
           release: options.release.name,
         };
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        metadata = options.moduleMetadata(args);
+        metadata = { ...metadata, ...options.moduleMetadata(args) };
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        metadata = options.moduleMetadata;
+        metadata = { ...metadata, ...options.moduleMetadata };
       }
 
       const injectionCode = generateModuleMetadataInjectorCode(metadata);
