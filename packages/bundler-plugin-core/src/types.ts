@@ -298,6 +298,21 @@ export interface Options {
   };
 
   /**
+   * Metadata that should be associated with the built application.
+   *
+   * The metadata is serialized and can be looked up at runtime from within the SDK (for example in the `beforeSend`,
+   * event processors, or the transport), allowing for custom event filtering logic or routing of events.
+   *
+   * Metadata can either be passed directly or alternatively a callback can be provided that will be
+   * called with the following parameters:
+   * - `org`: The organization slug.
+   * - `project`: The project slug.
+   * - `release`: The release name.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  moduleMetadata?: ModuleMetadata | ModuleMetadataCallback;
+
+  /**
    * Options that are considered experimental and subject to change.
    *
    * @experimental API that does not follow semantic versioning and may change in any release
@@ -312,18 +327,23 @@ export interface Options {
     injectBuildInformation?: boolean;
 
     /**
-     * Metadata associated with this module.
+     * NOTE: This option has been promoted to stable.
      *
-     * The metadata is serialized and can be looked up at runtime by filename.
+     * Metadata that should be associated with the built application.
+     *
+     * The metadata is serialized and can be looked up at runtime from within the SDK (for example in the `beforeSend`,
+     * event processors, or the transport), allowing for custom event filtering logic or routing of events.
      *
      * Metadata can either be passed directly or alternatively a callback can be provided that will be
-     * called with the following arguments:
+     * called with the following parameters:
      * - `org`: The organization slug.
      * - `project`: The project slug.
      * - `release`: The release name.
+     *
+     * @deprecated Use the non-experimental `moduleMetadata` option instead. (Basically just move this option out of `_experiments`)
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    moduleMetadata?: any | ModuleMetadataCallback;
+    moduleMetadata?: ModuleMetadata | ModuleMetadataCallback;
   };
 
   /**
@@ -340,13 +360,18 @@ export interface Options {
   };
 }
 
+export interface ModuleMetadata {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
 export interface ModuleMetadataCallbackArgs {
   org?: string;
   project?: string;
   release?: string;
 }
 
-export type ModuleMetadataCallback = (args: ModuleMetadataCallbackArgs) => object;
+export type ModuleMetadataCallback = (args: ModuleMetadataCallbackArgs) => ModuleMetadata;
 
 export type IncludeEntry = {
   /**

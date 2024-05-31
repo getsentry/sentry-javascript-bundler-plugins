@@ -9,9 +9,7 @@ createCjsBundles(
   },
   outputDir,
   {
-    _experiments: {
-      moduleMetadata: { team: "frontend" },
-    },
+    moduleMetadata: { team: "frontend" },
   },
   ["webpack4", "webpack5", "esbuild", "rollup", "vite"]
 );
