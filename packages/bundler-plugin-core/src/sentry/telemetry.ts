@@ -95,6 +95,8 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
   hub.setTag("node", process.version);
   hub.setTag("platform", process.platform);
 
+  hub.setTag("meta-framework", options._metaOptions.telemetry.metaFramework ?? "none");
+
   hub.setTags({
     organization: org,
     project,

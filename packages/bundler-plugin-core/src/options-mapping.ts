@@ -29,6 +29,11 @@ export function normalizeUserOptions(userOptions: UserOptions) {
     },
     bundleSizeOptimizations: userOptions.bundleSizeOptimizations,
     reactComponentAnnotation: userOptions.reactComponentAnnotation,
+    _metaOptions: {
+      telemetry: {
+        metaFramework: userOptions._metaOptions?.telemetry?.metaFramework,
+      },
+    },
     _experiments: userOptions._experiments ?? {},
   };
 
