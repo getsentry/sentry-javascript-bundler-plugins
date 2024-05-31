@@ -358,6 +358,16 @@ export interface Options {
      * Example value: `[sentry-webpack-plugin (client)]`
      */
     loggerPrefixOverride?: string;
+
+    /**
+     * Arbitrary telemetry items.
+     */
+    telemetry?: {
+      /**
+       * The meta framework using the plugin.
+       */
+      metaFramework?: string;
+    };
   };
 }
 
