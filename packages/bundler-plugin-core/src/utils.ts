@@ -280,18 +280,27 @@ export function generateGlobalInjectorCode({
 export function generateModuleMetadataInjectorCode(metadata: any) {
   // The code below is mostly ternary operators because it saves bundle size.
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
-  return `
-    var _global2 =
-      typeof window !== 'undefined' ?
-        window :
-        typeof global !== 'undefined' ?
-          global :
-          typeof self !== 'undefined' ?
-            self :
-            {};
+  // We are merging the metadata objects in case modules are bundled twice with the plugin
+  return `{
+  var _sentryModuleMetadataGlobal =
+    typeof window !== "undefined"
+      ? window
+      : typeof global !== "undefined"
+      ? global
+      : typeof self !== "undefined"
+      ? self
+      : {};
 
-    _global2._sentryModuleMetadata = _global2._sentryModuleMetadata || {};
-    _global2._sentryModuleMetadata[new Error().stack] = ${JSON.stringify(metadata)};`;
+  _sentryModuleMetadataGlobal._sentryModuleMetadata =
+    _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
+
+  _sentryModuleMetadataGlobal._sentryModuleMetadata[new Error().stack] =
+    Object.assign(
+      {},
+      _sentryModuleMetadataGlobal._sentryModuleMetadata[new Error().stack],
+      ${JSON.stringify(metadata)}
+    );
+}`;
 }
 
 function getBuildInformation() {

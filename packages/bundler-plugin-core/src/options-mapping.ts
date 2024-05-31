@@ -34,6 +34,7 @@ export function normalizeUserOptions(userOptions: UserOptions) {
         metaFramework: userOptions._metaOptions?.telemetry?.metaFramework,
       },
     },
+    moduleMetadata: userOptions.moduleMetadata || userOptions._experiments?.moduleMetadata,
     _experiments: userOptions._experiments ?? {},
   };
 

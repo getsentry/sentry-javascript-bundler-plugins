@@ -29,7 +29,7 @@ import { logger } from "@sentry/utils";
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
   componentNameAnnotatePlugin?: () => UnpluginOptions;
-  moduleMetadataInjectionPlugin?: (injectionCode: string) => UnpluginOptions;
+  moduleMetadataInjectionPlugin: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: (logger: Logger) => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
   bundleSizeOptimizationsPlugin: (buildFlags: SentrySDKBuildFlags) => UnpluginOptions;
@@ -95,6 +95,13 @@ export function sentryUnpluginFactory({
     }
 
     const options = normalizeUserOptions(userOptions);
+
+    // TODO(v3): Remove this warning
+    if (userOptions._experiments?.moduleMetadata) {
+      logger.warn(
+        "The `_experiments.moduleMetadata` option has been promoted to being stable. You can safely move the option out of the `_experiments` object scope."
+      );
+    }
 
     if (unpluginMetaContext.watchMode || options.disable) {
       return [
@@ -217,25 +224,23 @@ export function sentryUnpluginFactory({
       plugins.push(releaseInjectionPlugin(injectionCode));
     }
 
-    if (moduleMetadataInjectionPlugin && options._experiments.moduleMetadata) {
-      let metadata: object;
-      if (typeof options._experiments.moduleMetadata === "function") {
+    if (options.moduleMetadata) {
+      let metadata: Record<string, unknown>;
+      if (typeof options.moduleMetadata === "function") {
         const args = {
           org: options.org,
           project: options.project,
           release: options.release.name,
         };
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-        metadata = options._experiments.moduleMetadata(args);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        metadata = options.moduleMetadata(args);
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        metadata = options._experiments.moduleMetadata;
+        metadata = options.moduleMetadata;
       }
 
       const injectionCode = generateModuleMetadataInjectorCode(metadata);
       plugins.push(moduleMetadataInjectionPlugin(injectionCode));
-    } else if (options._experiments.moduleMetadata) {
-      logger.warn("'moduleMetadata' is currently only supported by '@sentry/webpack-plugin'");
     }
 
     if (!options.release.name) {
