@@ -228,10 +228,11 @@ export function sentryUnpluginFactory({
       let metadata: Record<string, unknown> = {};
 
       if (options.applicationKey) {
-        // We use different keys so that if code receives multiple bundling passes.
-        // It is a bit unfortunate that we have to inject the metadata snippet at the top, which means that if we didn't
-        // have this mechanism, the first bundling pass would always "win". If this weren't the case we would be fine with
-        // the last pass winning but the first pass winning is very bad, because it would prevent any sort of overriding.
+        // We use different keys so that if user-code receives multiple bundling passes, we will store the application keys of all the passes.
+        // It is a bit unfortunate that we have to inject the metadata snippet at the top, because after multiple
+        // injections, the first injection will always "win" because it comes last in the code. We would generally be
+        // fine with making the last bundling pass win. But because it cannot win, we have to use a workaround of storing
+        // the app keys in different object keys.
         // We can simply use the `_sentryBundlerPluginAppKey:` to filter for app keys in the SDK.
         metadata[`_sentryBundlerPluginAppKey:${options.applicationKey}`] = true;
       }
