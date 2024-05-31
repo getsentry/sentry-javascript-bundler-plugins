@@ -317,6 +317,7 @@ export interface Options {
    *
    * @experimental API that does not follow semantic versioning and may change in any release
    */
+  // TODO(v3): Remove these
   _experiments?: {
     /**
      * If set to true, the plugin will inject an additional `SENTRY_BUILD_INFO` variable.
