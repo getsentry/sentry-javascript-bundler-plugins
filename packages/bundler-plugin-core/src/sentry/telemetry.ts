@@ -70,7 +70,7 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
     );
   }
 
-  hub.setTag("module-metadata", !!options._experiments.moduleMetadata || !!options.moduleMetadata);
+  hub.setTag("module-metadata", !!options.moduleMetadata);
   hub.setTag("inject-build-information", !!options._experiments.injectBuildInformation);
 
   // Optional release pipeline steps
