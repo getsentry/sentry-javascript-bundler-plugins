@@ -27,6 +27,11 @@ describe("normalizeUserOptions()", () => {
       silent: false,
       telemetry: true,
       _experiments: {},
+      _metaOptions: {
+        telemetry: {
+          metaFramework: undefined,
+        },
+      },
       url: "https://sentry.io",
     });
   });
@@ -73,6 +78,11 @@ describe("normalizeUserOptions()", () => {
       silent: false,
       telemetry: true,
       _experiments: {},
+      _metaOptions: {
+        telemetry: {
+          metaFramework: undefined,
+        },
+      },
       url: "https://sentry.io",
     });
   });
