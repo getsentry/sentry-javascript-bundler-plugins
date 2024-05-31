@@ -29,6 +29,7 @@ export function normalizeUserOptions(userOptions: UserOptions) {
     },
     bundleSizeOptimizations: userOptions.bundleSizeOptimizations,
     reactComponentAnnotation: userOptions.reactComponentAnnotation,
+    moduleMetadata: userOptions.moduleMetadata || userOptions._experiments?.moduleMetadata,
     _experiments: userOptions._experiments ?? {},
   };
 
