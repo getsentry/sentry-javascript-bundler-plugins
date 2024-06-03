@@ -313,6 +313,12 @@ export interface Options {
   moduleMetadata?: ModuleMetadata | ModuleMetadataCallback;
 
   /**
+   * A key which will embedded in all the bundled files. The SDK will be able to use the key to apply filtering
+   * rules, for example using the `thirdPartyErrorFilterIntegration`.
+   */
+  applicationKey?: string;
+
+  /**
    * Options that are considered experimental and subject to change.
    *
    * @experimental API that does not follow semantic versioning and may change in any release
