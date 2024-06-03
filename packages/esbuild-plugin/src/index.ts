@@ -51,9 +51,9 @@ function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
 
     esbuild: {
       setup({ initialOptions, onLoad, onResolve }) {
-        if (initialOptions.bundle) {
+        if (!initialOptions.bundle) {
           logger.warn(
-            "Esbuild's `bundle: true` option is currently not supported! Esbuild will probably crash now. Sorry about that. If you need to upload sourcemaps with the `bundle` option, it is recommended to use Sentry CLI instead: https://docs.sentry.io/platforms/javascript/sourcemaps/uploading/cli/"
+            "The Sentry esbuild plugin only supports esbuild with `bundle: true` being set in the esbuild build options. Esbuild will probably crash now. Sorry about that. If you need to upload sourcemaps without `bundle: true`, it is recommended to use Sentry CLI instead: https://docs.sentry.io/platforms/javascript/sourcemaps/uploading/cli/"
           );
         }
 
