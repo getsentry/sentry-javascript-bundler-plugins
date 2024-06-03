@@ -4,13 +4,11 @@
   </a>
 </p>
 
-# Sentry Babel Component Annotate Plugin (Beta)
+# Sentry Babel Component Annotate Plugin
 
 [![npm version](https://img.shields.io/npm/v/@sentry/babel-plugin-component-annotate.svg)](https://www.npmjs.com/package/@sentry/babel-plugin-component-annotate)
 [![npm dm](https://img.shields.io/npm/dm/@sentry/babel-plugin-component-annotate.svg)](https://www.npmjs.com/package/@sentry/babel-plugin-component-annotate)
 [![npm dt](https://img.shields.io/npm/dt/@sentry/babel-plugin-component-annotate.svg)](https://www.npmjs.com/package/@babel-plugin-component-annotate)
-
-This plugin is currently in beta. Please help us improve by [reporting any issues or giving us feedback](https://github.com/getsentry/sentry-javascript-bundler-plugins/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc).
 
 A Babel plugin that automatically annotates your output DOM with their respective frontend component names.
 This will unlock the capability to search for Replays in Sentry by component name, as well as see component names in breadcrumbs and performance monitoring.
