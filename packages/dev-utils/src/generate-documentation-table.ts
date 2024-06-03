@@ -356,6 +356,18 @@ type IncludeEntry = {
     ],
   },
   {
+    name: "moduleMetadata",
+    type: "Record<string, any> | (args: { org?: string; project?: string; release?: string; }) => Record<string, any>",
+    fullDescription:
+      "Metadata that should be associated with the built application.\n\nThe metadata is serialized and can be looked up at runtime from within the SDK (for example in the `beforeSend`, event processors, or the transport), allowing for custom event filtering logic or routing of events.\n\nMetadata can either be passed directly or alternatively a callback can be provided that will be called with the following parameters:\n\n- `org`: The organization slug.\n- `project`: The project slug.\n- `release`: The release name.",
+  },
+  {
+    name: "applicationKey",
+    type: "string",
+    fullDescription:
+      "A key which will embedded in all the bundled files. The SDK will be able to use the key to apply filtering rules, for example using the `thirdPartyErrorFilterIntegration`.",
+  },
+  {
     name: "_experiments",
     type: "string",
     fullDescription:
