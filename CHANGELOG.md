@@ -4,6 +4,13 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.18.0
+
+- feat: Add `applicationKey` option to identify application code from within the SDK (#540)
+- feat: Allow passing of meta-framework as telemetry data (#539)
+- feat: Promote experimental `moduleMetadata` option to stable (#538)
+- fix(esbuild): Invert warning about `bundle: true` (#542)
+
 ## 2.17.0
 
 - feat: Deprecate and noop `cleanArtifacts` (#525)
