@@ -24,7 +24,7 @@ interface DebugIdUploadPluginOptions {
   handleRecoverableError: (error: unknown) => void;
   sentryHub: Hub;
   sentryClient: NodeClient;
-  filesToDeleteAfterUpload?: string | string[];
+  deleteFilesUpForDeletion: () => Promise<void>;
   sentryCliOptions: {
     url: string;
     authToken: string;
@@ -47,7 +47,7 @@ export function createDebugIdUploadFunction({
   sentryClient,
   sentryCliOptions,
   rewriteSourcesHook,
-  filesToDeleteAfterUpload,
+  deleteFilesUpForDeletion,
 }: DebugIdUploadPluginOptions) {
   return async (buildArtifactPaths: string[]) => {
     const artifactBundleUploadTransaction = sentryHub.startTransaction({
@@ -180,36 +180,7 @@ export function createDebugIdUploadFunction({
         logger.info("Successfully uploaded source maps to Sentry");
       }
 
-      if (filesToDeleteAfterUpload) {
-        const deleteGlobSpan = artifactBundleUploadTransaction.startChild({
-          description: "delete-glob",
-        });
-        const filePathsToDelete = await glob(filesToDeleteAfterUpload, {
-          absolute: true,
-          nodir: true,
-        });
-        deleteGlobSpan.finish();
-
-        filePathsToDelete.forEach((filePathToDelete) => {
-          logger.debug(`Deleting asset after upload: ${filePathToDelete}`);
-        });
-
-        const deleteSpan = artifactBundleUploadTransaction.startChild({
-          description: "delete-files-after-upload",
-        });
-        await Promise.all(
-          filePathsToDelete.map((filePathToDelete) =>
-            fs.promises.rm(filePathToDelete, { force: true }).catch((e) => {
-              // This is allowed to fail - we just don't do anything
-              logger.debug(
-                `An error occured while attempting to delete asset: ${filePathToDelete}`,
-                e
-              );
-            })
-          )
-        );
-        deleteSpan.finish();
-      }
+      await deleteFilesUpForDeletion();
     } catch (e) {
       sentryHub.withScope((scope) => {
         scope.setSpan(artifactBundleUploadTransaction);

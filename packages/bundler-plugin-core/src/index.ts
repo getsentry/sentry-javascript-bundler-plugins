@@ -25,6 +25,7 @@ import {
 import * as dotenv from "dotenv";
 import { glob } from "glob";
 import { logger } from "@sentry/utils";
+import { fileDeletionPlugin } from "./plugins/sourcemap-deletion";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
@@ -180,6 +181,34 @@ export function sentryUnpluginFactory({
       })
     );
 
+    async function deleteFilesUpForDeletion() {
+      const filesToDeleteAfterUpload =
+        options.sourcemaps?.filesToDeleteAfterUpload ?? options.sourcemaps?.deleteFilesAfterUpload;
+
+      if (filesToDeleteAfterUpload) {
+        const filePathsToDelete = await glob(filesToDeleteAfterUpload, {
+          absolute: true,
+          nodir: true,
+        });
+
+        filePathsToDelete.forEach((filePathToDelete) => {
+          logger.debug(`Deleting asset after upload: ${filePathToDelete}`);
+        });
+
+        await Promise.all(
+          filePathsToDelete.map((filePathToDelete) =>
+            fs.promises.rm(filePathToDelete, { force: true }).catch((e) => {
+              // This is allowed to fail - we just don't do anything
+              logger.debug(
+                `An error occurred while attempting to delete asset: ${filePathToDelete}`,
+                e
+              );
+            })
+          )
+        );
+      }
+    }
+
     if (options.bundleSizeOptimizations) {
       const { bundleSizeOptimizations } = options;
       const replacementValues: SentrySDKBuildFlags = {};
@@ -293,11 +322,21 @@ export function sentryUnpluginFactory({
             vcsRemote: options.release.vcsRemote,
             headers: options.headers,
           },
+          deleteFilesUpForDeletion,
         })
       );
     }
 
     plugins.push(debugIdInjectionPlugin(logger));
+
+    plugins.push(
+      fileDeletionPlugin({
+        deleteFilesUpForDeletion,
+        handleRecoverableError: handleRecoverableError,
+        sentryHub,
+        sentryClient,
+      })
+    );
 
     if (!options.authToken) {
       logger.warn(
@@ -317,9 +356,7 @@ export function sentryUnpluginFactory({
           createDebugIdUploadFunction({
             assets: options.sourcemaps?.assets,
             ignore: options.sourcemaps?.ignore,
-            filesToDeleteAfterUpload:
-              options.sourcemaps?.filesToDeleteAfterUpload ??
-              options.sourcemaps?.deleteFilesAfterUpload,
+            deleteFilesUpForDeletion,
             dist: options.release.dist,
             releaseName: options.release.name,
             logger: logger,
