@@ -332,7 +332,7 @@ export function sentryUnpluginFactory({
     plugins.push(
       fileDeletionPlugin({
         deleteFilesUpForDeletion,
-        handleRecoverableError: handleRecoverableError,
+        handleRecoverableError,
         sentryHub,
         sentryClient,
       })

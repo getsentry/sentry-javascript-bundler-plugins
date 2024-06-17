@@ -17,7 +17,7 @@ export function fileDeletionPlugin({
 }: FileDeletionPlugin): UnpluginOptions {
   return {
     name: "sentry-file-deletion-plugin",
-    async buildEnd() {
+    async writeBundle() {
       try {
         await deleteFilesUpForDeletion();
       } catch (e) {
