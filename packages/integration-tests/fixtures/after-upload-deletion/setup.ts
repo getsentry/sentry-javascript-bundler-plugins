@@ -19,4 +19,9 @@ const outputDir = path.resolve(__dirname, "out");
   );
 });
 
-console.log("ASDFASDF", path.join(".", "**", "after-upload-deletion", "**", "*.map"));
+console.log(
+  "ASDFASDF",
+  __dirname,
+  process.cwd(),
+  path.join(".", "**", "after-upload-deletion", "**", "*.map")
+);
