@@ -86,7 +86,11 @@ export function sentryUnpluginFactory({
       );
       // NOTE: Do not use the dotenv.config API directly to read the dotenv file! For some ungodly reason, it falls back to reading `${process.cwd()}/.env` which is absolutely not what we want.
       const dotenvResult = dotenv.parse(dotenvFile);
-      process.env = { ...process.env, ...dotenvResult };
+
+      // Vite has a bug/behaviour where spreading into process.env will cause it to crash
+      // https://github.com/vitest-dev/vitest/issues/1870#issuecomment-1501140251
+      Object.assign(process.env, dotenvResult);
+
       logger.info('Using environment variables configured in ".env.sentry-build-plugin".');
     } catch (e: unknown) {
       // Ignore "file not found" errors but throw all others

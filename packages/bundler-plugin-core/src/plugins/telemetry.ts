@@ -21,7 +21,7 @@ export function telemetryPlugin({
     async buildStart() {
       if (await shouldSendTelemetry) {
         logger.info(
-          "Sending error and performance telemetry data to Sentry. To disable telemetry, set `options.telemetry` to `false`."
+          "Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`."
         );
         sentryHub.startTransaction({ name: "Sentry Bundler Plugin execution" }).finish();
         await safeFlushTelemetry(sentryClient);
