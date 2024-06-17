@@ -23,6 +23,7 @@ export function createCjsBundles(
     void vite.build({
       clearScreen: false,
       build: {
+        sourcemap: true,
         outDir: path.join(outFolder, "vite"),
         rollupOptions: {
           input: entrypoints,
@@ -43,6 +44,7 @@ export function createCjsBundles(
       })
       .then((bundle) =>
         bundle.write({
+          sourcemap: true,
           dir: path.join(outFolder, "rollup"),
           format: "cjs",
           exports: "named",
@@ -52,6 +54,7 @@ export function createCjsBundles(
 
   if (plugins.length === 0 || plugins.includes("esbuild")) {
     void esbuild.build({
+      sourcemap: true,
       entryPoints: entrypoints,
       outdir: path.join(outFolder, "esbuild"),
       plugins: [sentryEsbuildPlugin(sentryUnpluginOptions)],
@@ -65,6 +68,7 @@ export function createCjsBundles(
   if (parseInt(nodejsMajorversion) < 18 && (plugins.length === 0 || plugins.includes("webpack4"))) {
     webpack4(
       {
+        devtool: "source-map",
         mode: "production",
         entry: entrypoints,
         cache: false,
@@ -86,6 +90,7 @@ export function createCjsBundles(
   if (plugins.length === 0 || plugins.includes("webpack5")) {
     webpack5(
       {
+        devtool: "source-map",
         cache: false,
         entry: entrypoints,
         output: {
