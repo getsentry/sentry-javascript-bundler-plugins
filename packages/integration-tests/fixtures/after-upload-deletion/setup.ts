@@ -10,18 +10,10 @@ const outputDir = path.resolve(__dirname, "out");
     },
     outputDir,
     {
-      debug: true,
       sourcemaps: {
-        filesToDeleteAfterUpload: path.join(".", "**", "after-upload-deletion", "**", "*.map"),
+        filesToDeleteAfterUpload: path.join("./**/after-upload-deletion/**/*.map"),
       },
     },
     [bundler]
   );
 });
-
-console.log(
-  "ASDFASDF",
-  __dirname,
-  process.cwd(),
-  path.join(".", "**", "after-upload-deletion", "**", "*.map")
-);
