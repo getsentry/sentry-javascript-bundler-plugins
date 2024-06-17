@@ -11,7 +11,7 @@ const outputDir = path.resolve(__dirname, "out");
     outputDir,
     {
       sourcemaps: {
-        filesToDeleteAfterUpload: path.join(__dirname, "out", bundler, "*.map"),
+        filesToDeleteAfterUpload: path.join(".", "**", "after-upload-deletion", "**", "*.map"),
       },
     },
     [bundler]
