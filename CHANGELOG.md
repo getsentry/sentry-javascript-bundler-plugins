@@ -4,6 +4,15 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.19.0
+
+- feat: Don't use word "error" in log message about telemetry (#548)
+- feat(core): Detect releases from more providers (#549)
+- fix: Always delete files when `sourcemaps.filesToDeleteAfterUpload` is set (#547)
+- fix(vite): Fix environment variable loading issue for Windows (#545)
+
+Work in this release contributed by @Rassilion, and @mateusz-daniluk-xtb. Thank you for your contributions!
+
 ## 2.18.0
 
 - feat: Add `applicationKey` option to identify application code from within the SDK (#540)
