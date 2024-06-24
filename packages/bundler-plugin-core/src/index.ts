@@ -185,7 +185,37 @@ export function sentryUnpluginFactory({
       })
     );
 
+    const tasks = new Set<symbol>();
+    const subscribers: (() => void)[] = [];
+
+    function notifySubscribers() {
+      subscribers.forEach((subscriber) => {
+        subscriber();
+      });
+    }
+
+    function createTaskDependingOnSourcemaps() {
+      const taskIdentifier = Symbol();
+      tasks.add(taskIdentifier);
+      return function completeTaskDependingOnSourcemaps() {
+        tasks.delete(taskIdentifier);
+        notifySubscribers();
+      };
+    }
+
     async function deleteFilesUpForDeletion() {
+      await new Promise<void>((resolve) => {
+        subscribers.push(() => {
+          if (tasks.size === 0) {
+            resolve();
+          }
+        });
+
+        if (tasks.size === 0) {
+          resolve();
+        }
+      });
+
       const filesToDeleteAfterUpload =
         options.sourcemaps?.filesToDeleteAfterUpload ?? options.sourcemaps?.deleteFilesAfterUpload;
 
@@ -326,21 +356,12 @@ export function sentryUnpluginFactory({
             vcsRemote: options.release.vcsRemote,
             headers: options.headers,
           },
-          deleteFilesUpForDeletion,
+          completeTaskDependingOnSourcemaps: createTaskDependingOnSourcemaps(),
         })
       );
     }
 
     plugins.push(debugIdInjectionPlugin(logger));
-
-    plugins.push(
-      fileDeletionPlugin({
-        deleteFilesUpForDeletion,
-        handleRecoverableError,
-        sentryHub,
-        sentryClient,
-      })
-    );
 
     if (!options.authToken) {
       logger.warn(
@@ -360,7 +381,7 @@ export function sentryUnpluginFactory({
           createDebugIdUploadFunction({
             assets: options.sourcemaps?.assets,
             ignore: options.sourcemaps?.ignore,
-            deleteFilesUpForDeletion,
+            completeTaskDependingOnSourcemaps: createTaskDependingOnSourcemaps(),
             dist: options.release.dist,
             releaseName: options.release.name,
             logger: logger,
@@ -395,6 +416,15 @@ export function sentryUnpluginFactory({
         componentNameAnnotatePlugin && plugins.push(componentNameAnnotatePlugin());
       }
     }
+
+    plugins.push(
+      fileDeletionPlugin({
+        deleteFilesUpForDeletion,
+        handleRecoverableError,
+        sentryHub,
+        sentryClient,
+      })
+    );
 
     return plugins;
   });

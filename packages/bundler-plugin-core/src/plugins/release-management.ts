@@ -27,7 +27,7 @@ interface ReleaseManagementPluginOptions {
     silent: boolean;
     headers?: Record<string, string>;
   };
-  deleteFilesUpForDeletion: () => Promise<void>;
+  completeTaskDependingOnSourcemaps: () => void;
 }
 
 export function releaseManagementPlugin({
@@ -42,7 +42,7 @@ export function releaseManagementPlugin({
   sentryHub,
   sentryClient,
   sentryCliOptions,
-  deleteFilesUpForDeletion,
+  completeTaskDependingOnSourcemaps,
 }: ReleaseManagementPluginOptions): UnpluginOptions {
   return {
     name: "sentry-debug-id-upload-plugin",
@@ -85,12 +85,12 @@ export function releaseManagementPlugin({
         if (deployOptions) {
           await cliInstance.releases.newDeploy(releaseName, deployOptions);
         }
-
-        await deleteFilesUpForDeletion();
       } catch (e) {
         sentryHub.captureException('Error in "releaseManagementPlugin" writeBundle hook');
         await safeFlushTelemetry(sentryClient);
         handleRecoverableError(e);
+      } finally {
+        completeTaskDependingOnSourcemaps();
       }
     },
   };
