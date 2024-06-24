@@ -267,5 +267,8 @@ const sentryUnplugin = sentryUnpluginFactory({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sentryEsbuildPlugin: (options?: Options) => any = sentryUnplugin.esbuild;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default sentryUnplugin.esbuild as (options?: Options) => any;
+
 export type { Options as SentryEsbuildPluginOptions } from "@sentry/bundler-plugin-core";
 export { sentryCliBinaryExists } from "@sentry/bundler-plugin-core";
