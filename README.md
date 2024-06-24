@@ -29,3 +29,11 @@ The Sentry Bundler Plugins take care of Sentry-related tasks at build time of yo
 - [Sentry Documentation](https://docs.sentry.io/quickstart/)
 - [Sentry Discord](https://discord.gg/Ww9hbqr)
 - [Sentry Stackoverflow](http://stackoverflow.com/questions/tagged/sentry)
+
+## Contributors
+
+Thanks to everyone who contributed to the Sentry JavaScript Bundler Plugins!
+
+<a href="https://github.com/getsentry/sentry-javascript-bundler-plugins/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=getsentry/sentry-javascript-bundler-plugins" />
+</a>
