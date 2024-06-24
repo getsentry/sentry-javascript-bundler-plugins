@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.20.0
+
+- feat: Export esbuild plugin as default (#555)
+
 ## 2.19.0
 
 - feat: Don't use word "error" in log message about telemetry (#548)
