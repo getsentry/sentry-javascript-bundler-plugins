@@ -24,7 +24,6 @@ interface DebugIdUploadPluginOptions {
   handleRecoverableError: (error: unknown) => void;
   sentryHub: Hub;
   sentryClient: NodeClient;
-  deleteFilesUpForDeletion: () => Promise<void>;
   sentryCliOptions: {
     url: string;
     authToken: string;
@@ -34,6 +33,7 @@ interface DebugIdUploadPluginOptions {
     silent: boolean;
     headers?: Record<string, string>;
   };
+  freeDependencyOnSourcemapFiles: () => void;
 }
 
 export function createDebugIdUploadFunction({
@@ -47,7 +47,7 @@ export function createDebugIdUploadFunction({
   sentryClient,
   sentryCliOptions,
   rewriteSourcesHook,
-  deleteFilesUpForDeletion,
+  freeDependencyOnSourcemapFiles,
 }: DebugIdUploadPluginOptions) {
   return async (buildArtifactPaths: string[]) => {
     const artifactBundleUploadTransaction = sentryHub.startTransaction({
@@ -179,8 +179,6 @@ export function createDebugIdUploadFunction({
         uploadSpan.finish();
         logger.info("Successfully uploaded source maps to Sentry");
       }
-
-      await deleteFilesUpForDeletion();
     } catch (e) {
       sentryHub.withScope((scope) => {
         scope.setSpan(artifactBundleUploadTransaction);
@@ -196,6 +194,7 @@ export function createDebugIdUploadFunction({
         cleanupSpan.finish();
       }
       artifactBundleUploadTransaction.finish();
+      freeDependencyOnSourcemapFiles();
       await safeFlushTelemetry(sentryClient);
     }
   };
