@@ -27,7 +27,7 @@ interface ReleaseManagementPluginOptions {
     silent: boolean;
     headers?: Record<string, string>;
   };
-  completeTaskDependingOnSourcemaps: () => void;
+  freeDependencyOnSourcemapFiles: () => void;
 }
 
 export function releaseManagementPlugin({
@@ -42,7 +42,7 @@ export function releaseManagementPlugin({
   sentryHub,
   sentryClient,
   sentryCliOptions,
-  completeTaskDependingOnSourcemaps,
+  freeDependencyOnSourcemapFiles,
 }: ReleaseManagementPluginOptions): UnpluginOptions {
   return {
     name: "sentry-debug-id-upload-plugin",
@@ -90,7 +90,7 @@ export function releaseManagementPlugin({
         await safeFlushTelemetry(sentryClient);
         handleRecoverableError(e);
       } finally {
-        completeTaskDependingOnSourcemaps();
+        freeDependencyOnSourcemapFiles();
       }
     },
   };

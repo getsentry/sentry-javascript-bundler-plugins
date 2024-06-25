@@ -185,62 +185,46 @@ export function sentryUnpluginFactory({
       })
     );
 
-    const tasks = new Set<symbol>();
-    const subscribers: (() => void)[] = [];
+    // We have multiple plugins depending on generated source map files. (debug ID upload, legacy upload)
+    // Additionally, we also want to have the functionality to delete files after uploading sourcemaps.
+    // All of these plugins and the delete functionality need to run in the same hook (`writeBundle`).
+    // Since the plugins among themselves are not aware of when they run and finish, we need a system to
+    // track their dependencies on the generated files, so that we can initiate the file deletion only after
+    // nothing depends on the files anymore.
+    const dependenciesOnSourcemapFiles = new Set<symbol>();
+    const sourcemapFileDependencySubscribers: (() => void)[] = [];
 
-    function notifySubscribers() {
-      subscribers.forEach((subscriber) => {
+    function notifySourcemapFileDependencySubscribers() {
+      sourcemapFileDependencySubscribers.forEach((subscriber) => {
         subscriber();
       });
     }
 
-    function createTaskDependingOnSourcemaps() {
-      const taskIdentifier = Symbol();
-      tasks.add(taskIdentifier);
-      return function completeTaskDependingOnSourcemaps() {
-        tasks.delete(taskIdentifier);
-        notifySubscribers();
+    function createDependencyOnSourcemapFiles() {
+      const dependencyIdentifier = Symbol();
+      dependenciesOnSourcemapFiles.add(dependencyIdentifier);
+
+      return function freeDependencyOnSourcemapFiles() {
+        dependenciesOnSourcemapFiles.delete(dependencyIdentifier);
+        notifySourcemapFileDependencySubscribers();
       };
     }
 
-    async function deleteFilesUpForDeletion() {
-      await new Promise<void>((resolve) => {
-        subscribers.push(() => {
-          if (tasks.size === 0) {
+    /**
+     * Returns a Promise that resolves when all the currently active dependencies are freed again.
+     */
+    function waitUntilSourcemapFileDependenciesAreFreed() {
+      return new Promise<void>((resolve) => {
+        sourcemapFileDependencySubscribers.push(() => {
+          if (dependenciesOnSourcemapFiles.size === 0) {
             resolve();
           }
         });
 
-        if (tasks.size === 0) {
+        if (dependenciesOnSourcemapFiles.size === 0) {
           resolve();
         }
       });
-
-      const filesToDeleteAfterUpload =
-        options.sourcemaps?.filesToDeleteAfterUpload ?? options.sourcemaps?.deleteFilesAfterUpload;
-
-      if (filesToDeleteAfterUpload) {
-        const filePathsToDelete = await glob(filesToDeleteAfterUpload, {
-          absolute: true,
-          nodir: true,
-        });
-
-        filePathsToDelete.forEach((filePathToDelete) => {
-          logger.debug(`Deleting asset after upload: ${filePathToDelete}`);
-        });
-
-        await Promise.all(
-          filePathsToDelete.map((filePathToDelete) =>
-            fs.promises.rm(filePathToDelete, { force: true }).catch((e) => {
-              // This is allowed to fail - we just don't do anything
-              logger.debug(
-                `An error occurred while attempting to delete asset: ${filePathToDelete}`,
-                e
-              );
-            })
-          )
-        );
-      }
     }
 
     if (options.bundleSizeOptimizations) {
@@ -356,7 +340,7 @@ export function sentryUnpluginFactory({
             vcsRemote: options.release.vcsRemote,
             headers: options.headers,
           },
-          completeTaskDependingOnSourcemaps: createTaskDependingOnSourcemaps(),
+          freeDependencyOnSourcemapFiles: createDependencyOnSourcemapFiles(),
         })
       );
     }
@@ -381,7 +365,7 @@ export function sentryUnpluginFactory({
           createDebugIdUploadFunction({
             assets: options.sourcemaps?.assets,
             ignore: options.sourcemaps?.ignore,
-            completeTaskDependingOnSourcemaps: createTaskDependingOnSourcemaps(),
+            freeDependencyOnSourcemapFiles: createDependencyOnSourcemapFiles(),
             dist: options.release.dist,
             releaseName: options.release.name,
             logger: logger,
@@ -419,7 +403,13 @@ export function sentryUnpluginFactory({
 
     plugins.push(
       fileDeletionPlugin({
-        deleteFilesUpForDeletion,
+        // It is very important that this is only called after all other dependencies have been created with `createDependencyOnSourcemapFiles`.
+        // Ideally, we always register this plugin last.
+        dependenciesAreFreedPromise: waitUntilSourcemapFileDependenciesAreFreed(),
+        filesToDeleteAfterUpload:
+          options.sourcemaps?.filesToDeleteAfterUpload ??
+          options.sourcemaps?.deleteFilesAfterUpload,
+        logger,
         handleRecoverableError,
         sentryHub,
         sentryClient,

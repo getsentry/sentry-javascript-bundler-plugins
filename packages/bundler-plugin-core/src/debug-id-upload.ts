@@ -33,7 +33,7 @@ interface DebugIdUploadPluginOptions {
     silent: boolean;
     headers?: Record<string, string>;
   };
-  completeTaskDependingOnSourcemaps: () => void;
+  freeDependencyOnSourcemapFiles: () => void;
 }
 
 export function createDebugIdUploadFunction({
@@ -47,7 +47,7 @@ export function createDebugIdUploadFunction({
   sentryClient,
   sentryCliOptions,
   rewriteSourcesHook,
-  completeTaskDependingOnSourcemaps,
+  freeDependencyOnSourcemapFiles,
 }: DebugIdUploadPluginOptions) {
   return async (buildArtifactPaths: string[]) => {
     const artifactBundleUploadTransaction = sentryHub.startTransaction({
@@ -194,7 +194,7 @@ export function createDebugIdUploadFunction({
         cleanupSpan.finish();
       }
       artifactBundleUploadTransaction.finish();
-      completeTaskDependingOnSourcemaps();
+      freeDependencyOnSourcemapFiles();
       await safeFlushTelemetry(sentryClient);
     }
   };
