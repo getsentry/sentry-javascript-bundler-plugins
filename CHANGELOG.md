@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.20.1
+
+- feat(telemetry): Collect whether applicationKey is set (#559)
+- fix: Wait for tasks depending on sourcemaps before deleting (#557)
+
 ## 2.20.0
 
 - feat: Export esbuild plugin as default (#555)
