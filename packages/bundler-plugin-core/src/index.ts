@@ -301,7 +301,9 @@ export function sentryUnpluginFactory({
       plugins.push(moduleMetadataInjectionPlugin(injectionCode));
     }
 
-    if (!options.release.name) {
+    if (options.sourcemaps?.disable) {
+      logger.debug("Source map upload was disabled. Will not upload sourcemaps.");
+    } else if (!options.release.name) {
       logger.warn(
         "No release name provided. Will not create release. Please set the `release.name` option to identify your release."
       );
