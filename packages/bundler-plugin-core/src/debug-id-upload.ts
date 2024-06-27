@@ -7,7 +7,6 @@ import { Logger } from "./sentry/logger";
 import { promisify } from "util";
 import { Hub, NodeClient } from "@sentry/node";
 import SentryCli from "@sentry/cli";
-import { dynamicSamplingContextToSentryBaggageHeader } from "@sentry/utils";
 import { safeFlushTelemetry } from "./sentry/telemetry";
 
 interface RewriteSourcesHook {
@@ -152,14 +151,7 @@ export function createDebugIdUploadFunction({
 
         const cliInstance = new SentryCli(null, {
           ...sentryCliOptions,
-          headers: {
-            "sentry-trace": uploadSpan.toTraceparent(),
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            baggage: dynamicSamplingContextToSentryBaggageHeader(
-              artifactBundleUploadTransaction.getDynamicSamplingContext()
-            )!,
-            ...sentryCliOptions.headers,
-          },
+          headers: sentryCliOptions.headers,
         });
 
         await cliInstance.releases.uploadSourceMaps(
