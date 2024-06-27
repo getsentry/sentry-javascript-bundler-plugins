@@ -1,6 +1,7 @@
 import SentryCli from "@sentry/cli";
 import { defaultStackParser, Hub, makeNodeTransport, NodeClient } from "@sentry/node";
 import { NormalizedOptions, SENTRY_SAAS_URL } from "../options-mapping";
+import crypto from "crypto";
 
 const SENTRY_SAAS_HOSTNAME = "sentry.io";
 
@@ -99,13 +100,15 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
 
   hub.setTag("application-key-set", options.applicationKey !== undefined);
 
-  hub.setTags({
-    organization: org,
-    project,
-    bundler,
-  });
+  hub.setTag("bundler", bundler);
 
-  hub.setUser({ id: org });
+  if (org) {
+    hub.setTag("org-hash", crypto.createHash("md5").update(org).digest("hex"));
+  }
+
+  if (project) {
+    hub.setTag("project-hash", crypto.createHash("md5").update(project).digest("hex"));
+  }
 }
 
 export async function allowedToSendTelemetry(options: NormalizedOptions): Promise<boolean> {
