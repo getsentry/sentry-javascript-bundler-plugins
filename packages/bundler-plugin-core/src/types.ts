@@ -91,6 +91,13 @@ export interface Options {
    */
   sourcemaps?: {
     /**
+     * Disables all functionality related to sourcemaps.
+     *
+     * Defaults to `false`.
+     */
+    disable?: boolean;
+
+    /**
      * A glob or an array of globs that specifies the build artifacts that should be uploaded to Sentry.
      *
      * If this option is not specified, the plugin will try to upload all JavaScript files and source map files that are created during build.

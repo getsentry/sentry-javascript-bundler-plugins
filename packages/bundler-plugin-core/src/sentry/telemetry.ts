@@ -89,6 +89,7 @@ export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bund
     "delete-after-upload",
     !!sourcemaps?.deleteFilesAfterUpload || !!sourcemaps?.filesToDeleteAfterUpload
   );
+  hub.setTag("sourcemaps-disabled", !!sourcemaps?.disable);
 
   hub.setTag("react-annotate", !!reactComponentAnnotation?.enabled);
 
