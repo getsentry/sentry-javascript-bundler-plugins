@@ -4,6 +4,13 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.21.0
+
+- fix: Use `sequential` and `post` order for vite artifact deletion (#568)
+- feat: Add option to disable sourcemaps (#561)
+
+Work in this release contributed by @tyouzu1. Thank you for your contribution!
+
 ## 2.20.1
 
 - feat(telemetry): Collect whether applicationKey is set (#559)
