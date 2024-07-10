@@ -18,10 +18,13 @@ function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-function rollupComponentNameAnnotatePlugin(): UnpluginOptions {
+function rollupComponentNameAnnotatePlugin(
+  ignoredFiles?: string[],
+  ignoredComponents?: string[]
+): UnpluginOptions {
   return {
     name: "sentry-rollup-component-name-annotate-plugin",
-    rollup: createComponentNameAnnotateHooks(),
+    rollup: createComponentNameAnnotateHooks(ignoredFiles, ignoredComponents),
   };
 }
 

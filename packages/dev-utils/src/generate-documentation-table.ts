@@ -359,6 +359,20 @@ type IncludeEntry = {
         fullDescription: "Whether the component name annotate plugin should be enabled or not.",
         supportedBundlers: ["webpack", "vite", "rollup"],
       },
+      {
+        name: "ignoredFiles",
+        type: "string[]",
+        fullDescription:
+          "A list of strings representing local paths to files to ignore. The plugin will not perform any annotations on components in these files.",
+        supportedBundlers: ["webpack", "vite", "rollup"],
+      },
+      {
+        name: "ignoredComponents",
+        type: "string[]",
+        fullDescription:
+          "A list of strings representing the names of components to ignore. The plugin will not perform any annotations on these components.",
+        supportedBundlers: ["webpack", "vite", "rollup"],
+      },
     ],
   },
   {

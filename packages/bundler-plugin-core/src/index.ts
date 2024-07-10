@@ -610,7 +610,10 @@ export function createRollupDebugIdUploadHooks(
   };
 }
 
-export function createComponentNameAnnotateHooks() {
+export function createComponentNameAnnotateHooks(
+  ignoredFiles?: string[],
+  ignoredComponents?: string[]
+) {
   type ParserPlugins = NonNullable<
     NonNullable<Parameters<typeof transformAsync>[1]>["parserOpts"]
   >["plugins"];
