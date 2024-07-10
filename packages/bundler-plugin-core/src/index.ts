@@ -627,6 +627,12 @@ export function createComponentNameAnnotateHooks(
         return null;
       }
 
+      const isIgnoredFile = ignoredFiles?.some((file) => idWithoutQueryAndHash.endsWith(file));
+      if (isIgnoredFile) {
+        console.log(`FOUND IGNORED FILE: ${idWithoutQueryAndHash}`);
+        return null;
+      }
+
       // We will only apply this plugin on jsx and tsx files
       if (![".jsx", ".tsx"].some((ending) => idWithoutQueryAndHash.endsWith(ending))) {
         return null;
