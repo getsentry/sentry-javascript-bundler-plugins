@@ -26,7 +26,7 @@ export function fileDeletionPlugin({
     name: "sentry-file-deletion-plugin",
     writeBundle: {
       sequential: true,
-			order: 'post',
+      order: 'post',
       async handler() {
         try {
           if (filesToDeleteAfterUpload !== undefined) {
