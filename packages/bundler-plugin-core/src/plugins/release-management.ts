@@ -47,7 +47,7 @@ export function releaseManagementPlugin({
   return {
     name: "sentry-debug-id-upload-plugin",
     async writeBundle() {
-      const freeDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles()
+      const freeDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
       try {
         const cliInstance = new SentryCli(null, sentryCliOptions);
 
