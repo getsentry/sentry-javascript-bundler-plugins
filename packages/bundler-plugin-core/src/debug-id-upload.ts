@@ -49,6 +49,7 @@ export function createDebugIdUploadFunction({
   rewriteSourcesHook,
   createDependencyOnSourcemapFiles,
 }: DebugIdUploadPluginOptions) {
+  const freeInitDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
   return async (buildArtifactPaths: string[]) => {
     const artifactBundleUploadTransaction = sentryHub.startTransaction({
       name: "debug-id-sourcemap-upload",
@@ -195,6 +196,7 @@ export function createDebugIdUploadFunction({
         cleanupSpan.finish();
       }
       artifactBundleUploadTransaction.finish();
+      freeInitDependencyOnSourcemapFiles();
       freeDependencyOnSourcemapFiles();
       await safeFlushTelemetry(sentryClient);
     }
