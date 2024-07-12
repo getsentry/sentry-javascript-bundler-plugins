@@ -44,11 +44,15 @@ export function releaseManagementPlugin({
   sentryCliOptions,
   createDependencyOnSourcemapFiles,
 }: ReleaseManagementPluginOptions): UnpluginOptions {
-  const freeInitDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
+  const freeGlobalDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
   return {
     name: "sentry-debug-id-upload-plugin",
     async writeBundle() {
-      const freeDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
+      // It is possible that this writeBundle hook is called multiple times in one build (for example when reusing the plugin, or when using build tooling like `@vitejs/plugin-legacy`)
+      // Therefore we need to actually register the execution of this hook as dependency on the sourcemap files.
+      const freeWriteBundleInvocationDependencyOnSourcemapFiles =
+        createDependencyOnSourcemapFiles();
+
       try {
         const cliInstance = new SentryCli(null, sentryCliOptions);
 
@@ -92,8 +96,8 @@ export function releaseManagementPlugin({
         await safeFlushTelemetry(sentryClient);
         handleRecoverableError(e);
       } finally {
-        freeInitDependencyOnSourcemapFiles();
-        freeDependencyOnSourcemapFiles();
+        freeGlobalDependencyOnSourcemapFiles();
+        freeWriteBundleInvocationDependencyOnSourcemapFiles();
       }
     },
   };

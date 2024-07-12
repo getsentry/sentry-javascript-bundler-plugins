@@ -212,6 +212,9 @@ export function sentryUnpluginFactory({
 
     /**
      * Returns a Promise that resolves when all the currently active dependencies are freed again.
+     *
+     * It is very important that this function is called as late as possible before wanting to await the Promise to give
+     * the dependency producers as much time as possible to register themselves.
      */
     function waitUntilSourcemapFileDependenciesAreFreed() {
       return new Promise<void>((resolve) => {
@@ -405,9 +408,7 @@ export function sentryUnpluginFactory({
 
     plugins.push(
       fileDeletionPlugin({
-        // It is very important that this is only called after all other dependencies have been created with `createDependencyOnSourcemapFiles`.
-        // Ideally, we always register this plugin last.
-        dependenciesAreFreedPromise: () => waitUntilSourcemapFileDependenciesAreFreed(),
+        waitUntilSourcemapFileDependenciesAreFreed,
         filesToDeleteAfterUpload:
           options.sourcemaps?.filesToDeleteAfterUpload ??
           options.sourcemaps?.deleteFilesAfterUpload,
