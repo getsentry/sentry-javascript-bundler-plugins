@@ -33,7 +33,7 @@ interface DebugIdUploadPluginOptions {
     silent: boolean;
     headers?: Record<string, string>;
   };
-  freeDependencyOnSourcemapFiles: () => void;
+  createDependencyOnSourcemapFiles: () => () => void;
 }
 
 export function createDebugIdUploadFunction({
@@ -47,14 +47,20 @@ export function createDebugIdUploadFunction({
   sentryClient,
   sentryCliOptions,
   rewriteSourcesHook,
-  freeDependencyOnSourcemapFiles,
+  createDependencyOnSourcemapFiles,
 }: DebugIdUploadPluginOptions) {
+  const freeGlobalDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
+
   return async (buildArtifactPaths: string[]) => {
     const artifactBundleUploadTransaction = sentryHub.startTransaction({
       name: "debug-id-sourcemap-upload",
     });
 
     let folderToCleanUp: string | undefined;
+
+    // It is possible that this writeBundle hook (which calls this function) is called multiple times in one build (for example when reusing the plugin, or when using build tooling like `@vitejs/plugin-legacy`)
+    // Therefore we need to actually register the execution of this hook as dependency on the sourcemap files.
+    const freeUploadDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
 
     try {
       const mkdtempSpan = artifactBundleUploadTransaction.startChild({ description: "mkdtemp" });
@@ -194,7 +200,8 @@ export function createDebugIdUploadFunction({
         cleanupSpan.finish();
       }
       artifactBundleUploadTransaction.finish();
-      freeDependencyOnSourcemapFiles();
+      freeGlobalDependencyOnSourcemapFiles();
+      freeUploadDependencyOnSourcemapFiles();
       await safeFlushTelemetry(sentryClient);
     }
   };
