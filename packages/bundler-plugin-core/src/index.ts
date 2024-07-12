@@ -342,7 +342,7 @@ export function sentryUnpluginFactory({
             vcsRemote: options.release.vcsRemote,
             headers: options.headers,
           },
-          createDependencyOnSourcemapFiles,
+          freeDependencyOnSourcemapFiles: createDependencyOnSourcemapFiles(),
         })
       );
     }
@@ -367,7 +367,7 @@ export function sentryUnpluginFactory({
           createDebugIdUploadFunction({
             assets: options.sourcemaps?.assets,
             ignore: options.sourcemaps?.ignore,
-            createDependencyOnSourcemapFiles,
+            freeDependencyOnSourcemapFiles: createDependencyOnSourcemapFiles(),
             dist: options.release.dist,
             releaseName: options.release.name,
             logger: logger,
@@ -405,9 +405,7 @@ export function sentryUnpluginFactory({
 
     plugins.push(
       fileDeletionPlugin({
-        // It is very important that this is only called after all other dependencies have been created with `createDependencyOnSourcemapFiles`.
-        // Ideally, we always register this plugin last.
-        dependenciesAreFreedPromise: () => waitUntilSourcemapFileDependenciesAreFreed(),
+        waitUntilSourcemapFileDependenciesAreFreed,
         filesToDeleteAfterUpload:
           options.sourcemaps?.filesToDeleteAfterUpload ??
           options.sourcemaps?.deleteFilesAfterUpload,

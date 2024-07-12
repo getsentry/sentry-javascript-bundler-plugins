@@ -33,7 +33,7 @@ interface DebugIdUploadPluginOptions {
     silent: boolean;
     headers?: Record<string, string>;
   };
-  createDependencyOnSourcemapFiles: () => () => void;
+  freeDependencyOnSourcemapFiles: () => void;
 }
 
 export function createDebugIdUploadFunction({
@@ -47,9 +47,8 @@ export function createDebugIdUploadFunction({
   sentryClient,
   sentryCliOptions,
   rewriteSourcesHook,
-  createDependencyOnSourcemapFiles,
+  freeDependencyOnSourcemapFiles,
 }: DebugIdUploadPluginOptions) {
-  const freeInitDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
   return async (buildArtifactPaths: string[]) => {
     const artifactBundleUploadTransaction = sentryHub.startTransaction({
       name: "debug-id-sourcemap-upload",
@@ -57,7 +56,6 @@ export function createDebugIdUploadFunction({
 
     let folderToCleanUp: string | undefined;
 
-    const freeDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
     try {
       const mkdtempSpan = artifactBundleUploadTransaction.startChild({ description: "mkdtemp" });
       const tmpUploadFolder = await fs.promises.mkdtemp(
@@ -196,7 +194,6 @@ export function createDebugIdUploadFunction({
         cleanupSpan.finish();
       }
       artifactBundleUploadTransaction.finish();
-      freeInitDependencyOnSourcemapFiles();
       freeDependencyOnSourcemapFiles();
       await safeFlushTelemetry(sentryClient);
     }

@@ -7,7 +7,7 @@ import fs from "fs";
 
 interface FileDeletionPlugin {
   handleRecoverableError: (error: unknown) => void;
-  dependenciesAreFreedPromise: () => Promise<void>;
+  waitUntilSourcemapFileDependenciesAreFreed: () => Promise<void>;
   sentryHub: Hub;
   sentryClient: NodeClient;
   filesToDeleteAfterUpload: string | string[] | undefined;
@@ -19,7 +19,7 @@ export function fileDeletionPlugin({
   sentryHub,
   sentryClient,
   filesToDeleteAfterUpload,
-  dependenciesAreFreedPromise,
+  waitUntilSourcemapFileDependenciesAreFreed,
   logger,
 }: FileDeletionPlugin): UnpluginOptions {
   return {
@@ -36,7 +36,7 @@ export function fileDeletionPlugin({
             "Waiting for dependencies on generated files to be freed before deleting..."
           );
 
-          await dependenciesAreFreedPromise();
+          await waitUntilSourcemapFileDependenciesAreFreed();
 
           filePathsToDelete.forEach((filePathToDelete) => {
             logger.debug(`Deleting asset after upload: ${filePathToDelete}`);
