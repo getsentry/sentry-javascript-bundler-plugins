@@ -4,6 +4,12 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.21.1
+
+- fix: Do not delete files before all upload tasks executed (#572)
+
+Work in this release contributed by @tyouzu1. Thank you for your contribution!
+
 ## 2.21.0
 
 - fix: Use `sequential` and `post` order for vite artifact deletion (#568)
