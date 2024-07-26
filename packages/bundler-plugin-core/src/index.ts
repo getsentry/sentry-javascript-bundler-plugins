@@ -43,7 +43,7 @@ interface SentryUnpluginFactoryOptions {
  *
  * Release injection:
  * Per default the sentry bundler plugin will inject a global `SENTRY_RELEASE` into each JavaScript/TypeScript module
- * that is part of the bundle. On a technical level this is done by appending an import (`import "sentry-release-injector;"`)
+ * that is part of the bundle. On a technical level this is done by appending an import (`import "sentry-release-injector";`)
  * to all entrypoint files of the user code (see `transformInclude` and `transform` hooks). This import is then resolved
  * by the sentry plugin to a virtual module that sets the global variable (see `resolveId` and `load` hooks).
  * If a user wants to inject the release into a particular set of modules they can use the `releaseInjectionTargets` option.
