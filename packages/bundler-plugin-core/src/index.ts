@@ -237,7 +237,10 @@ export function sentryUnpluginFactory({
       if (bundleSizeOptimizations.excludeDebugStatements) {
         replacementValues["__SENTRY_DEBUG__"] = false;
       }
-      if (bundleSizeOptimizations.excludePerformanceMonitoring) {
+      if (
+        bundleSizeOptimizations.excludePerformanceMonitoring ||
+        bundleSizeOptimizations.excludeTracing
+      ) {
         replacementValues["__SENTRY_TRACE__"] = false;
       }
       if (bundleSizeOptimizations.excludeReplayCanvas) {
