@@ -4,6 +4,12 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.22.0
+
+- deps: Bump `@sentry/cli` to `2.33.1` (#581)
+- feat: Add `bundleSizeOptimizations.excludeTracing` option as alias to deprecated `bundleSizeOptimizations.excludePerformanceMonitoring` (#582)
+- fix(vite-plugin): Ensure `post` order of `sentry-vite-release-injection-plugin` to avoid breaking `@rollup/plugin-commonjs` step (#578)
+
 ## 2.21.1
 
 - fix: Do not delete files before all upload tasks executed (#572)
