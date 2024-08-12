@@ -6,7 +6,7 @@ import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 function checkBundle(bundlePath: string): void {
   const output = execSync(`node ${bundlePath}`, { encoding: "utf-8" });
-  expect(output).toBe('i am a dangerous release value because I contain a "');
+  expect(output.trimEnd()).toBe('"i am a dangerous release value because I contain a \\""');
 }
 
 describe("Properly escapes release values before injecting", () => {
