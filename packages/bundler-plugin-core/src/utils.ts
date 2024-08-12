@@ -321,7 +321,7 @@ export function generateGlobalInjectorCode({
             self :
             {};
 
-    _global.SENTRY_RELEASE={id:"${release}"};`;
+    _global.SENTRY_RELEASE={id:${JSON.stringify(release)}};`;
 
   if (injectBuildInformation) {
     const buildInfo = getBuildInformation();
