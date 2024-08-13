@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.22.1
+
+- fix: Use `sourcemaps.disable` to disable debug ID upload instead of legacy upload (#587)
+- fix: Escape release string in injection snippet (#585)
+
 ## 2.22.0
 
 - deps: Bump `@sentry/cli` to `2.33.1` (#581)
