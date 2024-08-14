@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.22.2
+
+- fix: Disable debug ID injection when `sourcemaps.disable` is set (#589)
+
 ## 2.22.1
 
 - fix: Use `sourcemaps.disable` to disable debug ID upload instead of legacy upload (#587)
