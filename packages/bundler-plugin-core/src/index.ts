@@ -351,7 +351,9 @@ export function sentryUnpluginFactory({
       );
     }
 
-    plugins.push(debugIdInjectionPlugin(logger));
+    if (!options.sourcemaps?.disable) {
+      plugins.push(debugIdInjectionPlugin(logger));
+    }
 
     if (options.sourcemaps?.disable) {
       logger.debug(
