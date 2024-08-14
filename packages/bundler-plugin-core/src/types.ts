@@ -301,7 +301,7 @@ export interface Options {
      * If set to `true`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay's Compression Web Worker.
      * Note that the success of this depends on tree shaking being enabled in your build tooling.
      *
-     * **Notice:** You should only do use this option if you manually host a compression worker and configure it in your Sentry Session Replay integration config via the `workerUrl` option.
+     * **Notice:** You should only use this option if you manually host a compression worker and configure it in your Sentry Session Replay integration config via the `workerUrl` option.
      */
     excludeReplayWorker?: boolean;
   };

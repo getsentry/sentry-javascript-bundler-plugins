@@ -370,7 +370,7 @@ type IncludeEntry = {
       {
         name: "excludeReplayWorker",
         type: "boolean",
-        fullDescription: `If set to \`true\`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay's Compression Web Worker.\nNote that the success of this depends on tree shaking being enabled in your build tooling.\n\n**Notice:** You should only do use this option if you manually host a compression worker and configure it in your Sentry Session Replay integration config via the \`workerUrl\` option.`,
+        fullDescription: `If set to \`true\`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay's Compression Web Worker.\nNote that the success of this depends on tree shaking being enabled in your build tooling.\n\n**Notice:** You should only use this option if you manually host a compression worker and configure it in your Sentry Session Replay integration config via the \`workerUrl\` option.`,
       },
     ],
   },
