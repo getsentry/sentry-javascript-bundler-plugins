@@ -13,6 +13,8 @@ function checkBundle(bundlePath1: string, bundlePath2: string): string[] {
     expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
   );
 
+  expect(Object.keys(debugIdMap1)[0]).toContain("Error");
+
   const process2Output = childProcess.execSync(`node ${bundlePath2}`, { encoding: "utf-8" });
   const debugIdMap2 = JSON.parse(process2Output) as Record<string, string>;
   const debugIds2 = Object.values(debugIdMap2);
@@ -20,6 +22,8 @@ function checkBundle(bundlePath1: string, bundlePath2: string): string[] {
   expect(debugIds2).toContainEqual(
     expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
   );
+
+  expect(Object.keys(debugIdMap2)[0]).toContain("Error");
 
   expect(debugIds1).not.toEqual(debugIds2);
 
