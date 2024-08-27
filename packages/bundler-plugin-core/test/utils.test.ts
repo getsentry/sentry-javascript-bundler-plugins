@@ -1,4 +1,5 @@
 import {
+  generateModuleMetadataInjectorCode,
   getDependencies,
   getPackageJson,
   parseMajorVersion,
@@ -212,5 +213,66 @@ if (false && true) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       map: expect.anything(),
     });
+  });
+});
+
+describe("generateModuleMetadataInjectorCode", () => {
+  it("generates code with empty metadata object", () => {
+    const generatedCode = generateModuleMetadataInjectorCode({});
+    expect(generatedCode).toMatchInlineSnapshot(`
+      "{
+        var _sentryModuleMetadataGlobal =
+          typeof window !== \\"undefined\\"
+            ? window
+            : typeof global !== \\"undefined\\"
+            ? global
+            : typeof self !== \\"undefined\\"
+            ? self
+            : {};
+
+        _sentryModuleMetadataGlobal._sentryModuleMetadata =
+          _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
+
+        _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack] =
+          Object.assign(
+            {},
+            _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
+            {}
+          );
+      }"
+    `);
+  });
+
+  it("generates code with metadata object", () => {
+    const generatedCode = generateModuleMetadataInjectorCode({
+      "file1.js": {
+        foo: "bar",
+      },
+      "file2.js": {
+        bar: "baz",
+      },
+    });
+    expect(generatedCode).toMatchInlineSnapshot(`
+      "{
+        var _sentryModuleMetadataGlobal =
+          typeof window !== \\"undefined\\"
+            ? window
+            : typeof global !== \\"undefined\\"
+            ? global
+            : typeof self !== \\"undefined\\"
+            ? self
+            : {};
+
+        _sentryModuleMetadataGlobal._sentryModuleMetadata =
+          _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
+
+        _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack] =
+          Object.assign(
+            {},
+            _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
+            {\\"file1.js\\":{\\"foo\\":\\"bar\\"},\\"file2.js\\":{\\"bar\\":\\"baz\\"}}
+          );
+      }"
+    `);
   });
 });

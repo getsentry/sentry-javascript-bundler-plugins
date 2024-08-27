@@ -351,10 +351,10 @@ export function generateModuleMetadataInjectorCode(metadata: any) {
   _sentryModuleMetadataGlobal._sentryModuleMetadata =
     _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
 
-  _sentryModuleMetadataGlobal._sentryModuleMetadata[new Error().stack] =
+  _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack] =
     Object.assign(
       {},
-      _sentryModuleMetadataGlobal._sentryModuleMetadata[new Error().stack],
+      _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
       ${JSON.stringify(metadata)}
     );
 }`;
