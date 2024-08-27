@@ -8,7 +8,7 @@ try {
       ? self
       : {};
 
-  var stack = new Error().stack;
+  var stack = new globalObject.Error().stack;
 
   if (stack) {
     globalObject._sentryDebugIds = globalObject._sentryDebugIds || {};
