@@ -39,7 +39,7 @@ function checkBundleForRelease(bundlePath: string): void {
 }
 
 // Query params and hashes are weird on windows
-(process.platform === "win32" ? describe : describe.skip)("Injection with query params", () => {
+(process.platform === "win32" ? describe.skip : describe)("Injection with query params", () => {
   test("vite bundle", () => {
     checkBundleForDebugIds(
       path.join(__dirname, "out", "vite", "bundle1.js?foo=bar#baz"),
