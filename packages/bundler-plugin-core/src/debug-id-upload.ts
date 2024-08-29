@@ -9,6 +9,7 @@ import { Hub, NodeClient } from "@sentry/node";
 import SentryCli from "@sentry/cli";
 import { dynamicSamplingContextToSentryBaggageHeader } from "@sentry/utils";
 import { safeFlushTelemetry } from "./sentry/telemetry";
+import { stripQueryAndHashFromPath } from "./utils";
 
 interface RewriteSourcesHook {
   (source: string, map: any): string;
@@ -89,12 +90,9 @@ export function createDebugIdUploadFunction({
       });
       globSpan.finish();
 
-      const debugIdChunkFilePaths = globResult.filter(
-        (debugIdChunkFilePath) =>
-          debugIdChunkFilePath.endsWith(".js") ||
-          debugIdChunkFilePath.endsWith(".mjs") ||
-          debugIdChunkFilePath.endsWith(".cjs")
-      );
+      const debugIdChunkFilePaths = globResult.filter((debugIdChunkFilePath) => {
+        return !!stripQueryAndHashFromPath(debugIdChunkFilePath).match(/\.(js|mjs|cjs)$/);
+      });
 
       // The order of the files output by glob() is not deterministic
       // Ensure order within the files so that {debug-id}-{chunkIndex} coupling is consistent

@@ -39,7 +39,7 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
         new BannerPlugin({
           raw: true,
-          include: /\.(js|ts|jsx|tsx|mjs|cjs)$/,
+          include: /\.(js|ts|jsx|tsx|mjs|cjs)(\?[^?]*)?(#[^#]*)?$/,
           banner: injectionCode,
         })
       );
@@ -105,7 +105,7 @@ function webpackDebugIdInjectionPlugin(): UnpluginOptions {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
         new BannerPlugin({
           raw: true,
-          include: /\.(js|ts|jsx|tsx|mjs|cjs)$/,
+          include: /\.(js|ts|jsx|tsx|mjs|cjs)(\?[^?]*)?(#[^#]*)?$/,
           banner: (arg?: BannerPluginCallbackArg) => {
             const debugId = arg?.chunk?.hash ? stringToUUID(arg.chunk.hash) : uuidv4();
             return getDebugIdSnippet(debugId);
@@ -156,7 +156,7 @@ function webpackModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
         new BannerPlugin({
           raw: true,
-          include: /\.(js|ts|jsx|tsx|mjs|cjs)$/,
+          include: /\.(js|ts|jsx|tsx|mjs|cjs)(\?[^?]*)?(#[^#]*)?$/,
           banner: injectionCode,
         })
       );

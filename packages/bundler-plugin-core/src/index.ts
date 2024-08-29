@@ -528,7 +528,10 @@ export function createRollupDebugIdInjectionHooks() {
   return {
     renderChunk(code: string, chunk: { fileName: string }) {
       if (
-        [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+        // chunks could be any file (html, md, ...)
+        [".js", ".mjs", ".cjs"].some((ending) =>
+          stripQueryAndHashFromPath(chunk.fileName).endsWith(ending)
+        )
       ) {
         const debugId = stringToUUID(code); // generate a deterministic debug ID
         const codeToInject = getDebugIdSnippet(debugId);
@@ -562,7 +565,10 @@ export function createRollupModuleMetadataInjectionHooks(injectionCode: string) 
   return {
     renderChunk(code: string, chunk: { fileName: string }) {
       if (
-        [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+        // chunks could be any file (html, md, ...)
+        [".js", ".mjs", ".cjs"].some((ending) =>
+          stripQueryAndHashFromPath(chunk.fileName).endsWith(ending)
+        )
       ) {
         const ms = new MagicString(code, { filename: chunk.fileName });
 
@@ -600,7 +606,14 @@ export function createRollupDebugIdUploadHooks(
       if (outputOptions.dir) {
         const outputDir = outputOptions.dir;
         const buildArtifacts = await glob(
-          ["/**/*.js", "/**/*.mjs", "/**/*.cjs", "/**/*.js.map", "/**/*.mjs.map", "/**/*.cjs.map"],
+          [
+            "/**/*.js",
+            "/**/*.mjs",
+            "/**/*.cjs",
+            "/**/*.js.map",
+            "/**/*.mjs.map",
+            "/**/*.cjs.map",
+          ].map((q) => `${q}?(\\?*)?(#*)`), // We want to allow query and hashes strings at the end of files
           {
             root: outputDir,
             absolute: true,
