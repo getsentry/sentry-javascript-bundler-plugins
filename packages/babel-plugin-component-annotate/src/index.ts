@@ -84,6 +84,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
       ArrowFunctionExpression(path, state) {
         // We're expecting a `VariableDeclarator` like `const MyComponent =`
         const parent = path.parent;
+
         if (
           !parent ||
           !("id" in parent) ||
@@ -189,6 +190,36 @@ function functionBodyPushAttributes(
       return;
     }
 
+    // Handle the case of a function body returning a ternary operation.
+    // `return (maybeTrue ? '' : (<SubComponent />))`
+    if (arg.isConditionalExpression()) {
+      const consequent = arg.get("consequent");
+      if (consequent.isJSXFragment() || consequent.isJSXElement()) {
+        processJSX(
+          annotateFragments,
+          t,
+          consequent,
+          componentName,
+          sourceFileName,
+          attributeNames,
+          ignoredComponents
+        );
+      }
+      const alternate = arg.get("alternate");
+      if (alternate.isJSXFragment() || alternate.isJSXElement()) {
+        processJSX(
+          annotateFragments,
+          t,
+          alternate,
+          componentName,
+          sourceFileName,
+          attributeNames,
+          ignoredComponents
+        );
+      }
+      return;
+    }
+
     if (!arg.isJSXFragment() && !arg.isJSXElement()) {
       return;
     }
@@ -223,7 +254,6 @@ function processJSX(
   if (!jsxNode) {
     return;
   }
-
   // NOTE: I don't know of a case where `openingElement` would have more than one item,
   // but it's safer to always iterate
   const paths = jsxNode.get("openingElement");
