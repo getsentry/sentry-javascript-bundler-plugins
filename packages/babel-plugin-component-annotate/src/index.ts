@@ -193,7 +193,7 @@ function functionBodyPushAttributes(
     // Handle the case of a function body returning a ternary operation.
     // `return (maybeTrue ? '' : (<SubComponent />))`
     if (arg.isConditionalExpression()) {
-      const consequent = arg.get('consequent');
+      const consequent = arg.get("consequent");
       if (consequent.isJSXFragment() || consequent.isJSXElement()) {
         processJSX(
           annotateFragments,
@@ -205,7 +205,7 @@ function functionBodyPushAttributes(
           ignoredComponents
         );
       }
-      const alternate = arg.get('alternate');
+      const alternate = arg.get("alternate");
       if (alternate.isJSXFragment() || alternate.isJSXElement()) {
         processJSX(
           annotateFragments,
