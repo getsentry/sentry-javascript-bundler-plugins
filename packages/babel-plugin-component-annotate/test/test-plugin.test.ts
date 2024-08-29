@@ -2236,3 +2236,16 @@ it("Bananas incompatible plugin @react-navigation source snapshot matches", () =
     }"
   `);
 });
+
+it("handles ternary operation returned by function body", () => {
+  const result = transform(`const maybeTrue = Math.random() > 0.5;
+export default function componentName() {
+  return (maybeTrue ? '' : (<SubComponent />))
+}`,
+    {
+      presets: ["@babel/preset-react"],
+      plugins: [[plugin, { "annotate-fragments": true }]],
+    }
+  );
+  expect(result?.code).toMatchSnapshot();
+});
