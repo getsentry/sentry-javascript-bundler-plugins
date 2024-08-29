@@ -90,10 +90,7 @@ export function createDebugIdUploadFunction({
       globSpan.finish();
 
       const debugIdChunkFilePaths = globResult.filter(
-        (debugIdChunkFilePath) =>
-          debugIdChunkFilePath.endsWith(".js") ||
-          debugIdChunkFilePath.endsWith(".mjs") ||
-          debugIdChunkFilePath.endsWith(".cjs")
+        (debugIdChunkFilePath) => !!debugIdChunkFilePath.match(/\.(js|mjs|cjs)(\?.*)?(#.*)?$/)
       );
 
       // The order of the files output by glob() is not deterministic
