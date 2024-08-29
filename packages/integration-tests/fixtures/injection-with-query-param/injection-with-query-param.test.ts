@@ -2,7 +2,7 @@
 /* eslint-disable jest/expect-expect */
 import childProcess from "child_process";
 import path from "path";
-import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
+import { testIf, testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 function checkBundleForDebugIds(bundlePath1: string, bundlePath2: string): string[] {
   const process1Output = childProcess.execSync(`node ${bundlePath1}`, { encoding: "utf-8" });
@@ -38,7 +38,10 @@ function checkBundleForRelease(bundlePath: string): void {
   expect(JSON.parse(processOutput).release).toBe("I AM A RELEASE!");
 }
 
-test("vite bundle", () => {
+testIf(
+  // query params and fragments are weird on windows
+  process.platform !== "win32"
+)("vite bundle", () => {
   checkBundleForDebugIds(
     path.join(__dirname, "out", "vite", "bundle1.js?foo=bar#baz"),
     path.join(__dirname, "out", "vite", "bundle2.js?foo=bar#baz")
@@ -46,7 +49,10 @@ test("vite bundle", () => {
   checkBundleForRelease(path.join(__dirname, "out", "vite", "bundle1.js?foo=bar#baz"));
 });
 
-test("rollup bundle", () => {
+testIf(
+  // query params and fragments are weird on windows
+  process.platform !== "win32"
+)("rollup bundle", () => {
   checkBundleForDebugIds(
     path.join(__dirname, "out", "rollup", "bundle1.js?foo=bar#baz"),
     path.join(__dirname, "out", "rollup", "bundle2.js?foo=bar#baz")
