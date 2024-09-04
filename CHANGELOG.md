@@ -4,6 +4,13 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.22.4
+
+- feat(react-component-annotate): Handle function body returning a ternary (#598)
+- fix: Allow injection plugins to apply to files with query parameters and fragments in their name (#597)
+
+Work in this release contributed by @Thristhart. Thank you for your contribution!
+
 ## 2.22.3
 
 - fix(core): Always instantiate global `Error` class in injected code snippets (#594)
