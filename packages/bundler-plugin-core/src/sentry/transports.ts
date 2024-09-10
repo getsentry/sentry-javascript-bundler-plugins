@@ -98,7 +98,8 @@ function makeNodeTransport(options: BaseTransportOptions) {
   return createTransport(options, requestExecutor);
 }
 
-/** A transports that does nothing */
+/** A transport that can be optionally enabled as a later time than it's
+ * creation */
 export function makeOptionallyEnabledNodeTransport(
   shouldSendTelemetry: Promise<boolean>
 ): (options: BaseTransportOptions) => Transport {
