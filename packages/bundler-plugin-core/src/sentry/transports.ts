@@ -98,16 +98,6 @@ function makeNodeTransport(options: BaseTransportOptions) {
   return createTransport(options, requestExecutor);
 }
 
-/**
- * global.__SENTRY_INTERCEPT_TRANSPORT__ is used for testing purposes. If it is
- * set as an array, the transport will push envelopes to it instead of sending them.
- */
-function getGlobalWithInterceptor(): typeof global & {
-  __SENTRY_INTERCEPT_TRANSPORT__?: unknown[];
-} {
-  return global;
-}
-
 /** A transports that does nothing */
 export function makeOptionallyEnabledNodeTransport(
   shouldSendTelemetry: Promise<boolean>
@@ -117,10 +107,13 @@ export function makeOptionallyEnabledNodeTransport(
     return {
       flush: (timeout) => nodeTransport.flush(timeout),
       send: async (request) => {
-        // Allow intercepting enveloped for testing
-        const gbl = getGlobalWithInterceptor();
-        if (gbl.__SENTRY_INTERCEPT_TRANSPORT__) {
-          gbl.__SENTRY_INTERCEPT_TRANSPORT__.push(request);
+        // If global.__SENTRY_INTERCEPT_TRANSPORT__ is an array, we push the
+        // envelope into it for testing purposes.
+        if (
+          "__SENTRY_INTERCEPT_TRANSPORT__" in global &&
+          Array.isArray(global.__SENTRY_INTERCEPT_TRANSPORT__)
+        ) {
+          global.__SENTRY_INTERCEPT_TRANSPORT__.push(request);
           return { statusCode: 200 };
         }
 
