@@ -128,16 +128,24 @@ export function sentryUnpluginFactory({
 
     const sentrySession = makeSession({ release, environment });
     sentryScope.setSession(sentrySession);
+    // Send the start of the session
     sentryClient.captureSession(sentrySession);
 
-    let sentEndSession = false; // Just to prevent infinite loops with beforeExit, which is called whenever the event loop empties out
-    // We also need to manually end sesisons on errors because beforeExit is not called on crashes
-    process.on("beforeExit", () => {
-      if (!sentEndSession) {
-        closeSession(sentrySession);
-        sentryClient.captureSession(sentrySession);
-        sentEndSession = true;
+    let sessionHasEnded = false; // Just to prevent infinite loops with beforeExit, which is called whenever the event loop empties out
+
+    function endSession() {
+      if (sessionHasEnded) {
+        return;
       }
+
+      closeSession(sentrySession);
+      sentryClient.captureSession(sentrySession);
+      sessionHasEnded = true;
+    }
+
+    // We also need to manually end sessions on errors because beforeExit is not called on crashes
+    process.on("beforeExit", () => {
+      endSession();
     });
 
     // Set the User-Agent that Sentry CLI will use when interacting with Sentry
@@ -164,7 +172,7 @@ export function sentryUnpluginFactory({
           throw unknownError;
         }
       } finally {
-        closeSession(sentrySession);
+        endSession();
       }
     }
 
