@@ -1,22 +1,23 @@
-import { Hub, NodeClient } from "@sentry/node";
 import { glob } from "glob";
 import { UnpluginOptions } from "unplugin";
 import { Logger } from "../sentry/logger";
 import { safeFlushTelemetry } from "../sentry/telemetry";
 import fs from "fs";
+import { Scope } from "@sentry/core";
+import { Client } from "@sentry/types";
 
 interface FileDeletionPlugin {
   handleRecoverableError: (error: unknown) => void;
   waitUntilSourcemapFileDependenciesAreFreed: () => Promise<void>;
-  sentryHub: Hub;
-  sentryClient: NodeClient;
+  sentryScope: Scope;
+  sentryClient: Client;
   filesToDeleteAfterUpload: string | string[] | undefined;
   logger: Logger;
 }
 
 export function fileDeletionPlugin({
   handleRecoverableError,
-  sentryHub,
+  sentryScope,
   sentryClient,
   filesToDeleteAfterUpload,
   waitUntilSourcemapFileDependenciesAreFreed,
@@ -55,7 +56,7 @@ export function fileDeletionPlugin({
           );
         }
       } catch (e) {
-        sentryHub.captureException('Error in "sentry-file-deletion-plugin" buildEnd hook');
+        sentryScope.captureException('Error in "sentry-file-deletion-plugin" buildEnd hook');
         await safeFlushTelemetry(sentryClient);
         handleRecoverableError(e);
       }
