@@ -1,15 +1,24 @@
 import SentryCli from "@sentry/cli";
-import { defaultStackParser, Hub, makeNodeTransport, NodeClient } from "@sentry/node";
+import { Client } from "@sentry/types";
+import { applySdkMetadata, ServerRuntimeClient, ServerRuntimeClientOptions } from "@sentry/core";
 import { NormalizedOptions, SENTRY_SAAS_URL } from "../options-mapping";
+import { Scope } from "@sentry/core";
+import { createStackParser, nodeStackLineParser } from "@sentry/utils";
+import { makeOptionallyEnabledNodeTransport } from "./transports";
 
 const SENTRY_SAAS_HOSTNAME = "sentry.io";
+
+const stackParser = createStackParser(nodeStackLineParser());
 
 export function createSentryInstance(
   options: NormalizedOptions,
   shouldSendTelemetry: Promise<boolean>,
   bundler: string
-) {
-  const client = new NodeClient({
+): { sentryScope: Scope; sentryClient: Client } {
+  const clientOptions: ServerRuntimeClientOptions = {
+    platform: "node",
+    runtime: { name: "node", version: global.process.version },
+
     dsn: "https://4c2bae7d9fbc413e8f7385f55c515d51@o1.ingest.sentry.io/6690737",
 
     tracesSampleRate: 1,
@@ -19,7 +28,7 @@ export function createSentryInstance(
     integrations: [],
     tracePropagationTargets: ["sentry.io/api"],
 
-    stackParser: defaultStackParser,
+    stackParser,
 
     beforeSend: (event) => {
       event.exception?.values?.forEach((exception) => {
@@ -37,76 +46,68 @@ export function createSentryInstance(
 
     // We create a transport that stalls sending events until we know that we're allowed to (i.e. when Sentry CLI told
     // us that the upload URL is the Sentry SaaS URL)
-    transport: (nodeTransportOptions) => {
-      const nodeTransport = makeNodeTransport(nodeTransportOptions);
-      return {
-        flush: (timeout) => nodeTransport.flush(timeout),
-        send: async (request) => {
-          if (await shouldSendTelemetry) {
-            return nodeTransport.send(request);
-          } else {
-            return undefined;
-          }
-        },
-      };
-    },
-  });
+    transport: makeOptionallyEnabledNodeTransport(shouldSendTelemetry),
+  };
 
-  const hub = new Hub(client);
+  applySdkMetadata(clientOptions, "node");
 
-  setTelemetryDataOnHub(options, hub, bundler);
+  const client = new ServerRuntimeClient(clientOptions);
+  const scope = new Scope();
+  scope.setClient(client);
 
-  return { sentryHub: hub, sentryClient: client };
+  setTelemetryDataOnScope(options, scope, bundler);
+
+  return { sentryScope: scope, sentryClient: client };
 }
 
-export function setTelemetryDataOnHub(options: NormalizedOptions, hub: Hub, bundler: string) {
+export function setTelemetryDataOnScope(options: NormalizedOptions, scope: Scope, bundler: string) {
   const { org, project, release, errorHandler, sourcemaps, reactComponentAnnotation } = options;
 
-  hub.setTag("upload-legacy-sourcemaps", !!release.uploadLegacySourcemaps);
+  scope.setTag("upload-legacy-sourcemaps", !!release.uploadLegacySourcemaps);
   if (release.uploadLegacySourcemaps) {
-    hub.setTag(
+    scope.setTag(
       "uploadLegacySourcemapsEntries",
       Array.isArray(release.uploadLegacySourcemaps) ? release.uploadLegacySourcemaps.length : 1
     );
   }
 
-  hub.setTag("module-metadata", !!options.moduleMetadata);
-  hub.setTag("inject-build-information", !!options._experiments.injectBuildInformation);
+  scope.setTag("module-metadata", !!options.moduleMetadata);
+  scope.setTag("inject-build-information", !!options._experiments.injectBuildInformation);
 
   // Optional release pipeline steps
   if (release.setCommits) {
-    hub.setTag("set-commits", release.setCommits.auto === true ? "auto" : "manual");
+    scope.setTag("set-commits", release.setCommits.auto === true ? "auto" : "manual");
   } else {
-    hub.setTag("set-commits", "undefined");
+    scope.setTag("set-commits", "undefined");
   }
-  hub.setTag("finalize-release", release.finalize);
-  hub.setTag("deploy-options", !!release.deploy);
+  scope.setTag("finalize-release", release.finalize);
+  scope.setTag("deploy-options", !!release.deploy);
 
-  // Miscelaneous options
-  hub.setTag("custom-error-handler", !!errorHandler);
-  hub.setTag("sourcemaps-assets", !!sourcemaps?.assets);
-  hub.setTag(
+  // Miscellaneous options
+  scope.setTag("custom-error-handler", !!errorHandler);
+  scope.setTag("sourcemaps-assets", !!sourcemaps?.assets);
+  scope.setTag(
     "delete-after-upload",
     !!sourcemaps?.deleteFilesAfterUpload || !!sourcemaps?.filesToDeleteAfterUpload
   );
-  hub.setTag("sourcemaps-disabled", !!sourcemaps?.disable);
+  scope.setTag("sourcemaps-disabled", !!sourcemaps?.disable);
 
-  hub.setTag("react-annotate", !!reactComponentAnnotation?.enabled);
+  scope.setTag("react-annotate", !!reactComponentAnnotation?.enabled);
 
-  hub.setTag("node", process.version);
-  hub.setTag("platform", process.platform);
+  scope.setTag("node", process.version);
+  scope.setTag("platform", process.platform);
 
-  hub.setTag("meta-framework", options._metaOptions.telemetry.metaFramework ?? "none");
+  scope.setTag("meta-framework", options._metaOptions.telemetry.metaFramework ?? "none");
 
-  hub.setTag("application-key-set", options.applicationKey !== undefined);
+  scope.setTag("application-key-set", options.applicationKey !== undefined);
 
-  hub.setTags({
+  scope.setTags({
     organization: org,
     project,
     bundler,
   });
 
-  hub.setUser({ id: org });
+  scope.setUser({ id: org });
 }
 
 export async function allowedToSendTelemetry(options: NormalizedOptions): Promise<boolean> {
@@ -157,7 +158,7 @@ export async function allowedToSendTelemetry(options: NormalizedOptions): Promis
 /**
  * Flushing the SDK client can fail. We never want to crash the plugin because of telemetry.
  */
-export async function safeFlushTelemetry(sentryClient: NodeClient) {
+export async function safeFlushTelemetry(sentryClient: Client) {
   try {
     await sentryClient.flush(2000);
   } catch {
