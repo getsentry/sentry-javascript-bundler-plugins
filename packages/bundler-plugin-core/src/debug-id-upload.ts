@@ -9,7 +9,7 @@ import SentryCli from "@sentry/cli";
 import { dynamicSamplingContextToSentryBaggageHeader } from "@sentry/utils";
 import { safeFlushTelemetry } from "./sentry/telemetry";
 import { stripQueryAndHashFromPath } from "./utils";
-import { spanToTraceHeader, startSpan } from "@sentry/core";
+import { setMeasurement, spanToTraceHeader, startSpan } from "@sentry/core";
 import { getDynamicSamplingContextFromSpan, Scope } from "@sentry/core";
 import { Client } from "@sentry/types";
 
@@ -107,76 +107,76 @@ export function createDebugIdUploadFunction({
             "Didn't find any matching sources for debug ID upload. Please check the `sourcemaps.assets` option."
           );
         } else {
-          await startSpan({ name: "prepare-bundles", scope: sentryScope }, async () => {
-            // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
-            // instead we do it with a maximum of 16 concurrent workers
-            const preparationTasks = debugIdChunkFilePaths.map(
-              (chunkFilePath, chunkIndex) => async () => {
-                await prepareBundleForDebugIdUpload(
-                  chunkFilePath,
-                  tmpUploadFolder,
-                  chunkIndex,
-                  logger,
-                  rewriteSourcesHook ?? defaultRewriteSourcesHook
-                );
-              }
-            );
-            const workers: Promise<void>[] = [];
-            const worker = async () => {
-              while (preparationTasks.length > 0) {
-                const task = preparationTasks.shift();
-                if (task) {
-                  await task();
-                }
-              }
-            };
-            for (let workerIndex = 0; workerIndex < 16; workerIndex++) {
-              workers.push(worker());
-            }
-
-            await Promise.all(workers);
-
-            // TODO: Bring back measurements
-            // There's no easy way to get the root span when not using a global client.
-
-            // const files = await fs.promises.readdir(tmpUploadFolder);
-            // const stats = files.map((file) => fs.promises.stat(path.join(tmpUploadFolder, file)));
-            // const uploadSize = (await Promise.all(stats)).reduce(
-            //   (accumulator, { size }) => accumulator + size,
-            //   0
-            // );
-
-            // artifactBundleUploadTransaction.setMeasurement("files", files.length, "none");
-            // artifactBundleUploadTransaction.setMeasurement("upload_size", uploadSize, "byte");
-
-            await startSpan({ name: "upload", scope: sentryScope }, async (uploadSpan) => {
-              const cliInstance = new SentryCli(null, {
-                ...sentryCliOptions,
-                headers: {
-                  "sentry-trace": spanToTraceHeader(uploadSpan),
-                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  baggage: dynamicSamplingContextToSentryBaggageHeader(
-                    getDynamicSamplingContextFromSpan(uploadSpan)
-                  )!,
-                  ...sentryCliOptions.headers,
-                },
-              });
-
-              await cliInstance.releases.uploadSourceMaps(
-                releaseName ?? "undefined", // unfortunetly this needs a value for now but it will not matter since debug IDs overpower releases anyhow
-                {
-                  include: [
-                    {
-                      paths: [tmpUploadFolder],
-                      rewrite: false,
-                      dist: dist,
-                    },
-                  ],
-                  useArtifactBundle: true,
+          await startSpan(
+            { name: "prepare-bundles", scope: sentryScope },
+            async (prepBundlesSpan) => {
+              // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
+              // instead we do it with a maximum of 16 concurrent workers
+              const preparationTasks = debugIdChunkFilePaths.map(
+                (chunkFilePath, chunkIndex) => async () => {
+                  await prepareBundleForDebugIdUpload(
+                    chunkFilePath,
+                    tmpUploadFolder,
+                    chunkIndex,
+                    logger,
+                    rewriteSourcesHook ?? defaultRewriteSourcesHook
+                  );
                 }
               );
-            });
-          });
+              const workers: Promise<void>[] = [];
+              const worker = async () => {
+                while (preparationTasks.length > 0) {
+                  const task = preparationTasks.shift();
+                  if (task) {
+                    await task();
+                  }
+                }
+              };
+              for (let workerIndex = 0; workerIndex < 16; workerIndex++) {
+                workers.push(worker());
+              }
+
+              await Promise.all(workers);
+
+              const files = await fs.promises.readdir(tmpUploadFolder);
+              const stats = files.map((file) => fs.promises.stat(path.join(tmpUploadFolder, file)));
+              const uploadSize = (await Promise.all(stats)).reduce(
+                (accumulator, { size }) => accumulator + size,
+                0
+              );
+
+              setMeasurement("files", files.length, "none", prepBundlesSpan);
+              setMeasurement("upload_size", uploadSize, "byte", prepBundlesSpan);
+
+              await startSpan({ name: "upload", scope: sentryScope }, async (uploadSpan) => {
+                const cliInstance = new SentryCli(null, {
+                  ...sentryCliOptions,
+                  headers: {
+                    "sentry-trace": spanToTraceHeader(uploadSpan),
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    baggage: dynamicSamplingContextToSentryBaggageHeader(
+                      getDynamicSamplingContextFromSpan(uploadSpan)
+                    )!,
+                    ...sentryCliOptions.headers,
+                  },
+                });
+
+                await cliInstance.releases.uploadSourceMaps(
+                  releaseName ?? "undefined", // unfortunetly this needs a value for now but it will not matter since debug IDs overpower releases anyhow
+                  {
+                    include: [
+                      {
+                        paths: [tmpUploadFolder],
+                        rewrite: false,
+                        dist: dist,
+                      },
+                    ],
+                    useArtifactBundle: true,
+                  }
+                );
+              });
+            }
+          );
 
           logger.info("Successfully uploaded source maps to Sentry");
         }
