@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.22.5
+
+- feat: Update Sentry telemetry to v8 (#604)
+- deps: Update `@sentry/cli` to `2.36.1` (#609)
+
 ## 2.22.4
 
 - feat(react-component-annotate): Handle function body returning a ternary (#598)
