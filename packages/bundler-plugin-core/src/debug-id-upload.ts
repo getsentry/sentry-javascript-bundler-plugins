@@ -56,146 +56,152 @@ export function createDebugIdUploadFunction({
   const freeGlobalDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
 
   return async (buildArtifactPaths: string[]) => {
-    await startSpan({ name: "debug-id-sourcemap-upload", scope: sentryScope }, async () => {
-      let folderToCleanUp: string | undefined;
+    await startSpan(
+      // This is `forceTransaction`ed because this span is used in dashboards in the form of indexed transactions.
+      { name: "debug-id-sourcemap-upload", scope: sentryScope, forceTransaction: true },
+      async () => {
+        let folderToCleanUp: string | undefined;
 
-      // It is possible that this writeBundle hook (which calls this function) is called multiple times in one build (for example when reusing the plugin, or when using build tooling like `@vitejs/plugin-legacy`)
-      // Therefore we need to actually register the execution of this hook as dependency on the sourcemap files.
-      const freeUploadDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
+        // It is possible that this writeBundle hook (which calls this function) is called multiple times in one build (for example when reusing the plugin, or when using build tooling like `@vitejs/plugin-legacy`)
+        // Therefore we need to actually register the execution of this hook as dependency on the sourcemap files.
+        const freeUploadDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
 
-      try {
-        const tmpUploadFolder = await startSpan(
-          { name: "mkdtemp", scope: sentryScope },
-          async () => {
-            return await fs.promises.mkdtemp(
-              path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+        try {
+          const tmpUploadFolder = await startSpan(
+            { name: "mkdtemp", scope: sentryScope },
+            async () => {
+              return await fs.promises.mkdtemp(
+                path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+              );
+            }
+          );
+
+          folderToCleanUp = tmpUploadFolder;
+
+          let globAssets: string | string[];
+          if (assets) {
+            globAssets = assets;
+          } else {
+            logger.debug(
+              "No `sourcemaps.assets` option provided, falling back to uploading detected build artifacts."
             );
+            globAssets = buildArtifactPaths;
           }
-        );
 
-        folderToCleanUp = tmpUploadFolder;
-
-        let globAssets: string | string[];
-        if (assets) {
-          globAssets = assets;
-        } else {
-          logger.debug(
-            "No `sourcemaps.assets` option provided, falling back to uploading detected build artifacts."
+          const globResult = await startSpan(
+            { name: "glob", scope: sentryScope },
+            async () => await glob(globAssets, { absolute: true, nodir: true, ignore: ignore })
           );
-          globAssets = buildArtifactPaths;
-        }
 
-        const globResult = await startSpan(
-          { name: "glob", scope: sentryScope },
-          async () => await glob(globAssets, { absolute: true, nodir: true, ignore: ignore })
-        );
+          const debugIdChunkFilePaths = globResult.filter((debugIdChunkFilePath) => {
+            return !!stripQueryAndHashFromPath(debugIdChunkFilePath).match(/\.(js|mjs|cjs)$/);
+          });
 
-        const debugIdChunkFilePaths = globResult.filter((debugIdChunkFilePath) => {
-          return !!stripQueryAndHashFromPath(debugIdChunkFilePath).match(/\.(js|mjs|cjs)$/);
-        });
+          // The order of the files output by glob() is not deterministic
+          // Ensure order within the files so that {debug-id}-{chunkIndex} coupling is consistent
+          debugIdChunkFilePaths.sort();
 
-        // The order of the files output by glob() is not deterministic
-        // Ensure order within the files so that {debug-id}-{chunkIndex} coupling is consistent
-        debugIdChunkFilePaths.sort();
-
-        if (Array.isArray(assets) && assets.length === 0) {
-          logger.debug(
-            "Empty `sourcemaps.assets` option provided. Will not upload sourcemaps with debug ID."
-          );
-        } else if (debugIdChunkFilePaths.length === 0) {
-          logger.warn(
-            "Didn't find any matching sources for debug ID upload. Please check the `sourcemaps.assets` option."
-          );
-        } else {
-          await startSpan(
-            { name: "prepare-bundles", scope: sentryScope },
-            async (prepBundlesSpan) => {
-              // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
-              // instead we do it with a maximum of 16 concurrent workers
-              const preparationTasks = debugIdChunkFilePaths.map(
-                (chunkFilePath, chunkIndex) => async () => {
-                  await prepareBundleForDebugIdUpload(
-                    chunkFilePath,
-                    tmpUploadFolder,
-                    chunkIndex,
-                    logger,
-                    rewriteSourcesHook ?? defaultRewriteSourcesHook
-                  );
-                }
-              );
-              const workers: Promise<void>[] = [];
-              const worker = async () => {
-                while (preparationTasks.length > 0) {
-                  const task = preparationTasks.shift();
-                  if (task) {
-                    await task();
-                  }
-                }
-              };
-              for (let workerIndex = 0; workerIndex < 16; workerIndex++) {
-                workers.push(worker());
-              }
-
-              await Promise.all(workers);
-
-              const files = await fs.promises.readdir(tmpUploadFolder);
-              const stats = files.map((file) => fs.promises.stat(path.join(tmpUploadFolder, file)));
-              const uploadSize = (await Promise.all(stats)).reduce(
-                (accumulator, { size }) => accumulator + size,
-                0
-              );
-
-              setMeasurement("files", files.length, "none", prepBundlesSpan);
-              setMeasurement("upload_size", uploadSize, "byte", prepBundlesSpan);
-
-              await startSpan({ name: "upload", scope: sentryScope }, async (uploadSpan) => {
-                const cliInstance = new SentryCli(null, {
-                  ...sentryCliOptions,
-                  headers: {
-                    "sentry-trace": spanToTraceHeader(uploadSpan),
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    baggage: dynamicSamplingContextToSentryBaggageHeader(
-                      getDynamicSamplingContextFromSpan(uploadSpan)
-                    )!,
-                    ...sentryCliOptions.headers,
-                  },
-                });
-
-                await cliInstance.releases.uploadSourceMaps(
-                  releaseName ?? "undefined", // unfortunetly this needs a value for now but it will not matter since debug IDs overpower releases anyhow
-                  {
-                    include: [
-                      {
-                        paths: [tmpUploadFolder],
-                        rewrite: false,
-                        dist: dist,
-                      },
-                    ],
-                    useArtifactBundle: true,
+          if (Array.isArray(assets) && assets.length === 0) {
+            logger.debug(
+              "Empty `sourcemaps.assets` option provided. Will not upload sourcemaps with debug ID."
+            );
+          } else if (debugIdChunkFilePaths.length === 0) {
+            logger.warn(
+              "Didn't find any matching sources for debug ID upload. Please check the `sourcemaps.assets` option."
+            );
+          } else {
+            await startSpan(
+              { name: "prepare-bundles", scope: sentryScope },
+              async (prepBundlesSpan) => {
+                // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
+                // instead we do it with a maximum of 16 concurrent workers
+                const preparationTasks = debugIdChunkFilePaths.map(
+                  (chunkFilePath, chunkIndex) => async () => {
+                    await prepareBundleForDebugIdUpload(
+                      chunkFilePath,
+                      tmpUploadFolder,
+                      chunkIndex,
+                      logger,
+                      rewriteSourcesHook ?? defaultRewriteSourcesHook
+                    );
                   }
                 );
-              });
-            }
-          );
+                const workers: Promise<void>[] = [];
+                const worker = async () => {
+                  while (preparationTasks.length > 0) {
+                    const task = preparationTasks.shift();
+                    if (task) {
+                      await task();
+                    }
+                  }
+                };
+                for (let workerIndex = 0; workerIndex < 16; workerIndex++) {
+                  workers.push(worker());
+                }
 
-          logger.info("Successfully uploaded source maps to Sentry");
+                await Promise.all(workers);
+
+                const files = await fs.promises.readdir(tmpUploadFolder);
+                const stats = files.map((file) =>
+                  fs.promises.stat(path.join(tmpUploadFolder, file))
+                );
+                const uploadSize = (await Promise.all(stats)).reduce(
+                  (accumulator, { size }) => accumulator + size,
+                  0
+                );
+
+                setMeasurement("files", files.length, "none", prepBundlesSpan);
+                setMeasurement("upload_size", uploadSize, "byte", prepBundlesSpan);
+
+                await startSpan({ name: "upload", scope: sentryScope }, async (uploadSpan) => {
+                  const cliInstance = new SentryCli(null, {
+                    ...sentryCliOptions,
+                    headers: {
+                      "sentry-trace": spanToTraceHeader(uploadSpan),
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                      baggage: dynamicSamplingContextToSentryBaggageHeader(
+                        getDynamicSamplingContextFromSpan(uploadSpan)
+                      )!,
+                      ...sentryCliOptions.headers,
+                    },
+                  });
+
+                  await cliInstance.releases.uploadSourceMaps(
+                    releaseName ?? "undefined", // unfortunetly this needs a value for now but it will not matter since debug IDs overpower releases anyhow
+                    {
+                      include: [
+                        {
+                          paths: [tmpUploadFolder],
+                          rewrite: false,
+                          dist: dist,
+                        },
+                      ],
+                      useArtifactBundle: true,
+                    }
+                  );
+                });
+              }
+            );
+
+            logger.info("Successfully uploaded source maps to Sentry");
+          }
+        } catch (e) {
+          sentryScope.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
+          handleRecoverableError(e);
+        } finally {
+          if (folderToCleanUp) {
+            void startSpan({ name: "cleanup", scope: sentryScope }, async () => {
+              if (folderToCleanUp) {
+                await fs.promises.rm(folderToCleanUp, { recursive: true, force: true });
+              }
+            });
+          }
+          freeGlobalDependencyOnSourcemapFiles();
+          freeUploadDependencyOnSourcemapFiles();
+          await safeFlushTelemetry(sentryClient);
         }
-      } catch (e) {
-        sentryScope.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
-        handleRecoverableError(e);
-      } finally {
-        if (folderToCleanUp) {
-          void startSpan({ name: "cleanup", scope: sentryScope }, async () => {
-            if (folderToCleanUp) {
-              await fs.promises.rm(folderToCleanUp, { recursive: true, force: true });
-            }
-          });
-        }
-        freeGlobalDependencyOnSourcemapFiles();
-        freeUploadDependencyOnSourcemapFiles();
-        await safeFlushTelemetry(sentryClient);
       }
-    });
+    );
   };
 }
 
