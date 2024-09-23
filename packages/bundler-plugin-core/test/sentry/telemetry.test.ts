@@ -1,6 +1,6 @@
-import { Hub } from "@sentry/node";
+import { Scope } from "@sentry/core";
 import { NormalizedOptions, normalizeUserOptions } from "../../src/options-mapping";
-import { allowedToSendTelemetry, setTelemetryDataOnHub } from "../../src/sentry/telemetry";
+import { allowedToSendTelemetry, setTelemetryDataOnScope } from "../../src/sentry/telemetry";
 
 const mockCliExecute = jest.fn();
 jest.mock(
@@ -31,8 +31,8 @@ describe("shouldSendTelemetry", () => {
   });
 });
 
-describe("addPluginOptionTagsToHub", () => {
-  const mockedHub = {
+describe("addPluginOptionTagsToScope", () => {
+  const mockedScope = {
     setTag: jest.fn(),
     setTags: jest.fn(),
     setUser: jest.fn(),
@@ -47,40 +47,40 @@ describe("addPluginOptionTagsToHub", () => {
   });
 
   it("should set include tag according to number of entries (single entry)", () => {
-    setTelemetryDataOnHub(
+    setTelemetryDataOnScope(
       normalizeUserOptions(defaultOptions),
-      mockedHub as unknown as Hub,
+      mockedScope as unknown as Scope,
       "rollup"
     );
-    expect(mockedHub.setTag).toHaveBeenCalledWith("uploadLegacySourcemapsEntries", 0);
+    expect(mockedScope.setTag).toHaveBeenCalledWith("uploadLegacySourcemapsEntries", 0);
   });
 
   it("should set include tag according to number of entries (multiple entries)", () => {
-    setTelemetryDataOnHub(
+    setTelemetryDataOnScope(
       normalizeUserOptions({ release: { uploadLegacySourcemaps: ["", "", ""] } }),
-      mockedHub as unknown as Hub,
+      mockedScope as unknown as Scope,
       "rollup"
     );
-    expect(mockedHub.setTag).toHaveBeenCalledWith("uploadLegacySourcemapsEntries", 3);
+    expect(mockedScope.setTag).toHaveBeenCalledWith("uploadLegacySourcemapsEntries", 3);
   });
 
   it("should set deploy tag to true if the deploy option is specified", () => {
-    setTelemetryDataOnHub(
+    setTelemetryDataOnScope(
       normalizeUserOptions({ ...defaultOptions, release: { deploy: { env: "production" } } }),
-      mockedHub as unknown as Hub,
+      mockedScope as unknown as Scope,
       "rollup"
     );
-    expect(mockedHub.setTag).toHaveBeenCalledWith("deploy-options", true);
+    expect(mockedScope.setTag).toHaveBeenCalledWith("deploy-options", true);
   });
 
   it("should set errorHandler tag to `custom` if the errorHandler option is specified", () => {
-    setTelemetryDataOnHub(
+    setTelemetryDataOnScope(
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       normalizeUserOptions({ ...defaultOptions, errorHandler: () => {} }),
-      mockedHub as unknown as Hub,
+      mockedScope as unknown as Scope,
       "rollup"
     );
-    expect(mockedHub.setTag).toHaveBeenCalledWith("custom-error-handler", true);
+    expect(mockedScope.setTag).toHaveBeenCalledWith("custom-error-handler", true);
   });
 
   it.each([
@@ -89,40 +89,40 @@ describe("addPluginOptionTagsToHub", () => {
   ])(
     `should set setCommits tag to %s if the setCommits option is %s`,
     (expectedValue, commitOptions) => {
-      setTelemetryDataOnHub(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      setTelemetryDataOnScope(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
         normalizeUserOptions({ ...defaultOptions, release: { setCommits: commitOptions as any } }),
-        mockedHub as unknown as Hub,
+        mockedScope as unknown as Scope,
         "rollup"
       );
-      expect(mockedHub.setTag).toHaveBeenCalledWith("set-commits", expectedValue);
+      expect(mockedScope.setTag).toHaveBeenCalledWith("set-commits", expectedValue);
     }
   );
 
   it("sets all simple tags correctly", () => {
-    setTelemetryDataOnHub(
+    setTelemetryDataOnScope(
       normalizeUserOptions({
         ...defaultOptions,
         release: {
           finalize: true,
         },
       }),
-      mockedHub as unknown as Hub,
+      mockedScope as unknown as Scope,
       "rollup"
     );
 
-    expect(mockedHub.setTag).toHaveBeenCalledWith("finalize-release", true);
+    expect(mockedScope.setTag).toHaveBeenCalledWith("finalize-release", true);
   });
 
   it("shouldn't set any tags other than include if no opional options are specified", () => {
-    setTelemetryDataOnHub(
+    setTelemetryDataOnScope(
       normalizeUserOptions(defaultOptions),
-      mockedHub as unknown as Hub,
+      mockedScope as unknown as Scope,
       "rollup"
     );
 
-    expect(mockedHub.setTag).toHaveBeenCalledWith("uploadLegacySourcemapsEntries", 0);
-    expect(mockedHub.setTag).toHaveBeenCalledWith("finalize-release", true);
-    expect(mockedHub.setTag).toHaveBeenCalledWith("node", expect.any(String));
+    expect(mockedScope.setTag).toHaveBeenCalledWith("uploadLegacySourcemapsEntries", 0);
+    expect(mockedScope.setTag).toHaveBeenCalledWith("finalize-release", true);
+    expect(mockedScope.setTag).toHaveBeenCalledWith("node", expect.any(String));
   });
 });
