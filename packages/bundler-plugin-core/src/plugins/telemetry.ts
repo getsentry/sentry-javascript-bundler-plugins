@@ -1,18 +1,19 @@
-import { Hub, NodeClient } from "@sentry/node";
+import { Scope, startSpan } from "@sentry/core";
+import { Client } from "@sentry/types";
 import { UnpluginOptions } from "unplugin";
 import { Logger } from "../sentry/logger";
 import { safeFlushTelemetry } from "../sentry/telemetry";
 
 interface TelemetryPluginOptions {
-  sentryHub: Hub;
-  sentryClient: NodeClient;
+  sentryClient: Client;
+  sentryScope: Scope;
   shouldSendTelemetry: Promise<boolean>;
   logger: Logger;
 }
 
 export function telemetryPlugin({
-  sentryHub,
   sentryClient,
+  sentryScope,
   shouldSendTelemetry,
   logger,
 }: TelemetryPluginOptions): UnpluginOptions {
@@ -23,7 +24,9 @@ export function telemetryPlugin({
         logger.info(
           "Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`."
         );
-        sentryHub.startTransaction({ name: "Sentry Bundler Plugin execution" }).finish();
+        startSpan({ name: "Sentry Bundler Plugin execution", scope: sentryScope }, () => {
+          //
+        });
         await safeFlushTelemetry(sentryClient);
       }
     },

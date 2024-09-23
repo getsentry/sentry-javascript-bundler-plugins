@@ -124,6 +124,7 @@ export interface Options {
      *
      * Defaults to making all sources relative to `process.cwd()` while building.
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rewriteSources?: (source: string, map: any) => string;
 
     /**

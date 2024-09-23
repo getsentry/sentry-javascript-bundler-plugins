@@ -26,6 +26,7 @@ import * as dotenv from "dotenv";
 import { glob } from "glob";
 import { logger } from "@sentry/utils";
 import { fileDeletionPlugin } from "./plugins/sourcemap-deletion";
+import { closeSession, DEFAULT_ENVIRONMENT, makeSession } from "@sentry/core";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
@@ -117,21 +118,34 @@ export function sentryUnpluginFactory({
     }
 
     const shouldSendTelemetry = allowedToSendTelemetry(options);
-    const { sentryHub, sentryClient } = createSentryInstance(
+    const { sentryScope, sentryClient } = createSentryInstance(
       options,
       shouldSendTelemetry,
       unpluginMetaContext.framework
     );
-    const sentrySession = sentryHub.startSession();
-    sentryHub.captureSession();
 
-    let sentEndSession = false; // Just to prevent infinite loops with beforeExit, which is called whenever the event loop empties out
-    // We also need to manually end sesisons on errors because beforeExit is not called on crashes
-    process.on("beforeExit", () => {
-      if (!sentEndSession) {
-        sentryHub.endSession();
-        sentEndSession = true;
+    const { release, environment = DEFAULT_ENVIRONMENT } = sentryClient.getOptions();
+
+    const sentrySession = makeSession({ release, environment });
+    sentryScope.setSession(sentrySession);
+    // Send the start of the session
+    sentryClient.captureSession(sentrySession);
+
+    let sessionHasEnded = false; // Just to prevent infinite loops with beforeExit, which is called whenever the event loop empties out
+
+    function endSession() {
+      if (sessionHasEnded) {
+        return;
       }
+
+      closeSession(sentrySession);
+      sentryClient.captureSession(sentrySession);
+      sessionHasEnded = true;
+    }
+
+    // We also need to manually end sessions on errors because beforeExit is not called on crashes
+    process.on("beforeExit", () => {
+      endSession();
     });
 
     // Set the User-Agent that Sentry CLI will use when interacting with Sentry
@@ -158,7 +172,7 @@ export function sentryUnpluginFactory({
           throw unknownError;
         }
       } finally {
-        sentryHub.endSession();
+        endSession();
       }
     }
 
@@ -179,7 +193,7 @@ export function sentryUnpluginFactory({
     plugins.push(
       telemetryPlugin({
         sentryClient,
-        sentryHub,
+        sentryScope,
         logger,
         shouldSendTelemetry,
       })
@@ -335,7 +349,7 @@ export function sentryUnpluginFactory({
           deployOptions: options.release.deploy,
           dist: options.release.dist,
           handleRecoverableError: handleRecoverableError,
-          sentryHub,
+          sentryScope,
           sentryClient,
           sentryCliOptions: {
             authToken: options.authToken,
@@ -383,7 +397,7 @@ export function sentryUnpluginFactory({
             logger: logger,
             handleRecoverableError: handleRecoverableError,
             rewriteSourcesHook: options.sourcemaps?.rewriteSources,
-            sentryHub,
+            sentryScope,
             sentryClient,
             sentryCliOptions: {
               authToken: options.authToken,
@@ -421,7 +435,7 @@ export function sentryUnpluginFactory({
           options.sourcemaps?.deleteFilesAfterUpload,
         logger,
         handleRecoverableError,
-        sentryHub,
+        sentryScope,
         sentryClient,
       })
     );

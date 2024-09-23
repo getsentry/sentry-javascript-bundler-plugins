@@ -2716,15 +2716,6 @@
     estree-walker "^2.0.2"
     picomatch "^2.3.1"
 
-"@sentry-internal/tracing@7.102.0":
-  version "7.102.0"
-  resolved "https://registry.npmjs.org/@sentry-internal/tracing/-/tracing-7.102.0.tgz#24cf662e1eb5623f6d5197e78c66d7b257560eb8"
-  integrity sha512-BlE33HWL1IzkGa0W+pwTiyu01MUIfYf+WnO9UC8qkDW3jxVvg2zhoSjXSxikT+KPCOgoZpQHspaTzwjnI1LCvw==
-  dependencies:
-    "@sentry/core" "7.102.0"
-    "@sentry/types" "7.102.0"
-    "@sentry/utils" "7.102.0"
-
 "@sentry-internal/tracing@7.50.0":
   version "7.50.0"
   resolved "https://registry.npmjs.org/@sentry-internal/tracing/-/tracing-7.50.0.tgz#74454af99a03d81762993835d2687c881e14f41e"
@@ -2735,45 +2726,45 @@
     "@sentry/utils" "7.50.0"
     tslib "^1.9.3"
 
-"@sentry/cli-darwin@2.33.1":
-  version "2.33.1"
-  resolved "https://registry.npmjs.org/@sentry/cli-darwin/-/cli-darwin-2.33.1.tgz#e4eb1dd01ee3ce2788025426b860ccc63759589c"
-  integrity sha512-+4/VIx/E1L2hChj5nGf5MHyEPHUNHJ/HoG5RY+B+vyEutGily1c1+DM2bum7RbD0xs6wKLIyup5F02guzSzG8A==
+"@sentry/cli-darwin@2.36.1":
+  version "2.36.1"
+  resolved "https://registry.npmjs.org/@sentry/cli-darwin/-/cli-darwin-2.36.1.tgz#786adf6984dbe3c6fb7dac51b625c314117b807d"
+  integrity sha512-JOHQjVD8Kqxm1jUKioAP5ohLOITf+Dh6+DBz4gQjCNdotsvNW5m63TKROwq2oB811p+Jzv5304ujmN4cAqW1Ww==
 
-"@sentry/cli-linux-arm64@2.33.1":
-  version "2.33.1"
-  resolved "https://registry.npmjs.org/@sentry/cli-linux-arm64/-/cli-linux-arm64-2.33.1.tgz#9ea1718c21ef32ca83b0852ca29fb461fd26d25a"
-  integrity sha512-DbGV56PRKOLsAZJX27Jt2uZ11QfQEMmWB4cIvxkKcFVE+LJP4MVA+MGGRUL6p+Bs1R9ZUuGbpKGtj0JiG6CoXw==
+"@sentry/cli-linux-arm64@2.36.1":
+  version "2.36.1"
+  resolved "https://registry.npmjs.org/@sentry/cli-linux-arm64/-/cli-linux-arm64-2.36.1.tgz#ff449d7e7e715166257998c02cf635ca02acbadd"
+  integrity sha512-R//3ZEkbzvoStr3IA7nxBZNiBYyxOljOqAhgiTnejXHmnuwDzM3TBA2n5vKPE/kBFxboEBEw0UTzTIRb1T0bgw==
 
-"@sentry/cli-linux-arm@2.33.1":
-  version "2.33.1"
-  resolved "https://registry.npmjs.org/@sentry/cli-linux-arm/-/cli-linux-arm-2.33.1.tgz#e8a1dca4d008dd6a72ab5935304c104e98e2901c"
-  integrity sha512-zbxEvQju+tgNvzTOt635le4kS/Fbm2XC2RtYbCTs034Vb8xjrAxLnK0z1bQnStUV8BkeBHtsNVrG+NSQDym2wg==
+"@sentry/cli-linux-arm@2.36.1":
+  version "2.36.1"
+  resolved "https://registry.npmjs.org/@sentry/cli-linux-arm/-/cli-linux-arm-2.36.1.tgz#1ae5d335a1b4cd217a34c2bd6c6f5e0670136eb3"
+  integrity sha512-gvEOKN0fWL2AVqUBKHNXPRZfJNvKTs8kQhS8cQqahZGgZHiPCI4BqW45cKMq+ZTt1UUbLmt6khx5Dz7wi+0i5A==
 
-"@sentry/cli-linux-i686@2.33.1":
-  version "2.33.1"
-  resolved "https://registry.npmjs.org/@sentry/cli-linux-i686/-/cli-linux-i686-2.33.1.tgz#f1fe8dd4d6dde0812a94fba31de8054ddfb7284a"
-  integrity sha512-g2LS4oPXkPWOfKWukKzYp4FnXVRRSwBxhuQ9eSw2peeb58ZIObr4YKGOA/8HJRGkooBJIKGaAR2mH2Pk1TKaiA==
+"@sentry/cli-linux-i686@2.36.1":
+  version "2.36.1"
+  resolved "https://registry.npmjs.org/@sentry/cli-linux-i686/-/cli-linux-i686-2.36.1.tgz#112b9e26357e918cbbba918114ec8cdab07cdf60"
+  integrity sha512-R7sW5Vk/HacVy2YgQoQB+PwccvFYf2CZVPSFSFm2z7MEfNe77UYHWUq+sjJ4vxWG6HDWGVmaX0fjxyDkE01JRA==
 
-"@sentry/cli-linux-x64@2.33.1":
-  version "2.33.1"
-  resolved "https://registry.npmjs.org/@sentry/cli-linux-x64/-/cli-linux-x64-2.33.1.tgz#6e086675356a9eb79731bf9e447d078bae1b5adf"
-  integrity sha512-IV3dcYV/ZcvO+VGu9U6kuxSdbsV2kzxaBwWUQxtzxJ+cOa7J8Hn1t0koKGtU53JVZNBa06qJWIcqgl4/pCuKIg==
+"@sentry/cli-linux-x64@2.36.1":
+  version "2.36.1"
+  resolved "https://registry.npmjs.org/@sentry/cli-linux-x64/-/cli-linux-x64-2.36.1.tgz#c3e5bdb0c9a4bb44c83927c62a3cd7e006709bf7"
+  integrity sha512-UMr3ik8ksA7zQfbzsfwCb+ztenLnaeAbX94Gp+bzANZwPfi/vVHf2bLyqsBs4OyVt9SPlN1bbM/RTGfMjZ3JOw==
 
-"@sentry/cli-win32-i686@2.33.1":
-  version "2.33.1"
-  resolved "https://registry.npmjs.org/@sentry/cli-win32-i686/-/cli-win32-i686-2.33.1.tgz#0e6b36c4a2f5f6e85a59247a123d276b3ef10f1a"
-  integrity sha512-F7cJySvkpzIu7fnLKNHYwBzZYYwlhoDbAUnaFX0UZCN+5DNp/5LwTp37a5TWOsmCaHMZT4i9IO4SIsnNw16/zQ==
+"@sentry/cli-win32-i686@2.36.1":
+  version "2.36.1"
+  resolved "https://registry.npmjs.org/@sentry/cli-win32-i686/-/cli-win32-i686-2.36.1.tgz#819573320e885e1dbf59b0a01d3bd370c84c1708"
+  integrity sha512-CflvhnvxPEs5GWQuuDtYSLqPrBaPbcSJFlBuUIb+8WNzRxvVfjgw1qzfZmkQqABqiy/YEsEekllOoMFZAvCcVA==
 
-"@sentry/cli-win32-x64@2.33.1":
-  version "2.33.1"
-  resolved "https://registry.npmjs.org/@sentry/cli-win32-x64/-/cli-win32-x64-2.33.1.tgz#2d00b38a2dd9f3355df91825582ada3ea0034e86"
-  integrity sha512-8VyRoJqtb2uQ8/bFRKNuACYZt7r+Xx0k2wXRGTyH05lCjAiVIXn7DiS2BxHFty7M1QEWUCMNsb/UC/x/Cu2wuA==
+"@sentry/cli-win32-x64@2.36.1":
+  version "2.36.1"
+  resolved "https://registry.npmjs.org/@sentry/cli-win32-x64/-/cli-win32-x64-2.36.1.tgz#80779b4bffb4e2e32944eae72c60e6f40151b4dc"
+  integrity sha512-wWqht2xghcK3TGnooHZSzA3WSjdtno/xFjZLvWmw38rblGwgKMxLZnlxV6uDyS+OJ6CbfDTlCRay/0TIqA0N8g==
 
-"@sentry/cli@^2.33.1":
-  version "2.33.1"
-  resolved "https://registry.npmjs.org/@sentry/cli/-/cli-2.33.1.tgz#cfbdffdd896b05b92a659baf435b5607037af928"
-  integrity sha512-dUlZ4EFh98VFRPJ+f6OW3JEYQ7VvqGNMa0AMcmvk07ePNeK/GicAWmSQE4ZfJTTl80ul6HZw1kY01fGQOQlVRA==
+"@sentry/cli@^2.36.1":
+  version "2.36.1"
+  resolved "https://registry.npmjs.org/@sentry/cli/-/cli-2.36.1.tgz#a9146b798cb6d2f782a7a48d74633ddcd88dc8d3"
+  integrity sha512-gzK5uQKDWKhyH5udoB5+oaUNrS//urWyaXgKvHKz4gFfl744HuKY9dpLPP2nMnf0zLGmGM6xJnMXLqILq0mtxw==
   dependencies:
     https-proxy-agent "^5.0.0"
     node-fetch "^2.6.7"
@@ -2781,21 +2772,13 @@
     proxy-from-env "^1.1.0"
     which "^2.0.2"
   optionalDependencies:
-    "@sentry/cli-darwin" "2.33.1"
-    "@sentry/cli-linux-arm" "2.33.1"
-    "@sentry/cli-linux-arm64" "2.33.1"
-    "@sentry/cli-linux-i686" "2.33.1"
-    "@sentry/cli-linux-x64" "2.33.1"
-    "@sentry/cli-win32-i686" "2.33.1"
-    "@sentry/cli-win32-x64" "2.33.1"
-
-"@sentry/core@7.102.0":
-  version "7.102.0"
-  resolved "https://registry.npmjs.org/@sentry/core/-/core-7.102.0.tgz#da5e04a5fe97ed91464944dac40b813e6f8aa453"
-  integrity sha512-GO9eLOSBK1waW4AD0wDXAreaNqXFQ1MPQZrkKcN+GJYEFhJK1+u+MSV7vO5Fs/rIfaTZIZ2jtEkxSSAOucE8EQ==
-  dependencies:
-    "@sentry/types" "7.102.0"
-    "@sentry/utils" "7.102.0"
+    "@sentry/cli-darwin" "2.36.1"
+    "@sentry/cli-linux-arm" "2.36.1"
+    "@sentry/cli-linux-arm64" "2.36.1"
+    "@sentry/cli-linux-i686" "2.36.1"
+    "@sentry/cli-linux-x64" "2.36.1"
+    "@sentry/cli-win32-i686" "2.36.1"
+    "@sentry/cli-win32-x64" "2.36.1"
 
 "@sentry/core@7.50.0":
   version "7.50.0"
@@ -2806,6 +2789,14 @@
     "@sentry/utils" "7.50.0"
     tslib "^1.9.3"
 
+"@sentry/core@8.30.0":
+  version "8.30.0"
+  resolved "https://registry.npmjs.org/@sentry/core/-/core-8.30.0.tgz#f929e42e9a537bfa3eb6024082714e9ab98d822b"
+  integrity sha512-CJ/FuWLw0QEKGKXGL/nm9eaOdajEcmPekLuHAuOCxID7N07R9l9laz3vFbAkUZ97GGDv3sYrJZgywfY3Moropg==
+  dependencies:
+    "@sentry/types" "8.30.0"
+    "@sentry/utils" "8.30.0"
+
 "@sentry/integrations@7.50":
   version "7.50.0"
   resolved "https://registry.npmjs.org/@sentry/integrations/-/integrations-7.50.0.tgz#82616f34ddba3c1f3e17b54900dfa7d8e0a0c537"
@@ -2815,16 +2806,6 @@
     "@sentry/utils" "7.50.0"
     localforage "^1.8.1"
     tslib "^1.9.3"
-
-"@sentry/node@7.102.0":
-  version "7.102.0"
-  resolved "https://registry.npmjs.org/@sentry/node/-/node-7.102.0.tgz#f2853bad8650b1f94a57ae3bafad3440740f98ab"
-  integrity sha512-ZS1s2uO/+K4rHkmWjyqm5Jtl6dT7klbZSMvn4tfIpkfWuqrs7pP0jaATyvmF+96z3lpq6fRAJliV5tRqPy7w5Q==
-  dependencies:
-    "@sentry-internal/tracing" "7.102.0"
-    "@sentry/core" "7.102.0"
-    "@sentry/types" "7.102.0"
-    "@sentry/utils" "7.102.0"
 
 "@sentry/node@7.50":
   version "7.50.0"
@@ -2840,22 +2821,15 @@
     lru_map "^0.3.3"
     tslib "^1.9.3"
 
-"@sentry/types@7.102.0":
-  version "7.102.0"
-  resolved "https://registry.npmjs.org/@sentry/types/-/types-7.102.0.tgz#b31e9faa54036053ab82c09c3c855035a4889c59"
-  integrity sha512-FPfFBP0x3LkPARw1/6cWySLq1djIo8ao3Qo2KNBeE9CHdq8bsS1a8zzjJLuWG4Ww+wieLP8/lY3WTgrCz4jowg==
-
 "@sentry/types@7.50.0":
   version "7.50.0"
   resolved "https://registry.npmjs.org/@sentry/types/-/types-7.50.0.tgz#52a035cad83a80ca26fa53c09eb1241250c3df3e"
   integrity sha512-Zo9vyI98QNeYT0K0y57Rb4JRWDaPEgmp+QkQ4CRQZFUTWetO5fvPZ4Gb/R7TW16LajuHZlbJBHmvmNj2pkL2kw==
 
-"@sentry/utils@7.102.0":
-  version "7.102.0"
-  resolved "https://registry.npmjs.org/@sentry/utils/-/utils-7.102.0.tgz#66325f2567986cc3fd12fbdb980fb8ada170342b"
-  integrity sha512-cp5KCRe0slOVMwG4iP2Z4UajQkjryRTiFskZ5H7Q3X9R5voM8+DAhiDcIW88GL9NxqyUrAJOjmKdeLK2vM+bdA==
-  dependencies:
-    "@sentry/types" "7.102.0"
+"@sentry/types@8.30.0":
+  version "8.30.0"
+  resolved "https://registry.npmjs.org/@sentry/types/-/types-8.30.0.tgz#5f5011f5b16bafd30a039ca5e8c337e948c703fb"
+  integrity sha512-kgWW2BCjBmVlSQRG32GonHEVyeDbys74xf9mLPvynwHTgw3+NUlNAlEdu05xnb2ow4bCTHfbkS5G1zRgyv5k4Q==
 
 "@sentry/utils@7.50.0":
   version "7.50.0"
@@ -2864,6 +2838,13 @@
   dependencies:
     "@sentry/types" "7.50.0"
     tslib "^1.9.3"
+
+"@sentry/utils@8.30.0":
+  version "8.30.0"
+  resolved "https://registry.npmjs.org/@sentry/utils/-/utils-8.30.0.tgz#2343dd8593ea83890b3e0d792ed3fa257955a26b"
+  integrity sha512-wZxU2HWlzsnu8214Xy7S7cRIuD6h8Z5DnnkojJfX0i0NLooepZQk2824el1Q13AakLb7/S8CHSHXOMnCtoSduw==
+  dependencies:
+    "@sentry/types" "8.30.0"
 
 "@sigstore/protobuf-specs@^0.1.0":
   version "0.1.0"
