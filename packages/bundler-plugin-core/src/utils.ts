@@ -198,7 +198,10 @@ export function stringToUUID(str: string): string {
 function gitRevision(): string | undefined {
   let gitRevision: string | undefined;
   try {
-    gitRevision = childProcess.execSync("git rev-parse HEAD").toString().trim();
+    gitRevision = childProcess
+      .execSync("git rev-parse HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim();
   } catch (e) {
     // noop
   }
