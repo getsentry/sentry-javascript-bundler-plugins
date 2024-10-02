@@ -6,6 +6,7 @@
 
 ## 2.22.5
 
+- fix: Ignore stderr output from git command (#613)
 - feat: Update Sentry telemetry to v8 (#604)
 - deps: Update `@sentry/cli` to `2.36.1` (#609)
 
