@@ -363,7 +363,7 @@ type IncludeEntry = {
         name: "ignoreComponents",
         type: "string[]",
         fullDescription:
-          "A list of strings representing the names of components to ignore. The plugin will not perform apply `data-sentry` annotations on the DOM element for this component.",
+          "A list of strings representing the names of components to ignore. The plugin will not perform apply `data-sentry` annotations on the DOM element for these components.",
         supportedBundlers: ["webpack", "vite", "rollup"],
       },
       // TODO: Support this option in the future
