@@ -29,7 +29,10 @@ import { fileDeletionPlugin } from "./plugins/sourcemap-deletion";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
-  componentNameAnnotatePlugin?: () => UnpluginOptions;
+  componentNameAnnotatePlugin?: (
+    ignoredFiles?: string[],
+    ignoredComponents?: string[]
+  ) => UnpluginOptions;
   moduleMetadataInjectionPlugin: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: (logger: Logger) => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
@@ -399,7 +402,13 @@ export function sentryUnpluginFactory({
           "The component name annotate plugin is currently not supported by '@sentry/esbuild-plugin'"
         );
       } else {
-        componentNameAnnotatePlugin && plugins.push(componentNameAnnotatePlugin());
+        componentNameAnnotatePlugin &&
+          plugins.push(
+            componentNameAnnotatePlugin(
+              options.reactComponentAnnotation.ignoredFiles,
+              options.reactComponentAnnotation.ignoredComponents
+            )
+          );
       }
     }
 
@@ -627,14 +636,19 @@ export function createComponentNameAnnotateHooks(
         return null;
       }
 
-      const isIgnoredFile = ignoredFiles?.some((file) => idWithoutQueryAndHash.endsWith(file));
-      if (isIgnoredFile) {
-        console.log(`FOUND IGNORED FILE: ${idWithoutQueryAndHash}`);
+      // We will only apply this plugin on jsx and tsx files
+      if (![".jsx", ".tsx"].some((ending) => idWithoutQueryAndHash.endsWith(ending))) {
         return null;
       }
 
-      // We will only apply this plugin on jsx and tsx files
-      if (![".jsx", ".tsx"].some((ending) => idWithoutQueryAndHash.endsWith(ending))) {
+      console.log("ignored files:");
+      console.dir(ignoredFiles);
+      console.log("current file:");
+      console.log(idWithoutQueryAndHash);
+
+      const isIgnoredFile = ignoredFiles?.some((file) => idWithoutQueryAndHash.endsWith(file));
+      if (isIgnoredFile) {
+        console.log(`FOUND IGNORED FILE: ${idWithoutQueryAndHash}`);
         return null;
       }
 
