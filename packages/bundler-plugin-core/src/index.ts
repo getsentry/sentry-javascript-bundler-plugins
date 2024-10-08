@@ -29,10 +29,7 @@ import { fileDeletionPlugin } from "./plugins/sourcemap-deletion";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
-  componentNameAnnotatePlugin?: (
-    ignoredFiles?: string[],
-    ignoredComponents?: string[]
-  ) => UnpluginOptions;
+  componentNameAnnotatePlugin?: (ignoreComponents?: string[]) => UnpluginOptions;
   moduleMetadataInjectionPlugin: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: (logger: Logger) => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
@@ -404,10 +401,7 @@ export function sentryUnpluginFactory({
       } else {
         componentNameAnnotatePlugin &&
           plugins.push(
-            componentNameAnnotatePlugin(
-              options.reactComponentAnnotation.ignoredFiles,
-              options.reactComponentAnnotation.ignoredComponents
-            )
+            componentNameAnnotatePlugin(options.reactComponentAnnotation.ignoreComponents)
           );
       }
     }
@@ -619,10 +613,7 @@ export function createRollupDebugIdUploadHooks(
   };
 }
 
-export function createComponentNameAnnotateHooks(
-  ignoredFiles?: string[],
-  ignoredComponents?: string[]
-) {
+export function createComponentNameAnnotateHooks(ignoreComponents?: string[]) {
   type ParserPlugins = NonNullable<
     NonNullable<Parameters<typeof transformAsync>[1]>["parserOpts"]
   >["plugins"];
@@ -641,17 +632,6 @@ export function createComponentNameAnnotateHooks(
         return null;
       }
 
-      console.log("ignored files:");
-      console.dir(ignoredFiles);
-      console.log("current file:");
-      console.log(idWithoutQueryAndHash);
-
-      const isIgnoredFile = ignoredFiles?.some((file) => idWithoutQueryAndHash.endsWith(file));
-      if (isIgnoredFile) {
-        console.log(`FOUND IGNORED FILE: ${idWithoutQueryAndHash}`);
-        return null;
-      }
-
       const parserPlugins: ParserPlugins = [];
       if (idWithoutQueryAndHash.endsWith(".jsx")) {
         parserPlugins.push("jsx");
@@ -661,7 +641,7 @@ export function createComponentNameAnnotateHooks(
 
       try {
         const result = await transformAsync(code, {
-          plugins: [[componentNameAnnotatePlugin]],
+          plugins: [[componentNameAnnotatePlugin, { ignoreComponents }]],
           filename: id,
           parserOpts: {
             sourceType: "module",

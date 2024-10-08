@@ -303,13 +303,14 @@ export interface Options {
      */
     enabled?: boolean;
     /**
-     * A list of strings representing local paths to files to ignore. The plugin will not perform any annotations on components in these files
-     */
-    ignoredFiles?: string[];
-    /**
      * A list of strings representing the names of components to ignore. The plugin will not perform any annotations on these components
      */
-    ignoredComponents?: string[];
+    ignoreComponents?: string[];
+    // TODO: Support this option in the future
+    /**
+     * A list of strings representing local paths to files to ignore. The plugin will not perform any annotations on components in these files
+     */
+    // ignoreFiles?: string[];
   };
 
   /**

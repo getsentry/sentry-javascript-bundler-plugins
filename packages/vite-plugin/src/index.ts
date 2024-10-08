@@ -19,14 +19,11 @@ function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-function viteComponentNameAnnotatePlugin(
-  ignoredFiles?: string[],
-  ignoredComponents?: string[]
-): UnpluginOptions {
+function viteComponentNameAnnotatePlugin(ignoreComponents?: string[]): UnpluginOptions {
   return {
     name: "sentry-vite-component-name-annotate-plugin",
     enforce: "pre" as const,
-    vite: createComponentNameAnnotateHooks(ignoredFiles, ignoredComponents),
+    vite: createComponentNameAnnotateHooks(ignoreComponents),
   };
 }
 

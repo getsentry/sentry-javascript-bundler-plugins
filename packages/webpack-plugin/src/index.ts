@@ -47,10 +47,7 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-function webpackComponentNameAnnotatePlugin(
-  ignoredFiles?: string[],
-  ignoredComponents?: string[]
-): UnpluginOptions {
+function webpackComponentNameAnnotatePlugin(ignoreComponents?: string[]): UnpluginOptions {
   return {
     name: "sentry-webpack-component-name-annotate-plugin",
     enforce: "pre",
@@ -58,7 +55,7 @@ function webpackComponentNameAnnotatePlugin(
     transformInclude(id) {
       return id.endsWith(".tsx") || id.endsWith(".jsx");
     },
-    transform: createComponentNameAnnotateHooks(ignoredFiles, ignoredComponents).transform,
+    transform: createComponentNameAnnotateHooks(ignoreComponents).transform,
   };
 }
 

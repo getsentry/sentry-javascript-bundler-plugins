@@ -360,19 +360,20 @@ type IncludeEntry = {
         supportedBundlers: ["webpack", "vite", "rollup"],
       },
       {
-        name: "ignoredFiles",
+        name: "ignoreComponents",
         type: "string[]",
         fullDescription:
-          "A list of strings representing local paths to files to ignore. The plugin will not perform any annotations on components in these files.",
+          "A list of strings representing the names of components to ignore. The plugin will not perform apply `data-sentry` annotations on the DOM element for this component.",
         supportedBundlers: ["webpack", "vite", "rollup"],
       },
-      {
-        name: "ignoredComponents",
-        type: "string[]",
-        fullDescription:
-          "A list of strings representing the names of components to ignore. The plugin will not perform any annotations on these components.",
-        supportedBundlers: ["webpack", "vite", "rollup"],
-      },
+      // TODO: Support this option in the future
+      // {
+      //   name: "ignoreFiles",
+      //   type: "string[]",
+      //   fullDescription:
+      //     "A list of strings representing local paths to files to ignore. The plugin will not perform any annotations on components in these files.",
+      //   supportedBundlers: ["webpack", "vite", "rollup"],
+      // },
     ],
   },
   {
