@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.22.6
+
+- fix(core): Use sha256 instead of md5 to generate uuids from string (#619)
+
 ## 2.22.5
 
 - fix: Ignore stderr output from git command (#613)
