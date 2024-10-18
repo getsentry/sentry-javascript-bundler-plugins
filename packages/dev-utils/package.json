@@ -1,6 +1,6 @@
 {
   "name": "@sentry-internal/dev-utils",
-  "version": "2.22.5",
+  "version": "2.22.6",
   "license": "MIT",
   "private": true,
   "files": [
