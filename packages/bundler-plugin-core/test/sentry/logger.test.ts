@@ -1,10 +1,10 @@
 import { createLogger } from "../../src/sentry/logger";
 
 describe("Logger", () => {
-  const consoleLogSpy = jest.spyOn(console, "log").mockImplementation(() => undefined);
+  const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
 
   afterEach(() => {
-    consoleLogSpy.mockReset();
+    consoleErrorSpy.mockReset();
   });
 
   it.each([
@@ -17,7 +17,7 @@ describe("Logger", () => {
 
     logger[loggerMethod]("Hey!");
 
-    expect(consoleLogSpy).toHaveBeenCalledWith(`[some-prefix] ${logLevel}: Hey!`);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(`[some-prefix] ${logLevel}: Hey!`);
   });
 
   it.each([
@@ -30,7 +30,7 @@ describe("Logger", () => {
 
     logger[loggerMethod]("Hey!", "this", "is", "a test with", 5, "params");
 
-    expect(consoleLogSpy).toHaveBeenCalledWith(
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
       `[some-prefix] ${logLevel}: Hey!`,
       "this",
       "is",
@@ -46,7 +46,7 @@ describe("Logger", () => {
 
     logger.debug("Hey!");
 
-    expect(consoleLogSpy).toHaveBeenCalledWith(`[some-prefix] Debug: Hey!`);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(`[some-prefix] Debug: Hey!`);
   });
 
   it(".debug() should log multiple params correctly", () => {
@@ -55,7 +55,7 @@ describe("Logger", () => {
 
     logger.debug("Hey!", "this", "is", "a test with", 5, "params");
 
-    expect(consoleLogSpy).toHaveBeenCalledWith(
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
       `[some-prefix] Debug: Hey!`,
       "this",
       "is",
@@ -72,7 +72,7 @@ describe("Logger", () => {
 
       logger[loggerMethod]("Hey!");
 
-      expect(consoleLogSpy).not.toHaveBeenCalled();
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -82,6 +82,6 @@ describe("Logger", () => {
 
     logger.debug("Hey!");
 
-    expect(consoleLogSpy).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 });
