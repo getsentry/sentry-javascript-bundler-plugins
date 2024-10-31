@@ -101,6 +101,8 @@ export function setTelemetryDataOnScope(options: NormalizedOptions, scope: Scope
 
   scope.setTag("application-key-set", options.applicationKey !== undefined);
 
+  scope.setTag("ci", !!process.env["CI"]);
+
   scope.setTags({
     organization: org,
     project,
