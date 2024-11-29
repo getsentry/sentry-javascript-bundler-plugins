@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.22.7
+
+- deps: Bump `@sentry/cli` to `2.39.1` and require specific version (#632)
+- feat(telemetry): Record if plugin is run in CI (#627)
+
 ## 2.22.6
 
 - fix(core): Use sha256 instead of md5 to generate uuids from string (#619)
