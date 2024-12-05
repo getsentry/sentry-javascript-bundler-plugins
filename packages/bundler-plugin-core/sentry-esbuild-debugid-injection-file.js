@@ -4,6 +4,8 @@ try {
       ? window
       : "undefined" != typeof global
       ? global
+      : "undefined" != typeof globalThis
+      ? global
       : "undefined" != typeof self
       ? self
       : {};
