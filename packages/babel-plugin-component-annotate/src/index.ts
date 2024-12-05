@@ -48,14 +48,12 @@ const nativeSourceFileName = "dataSentrySourceFile";
 interface AnnotationOpts {
   native?: boolean;
   "annotate-fragments"?: boolean;
-  ignoreComponents?: IgnoredComponent[];
+  ignoreComponents?: string[];
 }
 
 interface AnnotationPluginPass extends PluginPass {
   opts: AnnotationOpts;
 }
-
-type IgnoredComponent = [file: string, component: string, element: string];
 
 type AnnotationPlugin = PluginObj<AnnotationPluginPass>;
 
@@ -153,7 +151,7 @@ function functionBodyPushAttributes(
   componentName: string,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  ignoredComponents: IgnoredComponent[]
+  ignoredComponents: string[]
 ) {
   let jsxNode: Babel.NodePath;
 
@@ -249,7 +247,7 @@ function processJSX(
   componentName: string | null,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  ignoredComponents: IgnoredComponent[]
+  ignoredComponents: string[]
 ) {
   if (!jsxNode) {
     return;
@@ -324,7 +322,7 @@ function applyAttributes(
   componentName: string | null,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  ignoredComponents: IgnoredComponent[]
+  ignoredComponents: string[]
 ) {
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
 
@@ -340,10 +338,7 @@ function applyAttributes(
   const elementName = getPathName(t, openingElement);
 
   const isAnIgnoredComponent = ignoredComponents.some(
-    (ignoredComponent) =>
-      matchesIgnoreRule(ignoredComponent[0], sourceFileName) &&
-      matchesIgnoreRule(ignoredComponent[1], componentName) &&
-      matchesIgnoreRule(ignoredComponent[2], elementName)
+    (ignoredComponent) => ignoredComponent === componentName || ignoredComponent === elementName
   );
 
   // Add a stable attribute for the element name but only for non-DOM names
