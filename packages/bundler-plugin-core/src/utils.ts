@@ -318,9 +318,11 @@ export function generateGlobalInjectorCode({
         window :
         typeof global !== 'undefined' ?
           global :
-          typeof self !== 'undefined' ?
-            self :
-            {};
+          typeof globalThis !== 'undefined' ?
+            globalThis :
+            typeof self !== 'undefined' ?
+              self :
+              {};
 
     _global.SENTRY_RELEASE={id:${JSON.stringify(release)}};`;
 
@@ -345,6 +347,8 @@ export function generateModuleMetadataInjectorCode(metadata: any) {
       ? window
       : typeof global !== "undefined"
       ? global
+      : typeof globalThis !== "undefined"
+      ? globalThis
       : typeof self !== "undefined"
       ? self
       : {};

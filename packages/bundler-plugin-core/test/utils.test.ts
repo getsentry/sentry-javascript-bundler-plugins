@@ -226,6 +226,8 @@ describe("generateModuleMetadataInjectorCode", () => {
             ? window
             : typeof global !== \\"undefined\\"
             ? global
+            : typeof globalThis !== \\"undefined\\"
+            ? globalThis
             : typeof self !== \\"undefined\\"
             ? self
             : {};
@@ -259,6 +261,8 @@ describe("generateModuleMetadataInjectorCode", () => {
             ? window
             : typeof global !== \\"undefined\\"
             ? global
+            : typeof globalThis !== \\"undefined\\"
+            ? globalThis
             : typeof self !== \\"undefined\\"
             ? self
             : {};
