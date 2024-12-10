@@ -319,6 +319,15 @@ export interface Options {
      * Whether the component name annotate plugin should be enabled or not.
      */
     enabled?: boolean;
+    /**
+     * A list of strings representing the names of components to ignore. The plugin will not perform any annotations on these components
+     */
+    ignoreComponents?: string[];
+    // TODO: Support this option in the future
+    /**
+     * A list of strings representing local paths to files to ignore. The plugin will not perform any annotations on components in these files
+     */
+    // ignoreFiles?: string[];
   };
 
   /**
