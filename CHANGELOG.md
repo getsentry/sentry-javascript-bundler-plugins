@@ -4,6 +4,53 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.22.7
+
+- deps: Bump `@sentry/cli` to `2.39.1` and require specific version (#632)
+- feat(telemetry): Record if plugin is run in CI (#627)
+
+## 2.22.6
+
+- fix(core): Use sha256 instead of md5 to generate uuids from string (#619)
+
+## 2.22.5
+
+- fix: Ignore stderr output from git command (#613)
+- feat: Update Sentry telemetry to v8 (#604)
+- deps: Update `@sentry/cli` to `2.36.1` (#609)
+
+## 2.22.4
+
+- feat(react-component-annotate): Handle function body returning a ternary (#598)
+- fix: Allow injection plugins to apply to files with query parameters and fragments in their name (#597)
+
+Work in this release contributed by @Thristhart. Thank you for your contribution!
+
+## 2.22.3
+
+- fix(core): Always instantiate global `Error` class in injected code snippets (#594)
+
+## 2.22.2
+
+- fix: Disable debug ID injection when `sourcemaps.disable` is set (#589)
+
+## 2.22.1
+
+- fix: Use `sourcemaps.disable` to disable debug ID upload instead of legacy upload (#587)
+- fix: Escape release string in injection snippet (#585)
+
+## 2.22.0
+
+- deps: Bump `@sentry/cli` to `2.33.1` (#581)
+- feat: Add `bundleSizeOptimizations.excludeTracing` option as alias to deprecated `bundleSizeOptimizations.excludePerformanceMonitoring` (#582)
+- fix(vite-plugin): Ensure `post` order of `sentry-vite-release-injection-plugin` to avoid breaking `@rollup/plugin-commonjs` step (#578)
+
+## 2.21.1
+
+- fix: Do not delete files before all upload tasks executed (#572)
+
+Work in this release contributed by @tyouzu1. Thank you for your contribution!
+
 ## 2.21.0
 
 - fix: Use `sequential` and `post` order for vite artifact deletion (#568)

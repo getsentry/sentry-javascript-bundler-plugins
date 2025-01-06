@@ -26,6 +26,7 @@ import * as dotenv from "dotenv";
 import { glob } from "glob";
 import { logger } from "@sentry/utils";
 import { fileDeletionPlugin } from "./plugins/sourcemap-deletion";
+import { closeSession, DEFAULT_ENVIRONMENT, makeSession } from "@sentry/core";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
@@ -43,7 +44,7 @@ interface SentryUnpluginFactoryOptions {
  *
  * Release injection:
  * Per default the sentry bundler plugin will inject a global `SENTRY_RELEASE` into each JavaScript/TypeScript module
- * that is part of the bundle. On a technical level this is done by appending an import (`import "sentry-release-injector;"`)
+ * that is part of the bundle. On a technical level this is done by appending an import (`import "sentry-release-injector";`)
  * to all entrypoint files of the user code (see `transformInclude` and `transform` hooks). This import is then resolved
  * by the sentry plugin to a virtual module that sets the global variable (see `resolveId` and `load` hooks).
  * If a user wants to inject the release into a particular set of modules they can use the `releaseInjectionTargets` option.
@@ -117,21 +118,34 @@ export function sentryUnpluginFactory({
     }
 
     const shouldSendTelemetry = allowedToSendTelemetry(options);
-    const { sentryHub, sentryClient } = createSentryInstance(
+    const { sentryScope, sentryClient } = createSentryInstance(
       options,
       shouldSendTelemetry,
       unpluginMetaContext.framework
     );
-    const sentrySession = sentryHub.startSession();
-    sentryHub.captureSession();
 
-    let sentEndSession = false; // Just to prevent infinite loops with beforeExit, which is called whenever the event loop empties out
-    // We also need to manually end sesisons on errors because beforeExit is not called on crashes
-    process.on("beforeExit", () => {
-      if (!sentEndSession) {
-        sentryHub.endSession();
-        sentEndSession = true;
+    const { release, environment = DEFAULT_ENVIRONMENT } = sentryClient.getOptions();
+
+    const sentrySession = makeSession({ release, environment });
+    sentryScope.setSession(sentrySession);
+    // Send the start of the session
+    sentryClient.captureSession(sentrySession);
+
+    let sessionHasEnded = false; // Just to prevent infinite loops with beforeExit, which is called whenever the event loop empties out
+
+    function endSession() {
+      if (sessionHasEnded) {
+        return;
       }
+
+      closeSession(sentrySession);
+      sentryClient.captureSession(sentrySession);
+      sessionHasEnded = true;
+    }
+
+    // We also need to manually end sessions on errors because beforeExit is not called on crashes
+    process.on("beforeExit", () => {
+      endSession();
     });
 
     // Set the User-Agent that Sentry CLI will use when interacting with Sentry
@@ -158,7 +172,7 @@ export function sentryUnpluginFactory({
           throw unknownError;
         }
       } finally {
-        sentryHub.endSession();
+        endSession();
       }
     }
 
@@ -179,7 +193,7 @@ export function sentryUnpluginFactory({
     plugins.push(
       telemetryPlugin({
         sentryClient,
-        sentryHub,
+        sentryScope,
         logger,
         shouldSendTelemetry,
       })
@@ -212,6 +226,9 @@ export function sentryUnpluginFactory({
 
     /**
      * Returns a Promise that resolves when all the currently active dependencies are freed again.
+     *
+     * It is very important that this function is called as late as possible before wanting to await the Promise to give
+     * the dependency producers as much time as possible to register themselves.
      */
     function waitUntilSourcemapFileDependenciesAreFreed() {
       return new Promise<void>((resolve) => {
@@ -234,7 +251,10 @@ export function sentryUnpluginFactory({
       if (bundleSizeOptimizations.excludeDebugStatements) {
         replacementValues["__SENTRY_DEBUG__"] = false;
       }
-      if (bundleSizeOptimizations.excludePerformanceMonitoring) {
+      if (
+        bundleSizeOptimizations.excludePerformanceMonitoring ||
+        bundleSizeOptimizations.excludeTracing
+      ) {
         replacementValues["__SENTRY_TRACE__"] = false;
       }
       if (bundleSizeOptimizations.excludeReplayCanvas) {
@@ -301,9 +321,7 @@ export function sentryUnpluginFactory({
       plugins.push(moduleMetadataInjectionPlugin(injectionCode));
     }
 
-    if (options.sourcemaps?.disable) {
-      logger.debug("Source map upload was disabled. Will not upload sourcemaps.");
-    } else if (!options.release.name) {
+    if (!options.release.name) {
       logger.warn(
         "No release name provided. Will not create release. Please set the `release.name` option to identify your release."
       );
@@ -331,7 +349,7 @@ export function sentryUnpluginFactory({
           deployOptions: options.release.deploy,
           dist: options.release.dist,
           handleRecoverableError: handleRecoverableError,
-          sentryHub,
+          sentryScope,
           sentryClient,
           sentryCliOptions: {
             authToken: options.authToken,
@@ -342,14 +360,20 @@ export function sentryUnpluginFactory({
             vcsRemote: options.release.vcsRemote,
             headers: options.headers,
           },
-          freeDependencyOnSourcemapFiles: createDependencyOnSourcemapFiles(),
+          createDependencyOnSourcemapFiles,
         })
       );
     }
 
-    plugins.push(debugIdInjectionPlugin(logger));
+    if (!options.sourcemaps?.disable) {
+      plugins.push(debugIdInjectionPlugin(logger));
+    }
 
-    if (!options.authToken) {
+    if (options.sourcemaps?.disable) {
+      logger.debug(
+        "Source map upload was disabled. Will not upload sourcemaps using debug ID process."
+      );
+    } else if (!options.authToken) {
       logger.warn(
         "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
       );
@@ -367,13 +391,13 @@ export function sentryUnpluginFactory({
           createDebugIdUploadFunction({
             assets: options.sourcemaps?.assets,
             ignore: options.sourcemaps?.ignore,
-            freeDependencyOnSourcemapFiles: createDependencyOnSourcemapFiles(),
+            createDependencyOnSourcemapFiles,
             dist: options.release.dist,
             releaseName: options.release.name,
             logger: logger,
             handleRecoverableError: handleRecoverableError,
             rewriteSourcesHook: options.sourcemaps?.rewriteSources,
-            sentryHub,
+            sentryScope,
             sentryClient,
             sentryCliOptions: {
               authToken: options.authToken,
@@ -408,15 +432,13 @@ export function sentryUnpluginFactory({
 
     plugins.push(
       fileDeletionPlugin({
-        // It is very important that this is only called after all other dependencies have been created with `createDependencyOnSourcemapFiles`.
-        // Ideally, we always register this plugin last.
-        dependenciesAreFreedPromise: waitUntilSourcemapFileDependenciesAreFreed(),
+        waitUntilSourcemapFileDependenciesAreFreed,
         filesToDeleteAfterUpload:
           options.sourcemaps?.filesToDeleteAfterUpload ??
           options.sourcemaps?.deleteFilesAfterUpload,
         logger,
         handleRecoverableError,
-        sentryHub,
+        sentryScope,
         sentryClient,
       })
     );
@@ -523,7 +545,10 @@ export function createRollupDebugIdInjectionHooks() {
   return {
     renderChunk(code: string, chunk: { fileName: string }) {
       if (
-        [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+        // chunks could be any file (html, md, ...)
+        [".js", ".mjs", ".cjs"].some((ending) =>
+          stripQueryAndHashFromPath(chunk.fileName).endsWith(ending)
+        )
       ) {
         const debugId = stringToUUID(code); // generate a deterministic debug ID
         const codeToInject = getDebugIdSnippet(debugId);
@@ -557,7 +582,10 @@ export function createRollupModuleMetadataInjectionHooks(injectionCode: string) 
   return {
     renderChunk(code: string, chunk: { fileName: string }) {
       if (
-        [".js", ".mjs", ".cjs"].some((ending) => chunk.fileName.endsWith(ending)) // chunks could be any file (html, md, ...)
+        // chunks could be any file (html, md, ...)
+        [".js", ".mjs", ".cjs"].some((ending) =>
+          stripQueryAndHashFromPath(chunk.fileName).endsWith(ending)
+        )
       ) {
         const ms = new MagicString(code, { filename: chunk.fileName });
 
@@ -595,7 +623,14 @@ export function createRollupDebugIdUploadHooks(
       if (outputOptions.dir) {
         const outputDir = outputOptions.dir;
         const buildArtifacts = await glob(
-          ["/**/*.js", "/**/*.mjs", "/**/*.cjs", "/**/*.js.map", "/**/*.mjs.map", "/**/*.cjs.map"],
+          [
+            "/**/*.js",
+            "/**/*.mjs",
+            "/**/*.cjs",
+            "/**/*.js.map",
+            "/**/*.mjs.map",
+            "/**/*.cjs.map",
+          ].map((q) => `${q}?(\\?*)?(#*)`), // We want to allow query and hashes strings at the end of files
           {
             root: outputDir,
             absolute: true,
@@ -668,7 +703,7 @@ export function createComponentNameAnnotateHooks(ignoreComponents?: string[]) {
 }
 
 export function getDebugIdSnippet(debugId: string): string {
-  return `;!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:{},n=(new Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="${debugId}",e._sentryDebugIdIdentifier="sentry-dbid-${debugId}")}catch(e){}}();`;
+  return `;!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{},n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="${debugId}",e._sentryDebugIdIdentifier="sentry-dbid-${debugId}")}catch(e){}}();`;
 }
 
 export { stringToUUID, replaceBooleanFlagsInCode } from "./utils";

@@ -223,6 +223,16 @@ class componentName extends Component {
 export default componentName;"
 `;
 
+exports[`handles ternary operation returned by function body 1`] = `
+"const maybeTrue = Math.random() > 0.5;
+export default function componentName() {
+  return maybeTrue ? '' : /*#__PURE__*/React.createElement(SubComponent, {
+    \\"data-sentry-element\\": \\"SubComponent\\",
+    \\"data-sentry-component\\": \\"componentName\\"
+  });
+}"
+`;
+
 exports[`nonJSX snapshot matches 1`] = `
 "import React, { Component } from 'react';
 class TestClass extends Component {

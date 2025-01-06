@@ -4,11 +4,13 @@ try {
       ? window
       : "undefined" != typeof global
       ? global
+      : "undefined" != typeof globalThis
+      ? global
       : "undefined" != typeof self
       ? self
       : {};
 
-  var stack = new Error().stack;
+  var stack = new globalObject.Error().stack;
 
   if (stack) {
     globalObject._sentryDebugIds = globalObject._sentryDebugIds || {};

@@ -1,10 +1,11 @@
 import SentryCli, { SentryCliCommitsOptions, SentryCliNewDeployOptions } from "@sentry/cli";
-import { Hub, NodeClient } from "@sentry/node";
+import { Scope } from "@sentry/core";
 import { UnpluginOptions } from "unplugin";
 import { Logger } from "../sentry/logger";
 import { safeFlushTelemetry } from "../sentry/telemetry";
 import { IncludeEntry } from "../types";
 import { arrayify } from "../utils";
+import { Client } from "@sentry/types";
 
 interface ReleaseManagementPluginOptions {
   logger: Logger;
@@ -16,8 +17,8 @@ interface ReleaseManagementPluginOptions {
   deployOptions?: SentryCliNewDeployOptions;
   dist?: string;
   handleRecoverableError: (error: unknown) => void;
-  sentryHub: Hub;
-  sentryClient: NodeClient;
+  sentryScope: Scope;
+  sentryClient: Client;
   sentryCliOptions: {
     url: string;
     authToken: string;
@@ -27,7 +28,7 @@ interface ReleaseManagementPluginOptions {
     silent: boolean;
     headers?: Record<string, string>;
   };
-  freeDependencyOnSourcemapFiles: () => void;
+  createDependencyOnSourcemapFiles: () => () => void;
 }
 
 export function releaseManagementPlugin({
@@ -39,14 +40,20 @@ export function releaseManagementPlugin({
   shouldFinalizeRelease,
   deployOptions,
   handleRecoverableError,
-  sentryHub,
+  sentryScope,
   sentryClient,
   sentryCliOptions,
-  freeDependencyOnSourcemapFiles,
+  createDependencyOnSourcemapFiles,
 }: ReleaseManagementPluginOptions): UnpluginOptions {
+  const freeGlobalDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
   return {
     name: "sentry-debug-id-upload-plugin",
     async writeBundle() {
+      // It is possible that this writeBundle hook is called multiple times in one build (for example when reusing the plugin, or when using build tooling like `@vitejs/plugin-legacy`)
+      // Therefore we need to actually register the execution of this hook as dependency on the sourcemap files.
+      const freeWriteBundleInvocationDependencyOnSourcemapFiles =
+        createDependencyOnSourcemapFiles();
+
       try {
         const cliInstance = new SentryCli(null, sentryCliOptions);
 
@@ -86,11 +93,12 @@ export function releaseManagementPlugin({
           await cliInstance.releases.newDeploy(releaseName, deployOptions);
         }
       } catch (e) {
-        sentryHub.captureException('Error in "releaseManagementPlugin" writeBundle hook');
+        sentryScope.captureException('Error in "releaseManagementPlugin" writeBundle hook');
         await safeFlushTelemetry(sentryClient);
         handleRecoverableError(e);
       } finally {
-        freeDependencyOnSourcemapFiles();
+        freeGlobalDependencyOnSourcemapFiles();
+        freeWriteBundleInvocationDependencyOnSourcemapFiles();
       }
     },
   };

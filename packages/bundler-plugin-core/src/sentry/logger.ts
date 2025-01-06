@@ -11,30 +11,31 @@ export type Logger = {
   debug(message: string, ...params: unknown[]): void;
 };
 
+// Logging everything to stderr not to interfere with stdout
 export function createLogger(options: LoggerOptions): Logger {
   return {
     info(message: string, ...params: unknown[]) {
       if (!options.silent) {
         // eslint-disable-next-line no-console
-        console.log(`${options.prefix} Info: ${message}`, ...params);
+        console.error(`${options.prefix} Info: ${message}`, ...params);
       }
     },
     warn(message: string, ...params: unknown[]) {
       if (!options.silent) {
         // eslint-disable-next-line no-console
-        console.log(`${options.prefix} Warning: ${message}`, ...params);
+        console.error(`${options.prefix} Warning: ${message}`, ...params);
       }
     },
     error(message: string, ...params: unknown[]) {
       if (!options.silent) {
         // eslint-disable-next-line no-console
-        console.log(`${options.prefix} Error: ${message}`, ...params);
+        console.error(`${options.prefix} Error: ${message}`, ...params);
       }
     },
     debug(message: string, ...params: unknown[]) {
       if (!options.silent && options.debug) {
         // eslint-disable-next-line no-console
-        console.log(`${options.prefix} Debug: ${message}`, ...params);
+        console.error(`${options.prefix} Debug: ${message}`, ...params);
       }
     },
   };

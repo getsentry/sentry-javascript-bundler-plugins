@@ -1,4 +1,5 @@
 import {
+  generateModuleMetadataInjectorCode,
   getDependencies,
   getPackageJson,
   parseMajorVersion,
@@ -178,7 +179,7 @@ describe("getDependencies", () => {
 
 describe("stringToUUID", () => {
   test("should return a deterministic UUID", () => {
-    expect(stringToUUID("Nothing personnel kid")).toBe("52c7a762-5ddf-49a7-af16-6874a8cb2512");
+    expect(stringToUUID("Nothing personnel kid")).toBe("95543648-7392-49e4-b46a-67dfd0235986");
   });
 });
 
@@ -212,5 +213,70 @@ if (false && true) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       map: expect.anything(),
     });
+  });
+});
+
+describe("generateModuleMetadataInjectorCode", () => {
+  it("generates code with empty metadata object", () => {
+    const generatedCode = generateModuleMetadataInjectorCode({});
+    expect(generatedCode).toMatchInlineSnapshot(`
+      "{
+        var _sentryModuleMetadataGlobal =
+          typeof window !== \\"undefined\\"
+            ? window
+            : typeof global !== \\"undefined\\"
+            ? global
+            : typeof globalThis !== \\"undefined\\"
+            ? globalThis
+            : typeof self !== \\"undefined\\"
+            ? self
+            : {};
+
+        _sentryModuleMetadataGlobal._sentryModuleMetadata =
+          _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
+
+        _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack] =
+          Object.assign(
+            {},
+            _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
+            {}
+          );
+      }"
+    `);
+  });
+
+  it("generates code with metadata object", () => {
+    const generatedCode = generateModuleMetadataInjectorCode({
+      "file1.js": {
+        foo: "bar",
+      },
+      "file2.js": {
+        bar: "baz",
+      },
+    });
+    expect(generatedCode).toMatchInlineSnapshot(`
+      "{
+        var _sentryModuleMetadataGlobal =
+          typeof window !== \\"undefined\\"
+            ? window
+            : typeof global !== \\"undefined\\"
+            ? global
+            : typeof globalThis !== \\"undefined\\"
+            ? globalThis
+            : typeof self !== \\"undefined\\"
+            ? self
+            : {};
+
+        _sentryModuleMetadataGlobal._sentryModuleMetadata =
+          _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
+
+        _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack] =
+          Object.assign(
+            {},
+            _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
+            {\\"file1.js\\":{\\"foo\\":\\"bar\\"},\\"file2.js\\":{\\"bar\\":\\"baz\\"}}
+          );
+      }"
+    `);
   });
 });

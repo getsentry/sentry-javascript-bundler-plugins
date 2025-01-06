@@ -124,6 +124,7 @@ export interface Options {
      *
      * Defaults to making all sources relative to `process.cwd()` while building.
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rewriteSources?: (source: string, map: any) => string;
 
     /**
@@ -245,47 +246,63 @@ export interface Options {
    */
   bundleSizeOptimizations?: {
     /**
-     * If set to true, the plugin will try to tree-shake debug statements out.
-     * Note that the success of this depends on tree shaking generally being enabled in your build.
+     * If set to `true`, the plugin will attempt to tree-shake (remove) any debugging code within the Sentry SDK.
+     * Note that the success of this depends on tree shaking being enabled in your build tooling.
+     *
+     * Setting this option to `true` will disable features like the SDK's `debug` option.
      */
     excludeDebugStatements?: boolean;
 
     /**
-     * If set to true, the plugin will try to tree-shake performance monitoring statements out.
-     * Note that the success of this depends on tree shaking generally being enabled in your build.
-     * Attention: DO NOT enable this when you're using any performance monitoring-related SDK features (e.g. Sentry.startTransaction()).
-     * This flag is intended to be used in combination with packages like @sentry/next or @sentry/sveltekit,
-     * which automatically include performance monitoring functionality.
+     * If set to `true`, the plugin will attempt to tree-shake (remove) code within the Sentry SDK that is related to tracing and performance monitoring.
+     * Note that the success of this depends on tree shaking being enabled in your build tooling.
+     *
+     * **Notice**: Do not enable this when you're using any performance monitoring-related SDK features (e.g. `Sentry.startTransaction()`).
+     *
+     * @deprecated This option has been replaced with the `excludeTracing`. Currently, this option is an alias for `excludeTracing` but `excludePerformanceMonitoring` will be removed in the next major version.
      */
+    // TODO(v3): Remove this option
     excludePerformanceMonitoring?: boolean;
 
     /**
-     * If set to true, the plugin will try to tree-shake Session Replay's Canvas recording functionality out.
-     * You can safely do this when you do not want to capture any Canvas activity via Replay.
-     * Note that the success of this depends on tree shaking generally being enabled in your build.
+     * If set to `true`, the plugin will attempt to tree-shake (remove) code within the Sentry SDK that is related to tracing and performance monitoring.
+     * Note that the success of this depends on tree shaking being enabled in your build tooling.
      *
-     * @deprecated Versions v7.78.0 and later of the Sentry JavaScript SDKs do not include canvas support by default, making this option redundant.
+     * **Notice:** Do not enable this when you're using any performance monitoring-related SDK features (e.g. `Sentry.startTransaction()`).
+     */
+    excludeTracing?: boolean;
+
+    /**
+     * If set to `true`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay Canvas recording functionality.
+     * Note that the success of this depends on tree shaking being enabled in your build tooling.
+     *
+     * You can safely do this when you do not want to capture any Canvas activity via Sentry Session Replay.
+     *
+     * @deprecated In versions v7.78.0 and later of the Sentry JavaScript SDKs, canvas recording is opt-in making this option redundant.
      */
     excludeReplayCanvas?: boolean;
 
     /**
-     * If set to true, the plugin will try to tree-shake Session Replay's Shadow DOM recording functionality out.
-     * You can safely do this when you do not want to capture any Shadow DOM activity via Replay.
-     * Note that the success of this depends on tree shaking generally being enabled in your build.
+     * If set to `true`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay Shadow DOM recording functionality.
+     * Note that the success of this depends on tree shaking being enabled in your build tooling.
+     *
+     * This option is safe to be used when you do not want to capture any Shadow DOM activity via Sentry Session Replay.
      */
     excludeReplayShadowDom?: boolean;
 
     /**
-     * If set to true, the plugin will try to tree-shake Session Replay's IFrame recording functionality out.
-     * You can safely do this when you do not want to capture any IFrame activity via Replay.
-     * Note that the success of this depends on tree shaking generally being enabled in your build.
+     * If set to `true`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay `iframe` recording functionality.
+     * Note that the success of this depends on tree shaking being enabled in your build tooling.
+     *
+     * You can safely do this when you do not want to capture any `iframe` activity via Sentry Session Replay.
      */
     excludeReplayIframe?: boolean;
 
     /**
-     * If set to true, the plugin will try to tree-shake Session Replay's Compression Web Worker out.
-     * You should only do this if you manually host a compression worker and configure it in your Replay config via `workerUrl`.
-     * Note that the success of this depends on tree shaking generally being enabled in your build.
+     * If set to `true`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay's Compression Web Worker.
+     * Note that the success of this depends on tree shaking being enabled in your build tooling.
+     *
+     * **Notice:** You should only use this option if you manually host a compression worker and configure it in your Sentry Session Replay integration config via the `workerUrl` option.
      */
     excludeReplayWorker?: boolean;
   };
