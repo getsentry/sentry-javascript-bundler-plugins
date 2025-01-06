@@ -53,7 +53,7 @@ pnpm add @sentry/babel-plugin-component-annotate --save-dev
 
 Type: `string[]`
 
-A list of strings representing the names of components to ignore. The plugin will not perform apply `data-sentry` annotations on the DOM element for these components.
+A list of strings representing the names of components to ignore. The plugin will not apply `data-sentry` annotations on the DOM element for these components.
 
 ## Example
 
