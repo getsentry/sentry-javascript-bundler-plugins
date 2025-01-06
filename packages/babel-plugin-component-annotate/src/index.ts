@@ -496,10 +496,6 @@ function isReactFragment(t: typeof Babel.types, openingElement: Babel.NodePath):
   return false;
 }
 
-function matchesIgnoreRule(rule: string, name: string | undefined | null) {
-  return rule === "*" || rule === name;
-}
-
 function hasAttributeWithName(
   openingElement: Babel.NodePath<Babel.types.JSXOpeningElement>,
   name: string | undefined | null

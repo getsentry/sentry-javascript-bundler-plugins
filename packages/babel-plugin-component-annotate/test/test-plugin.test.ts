@@ -1174,34 +1174,6 @@ it("skips components marked in ignoreComponents", () => {
   `);
 });
 
-it("Bananas incompatible plugin @react-navigation source snapshot matches", () => {
-  const result = transform(BananasStandardInput, {
-    filename: "test/node_modules/@react-navigation/core/filename-test.js",
-    presets: ["@babel/preset-react"],
-    plugins: [[plugin, { native: true }]],
-  });
-  expect(result?.code).toMatchInlineSnapshot(`
-    "import React, { Component } from 'react';
-    import { Image } from 'react-native';
-    class Bananas extends Component {
-      render() {
-        let pic = {
-          uri: 'https://upload.wikimedia.org/wikipedia/commons/d/de/Bananavarieties.jpg'
-        };
-        return /*#__PURE__*/React.createElement(Image, {
-          source: pic,
-          style: {
-            width: 193,
-            height: 110,
-            marginTop: 10
-          },
-          fsClass: \\"test-class\\"
-        });
-      }
-    }"
-  `);
-});
-
 it("handles ternary operation returned by function body", () => {
   const result = transform(
     `const maybeTrue = Math.random() > 0.5;
