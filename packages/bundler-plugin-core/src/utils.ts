@@ -314,7 +314,7 @@ export function generateGlobalInjectorCode({
 }) {
   // The code below is mostly ternary operators because it saves bundle size.
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
-  let code = `
+  let code = `(function () {
     var _global =
       typeof window !== 'undefined' ?
         window :
@@ -334,6 +334,8 @@ export function generateGlobalInjectorCode({
     code += `
       _global.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)};`;
   }
+
+  code += '})();';
 
   return code;
 }
