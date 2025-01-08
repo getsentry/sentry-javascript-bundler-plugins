@@ -31,6 +31,11 @@ interface ReleaseManagementPluginOptions {
   createDependencyOnSourcemapFiles: () => () => void;
 }
 
+/**
+ * Creates a plugin that creates releases, sets commits, deploys and finalizes releases.
+ *
+ * Additionally, if legacy upload options are set, it uploads source maps in the legacy (non-debugId) way.
+ */
 export function releaseManagementPlugin({
   releaseName,
   include,
@@ -47,7 +52,7 @@ export function releaseManagementPlugin({
 }: ReleaseManagementPluginOptions): UnpluginOptions {
   const freeGlobalDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
   return {
-    name: "sentry-debug-id-upload-plugin",
+    name: "sentry-release-management-plugin",
     async writeBundle() {
       // It is possible that this writeBundle hook is called multiple times in one build (for example when reusing the plugin, or when using build tooling like `@vitejs/plugin-legacy`)
       // Therefore we need to actually register the execution of this hook as dependency on the sourcemap files.
