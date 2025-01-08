@@ -391,7 +391,7 @@ type IncludeEntry = {
         supportedBundlers: ["webpack", "vite", "rollup"],
       },
       {
-        name: "ignoreComponents",
+        name: "ignoredComponents",
         type: "string[]",
         fullDescription:
           "A list of strings representing the names of components to ignore. The plugin will not perform apply `data-sentry` annotations on the DOM element for these components.",

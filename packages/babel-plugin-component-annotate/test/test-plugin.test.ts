@@ -1079,11 +1079,11 @@ it("Bananas incompatible plugin @react-navigation source snapshot matches", () =
   `);
 });
 
-it("skips components marked in ignoreComponents", () => {
+it("skips components marked in ignoredComponents", () => {
   const result = transform(BananasPizzaAppStandardInput, {
     filename: "/filename-test.js",
     presets: ["@babel/preset-react"],
-    plugins: [[plugin, { native: true, ignoreComponents: ["Bananas"] }]],
+    plugins: [[plugin, { native: true, ignoredComponents: ["Bananas"] }]],
   });
   expect(result?.code).toMatchInlineSnapshot(`
     "import React, { Component } from 'react';

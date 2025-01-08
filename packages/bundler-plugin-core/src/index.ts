@@ -30,7 +30,7 @@ import { closeSession, DEFAULT_ENVIRONMENT, makeSession } from "@sentry/core";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
-  componentNameAnnotatePlugin?: (ignoreComponents?: string[]) => UnpluginOptions;
+  componentNameAnnotatePlugin?: (ignoredComponents?: string[]) => UnpluginOptions;
   moduleMetadataInjectionPlugin: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: (logger: Logger) => UnpluginOptions;
   debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
@@ -425,7 +425,7 @@ export function sentryUnpluginFactory({
       } else {
         componentNameAnnotatePlugin &&
           plugins.push(
-            componentNameAnnotatePlugin(options.reactComponentAnnotation.ignoreComponents)
+            componentNameAnnotatePlugin(options.reactComponentAnnotation.ignoredComponents)
           );
       }
     }
@@ -648,7 +648,7 @@ export function createRollupDebugIdUploadHooks(
   };
 }
 
-export function createComponentNameAnnotateHooks(ignoreComponents?: string[]) {
+export function createComponentNameAnnotateHooks(ignoredComponents?: string[]) {
   type ParserPlugins = NonNullable<
     NonNullable<Parameters<typeof transformAsync>[1]>["parserOpts"]
   >["plugins"];
@@ -676,7 +676,7 @@ export function createComponentNameAnnotateHooks(ignoreComponents?: string[]) {
 
       try {
         const result = await transformAsync(code, {
-          plugins: [[componentNameAnnotatePlugin, { ignoreComponents }]],
+          plugins: [[componentNameAnnotatePlugin, { ignoredComponents }]],
           filename: id,
           parserOpts: {
             sourceType: "module",

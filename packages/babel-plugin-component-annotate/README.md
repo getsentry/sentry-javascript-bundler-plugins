@@ -49,7 +49,7 @@ pnpm add @sentry/babel-plugin-component-annotate --save-dev
 
 ## Options
 
-### `ignoreComponents`
+### `ignoredComponents`
 
 Type: `string[]`
 
@@ -66,7 +66,7 @@ A list of strings representing the names of components to ignore. The plugin wil
   plugins: [
     // Put this plugin before any other plugins you have that transform JSX code
     // The options are set by providing an object as the second element in the array, but not required
-    ['@sentry/babel-plugin-component-annotate', {ignoreComponents: ['Foo', 'Bar']}]
+    ['@sentry/babel-plugin-component-annotate', {ignoredComponents: ['Foo', 'Bar']}]
   ],
 }
 ```

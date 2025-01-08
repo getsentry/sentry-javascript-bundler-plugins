@@ -322,7 +322,7 @@ export interface Options {
     /**
      * A list of strings representing the names of components to ignore. The plugin will not apply `data-sentry` annotations on the DOM element for these components.
      */
-    ignoreComponents?: string[];
+    ignoredComponents?: string[];
     // TODO: Support this option in the future
     /**
      * A list of strings representing local paths to files to ignore. The plugin will not apply `data-sentry` annotations on components in these files
