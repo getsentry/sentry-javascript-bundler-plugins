@@ -4,6 +4,16 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.23.0
+
+- chore(deps): bump nanoid from 3.3.6 to 3.3.8 (#641)
+- feat(core): Detect Railway release name (#639)
+- feat(core): Write module injections to `globalThis` (#636)
+- feat(react-component-annotate): Allow skipping annotations on specified components (#617)
+- ref(core): Rename release management plugin name (#647)
+
+Work in this release contributed by @conor-ob. Thank you for your contribution!
+
 ## 2.22.7
 
 - deps: Bump `@sentry/cli` to `2.39.1` and require specific version (#632)
