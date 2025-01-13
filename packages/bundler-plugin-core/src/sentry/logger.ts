@@ -17,13 +17,13 @@ export function createLogger(options: LoggerOptions): Logger {
     info(message: string, ...params: unknown[]) {
       if (!options.silent) {
         // eslint-disable-next-line no-console
-        console.error(`${options.prefix} Info: ${message}`, ...params);
+        console.info(`${options.prefix} Info: ${message}`, ...params);
       }
     },
     warn(message: string, ...params: unknown[]) {
       if (!options.silent) {
         // eslint-disable-next-line no-console
-        console.error(`${options.prefix} Warning: ${message}`, ...params);
+        console.warn(`${options.prefix} Warning: ${message}`, ...params);
       }
     },
     error(message: string, ...params: unknown[]) {
@@ -35,7 +35,7 @@ export function createLogger(options: LoggerOptions): Logger {
     debug(message: string, ...params: unknown[]) {
       if (!options.silent && options.debug) {
         // eslint-disable-next-line no-console
-        console.error(`${options.prefix} Debug: ${message}`, ...params);
+        console.debug(`${options.prefix} Debug: ${message}`, ...params);
       }
     },
   };
