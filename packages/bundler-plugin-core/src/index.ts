@@ -33,7 +33,10 @@ interface SentryUnpluginFactoryOptions {
   componentNameAnnotatePlugin?: (ignoredComponents?: string[]) => UnpluginOptions;
   moduleMetadataInjectionPlugin: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: (logger: Logger) => UnpluginOptions;
-  debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
+  debugIdUploadPlugin: (
+    upload: (buildArtifacts: string[]) => Promise<void>,
+    logger: Logger
+  ) => UnpluginOptions;
   bundleSizeOptimizationsPlugin: (buildFlags: SentrySDKBuildFlags) => UnpluginOptions;
 }
 
@@ -408,7 +411,8 @@ export function sentryUnpluginFactory({
               vcsRemote: options.release.vcsRemote,
               headers: options.headers,
             },
-          })
+          }),
+          logger
         )
       );
     }
