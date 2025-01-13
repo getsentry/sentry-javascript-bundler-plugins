@@ -136,12 +136,14 @@ function webpackDebugIdUploadPlugin(
         });
       });
 
-      compiler.hooks.done.tap(pluginName, () => {
-        setTimeout(() => {
-          logger.debug("Exiting process after debug file upload");
-          process.exit(0);
+      if (compiler.options.mode === "production") {
+        compiler.hooks.done.tap(pluginName, () => {
+          setTimeout(() => {
+            logger.debug("Exiting process after debug file upload");
+            process.exit(0);
+          });
         });
-      });
+      }
     },
   };
 }
