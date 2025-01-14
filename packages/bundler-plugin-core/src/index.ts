@@ -105,13 +105,6 @@ export function sentryUnpluginFactory({
 
     const options = normalizeUserOptions(userOptions);
 
-    // TODO(v3): Remove this warning
-    if (userOptions._experiments?.moduleMetadata) {
-      logger.warn(
-        "The `_experiments.moduleMetadata` option has been promoted to being stable. You can safely move the option out of the `_experiments` object scope."
-      );
-    }
-
     if (unpluginMetaContext.watchMode || options.disable) {
       return [
         {
@@ -254,10 +247,7 @@ export function sentryUnpluginFactory({
       if (bundleSizeOptimizations.excludeDebugStatements) {
         replacementValues["__SENTRY_DEBUG__"] = false;
       }
-      if (
-        bundleSizeOptimizations.excludePerformanceMonitoring ||
-        bundleSizeOptimizations.excludeTracing
-      ) {
+      if (bundleSizeOptimizations.excludeTracing) {
         replacementValues["__SENTRY_TRACE__"] = false;
       }
       if (bundleSizeOptimizations.excludeReplayCanvas) {
@@ -437,9 +427,7 @@ export function sentryUnpluginFactory({
     plugins.push(
       fileDeletionPlugin({
         waitUntilSourcemapFileDependenciesAreFreed,
-        filesToDeleteAfterUpload:
-          options.sourcemaps?.filesToDeleteAfterUpload ??
-          options.sourcemaps?.deleteFilesAfterUpload,
+        filesToDeleteAfterUpload: options.sourcemaps?.filesToDeleteAfterUpload,
         logger,
         handleRecoverableError,
         sentryScope,

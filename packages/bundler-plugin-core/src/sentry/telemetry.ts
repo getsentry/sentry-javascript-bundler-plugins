@@ -86,10 +86,7 @@ export function setTelemetryDataOnScope(options: NormalizedOptions, scope: Scope
   // Miscellaneous options
   scope.setTag("custom-error-handler", !!errorHandler);
   scope.setTag("sourcemaps-assets", !!sourcemaps?.assets);
-  scope.setTag(
-    "delete-after-upload",
-    !!sourcemaps?.deleteFilesAfterUpload || !!sourcemaps?.filesToDeleteAfterUpload
-  );
+  scope.setTag("delete-after-upload", !!sourcemaps?.filesToDeleteAfterUpload);
   scope.setTag("sourcemaps-disabled", !!sourcemaps?.disable);
 
   scope.setTag("react-annotate", !!reactComponentAnnotation?.enabled);
