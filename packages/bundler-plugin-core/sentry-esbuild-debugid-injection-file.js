@@ -1,16 +1,7 @@
 try {
-  var globalObject =
-    "undefined" != typeof window
-      ? window
-      : "undefined" != typeof global
-      ? global
-      : "undefined" != typeof globalThis
-      ? global
-      : "undefined" != typeof self
-      ? self
-      : {};
+  let globalObject = globalThis;
 
-  var stack = new globalObject.Error().stack;
+  let stack = new globalObject.Error().stack;
 
   if (stack) {
     globalObject._sentryDebugIds = globalObject._sentryDebugIds || {};
