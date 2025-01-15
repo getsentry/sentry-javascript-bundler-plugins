@@ -695,7 +695,7 @@ export function createComponentNameAnnotateHooks(ignoredComponents?: string[]) {
 }
 
 export function getDebugIdSnippet(debugId: string): string {
-  return `;!function(){try{var e=globalThis,n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="${debugId}",e._sentryDebugIdIdentifier="sentry-dbid-${debugId}")}catch(e){}}();`;
+  return `;{try{let e=globalThis,n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="${debugId}",e._sentryDebugIdIdentifier="sentry-dbid-${debugId}")}catch(e){}};`;
 }
 
 export { stringToUUID, replaceBooleanFlagsInCode } from "./utils";

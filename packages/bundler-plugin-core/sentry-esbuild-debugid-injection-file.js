@@ -1,7 +1,7 @@
 try {
-  var globalObject = globalThis;
+  let globalObject = globalThis;
 
-  var stack = new globalObject.Error().stack;
+  let stack = new globalObject.Error().stack;
 
   if (stack) {
     globalObject._sentryDebugIds = globalObject._sentryDebugIds || {};

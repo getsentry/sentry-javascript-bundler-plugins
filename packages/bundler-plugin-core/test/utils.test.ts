@@ -221,7 +221,7 @@ describe("generateModuleMetadataInjectorCode", () => {
     const generatedCode = generateModuleMetadataInjectorCode({});
     expect(generatedCode).toMatchInlineSnapshot(`
       "{
-        var _sentryModuleMetadataGlobal = globalThis;
+        let _sentryModuleMetadataGlobal = globalThis;
 
         _sentryModuleMetadataGlobal._sentryModuleMetadata =
           _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
@@ -247,7 +247,7 @@ describe("generateModuleMetadataInjectorCode", () => {
     });
     expect(generatedCode).toMatchInlineSnapshot(`
       "{
-        var _sentryModuleMetadataGlobal = globalThis;
+        let _sentryModuleMetadataGlobal = globalThis;
 
         _sentryModuleMetadataGlobal._sentryModuleMetadata =
           _sentryModuleMetadataGlobal._sentryModuleMetadata || {};

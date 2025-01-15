@@ -312,9 +312,8 @@ export function generateGlobalInjectorCode({
   release: string;
   injectBuildInformation: boolean;
 }) {
-  let code = `
-    var _global = globalThis;
-
+  let code = `{
+    let _global = globalThis;
     _global.SENTRY_RELEASE={id:${JSON.stringify(release)}};`;
 
   if (injectBuildInformation) {
@@ -333,7 +332,7 @@ export function generateGlobalInjectorCode({
 export function generateModuleMetadataInjectorCode(metadata: any) {
   // We are merging the metadata objects in case modules are bundled twice with the plugin
   return `{
-  var _sentryModuleMetadataGlobal = globalThis;
+  let _sentryModuleMetadataGlobal = globalThis;
 
   _sentryModuleMetadataGlobal._sentryModuleMetadata =
     _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
