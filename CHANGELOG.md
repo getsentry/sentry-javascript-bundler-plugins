@@ -8,7 +8,7 @@
 
 ### Breaking Changes
 
-- Injected code will now use `let`, which were added in ES6 (ES2015).
+- Injected code will now use `let`, which was added in ES6 (ES2015).
   This means that ES6 is the minimum JavaScript version that the Sentry bundler plugins support.
 
 - Deprecated options have been removed:
