@@ -133,18 +133,6 @@ export interface Options {
      * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
      *
      * Use the `debug` option to print information about which files end up being deleted.
-     *
-     * @deprecated Use `filesToDeleteAfterUpload` instead.
-     */
-    // TODO(v3): Remove this option.
-    deleteFilesAfterUpload?: string | string[];
-
-    /**
-     * A glob or an array of globs that specifies the build artifacts that should be deleted after the artifact upload to Sentry has been completed.
-     *
-     * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
-     *
-     * Use the `debug` option to print information about which files end up being deleted.
      */
     filesToDeleteAfterUpload?: string | string[];
   };
@@ -217,18 +205,6 @@ export interface Options {
     deploy?: DeployOptions;
 
     /**
-     * Remove all previously uploaded artifacts for this release on Sentry before the upload.
-     *
-     * Defaults to `false`.
-     *
-     * @deprecated `cleanArtifacts` is deprecated and currently doesn't do anything. Historically it was needed
-     * since uploading the same artifacts twice was not allowed. Nowadays, when uploading artifacts with the same name
-     * more than once to the same release on Sentry, Sentry will prefer the most recent artifact for source mapping.
-     */
-    // TODO(v3): Remove this option
-    cleanArtifacts?: boolean;
-
-    /**
      * Legacy method of uploading source maps. (not recommended unless necessary)
      *
      * One or more paths that should be scanned recursively for sources.
@@ -252,17 +228,6 @@ export interface Options {
      * Setting this option to `true` will disable features like the SDK's `debug` option.
      */
     excludeDebugStatements?: boolean;
-
-    /**
-     * If set to `true`, the plugin will attempt to tree-shake (remove) code within the Sentry SDK that is related to tracing and performance monitoring.
-     * Note that the success of this depends on tree shaking being enabled in your build tooling.
-     *
-     * **Notice**: Do not enable this when you're using any performance monitoring-related SDK features (e.g. `Sentry.startTransaction()`).
-     *
-     * @deprecated This option has been replaced with the `excludeTracing`. Currently, this option is an alias for `excludeTracing` but `excludePerformanceMonitoring` will be removed in the next major version.
-     */
-    // TODO(v3): Remove this option
-    excludePerformanceMonitoring?: boolean;
 
     /**
      * If set to `true`, the plugin will attempt to tree-shake (remove) code within the Sentry SDK that is related to tracing and performance monitoring.
@@ -319,6 +284,10 @@ export interface Options {
      * Whether the component name annotate plugin should be enabled or not.
      */
     enabled?: boolean;
+    /**
+     * A list of strings representing the names of components to ignore. The plugin will not apply `data-sentry` annotations on the DOM element for these components.
+     */
+    ignoredComponents?: string[];
   };
 
   /**
@@ -347,7 +316,6 @@ export interface Options {
    *
    * @experimental API that does not follow semantic versioning and may change in any release
    */
-  // TODO(v3): Remove these
   _experiments?: {
     /**
      * If set to true, the plugin will inject an additional `SENTRY_BUILD_INFO` variable.
@@ -356,25 +324,6 @@ export interface Options {
      * Defaults to `false`.
      */
     injectBuildInformation?: boolean;
-
-    /**
-     * NOTE: This option has been promoted to stable.
-     *
-     * Metadata that should be associated with the built application.
-     *
-     * The metadata is serialized and can be looked up at runtime from within the SDK (for example in the `beforeSend`,
-     * event processors, or the transport), allowing for custom event filtering logic or routing of events.
-     *
-     * Metadata can either be passed directly or alternatively a callback can be provided that will be
-     * called with the following parameters:
-     * - `org`: The organization slug.
-     * - `project`: The project slug.
-     * - `release`: The release name.
-     *
-     * @deprecated Use the non-experimental `moduleMetadata` option instead. (Basically just move this option out of `_experiments`)
-     */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    moduleMetadata?: ModuleMetadata | ModuleMetadataCallback;
   };
 
   /**

@@ -4,8 +4,48 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 3.0.0
+
+### Breaking Changes
+
+- Code injected into bundles now uses:
+
+  - `const` which was added in ES6 (ES2015) (#646)
+  - `globalThis` which was added ES2020 but can be polyfilled (#610)
+
+- Deprecated configuration options have been removed:
+  - `deleteFilesAfterUpload` - Use `filesToDeleteAfterUpload` instead
+  - `bundleSizeOptimizations.excludePerformanceMonitoring` - Use `bundleSizeOptimizations.excludeTracing` instead
+  - `_experiments.moduleMetadata` - Use `moduleMetadata` instead
+  - `cleanArtifacts` - Did not do anything
+
+### Other Changes
+
+- fix(webpack): Ensure process exits when done (#653)
+- feat(logger): Use console methods respective to log level (#652)
+
+## 2.23.0
+
+- chore(deps): bump nanoid from 3.3.6 to 3.3.8 (#641)
+- feat(core): Detect Railway release name (#639)
+- feat(core): Write module injections to `globalThis` (#636)
+- feat(react-component-annotate): Allow skipping annotations on specified components (#617)
+- ref(core): Rename release management plugin name (#647)
+
+Work in this release contributed by @conor-ob. Thank you for your contribution!
+
+## 2.22.7
+
+- deps: Bump `@sentry/cli` to `2.39.1` and require specific version (#632)
+- feat(telemetry): Record if plugin is run in CI (#627)
+
+## 2.22.6
+
+- fix(core): Use sha256 instead of md5 to generate uuids from string (#619)
+
 ## 2.22.5
 
+- fix: Ignore stderr output from git command (#613)
 - feat: Update Sentry telemetry to v8 (#604)
 - deps: Update `@sentry/cli` to `2.36.1` (#609)
 

@@ -30,10 +30,13 @@ import { closeSession, DEFAULT_ENVIRONMENT, makeSession } from "@sentry/core";
 
 interface SentryUnpluginFactoryOptions {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
-  componentNameAnnotatePlugin?: () => UnpluginOptions;
+  componentNameAnnotatePlugin?: (ignoredComponents?: string[]) => UnpluginOptions;
   moduleMetadataInjectionPlugin: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: (logger: Logger) => UnpluginOptions;
-  debugIdUploadPlugin: (upload: (buildArtifacts: string[]) => Promise<void>) => UnpluginOptions;
+  debugIdUploadPlugin: (
+    upload: (buildArtifacts: string[]) => Promise<void>,
+    logger: Logger
+  ) => UnpluginOptions;
   bundleSizeOptimizationsPlugin: (buildFlags: SentrySDKBuildFlags) => UnpluginOptions;
 }
 
@@ -101,13 +104,6 @@ export function sentryUnpluginFactory({
     }
 
     const options = normalizeUserOptions(userOptions);
-
-    // TODO(v3): Remove this warning
-    if (userOptions._experiments?.moduleMetadata) {
-      logger.warn(
-        "The `_experiments.moduleMetadata` option has been promoted to being stable. You can safely move the option out of the `_experiments` object scope."
-      );
-    }
 
     if (unpluginMetaContext.watchMode || options.disable) {
       return [
@@ -251,10 +247,7 @@ export function sentryUnpluginFactory({
       if (bundleSizeOptimizations.excludeDebugStatements) {
         replacementValues["__SENTRY_DEBUG__"] = false;
       }
-      if (
-        bundleSizeOptimizations.excludePerformanceMonitoring ||
-        bundleSizeOptimizations.excludeTracing
-      ) {
+      if (bundleSizeOptimizations.excludeTracing) {
         replacementValues["__SENTRY_TRACE__"] = false;
       }
       if (bundleSizeOptimizations.excludeReplayCanvas) {
@@ -408,7 +401,8 @@ export function sentryUnpluginFactory({
               vcsRemote: options.release.vcsRemote,
               headers: options.headers,
             },
-          })
+          }),
+          logger
         )
       );
     }
@@ -423,16 +417,17 @@ export function sentryUnpluginFactory({
           "The component name annotate plugin is currently not supported by '@sentry/esbuild-plugin'"
         );
       } else {
-        componentNameAnnotatePlugin && plugins.push(componentNameAnnotatePlugin());
+        componentNameAnnotatePlugin &&
+          plugins.push(
+            componentNameAnnotatePlugin(options.reactComponentAnnotation.ignoredComponents)
+          );
       }
     }
 
     plugins.push(
       fileDeletionPlugin({
         waitUntilSourcemapFileDependenciesAreFreed,
-        filesToDeleteAfterUpload:
-          options.sourcemaps?.filesToDeleteAfterUpload ??
-          options.sourcemaps?.deleteFilesAfterUpload,
+        filesToDeleteAfterUpload: options.sourcemaps?.filesToDeleteAfterUpload,
         logger,
         handleRecoverableError,
         sentryScope,
@@ -645,7 +640,7 @@ export function createRollupDebugIdUploadHooks(
   };
 }
 
-export function createComponentNameAnnotateHooks() {
+export function createComponentNameAnnotateHooks(ignoredComponents?: string[]) {
   type ParserPlugins = NonNullable<
     NonNullable<Parameters<typeof transformAsync>[1]>["parserOpts"]
   >["plugins"];
@@ -673,7 +668,7 @@ export function createComponentNameAnnotateHooks() {
 
       try {
         const result = await transformAsync(code, {
-          plugins: [[componentNameAnnotatePlugin]],
+          plugins: [[componentNameAnnotatePlugin, { ignoredComponents }]],
           filename: id,
           parserOpts: {
             sourceType: "module",

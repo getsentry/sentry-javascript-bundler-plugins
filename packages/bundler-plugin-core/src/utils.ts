@@ -173,32 +173,33 @@ function lookupPackageJson(cwd: string, stopAt: string): PackageJson | undefined
  * Deterministically hashes a string and turns the hash into a uuid.
  */
 export function stringToUUID(str: string): string {
-  const md5sum = crypto.createHash("md5");
-  md5sum.update(str);
-  const md5Hash = md5sum.digest("hex");
+  const sha256Hash = crypto.createHash("sha256").update(str).digest("hex");
 
   // Position 16 is fixed to either 8, 9, a, or b in the uuid v4 spec (10xx in binary)
   // RFC 4122 section 4.4
-  const v4variant = ["8", "9", "a", "b"][md5Hash.substring(16, 17).charCodeAt(0) % 4] as string;
+  const v4variant = ["8", "9", "a", "b"][sha256Hash.substring(16, 17).charCodeAt(0) % 4] as string;
 
   return (
-    md5Hash.substring(0, 8) +
+    sha256Hash.substring(0, 8) +
     "-" +
-    md5Hash.substring(8, 12) +
+    sha256Hash.substring(8, 12) +
     "-4" +
-    md5Hash.substring(13, 16) +
+    sha256Hash.substring(13, 16) +
     "-" +
     v4variant +
-    md5Hash.substring(17, 20) +
+    sha256Hash.substring(17, 20) +
     "-" +
-    md5Hash.substring(20)
+    sha256Hash.substring(20, 32)
   ).toLowerCase();
 }
 
 function gitRevision(): string | undefined {
   let gitRevision: string | undefined;
   try {
-    gitRevision = childProcess.execSync("git rev-parse HEAD").toString().trim();
+    gitRevision = childProcess
+      .execSync("git rev-parse HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim();
   } catch (e) {
     // noop
   }
@@ -258,6 +259,8 @@ export function determineReleaseName(): string | undefined {
     process.env["HEROKU_TEST_RUN_COMMIT_VERSION"] ||
     // Heroku #2 https://docs.sentry.io/product/integrations/deployment/heroku/#configure-releases
     process.env["HEROKU_SLUG_COMMIT"] ||
+    // Railway - https://docs.railway.app/reference/variables#git-variables
+    process.env["RAILWAY_GIT_COMMIT_SHA"] ||
     // Render - https://render.com/docs/environment-variables
     process.env["RENDER_GIT_COMMIT"] ||
     // Semaphore CI - https://docs.semaphoreci.com/ci-cd-environment/environment-variables

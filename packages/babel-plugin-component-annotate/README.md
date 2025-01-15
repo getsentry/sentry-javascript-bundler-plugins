@@ -47,6 +47,14 @@ Using pnpm:
 pnpm add @sentry/babel-plugin-component-annotate --save-dev
 ```
 
+## Options
+
+### `ignoredComponents`
+
+Type: `string[]`
+
+A list of strings representing the names of components to ignore. The plugin will not apply `data-sentry` annotations on the DOM element for these components.
+
 ## Example
 
 ```js
@@ -57,7 +65,8 @@ pnpm add @sentry/babel-plugin-component-annotate --save-dev
 
   plugins: [
     // Put this plugin before any other plugins you have that transform JSX code
-    ['@sentry/babel-plugin-component-annotate']
+    // The options are set by providing an object as the second element in the array, but not required
+    ['@sentry/babel-plugin-component-annotate', {ignoredComponents: ['Foo', 'Bar']}]
   ],
 }
 ```

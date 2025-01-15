@@ -48,14 +48,12 @@ const nativeSourceFileName = "dataSentrySourceFile";
 interface AnnotationOpts {
   native?: boolean;
   "annotate-fragments"?: boolean;
-  ignoreComponents?: IgnoredComponent[];
+  ignoredComponents?: string[];
 }
 
 interface AnnotationPluginPass extends PluginPass {
   opts: AnnotationOpts;
 }
-
-type IgnoredComponent = [file: string, component: string, element: string];
 
 type AnnotationPlugin = PluginObj<AnnotationPluginPass>;
 
@@ -78,7 +76,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           path.node.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          state.opts.ignoreComponents ?? []
+          state.opts.ignoredComponents ?? []
         );
       },
       ArrowFunctionExpression(path, state) {
@@ -106,7 +104,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           parent.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          state.opts.ignoreComponents ?? []
+          state.opts.ignoredComponents ?? []
         );
       },
       ClassDeclaration(path, state) {
@@ -120,7 +118,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
-        const ignoredComponents = state.opts.ignoreComponents ?? [];
+        const ignoredComponents = state.opts.ignoredComponents ?? [];
 
         render.traverse({
           ReturnStatement(returnStatement) {
@@ -153,7 +151,7 @@ function functionBodyPushAttributes(
   componentName: string,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  ignoredComponents: IgnoredComponent[]
+  ignoredComponents: string[]
 ) {
   let jsxNode: Babel.NodePath;
 
@@ -249,7 +247,7 @@ function processJSX(
   componentName: string | null,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  ignoredComponents: IgnoredComponent[]
+  ignoredComponents: string[]
 ) {
   if (!jsxNode) {
     return;
@@ -324,7 +322,7 @@ function applyAttributes(
   componentName: string | null,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  ignoredComponents: IgnoredComponent[]
+  ignoredComponents: string[]
 ) {
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
 
@@ -340,10 +338,7 @@ function applyAttributes(
   const elementName = getPathName(t, openingElement);
 
   const isAnIgnoredComponent = ignoredComponents.some(
-    (ignoredComponent) =>
-      matchesIgnoreRule(ignoredComponent[0], sourceFileName) &&
-      matchesIgnoreRule(ignoredComponent[1], componentName) &&
-      matchesIgnoreRule(ignoredComponent[2], elementName)
+    (ignoredComponent) => ignoredComponent === componentName || ignoredComponent === elementName
   );
 
   // Add a stable attribute for the element name but only for non-DOM names
@@ -499,10 +494,6 @@ function isReactFragment(t: typeof Babel.types, openingElement: Babel.NodePath):
   }
 
   return false;
-}
-
-function matchesIgnoreRule(rule: string, name: string | undefined | null) {
-  return rule === "*" || rule === name;
 }
 
 function hasAttributeWithName(

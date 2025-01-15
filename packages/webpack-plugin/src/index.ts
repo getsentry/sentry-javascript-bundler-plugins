@@ -5,6 +5,7 @@ import {
   stringToUUID,
   SentrySDKBuildFlags,
   createComponentNameAnnotateHooks,
+  Logger,
 } from "@sentry/bundler-plugin-core";
 import * as path from "path";
 import { UnpluginOptions } from "unplugin";
@@ -47,7 +48,7 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
-function webpackComponentNameAnnotatePlugin(): UnpluginOptions {
+function webpackComponentNameAnnotatePlugin(ignoredComponents?: string[]): UnpluginOptions {
   return {
     name: "sentry-webpack-component-name-annotate-plugin",
     enforce: "pre",
@@ -55,7 +56,7 @@ function webpackComponentNameAnnotatePlugin(): UnpluginOptions {
     transformInclude(id) {
       return id.endsWith(".tsx") || id.endsWith(".jsx");
     },
-    transform: createComponentNameAnnotateHooks().transform,
+    transform: createComponentNameAnnotateHooks(ignoredComponents).transform,
   };
 }
 
@@ -117,7 +118,8 @@ function webpackDebugIdInjectionPlugin(): UnpluginOptions {
 }
 
 function webpackDebugIdUploadPlugin(
-  upload: (buildArtifacts: string[]) => Promise<void>
+  upload: (buildArtifacts: string[]) => Promise<void>,
+  logger: Logger
 ): UnpluginOptions {
   const pluginName = "sentry-webpack-debug-id-upload-plugin";
   return {
@@ -133,6 +135,15 @@ function webpackDebugIdUploadPlugin(
           callback();
         });
       });
+
+      if (compiler.options.mode === "production") {
+        compiler.hooks.done.tap(pluginName, () => {
+          setTimeout(() => {
+            logger.debug("Exiting process after debug file upload");
+            process.exit(0);
+          });
+        });
+      }
     },
   };
 }
