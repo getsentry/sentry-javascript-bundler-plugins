@@ -315,7 +315,7 @@ export function generateGlobalInjectorCode({
   // The code below is mostly ternary operators because it saves bundle size.
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
   let code = `{
-    const _global =
+    let _global =
       typeof window !== 'undefined' ?
         window :
         typeof global !== 'undefined' ?
@@ -346,7 +346,7 @@ export function generateModuleMetadataInjectorCode(metadata: any) {
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
   // We are merging the metadata objects in case modules are bundled twice with the plugin
   return `{
-  const _sentryModuleMetadataGlobal =
+  let _sentryModuleMetadataGlobal =
     typeof window !== "undefined"
       ? window
       : typeof global !== "undefined"
