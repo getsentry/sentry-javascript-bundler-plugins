@@ -324,6 +324,8 @@ export function generateGlobalInjectorCode({
       _global.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)};`;
   }
 
+  code += "}";
+
   return code;
 }
 
