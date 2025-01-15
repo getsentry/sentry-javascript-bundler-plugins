@@ -8,10 +8,8 @@
 
 ### Breaking Changes
 
-- Code injected into bundles now uses:
-
-  - `const` which was added in ES6 (ES2015) (#646)
-  - `globalThis` which was added ES2020 but can be polyfilled (#610)
+- Injected code will now use `let` and `const` which were added in ES6 (ES2015).
+  This means that ES6 is the minimum JavaScript version that the Sentry bundler plugins support.
 
 - Deprecated configuration options have been removed:
   - `deleteFilesAfterUpload` - Use `filesToDeleteAfterUpload` instead
@@ -19,10 +17,15 @@
   - `_experiments.moduleMetadata` - Use `moduleMetadata` instead
   - `cleanArtifacts` - Did not do anything
 
-### Other Changes
+### List of Changes
 
-- fix(webpack): Ensure process exits when done (#653)
+- fix!: Wrap injected code in block-statement to contain scope (#646)
+- chore!: Remove deprecated options (#654)
 - feat(logger): Use console methods respective to log level (#652)
+- fix(webpack): Ensure process exits when done (#653)
+- fix: Use correct replacement matcher for `bundleSizeOptimizations.excludeTracing` (#644)
+
+Work in this release contributed by @jdelStrother. Thank you for your contribution!
 
 ## 2.23.0
 
