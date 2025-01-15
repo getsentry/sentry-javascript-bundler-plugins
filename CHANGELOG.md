@@ -8,10 +8,10 @@
 
 ### Breaking Changes
 
-- Injected code will now use `let` and `const` which were added in ES6 (ES2015).
+- Injected code will now use `let`, which were added in ES6 (ES2015).
   This means that ES6 is the minimum JavaScript version that the Sentry bundler plugins support.
 
-- Deprecated configuration options have been removed:
+- Deprecated options have been removed:
   - `deleteFilesAfterUpload` - Use `filesToDeleteAfterUpload` instead
   - `bundleSizeOptimizations.excludePerformanceMonitoring` - Use `bundleSizeOptimizations.excludeTracing` instead
   - `_experiments.moduleMetadata` - Use `moduleMetadata` instead
