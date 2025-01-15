@@ -4,6 +4,26 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 3.0.0
+
+### Breaking Changes
+
+- Code injected into bundles now uses:
+
+  - `const` which was added in ES6 (ES2015) (#646)
+  - `globalThis` which was added ES2020 but can be polyfilled (#610)
+
+- Deprecated configuration options have been removed:
+  - `deleteFilesAfterUpload` - Use `filesToDeleteAfterUpload` instead
+  - `bundleSizeOptimizations.excludePerformanceMonitoring` - Use `bundleSizeOptimizations.excludeTracing` instead
+  - `_experiments.moduleMetadata` - Use `moduleMetadata` instead
+  - `cleanArtifacts` - Did not do anything
+
+### Other Changes
+
+- fix(webpack): Ensure process exits when done (#653)
+- feat(logger): Use console methods respective to log level (#652)
+
 ## 2.23.0
 
 - chore(deps): bump nanoid from 3.3.6 to 3.3.8 (#641)
