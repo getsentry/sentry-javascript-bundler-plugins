@@ -35,7 +35,7 @@ export function normalizeUserOptions(userOptions: UserOptions) {
       },
     },
     applicationKey: userOptions.applicationKey,
-    moduleMetadata: userOptions.moduleMetadata || userOptions._experiments?.moduleMetadata,
+    moduleMetadata: userOptions.moduleMetadata,
     _experiments: userOptions._experiments ?? {},
   };
 
