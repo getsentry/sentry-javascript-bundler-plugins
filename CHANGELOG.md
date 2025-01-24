@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 3.1.0
+
+- feat(webpack): Gate forced process exit behind experimental flag (#663)
+
 ## 3.0.0
 
 ### Breaking Changes
