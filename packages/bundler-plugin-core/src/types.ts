@@ -324,7 +324,7 @@ export interface Options {
      * Defaults to `false`.
      */
     injectBuildInformation?: boolean;
-  };
+  } & Record<string, unknown>;
 
   /**
    * Options that are useful for building wrappers around the plugin. You likely don't need these options unless you

@@ -35,7 +35,8 @@ interface SentryUnpluginFactoryOptions {
   debugIdInjectionPlugin: (logger: Logger) => UnpluginOptions;
   debugIdUploadPlugin: (
     upload: (buildArtifacts: string[]) => Promise<void>,
-    logger: Logger
+    logger: Logger,
+    webpack_forceExitOnBuildComplete?: boolean
   ) => UnpluginOptions;
   bundleSizeOptimizationsPlugin: (buildFlags: SentrySDKBuildFlags) => UnpluginOptions;
 }
@@ -379,6 +380,12 @@ export function sentryUnpluginFactory({
         "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug."
       );
     } else {
+      // This option is only strongly typed for the webpack plugin, where it is used. It has no effect on other plugins
+      const webpack_forceExitOnBuildComplete =
+        (typeof options._experiments["forceExitOnBuildCompletion"] === "boolean" &&
+          options._experiments["forceExitOnBuildCompletion"]) ??
+        false;
+
       plugins.push(
         debugIdUploadPlugin(
           createDebugIdUploadFunction({
@@ -402,7 +409,8 @@ export function sentryUnpluginFactory({
               headers: options.headers,
             },
           }),
-          logger
+          logger,
+          webpack_forceExitOnBuildComplete
         )
       );
     }
