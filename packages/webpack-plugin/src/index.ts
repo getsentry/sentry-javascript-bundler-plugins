@@ -186,7 +186,7 @@ const sentryUnplugin = sentryUnpluginFactory({
 });
 
 type SentryWebpackPluginOptions = Options & {
-  _experiments: Options["_experiments"] & {
+  _experiments?: Options["_experiments"] & {
     /**
      * If enabled, the webpack plugin will exit the build process after the build completes.
      * Use this with caution, as it will terminate the process.
