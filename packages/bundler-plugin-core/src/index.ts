@@ -382,9 +382,9 @@ export function sentryUnpluginFactory({
     } else {
       // This option is only strongly typed for the webpack plugin, where it is used. It has no effect on other plugins
       const webpack_forceExitOnBuildComplete =
-        (typeof options._experiments["forceExitOnBuildCompletion"] === "boolean" &&
-          options._experiments["forceExitOnBuildCompletion"]) ??
-        false;
+        typeof options._experiments["forceExitOnBuildCompletion"] === "boolean"
+          ? options._experiments["forceExitOnBuildCompletion"]
+          : undefined;
 
       plugins.push(
         debugIdUploadPlugin(
