@@ -111,7 +111,7 @@ export function sentryUnpluginFactory({
 
     const options = normalizeUserOptions(userOptions);
 
-    if (isDevMode || options.disable) {
+    if (options.disable) {
       return [
         {
           name: "sentry-noop-plugin",
@@ -324,6 +324,8 @@ export function sentryUnpluginFactory({
       logger.debug(
         "No release name provided. Will not create release. Please set the `release.name` option to identify your release."
       );
+    } else if (isDevMode) {
+      logger.debug("Running in development mode. Will not create release.");
     } else if (!options.authToken) {
       logger.warn(
         "No auth token provided. Will not create release. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
@@ -372,6 +374,8 @@ export function sentryUnpluginFactory({
       logger.debug(
         "Source map upload was disabled. Will not upload sourcemaps using debug ID process."
       );
+    } else if (isDevMode) {
+      logger.debug("Running in development mode. Will not upload sourcemaps.");
     } else if (!options.authToken) {
       logger.warn(
         "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
