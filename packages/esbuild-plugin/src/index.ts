@@ -221,23 +221,6 @@ function esbuildModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
   };
 }
 
-function esbuildDebugIdUploadPlugin(
-  upload: (buildArtifacts: string[]) => Promise<void>
-): UnpluginOptions {
-  return {
-    name: "sentry-esbuild-debug-id-upload-plugin",
-    esbuild: {
-      setup({ initialOptions, onEnd }) {
-        initialOptions.metafile = true;
-        onEnd(async (result) => {
-          const buildArtifacts = result.metafile ? Object.keys(result.metafile.outputs) : [];
-          await upload(buildArtifacts);
-        });
-      },
-    },
-  };
-}
-
 function esbuildBundleSizeOptimizationsPlugin(
   replacementValues: SentrySDKBuildFlags
 ): UnpluginOptions {
@@ -260,7 +243,6 @@ const sentryUnplugin = sentryUnpluginFactory({
   releaseInjectionPlugin: esbuildReleaseInjectionPlugin,
   debugIdInjectionPlugin: esbuildDebugIdInjectionPlugin,
   moduleMetadataInjectionPlugin: esbuildModuleMetadataInjectionPlugin,
-  debugIdUploadPlugin: esbuildDebugIdUploadPlugin,
   bundleSizeOptimizationsPlugin: esbuildBundleSizeOptimizationsPlugin,
 });
 
