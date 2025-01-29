@@ -4,6 +4,14 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 3.1.1
+
+- fix(core): Disable release creation and source maps upload in dev mode (#666)
+
+  This fix disables any external calls to the Sentry API for managing releases or uploading source maps, when detecting that the plugin is running in dev-mode. While this rarely actually happened,
+  it also polluted the dev server output with unnecessary logs about missing auth tokens, which shouldn't
+  be required in dev mode.
+
 ## 3.1.0
 
 - feat(webpack): Gate forced process exit behind experimental flag (#663)
