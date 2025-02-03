@@ -54,7 +54,7 @@
   "dependencies": {
     "@babel/core": "^7.18.5",
     "@sentry/babel-plugin-component-annotate": "3.1.1",
-    "@sentry/cli": "2.39.1",
+    "@sentry/cli": "2.41.1",
     "dotenv": "^16.3.1",
     "find-up": "^5.0.0",
     "glob": "^9.3.2",
