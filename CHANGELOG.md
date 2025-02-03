@@ -6,7 +6,7 @@
 
 ## 3.1.2
 
-- deps: Bump @sentry/cli to 2.41.1 (#671)
+- deps: Bump `@sentry/cli` to `2.41.1` (#671)
 
 ## 3.1.1
 
