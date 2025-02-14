@@ -319,7 +319,11 @@ export function sentryUnpluginFactory({
       const injectionCode = generateModuleMetadataInjectorCode(metadata);
       plugins.push(moduleMetadataInjectionPlugin(injectionCode));
     }
-
+    // https://turbo.build/repo/docs/reference/system-environment-variables#environment-variables-in-tasks
+    const isRunningInTurboRepo = Boolean(process.env["TURBO_HASH"]);
+    const TUROBOREPO_PASSTHROUGH_TOKEN_MSG = isRunningInTurboRepo
+      ? "\nYou seem to be using Truborepo, did you forget to put `SENTRY_AUTH_TOKEN` in `passThroughEnv`? https://turbo.build/repo/docs/reference/configuration#passthroughenv"
+      : "";
     if (!options.release.name) {
       logger.debug(
         "No release name provided. Will not create release. Please set the `release.name` option to identify your release."
@@ -328,7 +332,8 @@ export function sentryUnpluginFactory({
       logger.debug("Running in development mode. Will not create release.");
     } else if (!options.authToken) {
       logger.warn(
-        "No auth token provided. Will not create release. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
+        "No auth token provided. Will not create release. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/" +
+          TUROBOREPO_PASSTHROUGH_TOKEN_MSG
       );
     } else if (!options.org && !options.authToken.startsWith("sntrys_")) {
       logger.warn(
@@ -378,7 +383,8 @@ export function sentryUnpluginFactory({
       logger.debug("Running in development mode. Will not upload sourcemaps.");
     } else if (!options.authToken) {
       logger.warn(
-        "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
+        "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/" +
+          TUROBOREPO_PASSTHROUGH_TOKEN_MSG
       );
     } else if (!options.org && !options.authToken.startsWith("sntrys_")) {
       logger.warn(
