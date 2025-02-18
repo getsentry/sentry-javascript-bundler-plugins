@@ -132,9 +132,13 @@ export interface Options {
      *
      * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
      *
+     * Note: If you pass in a promise that resolves to a string or array, the plugin will await the promise and use
+     * the resolved value globs. This is useful if you need to dynamically determine the files to delete. Some
+     * higher-level Sentry SDKs or options use this feature (e.g. SvelteKit).
+     *
      * Use the `debug` option to print information about which files end up being deleted.
      */
-    filesToDeleteAfterUpload?: string | string[];
+    filesToDeleteAfterUpload?: string | string[] | Promise<string | string[]>;
   };
 
   /**
