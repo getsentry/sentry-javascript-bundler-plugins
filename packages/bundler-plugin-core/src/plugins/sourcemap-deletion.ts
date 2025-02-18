@@ -11,7 +11,7 @@ interface FileDeletionPlugin {
   waitUntilSourcemapFileDependenciesAreFreed: () => Promise<void>;
   sentryScope: Scope;
   sentryClient: Client;
-  filesToDeleteAfterUpload: string | string[] | Promise<string | string[]> | undefined;
+  filesToDeleteAfterUpload: string | string[] | Promise<string | string[] | undefined> | undefined;
   logger: Logger;
 }
 
@@ -27,9 +27,8 @@ export function fileDeletionPlugin({
     name: "sentry-file-deletion-plugin",
     async writeBundle() {
       try {
-        if (filesToDeleteAfterUpload !== undefined) {
-          const filesToDelete = await filesToDeleteAfterUpload;
-
+        const filesToDelete = await filesToDeleteAfterUpload;
+        if (filesToDelete !== undefined) {
           const filePathsToDelete = await glob(filesToDelete, {
             absolute: true,
             nodir: true,

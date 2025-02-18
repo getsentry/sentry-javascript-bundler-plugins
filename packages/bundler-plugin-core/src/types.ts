@@ -138,7 +138,7 @@ export interface Options {
      *
      * Use the `debug` option to print information about which files end up being deleted.
      */
-    filesToDeleteAfterUpload?: string | string[] | Promise<string | string[]>;
+    filesToDeleteAfterUpload?: string | string[] | Promise<string | string[] | undefined>;
   };
 
   /**
