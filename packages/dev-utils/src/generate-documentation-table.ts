@@ -98,9 +98,9 @@ errorHandler: (err) => {
       },
       {
         name: "filesToDeleteAfterUpload",
-        type: "string | string[]",
+        type: "string | string[] | Promise<string | string[]>",
         fullDescription:
-          "A glob or an array of globs that specifies the build artifacts that should be deleted after the artifact upload to Sentry has been completed.\n\nThe globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)\n\nUse the `debug` option to print information about which files end up being deleted.",
+          "A glob, an array of globs or a promise resolving a glob or array of globs that specifies the build artifacts that should be deleted after the artifact upload to Sentry has been completed.\n\nThe globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)\n\nUse the `debug` option to print information about which files end up being deleted.",
       },
       {
         name: "disable",
