@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 3.2.0
+
+- feat(core): Accept and await a promise in `sourcemaps.filesToDeleteAfterUpload` (#677)
+
 ## 3.1.2
 
 - deps: Bump `@sentry/cli` to `2.41.1` (#671)
