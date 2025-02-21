@@ -170,8 +170,10 @@ export function sentryUnpluginFactory({
             throw e;
           }
         } else {
+          // setting the session to "crashed" b/c from a plugin perspective this run failed.
+          // However, we're intentionally not rethrowing the error to avoid breaking the user build.
           sentrySession.status = "crashed";
-          throw unknownError;
+          logger.error("An error occurred. Couldn't finish all operations:", unknownError);
         }
       } finally {
         endSession();
