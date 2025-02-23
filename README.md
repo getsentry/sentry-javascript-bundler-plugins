@@ -23,6 +23,7 @@ The Sentry Bundler Plugins take care of Sentry-related tasks at build time of yo
 - Release creation in Sentry
 - Automatic release name discovery (based on CI environment - Vercel, AWS, Heroku, CircleCI, or current Git SHA)
 - Automatically associate errors with releases (Release injection)
+- [React component names instead of selectors.](https://docs.sentry.io/platforms/javascript/guides/react/features/component-names/)
 
 ### More information
 
