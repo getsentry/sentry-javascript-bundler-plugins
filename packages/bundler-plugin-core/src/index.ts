@@ -319,7 +319,12 @@ export function sentryUnpluginFactory({
       const injectionCode = generateModuleMetadataInjectorCode(metadata);
       plugins.push(moduleMetadataInjectionPlugin(injectionCode));
     }
-
+    // https://turbo.build/repo/docs/reference/system-environment-variables#environment-variables-in-tasks
+    const isRunningInTurboRepo = Boolean(process.env["TURBO_HASH"]);
+    const getTruboRepoEnvPassthroughWarning = (envVarName: string) =>
+      isRunningInTurboRepo
+        ? `\nYou seem to be using Truborepo, did you forget to put ${envVarName} in \`passThroughEnv\`? https://turbo.build/repo/docs/reference/configuration#passthroughenv`
+        : "";
     if (!options.release.name) {
       logger.debug(
         "No release name provided. Will not create release. Please set the `release.name` option to identify your release."
@@ -328,15 +333,18 @@ export function sentryUnpluginFactory({
       logger.debug("Running in development mode. Will not create release.");
     } else if (!options.authToken) {
       logger.warn(
-        "No auth token provided. Will not create release. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
+        "No auth token provided. Will not create release. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/" +
+          getTruboRepoEnvPassthroughWarning("SENTRY_AUTH_TOKEN")
       );
     } else if (!options.org && !options.authToken.startsWith("sntrys_")) {
       logger.warn(
-        "No organization slug provided. Will not create release. Please set the `org` option to your Sentry organization slug."
+        "No organization slug provided. Will not create release. Please set the `org` option to your Sentry organization slug." +
+          getTruboRepoEnvPassthroughWarning("SENTRY_ORG")
       );
     } else if (!options.project) {
       logger.warn(
-        "No project provided. Will not create release. Please set the `project` option to your Sentry project slug."
+        "No project provided. Will not create release. Please set the `project` option to your Sentry project slug." +
+          getTruboRepoEnvPassthroughWarning("SENTRY_PROJECT")
       );
     } else {
       plugins.push(
@@ -378,15 +386,18 @@ export function sentryUnpluginFactory({
       logger.debug("Running in development mode. Will not upload sourcemaps.");
     } else if (!options.authToken) {
       logger.warn(
-        "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/"
+        "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/" +
+          getTruboRepoEnvPassthroughWarning("SENTRY_AUTH_TOKEN")
       );
     } else if (!options.org && !options.authToken.startsWith("sntrys_")) {
       logger.warn(
-        "No org provided. Will not upload source maps. Please set the `org` option to your Sentry organization slug."
+        "No org provided. Will not upload source maps. Please set the `org` option to your Sentry organization slug." +
+          getTruboRepoEnvPassthroughWarning("SENTRY_ORG")
       );
     } else if (!options.project) {
       logger.warn(
-        "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug."
+        "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug." +
+          getTruboRepoEnvPassthroughWarning("SENTRY_PROJECT")
       );
     } else {
       // This option is only strongly typed for the webpack plugin, where it is used. It has no effect on other plugins
