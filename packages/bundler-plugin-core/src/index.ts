@@ -387,7 +387,7 @@ export function sentryUnpluginFactory({
     } else if (!options.authToken) {
       logger.warn(
         "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/" +
-          getTruboRepoEnvPassthroughWarning
+          getTruboRepoEnvPassthroughWarning("SENTRY_AUTH_TOKEN")
       );
     } else if (!options.org && !options.authToken.startsWith("sntrys_")) {
       logger.warn(
