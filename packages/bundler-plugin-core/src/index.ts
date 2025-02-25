@@ -155,7 +155,16 @@ export function sentryUnpluginFactory({
       "SENTRY_PIPELINE"
     ] = `${unpluginMetaContext.framework}-plugin/${__PACKAGE_VERSION__}`;
 
-    function handleRecoverableError(unknownError: unknown) {
+    /**
+     * Handles errors caught and emitted in various areas of the plugin.
+     *
+     * Also sets the sentry session status according to the error handling.
+     *
+     * If users specify their custom `errorHandler` we'll leave the decision to throw
+     * or continue up to them. By default, @param throwByDefault controls if the plugin
+     * should throw an error (which causes a build fail in most bundlers) or continue.
+     */
+    function handleRecoverableError(unknownError: unknown, throwByDefault: boolean) {
       sentrySession.status = "abnormal";
       try {
         if (options.errorHandler) {
@@ -173,6 +182,9 @@ export function sentryUnpluginFactory({
           // setting the session to "crashed" b/c from a plugin perspective this run failed.
           // However, we're intentionally not rethrowing the error to avoid breaking the user build.
           sentrySession.status = "crashed";
+          if (throwByDefault) {
+            throw unknownError;
+          }
           logger.error("An error occurred. Couldn't finish all operations:", unknownError);
         }
       } finally {
@@ -181,8 +193,10 @@ export function sentryUnpluginFactory({
     }
 
     if (!validateOptions(options, logger)) {
+      // Throwing by default to avoid a misconfigured plugin going unnoticed.
       handleRecoverableError(
-        new Error("Options were not set correctly. See output above for more details.")
+        new Error("Options were not set correctly. See output above for more details."),
+        true
       );
     }
 
