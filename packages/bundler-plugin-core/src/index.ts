@@ -391,11 +391,13 @@ export function sentryUnpluginFactory({
       );
     } else if (!options.org && !options.authToken.startsWith("sntrys_")) {
       logger.warn(
-        "No org provided. Will not upload source maps. Please set the `org` option to your Sentry organization slug."
+        "No org provided. Will not upload source maps. Please set the `org` option to your Sentry organization slug." +
+          getTruboRepoEnvPassthroughWarning("SENTRY_ORG")
       );
     } else if (!options.project) {
       logger.warn(
-        "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug."
+        "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug." +
+          getTruboRepoEnvPassthroughWarning("SENTRY_PROJECT")
       );
     } else {
       // This option is only strongly typed for the webpack plugin, where it is used. It has no effect on other plugins
