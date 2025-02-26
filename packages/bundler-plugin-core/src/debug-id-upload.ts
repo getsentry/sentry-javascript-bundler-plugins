@@ -168,7 +168,7 @@ export function createDebugIdUploadFunction({
                   });
 
                   await cliInstance.releases.uploadSourceMaps(
-                    releaseName ?? "undefined", // unfortunetly this needs a value for now but it will not matter since debug IDs overpower releases anyhow
+                    releaseName ?? "undefined", // unfortunately this needs a value for now but it will not matter since debug IDs overpower releases anyhow
                     {
                       include: [
                         {
