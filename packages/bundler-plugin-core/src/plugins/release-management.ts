@@ -3,7 +3,7 @@ import { Scope } from "@sentry/core";
 import { UnpluginOptions } from "unplugin";
 import { Logger } from "../sentry/logger";
 import { safeFlushTelemetry } from "../sentry/telemetry";
-import { IncludeEntry } from "../types";
+import { HandleRecoverableErrorFn, IncludeEntry } from "../types";
 import { arrayify } from "../utils";
 import { Client } from "@sentry/types";
 
@@ -16,7 +16,7 @@ interface ReleaseManagementPluginOptions {
   setCommitsOption?: SentryCliCommitsOptions;
   deployOptions?: SentryCliNewDeployOptions;
   dist?: string;
-  handleRecoverableError: (error: unknown) => void;
+  handleRecoverableError: HandleRecoverableErrorFn;
   sentryScope: Scope;
   sentryClient: Client;
   sentryCliOptions: {
@@ -100,7 +100,7 @@ export function releaseManagementPlugin({
       } catch (e) {
         sentryScope.captureException('Error in "releaseManagementPlugin" writeBundle hook');
         await safeFlushTelemetry(sentryClient);
-        handleRecoverableError(e);
+        handleRecoverableError(e, false);
       } finally {
         freeGlobalDependencyOnSourcemapFiles();
         freeWriteBundleInvocationDependencyOnSourcemapFiles();

@@ -552,3 +552,5 @@ type DeployOptions = {
    */
   url?: string;
 };
+
+export type HandleRecoverableErrorFn = (error: unknown, throwByDefault: boolean) => void;

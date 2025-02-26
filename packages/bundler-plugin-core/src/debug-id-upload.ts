@@ -12,6 +12,7 @@ import { stripQueryAndHashFromPath } from "./utils";
 import { setMeasurement, spanToTraceHeader, startSpan } from "@sentry/core";
 import { getDynamicSamplingContextFromSpan, Scope } from "@sentry/core";
 import { Client } from "@sentry/types";
+import { HandleRecoverableErrorFn } from "./types";
 
 interface RewriteSourcesHook {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,7 +26,7 @@ interface DebugIdUploadPluginOptions {
   releaseName?: string;
   dist?: string;
   rewriteSourcesHook?: RewriteSourcesHook;
-  handleRecoverableError: (error: unknown) => void;
+  handleRecoverableError: HandleRecoverableErrorFn;
   sentryScope: Scope;
   sentryClient: Client;
   sentryCliOptions: {
@@ -167,7 +168,7 @@ export function createDebugIdUploadFunction({
                   });
 
                   await cliInstance.releases.uploadSourceMaps(
-                    releaseName ?? "undefined", // unfortunetly this needs a value for now but it will not matter since debug IDs overpower releases anyhow
+                    releaseName ?? "undefined", // unfortunately this needs a value for now but it will not matter since debug IDs overpower releases anyhow
                     {
                       include: [
                         {
@@ -187,7 +188,7 @@ export function createDebugIdUploadFunction({
           }
         } catch (e) {
           sentryScope.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
-          handleRecoverableError(e);
+          handleRecoverableError(e, false);
         } finally {
           if (folderToCleanUp) {
             void startSpan({ name: "cleanup", scope: sentryScope }, async () => {
