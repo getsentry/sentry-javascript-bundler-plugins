@@ -438,7 +438,7 @@ export function sentryUnpluginFactory({
     if (options.reactComponentAnnotation) {
       if (!options.reactComponentAnnotation.enabled) {
         logger.debug(
-          "The component name annotate plugin is currently disabled. Skipping component name annotations."
+          "The component name annotate plugin is disabled. Skipping component name annotations."
         );
       } else if (options.reactComponentAnnotation.enabled && !componentNameAnnotatePlugin) {
         logger.warn(

@@ -3,6 +3,7 @@
   "extends": "@sentry-internal/sentry-bundler-plugin-tsconfig/base-config.json",
   "include": ["./**/*", "../package.json"],
   "compilerOptions": {
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "target": "ES2020" // es2020 needed for "new Set()"
   }
 }
