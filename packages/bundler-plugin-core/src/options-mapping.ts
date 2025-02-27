@@ -6,8 +6,6 @@ export type NormalizedOptions = ReturnType<typeof normalizeUserOptions>;
 
 export const SENTRY_SAAS_URL = "https://sentry.io";
 
-const DEFAULT_IGNORED_REACT_COMPONENTS = ["Fragment"];
-
 export function normalizeUserOptions(userOptions: UserOptions) {
   const options = {
     org: userOptions.org ?? process.env["SENTRY_ORG"],
@@ -30,17 +28,7 @@ export function normalizeUserOptions(userOptions: UserOptions) {
       vcsRemote: userOptions.release?.vcsRemote ?? process.env["SENTRY_VSC_REMOTE"] ?? "origin",
     },
     bundleSizeOptimizations: userOptions.bundleSizeOptimizations,
-    reactComponentAnnotation: userOptions.reactComponentAnnotation
-      ? {
-          enabled: userOptions.reactComponentAnnotation?.enabled ?? false,
-          ignoredComponents: [
-            ...new Set([
-              ...(userOptions.reactComponentAnnotation?.ignoredComponents ?? []),
-              ...DEFAULT_IGNORED_REACT_COMPONENTS,
-            ]),
-          ],
-        }
-      : undefined,
+    reactComponentAnnotation: userOptions.reactComponentAnnotation,
     _metaOptions: {
       telemetry: {
         metaFramework: userOptions._metaOptions?.telemetry?.metaFramework,

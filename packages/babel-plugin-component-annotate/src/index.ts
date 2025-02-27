@@ -57,6 +57,8 @@ interface AnnotationPluginPass extends PluginPass {
 
 type AnnotationPlugin = PluginObj<AnnotationPluginPass>;
 
+const DEFAULT_IGNORED_REACT_COMPONENTS = ["Fragment"];
+
 // We must export the plugin as default, otherwise the Babel loader will not be able to resolve it when configured using its string identifier
 export default function componentNameAnnotatePlugin({ types: t }: typeof Babel): AnnotationPlugin {
   return {
@@ -69,6 +71,13 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
+        const ignoredComponents = [
+          ...new Set([
+            ...(state.opts.ignoredComponents ?? []),
+            ...DEFAULT_IGNORED_REACT_COMPONENTS,
+          ]),
+        ];
+
         functionBodyPushAttributes(
           state.opts["annotate-fragments"] === true,
           t,
@@ -76,7 +85,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           path.node.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          state.opts.ignoredComponents ?? []
+          ignoredComponents
         );
       },
       ArrowFunctionExpression(path, state) {
@@ -97,6 +106,13 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
+        const ignoredComponents = [
+          ...new Set([
+            ...(state.opts.ignoredComponents ?? []),
+            ...DEFAULT_IGNORED_REACT_COMPONENTS,
+          ]),
+        ];
+
         functionBodyPushAttributes(
           state.opts["annotate-fragments"] === true,
           t,
@@ -104,7 +120,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           parent.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          state.opts.ignoredComponents ?? []
+          ignoredComponents
         );
       },
       ClassDeclaration(path, state) {
@@ -118,7 +134,12 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
-        const ignoredComponents = state.opts.ignoredComponents ?? [];
+        const ignoredComponents = [
+          ...new Set([
+            ...(state.opts.ignoredComponents ?? []),
+            ...DEFAULT_IGNORED_REACT_COMPONENTS,
+          ]),
+        ];
 
         render.traverse({
           ReturnStatement(returnStatement) {
