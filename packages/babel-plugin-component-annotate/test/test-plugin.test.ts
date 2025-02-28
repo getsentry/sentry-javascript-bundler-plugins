@@ -1187,3 +1187,96 @@ export default function componentName() {
   );
   expect(result?.code).toMatchSnapshot();
 });
+
+it("ignores components with member expressions when in ignoredComponents", () => {
+  const result = transform(
+    `import React from 'react';
+import { Tab } from '@headlessui/react';
+
+export default function TestComponent() {
+  return (
+    <div>
+      <Tab.Group>
+        <Tab.List>
+          <Tab>Tab 1</Tab>
+          <Tab>Tab 2</Tab>
+        </Tab.List>
+        <Tab.Panels>
+          <Tab.Panel>Content 1</Tab.Panel>
+          <Tab.Panel>Content 2</Tab.Panel>
+        </Tab.Panels>
+      </Tab.Group>
+    </div>
+  );
+}`,
+    {
+      filename: "/filename-test.js",
+      configFile: false,
+      presets: ["@babel/preset-react"],
+      plugins: [
+        [plugin, { ignoredComponents: ["Tab.Group", "Tab.List", "Tab.Panels", "Tab.Panel"] }],
+      ],
+    }
+  );
+
+  // The component should be transformed but Tab.* components should not have annotations
+  expect(result?.code).toContain("React.createElement(Tab.Group");
+  expect(result?.code).not.toContain('"data-sentry-element": "Tab.Group"');
+  expect(result?.code).toContain("React.createElement(Tab.List");
+  expect(result?.code).not.toContain('"data-sentry-element": "Tab.List"');
+  expect(result?.code).toMatchSnapshot();
+});
+
+it("handles nested member expressions in component names", () => {
+  const result = transform(
+    `import React from 'react';
+import { Components } from 'my-ui-library';
+
+export default function TestComponent() {
+  return (
+    <div>
+      <Components.UI.Button>Click me</Components.UI.Button>
+      <Components.UI.Card.Header>Title</Components.UI.Card.Header>
+    </div>
+  );
+}`,
+    {
+      filename: "/filename-test.js",
+      configFile: false,
+      presets: ["@babel/preset-react"],
+      plugins: [[plugin, { ignoredComponents: ["Components.UI.Button"] }]],
+    }
+  );
+
+  // Components.UI.Button should be ignored but Components.UI.Card.Header should be annotated
+  expect(result?.code).toContain("React.createElement(Components.UI.Button");
+  expect(result?.code).not.toContain('"data-sentry-element": "Components.UI.Button"');
+  expect(result?.code).toContain("React.createElement(Components.UI.Card.Header");
+  expect(result?.code).toContain('"data-sentry-element": "Components.UI.Card.Header"');
+  expect(result?.code).toMatchSnapshot();
+});
+
+it("ignores React.Fragment with member expression handling", () => {
+  const result = transform(
+    `import React from 'react';
+
+export default function TestComponent() {
+  return (
+    <React.Fragment>
+      <div>Content</div>
+    </React.Fragment>
+  );
+}`,
+    {
+      filename: "/filename-test.js",
+      configFile: false,
+      presets: ["@babel/preset-react"],
+      plugins: [plugin],
+    }
+  );
+
+  // React.Fragment should be ignored by default
+  expect(result?.code).toContain("React.createElement(React.Fragment");
+  expect(result?.code).not.toContain('"data-sentry-element": "React.Fragment"');
+  expect(result?.code).toMatchSnapshot();
+});

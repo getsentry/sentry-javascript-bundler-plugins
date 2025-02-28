@@ -223,6 +223,20 @@ class componentName extends Component {
 export default componentName;"
 `;
 
+exports[`handles nested member expressions in component names 1`] = `
+"import React from 'react';
+import { Components } from 'my-ui-library';
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(\\"div\\", {
+    \\"data-sentry-component\\": \\"TestComponent\\",
+    \\"data-sentry-source-file\\": \\"filename-test.js\\"
+  }, /*#__PURE__*/React.createElement(Components.UI.Button, null, \\"Click me\\"), /*#__PURE__*/React.createElement(Components.UI.Card.Header, {
+    \\"data-sentry-element\\": \\"Components.UI.Card.Header\\",
+    \\"data-sentry-source-file\\": \\"filename-test.js\\"
+  }, \\"Title\\"));
+}"
+`;
+
 exports[`handles ternary operation returned by function body 1`] = `
 "const maybeTrue = Math.random() > 0.5;
 export default function componentName() {
@@ -230,6 +244,30 @@ export default function componentName() {
     \\"data-sentry-element\\": \\"SubComponent\\",
     \\"data-sentry-component\\": \\"componentName\\"
   });
+}"
+`;
+
+exports[`ignores React.Fragment with member expression handling 1`] = `
+"import React from 'react';
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content\\"));
+}"
+`;
+
+exports[`ignores components with member expressions when in ignoredComponents 1`] = `
+"import React from 'react';
+import { Tab } from '@headlessui/react';
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(\\"div\\", {
+    \\"data-sentry-component\\": \\"TestComponent\\",
+    \\"data-sentry-source-file\\": \\"filename-test.js\\"
+  }, /*#__PURE__*/React.createElement(Tab.Group, null, /*#__PURE__*/React.createElement(Tab.List, null, /*#__PURE__*/React.createElement(Tab, {
+    \\"data-sentry-element\\": \\"Tab\\",
+    \\"data-sentry-source-file\\": \\"filename-test.js\\"
+  }, \\"Tab 1\\"), /*#__PURE__*/React.createElement(Tab, {
+    \\"data-sentry-element\\": \\"Tab\\",
+    \\"data-sentry-source-file\\": \\"filename-test.js\\"
+  }, \\"Tab 2\\")), /*#__PURE__*/React.createElement(Tab.Panels, null, /*#__PURE__*/React.createElement(Tab.Panel, null, \\"Content 1\\"), /*#__PURE__*/React.createElement(Tab.Panel, null, \\"Content 2\\"))));
 }"
 `;
 

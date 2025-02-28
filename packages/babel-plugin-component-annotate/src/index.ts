@@ -533,6 +533,29 @@ function getPathName(t: typeof Babel.types, path: Babel.NodePath): string {
     return name.name.name;
   }
 
+  // Handle JSX member expressions like Tab.Group
+  if (t.isJSXMemberExpression(name)) {
+    const objectName = getJSXMemberExpressionObjectName(t, name.object);
+    const propertyName = name.property.name;
+    return `${objectName}.${propertyName}`;
+  }
+
+  return UNKNOWN_ELEMENT_NAME;
+}
+
+// Recursively handle nested member expressions (e.g. Components.UI.Header)
+function getJSXMemberExpressionObjectName(
+  t: typeof Babel.types,
+  object: Babel.types.JSXMemberExpression | Babel.types.JSXIdentifier
+): string {
+  if (t.isJSXIdentifier(object)) {
+    return object.name;
+  }
+  if (t.isJSXMemberExpression(object)) {
+    const objectName = getJSXMemberExpressionObjectName(t, object.object);
+    return `${objectName}.${object.property.name}`;
+  }
+
   return UNKNOWN_ELEMENT_NAME;
 }
 
