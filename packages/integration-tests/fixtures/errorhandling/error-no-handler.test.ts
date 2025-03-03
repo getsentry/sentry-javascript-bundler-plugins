@@ -13,6 +13,7 @@ describe("Error throwing by default (no errorHandler)", () => {
     cwd: __dirname,
     stdio: "ignore", // <-- set to "inherit" to get server logs. Deactivated to avoid test logs.
     env: { ...process.env, FAKE_SENTRY_PORT },
+    shell: true,
   });
 
   beforeAll(async () => {
@@ -33,6 +34,7 @@ describe("Error throwing by default (no errorHandler)", () => {
       const buildProcess = spawn("yarn", ["ts-node", path.join(__dirname, `build-${bundler}.ts`)], {
         env: { ...process.env, FAKE_SENTRY_PORT },
         stdio: "ignore", // <-- set to "inherit" to get build output. Deactivated to avoid spamming test logs.
+        shell: true,
       });
 
       const exitCode = await new Promise<number>((resolve, reject) => {
@@ -57,6 +59,7 @@ describe("Error throwing by default (no errorHandler)", () => {
       const buildProcess = spawn("yarn", ["ts-node", path.join(__dirname, `build-webpack4.ts`)], {
         env: { ...process.env, FAKE_SENTRY_PORT },
         stdio: "ignore", // <-- set to "inherit" to get build output. Deactivated to avoid spamming test logs.
+        shell: true,
       });
 
       const exitCode = await new Promise<number>((resolve, reject) => {
