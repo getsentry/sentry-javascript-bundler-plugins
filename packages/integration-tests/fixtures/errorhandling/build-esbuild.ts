@@ -5,7 +5,7 @@ import path from "path";
 
 build({
   entryPoints: [path.join(__dirname, "input", "bundle.js")],
-  outdir: "./out/esbuild",
+  outdir: path.join(__dirname, "out", "esbuild"),
   plugins: [sentryEsbuildPlugin(pluginOptions)],
   minify: true,
   bundle: true,

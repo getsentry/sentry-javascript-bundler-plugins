@@ -9,7 +9,7 @@ jest.setTimeout(10_000);
 describe("Error throwing by default (no errorHandler)", () => {
   const FAKE_SENTRY_PORT = "9876";
 
-  const sentryServer = spawn("node", ["fakeSentry.js"], {
+  const sentryServer = spawn("node", [path.join(__dirname, "fakeSentry.js")], {
     cwd: __dirname,
     stdio: "ignore", // <-- set to "inherit" to get server logs. Deactivated to avoid test logs.
     env: { ...process.env, FAKE_SENTRY_PORT },
