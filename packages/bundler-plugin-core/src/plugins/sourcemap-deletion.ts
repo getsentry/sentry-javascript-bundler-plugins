@@ -5,9 +5,10 @@ import { safeFlushTelemetry } from "../sentry/telemetry";
 import fs from "fs";
 import { Scope } from "@sentry/core";
 import { Client } from "@sentry/types";
+import { HandleRecoverableErrorFn } from "../types";
 
 interface FileDeletionPlugin {
-  handleRecoverableError: (error: unknown) => void;
+  handleRecoverableError: HandleRecoverableErrorFn;
   waitUntilSourcemapFileDependenciesAreFreed: () => Promise<void>;
   sentryScope: Scope;
   sentryClient: Client;
@@ -59,7 +60,9 @@ export function fileDeletionPlugin({
       } catch (e) {
         sentryScope.captureException('Error in "sentry-file-deletion-plugin" buildEnd hook');
         await safeFlushTelemetry(sentryClient);
-        handleRecoverableError(e);
+        // We throw by default if we get here b/c not being able to delete
+        // source maps could leak them to production
+        handleRecoverableError(e, true);
       }
     },
   };
