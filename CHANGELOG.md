@@ -6,6 +6,7 @@
 
 ## 3.2.2
 
+- feat(annotation): Handle JSX member expressions (#690)
 - fix(core): Don't crash on recoverable CLI command error (#682)
 - chore: Suggest putting `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT` in `passThroughEnv` when using Turborepo (#675)
 
