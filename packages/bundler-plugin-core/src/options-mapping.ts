@@ -26,11 +26,7 @@ export function normalizeUserOptions(userOptions: UserOptions) {
       create: userOptions.release?.create ?? true,
       finalize: userOptions.release?.finalize ?? true,
       vcsRemote: userOptions.release?.vcsRemote ?? process.env["SENTRY_VSC_REMOTE"] ?? "origin",
-      setCommits: userOptions.release?.setCommits ?? {
-        auto: true,
-        isDefault: true,
-        repo: undefined, // Just to please type narrowing
-      },
+      setCommits: userOptions.release?.setCommits,
     },
     bundleSizeOptimizations: userOptions.bundleSizeOptimizations,
     reactComponentAnnotation: userOptions.reactComponentAnnotation,
@@ -43,6 +39,14 @@ export function normalizeUserOptions(userOptions: UserOptions) {
     moduleMetadata: userOptions.moduleMetadata,
     _experiments: userOptions._experiments ?? {},
   };
+
+  if (options.release.setCommits === undefined) {
+    options.release.setCommits = {
+      // @ts-expect-error This is fine
+      auto: true,
+      isDefault: true,
+    };
+  }
 
   return options;
 }
