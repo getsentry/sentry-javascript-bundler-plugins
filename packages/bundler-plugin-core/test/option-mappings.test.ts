@@ -26,6 +26,8 @@ describe("normalizeUserOptions()", () => {
         setCommits: {
           auto: true,
           shouldNotThrowOnFailure: true,
+          ignoreEmpty: true,
+          ignoreMissing: true,
         },
       },
       silent: false,
@@ -81,6 +83,8 @@ describe("normalizeUserOptions()", () => {
         setCommits: {
           auto: true,
           shouldNotThrowOnFailure: true,
+          ignoreEmpty: true,
+          ignoreMissing: true,
         },
       },
       silent: false,
