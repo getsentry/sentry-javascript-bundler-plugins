@@ -1,5 +1,5 @@
 import { Logger } from "./sentry/logger";
-import { Options as UserOptions } from "./types";
+import { Options as UserOptions, SetCommitsOptions } from "./types";
 import { determineReleaseName } from "./utils";
 
 export type NormalizedOptions = ReturnType<typeof normalizeUserOptions>;
@@ -26,7 +26,10 @@ export function normalizeUserOptions(userOptions: UserOptions) {
       create: userOptions.release?.create ?? true,
       finalize: userOptions.release?.finalize ?? true,
       vcsRemote: userOptions.release?.vcsRemote ?? process.env["SENTRY_VSC_REMOTE"] ?? "origin",
-      setCommits: userOptions.release?.setCommits,
+      setCommits: userOptions.release?.setCommits as
+        | (SetCommitsOptions & { shouldNotThrowOnFailure?: boolean })
+        | false
+        | undefined,
     },
     bundleSizeOptimizations: userOptions.bundleSizeOptimizations,
     reactComponentAnnotation: userOptions.reactComponentAnnotation,
@@ -48,7 +51,6 @@ export function normalizeUserOptions(userOptions: UserOptions) {
       process.env["VERCEL_GIT_REPO_OWNER"]
     ) {
       options.release.setCommits = {
-        // @ts-expect-error This is fine
         shouldNotThrowOnFailure: true,
         commit: process.env["VERCEL_GIT_COMMIT_SHA"],
         previousCommit: process.env["VERCEL_GIT_PREVIOUS_SHA"],
@@ -59,7 +61,6 @@ export function normalizeUserOptions(userOptions: UserOptions) {
     } else {
       options.release.setCommits = {
         shouldNotThrowOnFailure: true,
-        // @ts-expect-error This is fine
         auto: true,
         ignoreEmpty: true,
         ignoreMissing: true,
