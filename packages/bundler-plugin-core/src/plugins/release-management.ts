@@ -13,7 +13,7 @@ interface ReleaseManagementPluginOptions {
   shouldCreateRelease: boolean;
   shouldFinalizeRelease: boolean;
   include?: string | IncludeEntry | Array<string | IncludeEntry>;
-  setCommitsOption?: SentryCliCommitsOptions;
+  setCommitsOption: SentryCliCommitsOptions | false | { auto: true; isDefault: true };
   deployOptions?: SentryCliNewDeployOptions;
   dist?: string;
   handleRecoverableError: HandleRecoverableErrorFn;
@@ -37,6 +37,7 @@ interface ReleaseManagementPluginOptions {
  * Additionally, if legacy upload options are set, it uploads source maps in the legacy (non-debugId) way.
  */
 export function releaseManagementPlugin({
+  logger,
   releaseName,
   include,
   dist,
@@ -86,8 +87,20 @@ export function releaseManagementPlugin({
           });
         }
 
-        if (setCommitsOption) {
-          await cliInstance.releases.setCommits(releaseName, setCommitsOption);
+        if (setCommitsOption !== false) {
+          try {
+            await cliInstance.releases.setCommits(releaseName, setCommitsOption);
+          } catch (e) {
+            // isDefault being present means that the plugin defaulted to `{ auto: true }` for the setCommitsOptions, meaning that wee should not throw when CLI throws because there is no repo
+            if (!("isDefault" in setCommitsOption)) {
+              throw e;
+            } else {
+              logger.debug(
+                "An error occurred setting commits on release (this message can be ignored unless you commits on release are desired):",
+                e
+              );
+            }
+          }
         }
 
         if (shouldFinalizeRelease) {

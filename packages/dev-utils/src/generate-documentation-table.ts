@@ -154,7 +154,8 @@ errorHandler: (err) => {
       },
       {
         name: "setCommits",
-        fullDescription: "Option to associate the created release with its commits in Sentry.",
+        fullDescription:
+          "Option to associate the created release with its commits in Sentry. Defaults to `{ auto: true }`. Set to `false` to disable.",
         children: [
           {
             name: "previousCommit",

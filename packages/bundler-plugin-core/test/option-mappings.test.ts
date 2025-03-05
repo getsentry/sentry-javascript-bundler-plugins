@@ -23,6 +23,10 @@ describe("normalizeUserOptions()", () => {
         create: true,
         vcsRemote: "origin",
         uploadLegacySourcemaps: "./out",
+        setCommits: {
+          auto: true,
+          isDefault: true,
+        },
       },
       silent: false,
       telemetry: true,
@@ -73,6 +77,10 @@ describe("normalizeUserOptions()", () => {
           rewrite: true,
           sourceMapReference: false,
           stripCommonPrefix: true,
+        },
+        setCommits: {
+          auto: true,
+          isDefault: true,
         },
       },
       silent: false,
