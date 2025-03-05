@@ -460,7 +460,7 @@ export interface SentrySDKBuildFlags extends Record<string, boolean | undefined>
   __SENTRY_EXCLUDE_REPLAY_WORKER__?: boolean;
 }
 
-type SetCommitsOptions = (AutoSetCommitsOptions | ManualSetCommitsOptions) & {
+export type SetCommitsOptions = (AutoSetCommitsOptions | ManualSetCommitsOptions) & {
   /**
    * The commit before the beginning of this release (in other words,
    * the last commit of the previous release).

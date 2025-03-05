@@ -91,14 +91,17 @@ export function releaseManagementPlugin({
           try {
             await cliInstance.releases.setCommits(releaseName, setCommitsOption);
           } catch (e) {
-            // isDefault being present means that the plugin defaulted to `{ auto: true }` for the setCommitsOptions, meaning that wee should not throw when CLI throws because there is no repo
-            if (!("isDefault" in setCommitsOption)) {
-              throw e;
-            } else {
+            // shouldNotThrowOnFailure being present means that the plugin defaulted to `{ auto: true }` for the setCommitsOptions, meaning that wee should not throw when CLI throws because there is no repo
+            if (
+              "shouldNotThrowOnFailure" in setCommitsOption &&
+              setCommitsOption.shouldNotThrowOnFailure
+            ) {
               logger.debug(
-                "An error occurred setting commits on release (this message can be ignored unless your commits on release are desired):",
+                "An error occurred setting commits on release (this message can be ignored unless you commits on release are desired):",
                 e
               );
+            } else {
+              throw e;
             }
           }
         }

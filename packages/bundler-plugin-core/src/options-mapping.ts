@@ -1,5 +1,5 @@
 import { Logger } from "./sentry/logger";
-import { Options as UserOptions } from "./types";
+import { Options as UserOptions, SetCommitsOptions } from "./types";
 import { determineReleaseName } from "./utils";
 
 export type NormalizedOptions = ReturnType<typeof normalizeUserOptions>;
@@ -26,7 +26,10 @@ export function normalizeUserOptions(userOptions: UserOptions) {
       create: userOptions.release?.create ?? true,
       finalize: userOptions.release?.finalize ?? true,
       vcsRemote: userOptions.release?.vcsRemote ?? process.env["SENTRY_VSC_REMOTE"] ?? "origin",
-      setCommits: userOptions.release?.setCommits,
+      setCommits: userOptions.release?.setCommits as
+        | (SetCommitsOptions & { shouldNotThrowOnFailure?: boolean })
+        | false
+        | undefined,
     },
     bundleSizeOptimizations: userOptions.bundleSizeOptimizations,
     reactComponentAnnotation: userOptions.reactComponentAnnotation,
@@ -41,10 +44,38 @@ export function normalizeUserOptions(userOptions: UserOptions) {
   };
 
   if (options.release.setCommits === undefined) {
-    options.release.setCommits = {
-      // @ts-expect-error This is fine
-      auto: true,
-      isDefault: true,
+    if (
+      process.env["VERCEL"] &&
+      process.env["VERCEL_GIT_COMMIT_SHA"] &&
+      process.env["VERCEL_GIT_REPO_SLUG"] &&
+      process.env["VERCEL_GIT_REPO_OWNER"]
+    ) {
+      options.release.setCommits = {
+        shouldNotThrowOnFailure: true,
+        commit: process.env["VERCEL_GIT_COMMIT_SHA"],
+        previousCommit: process.env["VERCEL_GIT_PREVIOUS_SHA"],
+        repo: `${process.env["VERCEL_GIT_REPO_OWNER"]}/${process.env["VERCEL_GIT_REPO_SLUG"]}`,
+        ignoreEmpty: true,
+        ignoreMissing: true,
+      };
+    } else {
+      options.release.setCommits = {
+        shouldNotThrowOnFailure: true,
+        auto: true,
+        ignoreEmpty: true,
+        ignoreMissing: true,
+      };
+    }
+  }
+
+  if (
+    options.release.deploy === undefined &&
+    process.env["VERCEL"] &&
+    process.env["VERCEL_TARGET_ENV"]
+  ) {
+    options.release.deploy = {
+      env: `vercel-${process.env["VERCEL_TARGET_ENV"]}`,
+      url: process.env["VERCEL_URL"] ? `https://${process.env["VERCEL_URL"]}` : undefined,
     };
   }
 
