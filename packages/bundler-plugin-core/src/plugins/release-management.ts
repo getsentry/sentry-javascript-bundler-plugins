@@ -91,8 +91,8 @@ export function releaseManagementPlugin({
           try {
             await cliInstance.releases.setCommits(releaseName, setCommitsOption);
           } catch (e) {
-            // isDefault being present means that the plugin defaulted to `{ auto: true }` for the setCommitsOptions, meaning that wee should not throw when CLI throws because there is no repo
-            if (!("isDefault" in setCommitsOption)) {
+            // shouldNotThrowOnFailure being present means that the plugin defaulted to `{ auto: true }` for the setCommitsOptions, meaning that wee should not throw when CLI throws because there is no repo
+            if (!("shouldNotThrowOnFailure" in setCommitsOption)) {
               throw e;
             } else {
               logger.debug(

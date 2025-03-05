@@ -25,7 +25,7 @@ describe("normalizeUserOptions()", () => {
         uploadLegacySourcemaps: "./out",
         setCommits: {
           auto: true,
-          isDefault: true,
+          shouldNotThrowOnFailure: true,
         },
       },
       silent: false,
@@ -80,7 +80,7 @@ describe("normalizeUserOptions()", () => {
         },
         setCommits: {
           auto: true,
-          isDefault: true,
+          shouldNotThrowOnFailure: true,
         },
       },
       silent: false,
