@@ -200,8 +200,10 @@ export interface Options {
 
     /**
      * Associates the release with its commits in Sentry.
+     *
+     * Defaults to `{ auto: true }`. Set to `false` to disable commit association.
      */
-    setCommits?: SetCommitsOptions;
+    setCommits?: SetCommitsOptions | false;
 
     /**
      * Adds deployment information to the release in Sentry.

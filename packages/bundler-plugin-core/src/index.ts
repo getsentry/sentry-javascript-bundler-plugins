@@ -370,7 +370,9 @@ export function sentryUnpluginFactory({
           shouldCreateRelease: options.release.create,
           shouldFinalizeRelease: options.release.finalize,
           include: options.release.uploadLegacySourcemaps,
-          setCommitsOption: options.release.setCommits,
+          // setCommits has a default defined by the options mappings
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          setCommitsOption: options.release.setCommits!,
           deployOptions: options.release.deploy,
           dist: options.release.dist,
           handleRecoverableError: handleRecoverableError,

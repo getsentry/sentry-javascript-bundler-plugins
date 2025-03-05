@@ -101,7 +101,7 @@ test("rollup bundle telemetry", async () => {
               "upload-legacy-sourcemaps": false,
               "module-metadata": false,
               "inject-build-information": false,
-              "set-commits": "undefined",
+              "set-commits": "auto",
               "finalize-release": true,
               "deploy-options": false,
               "custom-error-handler": false,
