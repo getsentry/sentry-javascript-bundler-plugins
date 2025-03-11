@@ -347,7 +347,7 @@ export function sentryUnpluginFactory({
       );
     } else if (isDevMode) {
       logger.debug("Running in development mode. Will not create release.");
-    } else if (!options.authToken) {
+    } else if (!options.authToken && options.release.create) {
       logger.warn(
         "No auth token provided. Will not create release. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/" +
           getTurborepoEnvPassthroughWarning("SENTRY_AUTH_TOKEN")
