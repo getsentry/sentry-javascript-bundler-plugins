@@ -377,12 +377,8 @@ type IncludeEntry = {
   },
   {
     name: "reactComponentAnnotation",
-    fullDescription: `Options related to react component name annotations.
-      Disabled by default, unless a value is set for this option.
-      When enabled, your app's DOM will automatically be annotated during build-time with their respective component names.
-      This will unlock the capability to search for Replays in Sentry by component name, as well as see component names in breadcrumbs and performance monitoring.
-      Please note that this feature is not currently supported by the esbuild bundler plugins, and will only annotate React components
-    `,
+    fullDescription: `(NOTICE: Use the react component annotation feature with caution. The option will pass additional properties to your React components which may lead to errors if libraries or your own code iterate through component props without checking for the additional Sentry props.)\n\nOptions related to react component name annotations.
+      Disabled by default, unless a value is set for this option.\nWhen enabled, your app's DOM will automatically be annotated during build-time with their respective component names.\nThis will unlock the capability to search for Replays in Sentry by component name, as well as see component names in breadcrumbs and performance monitoring.`,
     supportedBundlers: ["webpack", "vite", "rollup"],
     children: [
       {
