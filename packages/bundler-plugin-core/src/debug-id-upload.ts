@@ -213,7 +213,7 @@ export async function prepareBundleForDebugIdUpload(
   logger: Logger,
   rewriteSourcesHook: RewriteSourcesHook
 ) {
-  let bundleContent;
+  let bundleContent: string;
   try {
     bundleContent = await promisify(fs.readFile)(bundleFilePath, "utf8");
   } catch (e) {
@@ -232,14 +232,21 @@ export async function prepareBundleForDebugIdUpload(
     return;
   }
 
-  const uniqueUploadName = `${debugId}-${chunkIndex}`;
-
-  bundleContent += `\n//# debugId=${debugId}`;
-  const writeSourceFilePromise = fs.promises.writeFile(
-    path.join(uploadFolder, `${uniqueUploadName}.js`),
-    bundleContent,
-    "utf-8"
+  const uniqueSourceFileUploadPath = path.join(
+    uploadFolder,
+    `${chunkIndex}`,
+    path.normalize(
+      path
+        .relative(process.cwd(), bundleFilePath)
+        .split(path.sep)
+        .filter((segment) => segment !== ".." && segment !== ".")
+        .join(path.sep)
+    )
   );
+  bundleContent += `\n//# debugId=${debugId}`;
+  const writeSourceFilePromise = fs.promises
+    .mkdir(path.dirname(uniqueSourceFileUploadPath), { recursive: true })
+    .then(() => fs.promises.writeFile(uniqueSourceFileUploadPath, bundleContent, "utf-8"));
 
   const writeSourceMapFilePromise = determineSourceMapPathFromBundle(
     bundleFilePath,
@@ -249,7 +256,13 @@ export async function prepareBundleForDebugIdUpload(
     if (sourceMapPath) {
       await prepareSourceMapForDebugIdUpload(
         sourceMapPath,
-        path.join(uploadFolder, `${uniqueUploadName}.js.map`),
+        path.normalize(
+          path
+            .join(uploadFolder, `${chunkIndex}`, path.relative(process.cwd(), sourceMapPath))
+            .split(path.sep)
+            .filter((segment) => segment !== ".." && segment !== ".")
+            .join(path.sep)
+        ),
         debugId,
         rewriteSourcesHook,
         logger
@@ -379,7 +392,8 @@ async function prepareSourceMapForDebugIdUpload(
   }
 
   try {
-    await util.promisify(fs.writeFile)(targetPath, JSON.stringify(map), {
+    await fs.promises.mkdir(path.dirname(targetPath), { recursive: true });
+    await fs.promises.writeFile(targetPath, JSON.stringify(map), {
       encoding: "utf8",
     });
   } catch (e) {
