@@ -234,11 +234,18 @@ export async function prepareBundleForDebugIdUpload(
 
   const uniqueSourceFileUploadPath = path.join(
     uploadFolder,
+    // We add a "chunk index" segment to the path that is a simple incrementing number to avoid name collisions.
+    // Name collisions can happen when files are located "outside" of the current working directory, at different levels but they share a subpath.
+    // Example:
+    // - CWD: /root/foo/cwd
+    // - File 1: /root/foo/index.js -> ../foo/index.js -> foo/index.js
+    // - File 2: /foo/index.js -> ../../foo/index.js -> foo/index.js
     `${chunkIndex}`,
     path.normalize(
       path
         .relative(process.cwd(), bundleFilePath)
         .split(path.sep)
+        // We filter out these "navigation" segments because a) they look ugly b) they will cause us to break out of the upload folder.
         .filter((segment) => segment !== ".." && segment !== ".")
         .join(path.sep)
     )
@@ -260,6 +267,7 @@ export async function prepareBundleForDebugIdUpload(
           path
             .join(uploadFolder, `${chunkIndex}`, path.relative(process.cwd(), sourceMapPath))
             .split(path.sep)
+            // We filter out these "navigation" segments because a) they look ugly b) they will cause us to break out of the upload folder.
             .filter((segment) => segment !== ".." && segment !== ".")
             .join(path.sep)
         ),
