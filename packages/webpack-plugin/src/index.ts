@@ -13,11 +13,14 @@ import { v4 as uuidv4 } from "uuid";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore webpack is a peer dep
-import * as webback4or5 from "webpack";
+import * as webpack4or5 from "webpack";
 
 interface BannerPluginCallbackArg {
   chunk?: {
     hash?: string;
+    contentHash?: {
+      javascript?: string;
+    };
   };
 }
 
@@ -33,8 +36,8 @@ function webpackReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
         // @ts-ignore webpack version compatibility shenanigans
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         compiler?.webpack?.BannerPlugin ||
-        webback4or5?.BannerPlugin ||
-        webback4or5?.default?.BannerPlugin;
+        webpack4or5?.BannerPlugin ||
+        webpack4or5?.default?.BannerPlugin;
       compiler.options.plugins = compiler.options.plugins || [];
       compiler.options.plugins.push(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
@@ -74,8 +77,8 @@ function webpackBundleSizeOptimizationsPlugin(
         // @ts-ignore webpack version compatibility shenanigans
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         compiler?.webpack?.DefinePlugin ||
-        webback4or5?.DefinePlugin ||
-        webback4or5?.default?.DefinePlugin;
+        webpack4or5?.DefinePlugin ||
+        webpack4or5?.default?.DefinePlugin;
       compiler.options.plugins = compiler.options.plugins || [];
       compiler.options.plugins.push(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
@@ -99,8 +102,8 @@ function webpackDebugIdInjectionPlugin(): UnpluginOptions {
         // @ts-ignore webpack version compatibility shenanigans
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         compiler?.webpack?.BannerPlugin ||
-        webback4or5?.BannerPlugin ||
-        webback4or5?.default?.BannerPlugin;
+        webpack4or5?.BannerPlugin ||
+        webpack4or5?.default?.BannerPlugin;
       compiler.options.plugins = compiler.options.plugins || [];
       compiler.options.plugins.push(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
@@ -108,7 +111,8 @@ function webpackDebugIdInjectionPlugin(): UnpluginOptions {
           raw: true,
           include: /\.(js|ts|jsx|tsx|mjs|cjs)(\?[^?]*)?(#[^#]*)?$/,
           banner: (arg?: BannerPluginCallbackArg) => {
-            const debugId = arg?.chunk?.hash ? stringToUUID(arg.chunk.hash) : uuidv4();
+            const hash = arg?.chunk?.contentHash?.javascript ?? arg?.chunk?.hash;
+            const debugId = hash ? stringToUUID(hash) : uuidv4();
             return getDebugIdSnippet(debugId);
           },
         })
@@ -161,8 +165,8 @@ function webpackModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
         // @ts-ignore webpack version compatibility shenanigans
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         compiler?.webpack?.BannerPlugin ||
-        webback4or5?.BannerPlugin ||
-        webback4or5?.default?.BannerPlugin;
+        webpack4or5?.BannerPlugin ||
+        webpack4or5?.default?.BannerPlugin;
       compiler.options.plugins = compiler.options.plugins || [];
       compiler.options.plugins.push(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
