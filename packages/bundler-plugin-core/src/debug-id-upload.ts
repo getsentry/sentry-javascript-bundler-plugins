@@ -232,24 +232,7 @@ export async function prepareBundleForDebugIdUpload(
     return;
   }
 
-  const uniqueSourceFileUploadPath = path.join(
-    uploadFolder,
-    // We add a "chunk index" segment to the path that is a simple incrementing number to avoid name collisions.
-    // Name collisions can happen when files are located "outside" of the current working directory, at different levels but they share a subpath.
-    // Example:
-    // - CWD: /root/foo/cwd
-    // - File 1: /root/foo/index.js -> ../foo/index.js -> foo/index.js
-    // - File 2: /foo/index.js -> ../../foo/index.js -> foo/index.js
-    `${chunkIndex}`,
-    path.normalize(
-      path
-        .relative(process.cwd(), bundleFilePath)
-        .split(path.sep)
-        // We filter out these "navigation" segments because a) they look ugly b) they will cause us to break out of the upload folder.
-        .filter((segment) => segment !== ".." && segment !== ".")
-        .join(path.sep)
-    )
-  );
+  const uniqueSourceFileUploadPath = getUniqueUploadPath(uploadFolder, chunkIndex, bundleFilePath);
   bundleContent += `\n//# debugId=${debugId}`;
   const writeSourceFilePromise = fs.promises
     .mkdir(path.dirname(uniqueSourceFileUploadPath), { recursive: true })
@@ -263,14 +246,7 @@ export async function prepareBundleForDebugIdUpload(
     if (sourceMapPath) {
       await prepareSourceMapForDebugIdUpload(
         sourceMapPath,
-        path.normalize(
-          path
-            .join(uploadFolder, `${chunkIndex}`, path.relative(process.cwd(), sourceMapPath))
-            .split(path.sep)
-            // We filter out these "navigation" segments because a) they look ugly b) they will cause us to break out of the upload folder.
-            .filter((segment) => segment !== ".." && segment !== ".")
-            .join(path.sep)
-        ),
+        getUniqueUploadPath(uploadFolder, chunkIndex, sourceMapPath),
         debugId,
         rewriteSourcesHook,
         logger
@@ -280,6 +256,27 @@ export async function prepareBundleForDebugIdUpload(
 
   await writeSourceFilePromise;
   await writeSourceMapFilePromise;
+}
+
+function getUniqueUploadPath(uploadFolder: string, chunkIndex: number, filePath: string) {
+  return path.join(
+    uploadFolder,
+    // We add a "chunk index" segment to the path that is a simple incrementing number to avoid name collisions.
+    // Name collisions can happen when files are located "outside" of the current working directory, at different levels but they share a subpath.
+    // Example:
+    // - CWD: /root/foo/cwd
+    // - File 1: /root/foo/index.js -> ../foo/index.js -> foo/index.js
+    // - File 2: /foo/index.js -> ../../foo/index.js -> foo/index.js
+    `${chunkIndex}`,
+    path.normalize(
+      path
+        .relative(process.cwd(), filePath)
+        .split(path.sep)
+        // We filter out these "navigation" segments because a) they look ugly b) they will cause us to break out of the upload folder.
+        .filter((segment) => segment !== ".." && segment !== ".")
+        .join(path.sep)
+    )
+  );
 }
 
 /**
