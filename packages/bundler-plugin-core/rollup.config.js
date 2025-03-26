@@ -1,9 +1,9 @@
-import babel from "@rollup/plugin-babel";
 import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 import modulePackage from "module";
 import packageJson from "./package.json";
+import swc from "@rollup/plugin-swc";
 
 const input = ["src/index.ts"];
 const extensions = [".ts"];
@@ -33,11 +33,7 @@ export default {
         __PACKAGE_VERSION__: JSON.stringify(packageJson.version),
       },
     }),
-    babel({
-      extensions,
-      babelHelpers: "bundled",
-      include: ["src/**/*"],
-    }),
+    swc(),
   ],
   output: [
     {
