@@ -177,7 +177,6 @@ export function createDebugIdUploadFunction({
                           dist: dist,
                         },
                       ],
-                      useArtifactBundle: true,
                     }
                   );
                 });
