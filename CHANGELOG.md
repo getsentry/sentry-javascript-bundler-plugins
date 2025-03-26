@@ -4,6 +4,13 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 3.2.3
+
+- feat(core): Use path instead of debug IDs as artifact names for debug ID upload (#700)
+- feat(webpack): Primarily use `contentHash` for debug ID hash (#702)
+- feat: Detect Vercel commits and env (#694)
+- feat: Default to automatically setting commits on release (#692)
+
 ## 3.2.2
 
 - feat(annotation): Handle JSX member expressions (#690)
