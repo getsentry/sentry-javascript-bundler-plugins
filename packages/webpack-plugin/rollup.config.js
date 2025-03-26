@@ -1,7 +1,7 @@
 import resolve from "@rollup/plugin-node-resolve";
-import babel from "@rollup/plugin-babel";
 import packageJson from "./package.json";
 import modulePackage from "module";
+import swc from "@rollup/plugin-swc";
 
 const input = ["src/index.ts"];
 
@@ -25,11 +25,7 @@ export default {
       rootDir: "./src",
       preferBuiltins: true,
     }),
-    babel({
-      extensions,
-      babelHelpers: "bundled",
-      include: ["src/**/*"],
-    }),
+    swc(),
   ],
   output: [
     {

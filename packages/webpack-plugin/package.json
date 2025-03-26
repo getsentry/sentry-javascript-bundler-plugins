@@ -53,9 +53,6 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@babel/core": "7.18.5",
-    "@babel/preset-env": "7.18.2",
-    "@babel/preset-typescript": "7.17.12",
     "@rollup/plugin-babel": "5.3.1",
     "@rollup/plugin-commonjs": "22.0.1",
     "@sentry-internal/eslint-config": "3.2.2",
