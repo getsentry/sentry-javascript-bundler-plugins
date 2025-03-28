@@ -212,7 +212,7 @@ export async function prepareBundleForDebugIdUpload(
   logger: Logger,
   rewriteSourcesHook: RewriteSourcesHook
 ) {
-  let bundleContent: string;
+  let bundleContent;
   try {
     bundleContent = await promisify(fs.readFile)(bundleFilePath, "utf8");
   } catch (e) {
@@ -231,11 +231,14 @@ export async function prepareBundleForDebugIdUpload(
     return;
   }
 
-  const uniqueSourceFileUploadPath = getUniqueUploadPath(uploadFolder, chunkIndex, bundleFilePath);
+  const uniqueUploadName = `${debugId}-${chunkIndex}`;
+
   bundleContent += `\n//# debugId=${debugId}`;
-  const writeSourceFilePromise = fs.promises
-    .mkdir(path.dirname(uniqueSourceFileUploadPath), { recursive: true })
-    .then(() => fs.promises.writeFile(uniqueSourceFileUploadPath, bundleContent, "utf-8"));
+  const writeSourceFilePromise = fs.promises.writeFile(
+    path.join(uploadFolder, `${uniqueUploadName}.js`),
+    bundleContent,
+    "utf-8"
+  );
 
   const writeSourceMapFilePromise = determineSourceMapPathFromBundle(
     bundleFilePath,
@@ -245,7 +248,7 @@ export async function prepareBundleForDebugIdUpload(
     if (sourceMapPath) {
       await prepareSourceMapForDebugIdUpload(
         sourceMapPath,
-        getUniqueUploadPath(uploadFolder, chunkIndex, sourceMapPath),
+        path.join(uploadFolder, `${uniqueUploadName}.js.map`),
         debugId,
         rewriteSourcesHook,
         logger
@@ -255,27 +258,6 @@ export async function prepareBundleForDebugIdUpload(
 
   await writeSourceFilePromise;
   await writeSourceMapFilePromise;
-}
-
-function getUniqueUploadPath(uploadFolder: string, chunkIndex: number, filePath: string) {
-  return path.join(
-    uploadFolder,
-    // We add a "chunk index" segment to the path that is a simple incrementing number to avoid name collisions.
-    // Name collisions can happen when files are located "outside" of the current working directory, at different levels but they share a subpath.
-    // Example:
-    // - CWD: /root/foo/cwd
-    // - File 1: /root/foo/index.js -> ../foo/index.js -> foo/index.js
-    // - File 2: /foo/index.js -> ../../foo/index.js -> foo/index.js
-    `${chunkIndex}`,
-    path.normalize(
-      path
-        .relative(process.cwd(), filePath)
-        .split(path.sep)
-        // We filter out these "navigation" segments because a) they look ugly b) they will cause us to break out of the upload folder.
-        .filter((segment) => segment !== ".." && segment !== ".")
-        .join(path.sep)
-    )
-  );
 }
 
 /**
@@ -396,8 +378,7 @@ async function prepareSourceMapForDebugIdUpload(
   }
 
   try {
-    await fs.promises.mkdir(path.dirname(targetPath), { recursive: true });
-    await fs.promises.writeFile(targetPath, JSON.stringify(map), {
+    await util.promisify(fs.writeFile)(targetPath, JSON.stringify(map), {
       encoding: "utf8",
     });
   } catch (e) {
