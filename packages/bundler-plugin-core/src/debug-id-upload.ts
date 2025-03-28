@@ -172,9 +172,10 @@ export function createDebugIdUploadFunction({
                     {
                       include: [
                         {
-                          paths: [tmpUploadFolder],
+                          paths: [path.join(tmpUploadFolder, "**")],
                           rewrite: false,
                           dist: dist,
+                          stripCommonPrefix: false,
                         },
                       ],
                     }
