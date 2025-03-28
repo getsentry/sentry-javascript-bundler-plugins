@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 3.2.4
+
+- Revert "feat(core): Use path instead of debug IDs as artifact names for debug ID upload (#700)" (#709)
+- ref: Remove deprecated use of `useArtifacBundles` (#707)
+
 ## 3.2.3
 
 - feat(core): Use path instead of debug IDs as artifact names for debug ID upload (#700)
