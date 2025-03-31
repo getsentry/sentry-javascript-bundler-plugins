@@ -48,7 +48,11 @@ export function normalizeUserOptions(userOptions: UserOptions) {
       process.env["VERCEL"] &&
       process.env["VERCEL_GIT_COMMIT_SHA"] &&
       process.env["VERCEL_GIT_REPO_SLUG"] &&
-      process.env["VERCEL_GIT_REPO_OWNER"]
+      process.env["VERCEL_GIT_REPO_OWNER"] &&
+      // We only want to set commits for the production env because Sentry becomes extremely noisy (eg on slack) for
+      // preview environments because the previous commit is always the "stem" commit of the preview/PR causing Sentry
+      // to notify you for other people creating PRs.
+      process.env["VERCEL_TARGET_ENV"] === "production"
     ) {
       options.release.setCommits = {
         shouldNotThrowOnFailure: true,
