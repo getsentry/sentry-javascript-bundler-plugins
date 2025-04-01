@@ -19,7 +19,6 @@ import {
   generateModuleMetadataInjectorCode,
   getDependencies,
   getPackageJson,
-  getTurborepoEnvPassthroughWarning,
   parseMajorVersion,
   replaceBooleanFlagsInCode,
   stringToUUID,
@@ -34,6 +33,7 @@ interface SentryUnpluginFactoryOptions {
   debugIdUploadPlugin: (
     upload: (buildArtifacts: string[]) => Promise<void>,
     logger: Logger,
+    createDependencyOnBuildArtifacts: () => () => void,
     webpack_forceExitOnBuildComplete?: boolean
   ) => UnpluginOptions;
   bundleSizeOptimizationsPlugin: (buildFlags: SentrySDKBuildFlags) => UnpluginOptions;
@@ -146,62 +146,22 @@ export function sentryUnpluginFactory({
       plugins.push(debugIdInjectionPlugin(logger));
     }
 
-    if (options.sourcemaps?.disable) {
-      logger.debug(
-        "Source map upload was disabled. Will not upload sourcemaps using debug ID process."
-      );
-    } else if (isDevMode) {
-      logger.debug("Running in development mode. Will not upload sourcemaps.");
-    } else if (!options.authToken) {
-      logger.warn(
-        "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/" +
-          getTurborepoEnvPassthroughWarning("SENTRY_AUTH_TOKEN")
-      );
-    } else if (!options.org && !options.authToken.startsWith("sntrys_")) {
-      logger.warn(
-        "No org provided. Will not upload source maps. Please set the `org` option to your Sentry organization slug." +
-          getTurborepoEnvPassthroughWarning("SENTRY_ORG")
-      );
-    } else if (!options.project) {
-      logger.warn(
-        "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug." +
-          getTurborepoEnvPassthroughWarning("SENTRY_PROJECT")
-      );
-    } else {
-      // This option is only strongly typed for the webpack plugin, where it is used. It has no effect on other plugins
-      const webpack_forceExitOnBuildComplete =
-        typeof options._experiments["forceExitOnBuildCompletion"] === "boolean"
-          ? options._experiments["forceExitOnBuildCompletion"]
-          : undefined;
+    // This option is only strongly typed for the webpack plugin, where it is used. It has no effect on other plugins
+    const webpack_forceExitOnBuildComplete =
+      typeof options._experiments["forceExitOnBuildCompletion"] === "boolean"
+        ? options._experiments["forceExitOnBuildCompletion"]
+        : undefined;
 
-      plugins.push(
-        debugIdUploadPlugin(
-          createDebugIdUploadFunction({
-            assets: options.sourcemaps?.assets,
-            ignore: options.sourcemaps?.ignore,
-            createDependencyOnSourcemapFiles,
-            dist: options.release.dist,
-            releaseName: options.release.name,
-            logger: logger,
-            handleRecoverableError: handleRecoverableError,
-            rewriteSourcesHook: options.sourcemaps?.rewriteSources,
-            sentryScope,
-            sentryClient,
-            sentryCliOptions: {
-              authToken: options.authToken,
-              org: options.org,
-              project: options.project,
-              silent: options.silent,
-              url: options.url,
-              vcsRemote: options.release.vcsRemote,
-              headers: options.headers,
-            },
-          }),
-          logger,
-          webpack_forceExitOnBuildComplete
-        )
-      );
-    }
+    plugins.push(
+      debugIdUploadPlugin(
+        createDebugIdUploadFunction({
+          sentryBuildPluginManager,
+        }),
+        logger,
+        sentryBuildPluginManager.createDependencyOnBuildArtifacts,
+        webpack_forceExitOnBuildComplete
+      )
+    );
 
     if (options.reactComponentAnnotation) {
       if (!options.reactComponentAnnotation.enabled) {
@@ -222,12 +182,7 @@ export function sentryUnpluginFactory({
 
     plugins.push(
       fileDeletionPlugin({
-        waitUntilSourcemapFileDependenciesAreFreed,
-        filesToDeleteAfterUpload: options.sourcemaps?.filesToDeleteAfterUpload,
-        logger,
-        handleRecoverableError,
-        sentryScope,
-        sentryClient,
+        sentryBuildPluginManager,
       })
     );
 
@@ -401,36 +356,45 @@ export function createRollupModuleMetadataInjectionHooks(injectionCode: string) 
 }
 
 export function createRollupDebugIdUploadHooks(
-  upload: (buildArtifacts: string[]) => Promise<void>
+  upload: (buildArtifacts: string[]) => Promise<void>,
+  _logger: Logger,
+  createDependencyOnBuildArtifacts: () => () => void
 ) {
+  const freeGlobalDependencyOnDebugIdSourcemapArtifacts = createDependencyOnBuildArtifacts();
   return {
     async writeBundle(
       outputOptions: { dir?: string; file?: string },
       bundle: { [fileName: string]: unknown }
     ) {
-      if (outputOptions.dir) {
-        const outputDir = outputOptions.dir;
-        const buildArtifacts = await glob(
-          [
-            "/**/*.js",
-            "/**/*.mjs",
-            "/**/*.cjs",
-            "/**/*.js.map",
-            "/**/*.mjs.map",
-            "/**/*.cjs.map",
-          ].map((q) => `${q}?(\\?*)?(#*)`), // We want to allow query and hashes strings at the end of files
-          {
-            root: outputDir,
-            absolute: true,
-            nodir: true,
-          }
-        );
-        await upload(buildArtifacts);
-      } else if (outputOptions.file) {
-        await upload([outputOptions.file]);
-      } else {
-        const buildArtifacts = Object.keys(bundle).map((asset) => path.join(path.resolve(), asset));
-        await upload(buildArtifacts);
+      try {
+        if (outputOptions.dir) {
+          const outputDir = outputOptions.dir;
+          const buildArtifacts = await glob(
+            [
+              "/**/*.js",
+              "/**/*.mjs",
+              "/**/*.cjs",
+              "/**/*.js.map",
+              "/**/*.mjs.map",
+              "/**/*.cjs.map",
+            ].map((q) => `${q}?(\\?*)?(#*)`), // We want to allow query and hashes strings at the end of files
+            {
+              root: outputDir,
+              absolute: true,
+              nodir: true,
+            }
+          );
+          await upload(buildArtifacts);
+        } else if (outputOptions.file) {
+          await upload([outputOptions.file]);
+        } else {
+          const buildArtifacts = Object.keys(bundle).map((asset) =>
+            path.join(path.resolve(), asset)
+          );
+          await upload(buildArtifacts);
+        }
+      } finally {
+        freeGlobalDependencyOnDebugIdSourcemapArtifacts();
       }
     },
   };

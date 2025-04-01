@@ -1,3 +1,18 @@
+import SentryCli from "@sentry/cli";
+import {
+  closeSession,
+  DEFAULT_ENVIRONMENT,
+  getDynamicSamplingContextFromSpan,
+  makeSession,
+  setMeasurement,
+  spanToTraceHeader,
+  startSpan,
+} from "@sentry/core";
+import * as dotenv from "dotenv";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
+import { normalizeUserOptions, validateOptions } from "./options-mapping";
 import { createLogger } from "./sentry/logger";
 import {
   allowedToSendTelemetry,
@@ -5,13 +20,10 @@ import {
   safeFlushTelemetry,
 } from "./sentry/telemetry";
 import { Options, SentrySDKBuildFlags } from "./types";
-import * as fs from "fs";
-import * as path from "path";
-import * as dotenv from "dotenv";
-import { closeSession, DEFAULT_ENVIRONMENT, makeSession, startSpan } from "@sentry/core";
-import { normalizeUserOptions, validateOptions } from "./options-mapping";
-import SentryCli from "@sentry/cli";
-import { arrayify, getTurborepoEnvPassthroughWarning } from "./utils";
+import { arrayify, getTurborepoEnvPassthroughWarning, stripQueryAndHashFromPath } from "./utils";
+import { glob } from "glob";
+import { defaultRewriteSourcesHook, prepareBundleForDebugIdUpload } from "./debug-id-upload";
+import { dynamicSamplingContextToSentryBaggageHeader } from "@sentry/utils";
 
 export type SentryBuildPluginManager = ReturnType<typeof createSentryBuildPluginManager>;
 
@@ -355,7 +367,225 @@ export function createSentryBuildPluginManager(
         freeWriteBundleInvocationDependencyOnSourcemapFiles();
       }
     },
+    async uploadSourcemaps(buildArtifactPaths: string[]) {
+      if (options.sourcemaps?.disable) {
+        logger.debug(
+          "Source map upload was disabled. Will not upload sourcemaps using debug ID process."
+        );
+      } else if (isDevMode) {
+        logger.debug("Running in development mode. Will not upload sourcemaps.");
+      } else if (!options.authToken) {
+        logger.warn(
+          "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/" +
+            getTurborepoEnvPassthroughWarning("SENTRY_AUTH_TOKEN")
+        );
+      } else if (!options.org && !options.authToken.startsWith("sntrys_")) {
+        logger.warn(
+          "No org provided. Will not upload source maps. Please set the `org` option to your Sentry organization slug." +
+            getTurborepoEnvPassthroughWarning("SENTRY_ORG")
+        );
+      } else if (!options.project) {
+        logger.warn(
+          "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug." +
+            getTurborepoEnvPassthroughWarning("SENTRY_PROJECT")
+        );
+      }
+
+      await startSpan(
+        // This is `forceTransaction`ed because this span is used in dashboards in the form of indexed transactions.
+        { name: "debug-id-sourcemap-upload", scope: sentryScope, forceTransaction: true },
+        async () => {
+          let folderToCleanUp: string | undefined;
+
+          // It is possible that this writeBundle hook (which calls this function) is called multiple times in one build (for example when reusing the plugin, or when using build tooling like `@vitejs/plugin-legacy`)
+          // Therefore we need to actually register the execution of this hook as dependency on the sourcemap files.
+          const freeUploadDependencyOnBuildArtifacts = createDependencyOnBuildArtifacts();
+
+          try {
+            const tmpUploadFolder = await startSpan(
+              { name: "mkdtemp", scope: sentryScope },
+              async () => {
+                return await fs.promises.mkdtemp(
+                  path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+                );
+              }
+            );
+
+            folderToCleanUp = tmpUploadFolder;
+            const assets = options.sourcemaps?.assets;
+
+            let globAssets: string | string[];
+            if (assets) {
+              globAssets = assets;
+            } else {
+              logger.debug(
+                "No `sourcemaps.assets` option provided, falling back to uploading detected build artifacts."
+              );
+              globAssets = buildArtifactPaths;
+            }
+
+            const globResult = await startSpan(
+              { name: "glob", scope: sentryScope },
+              async () =>
+                await glob(globAssets, {
+                  absolute: true,
+                  nodir: true,
+                  ignore: options.sourcemaps?.ignore,
+                })
+            );
+
+            const debugIdChunkFilePaths = globResult.filter((debugIdChunkFilePath) => {
+              return !!stripQueryAndHashFromPath(debugIdChunkFilePath).match(/\.(js|mjs|cjs)$/);
+            });
+
+            // The order of the files output by glob() is not deterministic
+            // Ensure order within the files so that {debug-id}-{chunkIndex} coupling is consistent
+            debugIdChunkFilePaths.sort();
+
+            if (Array.isArray(assets) && assets.length === 0) {
+              logger.debug(
+                "Empty `sourcemaps.assets` option provided. Will not upload sourcemaps with debug ID."
+              );
+            } else if (debugIdChunkFilePaths.length === 0) {
+              logger.warn(
+                "Didn't find any matching sources for debug ID upload. Please check the `sourcemaps.assets` option."
+              );
+            } else {
+              await startSpan(
+                { name: "prepare-bundles", scope: sentryScope },
+                async (prepBundlesSpan) => {
+                  // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
+                  // instead we do it with a maximum of 16 concurrent workers
+                  const preparationTasks = debugIdChunkFilePaths.map(
+                    (chunkFilePath, chunkIndex) => async () => {
+                      await prepareBundleForDebugIdUpload(
+                        chunkFilePath,
+                        tmpUploadFolder,
+                        chunkIndex,
+                        logger,
+                        options.sourcemaps?.rewriteSources ?? defaultRewriteSourcesHook
+                      );
+                    }
+                  );
+                  const workers: Promise<void>[] = [];
+                  const worker = async () => {
+                    while (preparationTasks.length > 0) {
+                      const task = preparationTasks.shift();
+                      if (task) {
+                        await task();
+                      }
+                    }
+                  };
+                  for (let workerIndex = 0; workerIndex < 16; workerIndex++) {
+                    workers.push(worker());
+                  }
+
+                  await Promise.all(workers);
+
+                  const files = await fs.promises.readdir(tmpUploadFolder);
+                  const stats = files.map((file) =>
+                    fs.promises.stat(path.join(tmpUploadFolder, file))
+                  );
+                  const uploadSize = (await Promise.all(stats)).reduce(
+                    (accumulator, { size }) => accumulator + size,
+                    0
+                  );
+
+                  setMeasurement("files", files.length, "none", prepBundlesSpan);
+                  setMeasurement("upload_size", uploadSize, "byte", prepBundlesSpan);
+
+                  await startSpan({ name: "upload", scope: sentryScope }, async (uploadSpan) => {
+                    const cliInstance = new SentryCli(null, {
+                      authToken: options.authToken,
+                      org: options.org,
+                      project: options.project,
+                      silent: options.silent,
+                      url: options.url,
+                      vcsRemote: options.release.vcsRemote,
+                      headers: {
+                        "sentry-trace": spanToTraceHeader(uploadSpan),
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        baggage: dynamicSamplingContextToSentryBaggageHeader(
+                          getDynamicSamplingContextFromSpan(uploadSpan)
+                        )!,
+                        ...options.headers,
+                      },
+                    });
+
+                    await cliInstance.releases.uploadSourceMaps(
+                      options.release.name ?? "undefined", // unfortunately this needs a value for now but it will not matter since debug IDs overpower releases anyhow
+                      {
+                        include: [
+                          {
+                            paths: [tmpUploadFolder],
+                            rewrite: false,
+                            dist: options.release.dist,
+                          },
+                        ],
+                      }
+                    );
+                  });
+                }
+              );
+
+              logger.info("Successfully uploaded source maps to Sentry");
+            }
+          } catch (e) {
+            sentryScope.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
+            handleRecoverableError(e, false);
+          } finally {
+            if (folderToCleanUp) {
+              void startSpan({ name: "cleanup", scope: sentryScope }, async () => {
+                if (folderToCleanUp) {
+                  await fs.promises.rm(folderToCleanUp, { recursive: true, force: true });
+                }
+              });
+            }
+            freeUploadDependencyOnBuildArtifacts();
+            await safeFlushTelemetry(sentryClient);
+          }
+        }
+      );
+    },
+    async deleteArtifacts() {
+      try {
+        const filesToDelete = await options.sourcemaps?.filesToDeleteAfterUpload;
+        if (filesToDelete !== undefined) {
+          const filePathsToDelete = await glob(filesToDelete, {
+            absolute: true,
+            nodir: true,
+          });
+
+          logger.debug(
+            "Waiting for dependencies on generated files to be freed before deleting..."
+          );
+
+          await waitUntilBuildArtifactDependenciesAreFreed();
+
+          filePathsToDelete.forEach((filePathToDelete) => {
+            logger.debug(`Deleting asset after upload: ${filePathToDelete}`);
+          });
+
+          await Promise.all(
+            filePathsToDelete.map((filePathToDelete) =>
+              fs.promises.rm(filePathToDelete, { force: true }).catch((e) => {
+                // This is allowed to fail - we just don't do anything
+                logger.debug(
+                  `An error occurred while attempting to delete asset: ${filePathToDelete}`,
+                  e
+                );
+              })
+            )
+          );
+        }
+      } catch (e) {
+        sentryScope.captureException('Error in "sentry-file-deletion-plugin" buildEnd hook');
+        await safeFlushTelemetry(sentryClient);
+        // We throw by default if we get here b/c not being able to delete
+        // source maps could leak them to production
+        handleRecoverableError(e, true);
+      }
+    },
     createDependencyOnBuildArtifacts,
-    waitUntilBuildArtifactDependenciesAreFreed,
   };
 }
