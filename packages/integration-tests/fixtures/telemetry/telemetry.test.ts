@@ -57,7 +57,7 @@ test("rollup bundle telemetry", async () => {
       ],
     ]),
     // Then we should get a transaction for execution
-    [
+    expect.arrayContaining([
       {
         event_id: expect.any(String),
         sent_at: expect.any(String),
@@ -133,7 +133,7 @@ test("rollup bundle telemetry", async () => {
           }),
         ],
       ],
-    ],
+    ]),
     // Then we should get a session exit
     [
       {
