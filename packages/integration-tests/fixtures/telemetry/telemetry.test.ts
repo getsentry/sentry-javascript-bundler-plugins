@@ -70,6 +70,18 @@ test("rollup bundle telemetry", async () => {
           sampled: "true",
         }),
       },
+      {
+        event_id: expect.any(String),
+        sent_at: expect.any(String),
+        sdk: { name: "sentry.javascript.node", version: expect.any(String) },
+        trace: expect.objectContaining({
+          environment: "production",
+          release: expect.any(String),
+          sample_rate: "1",
+          transaction: "debug-id-sourcemap-upload",
+          sampled: "true",
+        }),
+      },
       [
         [
           { type: "transaction" },
