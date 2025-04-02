@@ -85,28 +85,6 @@ export function sentryUnpluginFactory({
       },
     });
 
-    // Add plugin to create and finalize releases, and also take care of adding commits and legacy sourcemaps
-    const freeGlobalDependencyOnBuildArtifacts =
-      sentryBuildPluginManager.createDependencyOnBuildArtifacts();
-    plugins.push({
-      name: "sentry-release-management-plugin",
-      async writeBundle() {
-        try {
-          await sentryBuildPluginManager.createRelease();
-        } finally {
-          freeGlobalDependencyOnBuildArtifacts();
-        }
-      },
-    });
-
-    // Add plugin to delete unwanted artifacts like source maps after the uploads have completed
-    plugins.push({
-      name: "sentry-file-deletion-plugin",
-      async writeBundle() {
-        await sentryBuildPluginManager.deleteArtifacts();
-      },
-    });
-
     if (Object.keys(bundleSizeOptimizationReplacementValues).length > 0) {
       plugins.push(bundleSizeOptimizationsPlugin(bundleSizeOptimizationReplacementValues));
     }
@@ -133,6 +111,20 @@ export function sentryUnpluginFactory({
       );
       plugins.push(moduleMetadataInjectionPlugin(injectionCode));
     }
+
+    // Add plugin to create and finalize releases, and also take care of adding commits and legacy sourcemaps
+    const freeGlobalDependencyOnBuildArtifacts =
+      sentryBuildPluginManager.createDependencyOnBuildArtifacts();
+    plugins.push({
+      name: "sentry-release-management-plugin",
+      async writeBundle() {
+        try {
+          await sentryBuildPluginManager.createRelease();
+        } finally {
+          freeGlobalDependencyOnBuildArtifacts();
+        }
+      },
+    });
 
     if (!options.sourcemaps?.disable) {
       plugins.push(debugIdInjectionPlugin(logger));
@@ -171,6 +163,14 @@ export function sentryUnpluginFactory({
           );
       }
     }
+
+    // Add plugin to delete unwanted artifacts like source maps after the uploads have completed
+    plugins.push({
+      name: "sentry-file-deletion-plugin",
+      async writeBundle() {
+        await sentryBuildPluginManager.deleteArtifacts();
+      },
+    });
 
     return plugins;
   });
