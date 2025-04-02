@@ -38,7 +38,6 @@ export function createSentryBuildPluginManager(
     /**
      * E.g. `webpack` or `nextjs` or `turbopack`
      */
-
     buildTool: string;
     /**
      * E.g. `[sentry-webpack-plugin]` or `[@sentry/nextjs]`
