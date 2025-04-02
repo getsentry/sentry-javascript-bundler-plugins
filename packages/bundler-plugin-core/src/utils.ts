@@ -411,3 +411,10 @@ export function replaceBooleanFlagsInCode(
 
   return null;
 }
+
+// https://turbo.build/repo/docs/reference/system-environment-variables#environment-variables-in-tasks
+export function getTurborepoEnvPassthroughWarning(envVarName: string) {
+  return process.env["TURBO_HASH"]
+    ? `\nYou seem to be using Turborepo, did you forget to put ${envVarName} in \`passThroughEnv\`? https://turbo.build/repo/docs/reference/configuration#passthroughenv`
+    : "";
+}
