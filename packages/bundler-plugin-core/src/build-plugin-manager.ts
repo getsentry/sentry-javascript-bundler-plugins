@@ -291,11 +291,9 @@ export function createSentryBuildPluginManager(
           logger.info(
             "Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`."
           );
-          startInactiveSpan({
-            name: "Sentry Bundler Plugin execution",
-            forceTransaction: true,
-            scope: sentryScope,
-          }).end();
+          startSpan({ name: "Sentry Bundler Plugin execution", scope: sentryScope }, () => {
+            //
+          });
           await safeFlushTelemetry(sentryClient);
         }
       },
