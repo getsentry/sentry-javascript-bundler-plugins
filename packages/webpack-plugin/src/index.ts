@@ -1,4 +1,4 @@
-import { SentryWebpackPluginOptions, sentryWebpackUnpluginFactory } from "./plugin";
+import { SentryWebpackPluginOptions, sentryWebpackUnpluginFactory } from "./webpack4and5";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore webpack is a peer dep

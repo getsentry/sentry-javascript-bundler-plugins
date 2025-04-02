@@ -1,4 +1,4 @@
-import { SentryWebpackPluginOptions, sentryWebpackUnpluginFactory } from "./plugin";
+import { SentryWebpackPluginOptions, sentryWebpackUnpluginFactory } from "./webpack4and5";
 
 const sentryUnplugin = sentryWebpackUnpluginFactory();
 
