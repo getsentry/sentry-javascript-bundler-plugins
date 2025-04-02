@@ -3,7 +3,7 @@ import babel from "@rollup/plugin-babel";
 import packageJson from "./package.json";
 import modulePackage from "module";
 
-const input = ["src/webpack5.ts"];
+const input = ["src/index.ts", "src/webpack5.ts"];
 
 const extensions = [".ts"];
 
@@ -33,13 +33,14 @@ export default {
   ],
   output: [
     {
-      file: packageJson.exports["./webpack5"].import,
+      dir: "./dist/esm",
       format: "esm",
       exports: "named",
       sourcemap: true,
+      entryFileNames: "[name].mjs",
     },
     {
-      file: packageJson.exports["./webpack5"].require,
+      dir: "./dist/cjs",
       format: "cjs",
       exports: "named",
       sourcemap: true,
