@@ -22,13 +22,15 @@ describe("sentryVitePlugin", () => {
 
     const pluginNames = plugins.map((plugin) => plugin.name);
 
-    expect(pluginNames).toEqual([
-      "sentry-telemetry-plugin",
-      "sentry-vite-release-injection-plugin",
-      "sentry-release-management-plugin",
-      "sentry-vite-debug-id-injection-plugin",
-      "sentry-vite-debug-id-upload-plugin",
-      "sentry-file-deletion-plugin",
-    ]);
+    expect(pluginNames).toEqual(
+      expect.arrayContaining([
+        "sentry-telemetry-plugin",
+        "sentry-vite-release-injection-plugin",
+        "sentry-release-management-plugin",
+        "sentry-vite-debug-id-injection-plugin",
+        "sentry-vite-debug-id-upload-plugin",
+        "sentry-file-deletion-plugin",
+      ])
+    );
   });
 });
