@@ -23,13 +23,18 @@
       "import": "./dist/esm/index.mjs",
       "require": "./dist/cjs/index.js",
       "types": "./dist/types/index.d.ts"
+    },
+    "./webpack5": {
+      "import": "./dist/esm/webpack5.mjs",
+      "require": "./dist/cjs/webpack5.js",
+      "types": "./dist/types/webpack5.d.ts"
     }
   },
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.mjs",
   "types": "dist/types/index.d.ts",
   "scripts": {
-    "build": "rimraf ./out && run-p build:rollup build:types",
+    "build": "rimraf ./dist && run-p build:rollup build:types",
     "build:watch": "run-p build:rollup:watch build:types:watch",
     "build:rollup": "rollup --config rollup.config.js",
     "build:rollup:watch": "rollup --config rollup.config.js --watch --no-watch.clearScreen",
