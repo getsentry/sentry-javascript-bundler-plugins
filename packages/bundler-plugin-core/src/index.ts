@@ -451,3 +451,4 @@ export function getDebugIdSnippet(debugId: string): string {
 export type { Logger } from "./logger";
 export type { Options, SentrySDKBuildFlags } from "./types";
 export { replaceBooleanFlagsInCode, stringToUUID } from "./utils";
+export { createSentryBuildPluginManager } from "./build-plugin-manager";
