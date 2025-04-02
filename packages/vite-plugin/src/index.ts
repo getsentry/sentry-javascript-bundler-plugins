@@ -8,6 +8,7 @@ import {
   SentrySDKBuildFlags,
   createRollupBundleSizeOptimizationHooks,
   createComponentNameAnnotateHooks,
+  Logger,
 } from "@sentry/bundler-plugin-core";
 import { UnpluginOptions } from "unplugin";
 
@@ -44,11 +45,13 @@ function viteModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOptio
 }
 
 function viteDebugIdUploadPlugin(
-  upload: (buildArtifacts: string[]) => Promise<void>
+  upload: (buildArtifacts: string[]) => Promise<void>,
+  logger: Logger,
+  createDependencyOnBuildArtifacts: () => () => void
 ): UnpluginOptions {
   return {
     name: "sentry-vite-debug-id-upload-plugin",
-    vite: createRollupDebugIdUploadHooks(upload),
+    vite: createRollupDebugIdUploadHooks(upload, logger, createDependencyOnBuildArtifacts),
   };
 }
 

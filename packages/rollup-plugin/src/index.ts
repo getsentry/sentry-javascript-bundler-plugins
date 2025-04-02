@@ -8,6 +8,7 @@ import {
   SentrySDKBuildFlags,
   createRollupBundleSizeOptimizationHooks,
   createComponentNameAnnotateHooks,
+  Logger,
 } from "@sentry/bundler-plugin-core";
 import type { UnpluginOptions } from "unplugin";
 
@@ -40,11 +41,13 @@ function rollupModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOpt
 }
 
 function rollupDebugIdUploadPlugin(
-  upload: (buildArtifacts: string[]) => Promise<void>
+  upload: (buildArtifacts: string[]) => Promise<void>,
+  logger: Logger,
+  createDependencyOnBuildArtifacts: () => () => void
 ): UnpluginOptions {
   return {
     name: "sentry-rollup-debug-id-upload-plugin",
-    rollup: createRollupDebugIdUploadHooks(upload),
+    rollup: createRollupDebugIdUploadHooks(upload, logger, createDependencyOnBuildArtifacts),
   };
 }
 
