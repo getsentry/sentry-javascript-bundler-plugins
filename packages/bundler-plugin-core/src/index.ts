@@ -7,12 +7,9 @@ import { glob } from "glob";
 import MagicString from "magic-string";
 import * as path from "path";
 import { createUnplugin, TransformResult, UnpluginOptions } from "unplugin";
-import { createSentryBuildPluginManager } from "./api-primitives";
+import { createSentryBuildPluginManager } from "./build-plugin-manager";
 import { createDebugIdUploadFunction } from "./debug-id-upload";
-import { releaseManagementPlugin } from "./plugins/release-management";
-import { fileDeletionPlugin } from "./plugins/sourcemap-deletion";
-import { telemetryPlugin } from "./plugins/telemetry";
-import { Logger } from "./sentry/logger";
+import { Logger } from "./logger";
 import { Options, SentrySDKBuildFlags } from "./types";
 import {
   generateGlobalInjectorCode,
@@ -40,30 +37,7 @@ interface SentryUnpluginFactoryOptions {
 }
 
 /**
- * The sentry bundler plugin concerns itself with two things:
- * - Release injection
- * - Sourcemaps upload
- *
- * Release injection:
- * Per default the sentry bundler plugin will inject a global `SENTRY_RELEASE` into each JavaScript/TypeScript module
- * that is part of the bundle. On a technical level this is done by appending an import (`import "sentry-release-injector";`)
- * to all entrypoint files of the user code (see `transformInclude` and `transform` hooks). This import is then resolved
- * by the sentry plugin to a virtual module that sets the global variable (see `resolveId` and `load` hooks).
- * If a user wants to inject the release into a particular set of modules they can use the `releaseInjectionTargets` option.
- *
- * Source maps upload:
- *
- * The sentry bundler plugin will also take care of uploading source maps to Sentry. This
- * is all done in the `writeBundle` hook. In this hook the sentry plugin will execute the
- * release creation pipeline:
- *
- * 1. Create a new release
- * 2. Upload sourcemaps based on `include` and source-map-specific options
- * 3. Associate a range of commits with the release (if `setCommits` is specified)
- * 4. Finalize the release (unless `finalize` is disabled)
- * 5. Add deploy information to the release (if `deploy` is specified)
- *
- * This release creation pipeline relies on Sentry CLI to execute the different steps.
+ * Creates an unplugin instance used to create Sentry plugins for Vite, Rollup, esbuild, and Webpack.
  */
 export function sentryUnpluginFactory({
   releaseInjectionPlugin,
@@ -103,11 +77,35 @@ export function sentryUnpluginFactory({
 
     const plugins: UnpluginOptions[] = [];
 
-    plugins.push(
-      telemetryPlugin({
-        sentryBuildPluginManager,
-      })
-    );
+    // Add plugin to emit a telemetry signal when the build starts
+    plugins.push({
+      name: "sentry-telemetry-plugin",
+      async buildStart() {
+        await sentryBuildPluginManager.telemetry.emitBundlerPluginExecutionSignal();
+      },
+    });
+
+    // Add plugin to create and finalize releases, and also take care of adding commits and legacy sourcemaps
+    const freeGlobalDependencyOnBuildArtifacts =
+      sentryBuildPluginManager.createDependencyOnBuildArtifacts();
+    plugins.push({
+      name: "sentry-release-management-plugin",
+      async writeBundle() {
+        try {
+          await sentryBuildPluginManager.createRelease();
+        } finally {
+          freeGlobalDependencyOnBuildArtifacts();
+        }
+      },
+    });
+
+    // Add plugin to delete unwanted artifacts like source maps after the uploads have completed
+    plugins.push({
+      name: "sentry-file-deletion-plugin",
+      async writeBundle() {
+        await sentryBuildPluginManager.deleteArtifacts();
+      },
+    });
 
     if (Object.keys(bundleSizeOptimizationReplacementValues).length > 0) {
       plugins.push(bundleSizeOptimizationsPlugin(bundleSizeOptimizationReplacementValues));
@@ -135,12 +133,6 @@ export function sentryUnpluginFactory({
       );
       plugins.push(moduleMetadataInjectionPlugin(injectionCode));
     }
-
-    plugins.push(
-      releaseManagementPlugin({
-        sentryBuildPluginManager,
-      })
-    );
 
     if (!options.sourcemaps?.disable) {
       plugins.push(debugIdInjectionPlugin(logger));
@@ -180,16 +172,14 @@ export function sentryUnpluginFactory({
       }
     }
 
-    plugins.push(
-      fileDeletionPlugin({
-        sentryBuildPluginManager,
-      })
-    );
-
     return plugins;
   });
 }
 
+/**
+ * @deprecated
+ */
+// TODO(v4): Don't export this from the package
 export function getBuildInformation() {
   const packageJson = getPackageJson();
 
@@ -458,6 +448,6 @@ export function getDebugIdSnippet(debugId: string): string {
   return `;{try{let e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{},n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="${debugId}",e._sentryDebugIdIdentifier="sentry-dbid-${debugId}")}catch(e){}};`;
 }
 
-export type { Logger } from "./sentry/logger";
+export type { Logger } from "./logger";
 export type { Options, SentrySDKBuildFlags } from "./types";
 export { replaceBooleanFlagsInCode, stringToUUID } from "./utils";

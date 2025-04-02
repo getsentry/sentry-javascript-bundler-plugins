@@ -6,6 +6,7 @@ import {
   makeSession,
   setMeasurement,
   spanToTraceHeader,
+  startInactiveSpan,
   startSpan,
 } from "@sentry/core";
 import * as dotenv from "dotenv";
@@ -13,7 +14,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import { normalizeUserOptions, validateOptions } from "./options-mapping";
-import { createLogger } from "./sentry/logger";
+import { createLogger } from "./logger";
 import {
   allowedToSendTelemetry,
   createSentryInstance,
@@ -27,9 +28,24 @@ import { dynamicSamplingContextToSentryBaggageHeader } from "@sentry/utils";
 
 export type SentryBuildPluginManager = ReturnType<typeof createSentryBuildPluginManager>;
 
+/**
+ * Creates a build plugin manager that exposes primitives for everything that a Sentry JavaScript SDK or build tooling may do during a build.
+ *
+ * The build plugin manager's behavior strongly depends on the options that are passed in.
+ */
 export function createSentryBuildPluginManager(
   userOptions: Options,
-  bundlerPluginMetaContext: { buildTool: string; loggerPrefix: string }
+  bundlerPluginMetaContext: {
+    /**
+     * E.g. `webpack` or `nextjs` or `turbopack`
+     */
+
+    buildTool: string;
+    /**
+     * E.g. `[sentry-webpack-plugin]` or `[@sentry/nextjs]`
+     */
+    loggerPrefix: string;
+  }
 ) {
   const logger = createLogger({
     prefix: bundlerPluginMetaContext.loggerPrefix,
@@ -241,23 +257,59 @@ export function createSentryBuildPluginManager(
   }
 
   return {
+    /**
+     * A logger instance that takes the options passed to the build plugin manager into account. (for silencing and log level etc.)
+     */
     logger,
+
+    /**
+     * Options after normalization. Includes things like the inferred release name.
+     */
     normalizedOptions: options,
+
+    /**
+     * Magic strings and their replacement values that can be used for bundle size optimizations. This already takes
+     * into account the options passed to the build plugin manager.
+     */
     bundleSizeOptimizationReplacementValues,
+
+    /**
+     * Metadata that should be injected into bundles if possible. Takes into account options passed to the build plugin manager.
+     */
+    // See `generateModuleMetadataInjectorCode` for how this should be used exactly
     bundleMetadata,
+
+    /**
+     * Contains utility functions for emitting telemetry via the build plugin manager.
+     */
     telemetry: {
+      /**
+       * Emits a `Sentry Bundler Plugin execution` signal.
+       */
       async emitBundlerPluginExecutionSignal() {
         if (await shouldSendTelemetry) {
           logger.info(
             "Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`."
           );
-          startSpan({ name: "Sentry Bundler Plugin execution", scope: sentryScope }, () => {
-            //
-          });
+          startInactiveSpan({
+            name: "Sentry Bundler Plugin execution",
+            forceTransaction: true,
+            scope: sentryScope,
+          }).end();
           await safeFlushTelemetry(sentryClient);
         }
       },
     },
+
+    /**
+     * Will potentially create a release based on the build plugin manager options.
+     *
+     * Also
+     * - finalizes the release
+     * - sets commits
+     * - uploads legacy sourcemaps
+     * - adds deploy information
+     */
     async createRelease() {
       if (!options.release.name) {
         logger.debug(
@@ -367,6 +419,10 @@ export function createSentryBuildPluginManager(
         freeWriteBundleInvocationDependencyOnSourcemapFiles();
       }
     },
+
+    /**
+     * Uploads sourcemaps using the "Debug ID" method. This function takes a list of build artifact paths that will be uploaded
+     */
     async uploadSourcemaps(buildArtifactPaths: string[]) {
       if (options.sourcemaps?.disable) {
         logger.debug(
@@ -547,6 +603,10 @@ export function createSentryBuildPluginManager(
         }
       );
     },
+
+    /**
+     * Will delete artifacts based on the passed `sourcemaps.filesToDeleteAfterUpload` option.
+     */
     async deleteArtifacts() {
       try {
         const filesToDelete = await options.sourcemaps?.filesToDeleteAfterUpload;
