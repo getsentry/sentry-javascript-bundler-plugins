@@ -23,16 +23,25 @@
       "import": "./dist/esm/index.mjs",
       "require": "./dist/cjs/index.js",
       "types": "./dist/types/index.d.ts"
+    },
+    "./webpack5": {
+      "import": "./dist/esm/webpack5.mjs",
+      "require": "./dist/cjs/webpack5.js",
+      "types": "./dist/types/webpack5.d.ts"
     }
   },
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.mjs",
   "types": "dist/types/index.d.ts",
   "scripts": {
-    "build": "rimraf ./out && run-p build:rollup build:types",
+    "build": "rimraf ./dist && run-p build:rollup build:types",
     "build:watch": "run-p build:rollup:watch build:types:watch",
-    "build:rollup": "rollup --config rollup.config.js",
-    "build:rollup:watch": "rollup --config rollup.config.js --watch --no-watch.clearScreen",
+    "build:rollup": "run-p build:rollup:default build:rollup:webpack5",
+    "build:rollup:default": "rollup --config rollup.config.default.js",
+    "build:rollup:webpack5": "rollup --config rollup.config.webpack5.js",
+    "build:rollup:watch": "run-p build:rollup:default:watch build:rollup:webpack5:watch",
+    "build:rollup:default:watch": "rollup --config rollup.config.default.js --watch --no-watch.clearScreen",
+    "build:rollup:webpack5:watch": "rollup --config rollup.config.webpack5.js --watch --no-watch.clearScreen",
     "build:types": "tsc --project types.tsconfig.json",
     "build:types:watch": "tsc --project types.tsconfig.json --watch --preserveWatchOutput",
     "check:types": "run-p check:types:src check:types:test",
