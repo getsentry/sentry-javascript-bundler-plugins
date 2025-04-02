@@ -1,4 +1,4 @@
-import { Logger } from "./sentry/logger";
+import { Logger } from "./logger";
 import { Options as UserOptions, SetCommitsOptions } from "./types";
 import { determineReleaseName } from "./utils";
 

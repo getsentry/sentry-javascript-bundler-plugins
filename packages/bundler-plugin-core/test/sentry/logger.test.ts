@@ -1,4 +1,4 @@
-import { createLogger } from "../../src/sentry/logger";
+import { createLogger } from "../../src/logger";
 
 describe("Logger", () => {
   const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);

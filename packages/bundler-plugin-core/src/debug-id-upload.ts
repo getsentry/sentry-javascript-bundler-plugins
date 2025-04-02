@@ -2,8 +2,8 @@ import fs from "fs";
 import path from "path";
 import * as util from "util";
 import { promisify } from "util";
-import { SentryBuildPluginManager } from "./api-primitives";
-import { Logger } from "./sentry/logger";
+import { SentryBuildPluginManager } from "./build-plugin-manager";
+import { Logger } from "./logger";
 
 interface RewriteSourcesHook {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
