@@ -195,6 +195,14 @@ function webpackModuleMetadataInjectionPlugin(
   });
 }
 
+/**
+ * The factory function accepts BannerPlugin and DefinePlugin classes in
+ * order to avoid direct dependencies on webpack.
+ *
+ * This allow us to export version of the plugin for webpack 5.1+ and compatible environments.
+ *
+ * Since webpack 5.1 compiler contains webpack module so plugins always use correct webpack version.
+ */
 export function sentryWebpackUnpluginFactory({
   BannerPlugin,
   DefinePlugin,
