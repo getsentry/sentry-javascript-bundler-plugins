@@ -6,7 +6,6 @@ import {
   makeSession,
   setMeasurement,
   spanToTraceHeader,
-  startInactiveSpan,
   startSpan,
 } from "@sentry/core";
 import * as dotenv from "dotenv";
