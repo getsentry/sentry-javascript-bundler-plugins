@@ -7,6 +7,7 @@
 ## 3.3.0
 
 - feat(webpack): Add `@sentry/webpack-plugin/webpack5` export for webpack 5.1+ and compatible environments (#715)
+- feat: Only do automatic commit association for Vercel production environments (#711)
 
 ## 3.2.4
 
