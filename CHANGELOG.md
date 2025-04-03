@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 3.3.0
+
+- feat(webpack): Add `@sentry/webpack-plugin/webpack5` export for webpack 5.1+ and compatible environments (#715)
+
 ## 3.2.4
 
 - Revert "feat(core): Use path instead of debug IDs as artifact names for debug ID upload (#700)" (#709)
