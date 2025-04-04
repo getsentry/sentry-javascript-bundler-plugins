@@ -45,6 +45,8 @@ export default {
       format: "cjs",
       exports: "named",
       sourcemap: true,
+      entryFileNames: "[name].js",
+      chunkFileNames: "[name].js",
     },
   ],
 };
