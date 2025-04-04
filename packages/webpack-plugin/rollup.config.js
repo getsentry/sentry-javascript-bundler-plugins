@@ -38,6 +38,7 @@ export default {
       exports: "named",
       sourcemap: true,
       entryFileNames: "[name].mjs",
+      chunkFileNames: "[name].mjs",
     },
     {
       dir: "./dist/cjs",
