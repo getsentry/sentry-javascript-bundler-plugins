@@ -37,6 +37,8 @@ pnpm add @sentry/webpack-plugin --save-dev
 ```js
 // webpack.config.js
 const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
+// for webpack 5.1 and webpack compatible environments
+// const { sentryWebpackPlugin } = require("@sentry/webpack-plugin/webpack5");
 
 module.exports = {
   // ... other config above ...
