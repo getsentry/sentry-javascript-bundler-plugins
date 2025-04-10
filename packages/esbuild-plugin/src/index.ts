@@ -1,7 +1,7 @@
 import {
   sentryUnpluginFactory,
   Options,
-  getDebugIdSnippet,
+  getDebugIdPolyfillSnippet,
   SentrySDKBuildFlags,
 } from "@sentry/bundler-plugin-core";
 import type { Logger } from "@sentry/bundler-plugin-core";
@@ -125,7 +125,7 @@ function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
           return {
             loader: "js",
             pluginName,
-            contents: getDebugIdSnippet(uuidv4()),
+            contents: getDebugIdPolyfillSnippet(uuidv4()),
           };
         });
       },

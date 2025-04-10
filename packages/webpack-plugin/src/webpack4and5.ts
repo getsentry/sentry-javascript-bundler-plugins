@@ -1,5 +1,5 @@
 import {
-  getDebugIdSnippet,
+  getDebugIdPolyfillSnippet,
   Options,
   sentryUnpluginFactory,
   stringToUUID,
@@ -123,7 +123,7 @@ function webpackDebugIdInjectionPlugin(
           banner: (arg?: BannerPluginCallbackArg) => {
             const hash = arg?.chunk?.contentHash?.javascript ?? arg?.chunk?.hash;
             const debugId = hash ? stringToUUID(hash) : uuidv4();
-            return getDebugIdSnippet(debugId);
+            return getDebugIdPolyfillSnippet(debugId);
           },
         })
       );

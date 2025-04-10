@@ -169,6 +169,26 @@ function lookupPackageJson(cwd: string, stopAt: string): PackageJson | undefined
   return lookupPackageJson(newCwd, stopAt);
 }
 
+const DEBUG_ID_REGEX = /\/\/# debugId=([a-fA-F0-9-]+)(?![\s\S]*\/\/# debugId=)/m;
+
+/**
+ * Returns a debug ID if one can be found in a magic comment
+ */
+export function getDebugIdFromMagicComment(code: string): string | undefined {
+  const match = code.match(DEBUG_ID_REGEX);
+  return match?.[1];
+}
+
+/**
+ * Gets a debug ID for the passed source code.
+ * 
+ * If the source already contains a debug ID magic comment, that existing debug
+ * ID is used, otherwise a debug ID is created via hashing
+ */
+export function getDebugIdForCode(code: string): string {
+  return getDebugIdFromMagicComment(code) || stringToUUID(code);
+}
+
 /**
  * Deterministically hashes a string and turns the hash into a uuid.
  */
