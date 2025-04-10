@@ -20,7 +20,6 @@ import {
   getPackageJson,
   parseMajorVersion,
   replaceBooleanFlagsInCode,
-  stringToUUID,
   stripQueryAndHashFromPath,
 } from "./utils";
 import * as dotenv from "dotenv";

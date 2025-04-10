@@ -181,7 +181,7 @@ export function getDebugIdFromMagicComment(code: string): string | undefined {
 
 /**
  * Gets a debug ID for the passed source code.
- * 
+ *
  * If the source already contains a debug ID magic comment, that existing debug
  * ID is used, otherwise a debug ID is created via hashing
  */
