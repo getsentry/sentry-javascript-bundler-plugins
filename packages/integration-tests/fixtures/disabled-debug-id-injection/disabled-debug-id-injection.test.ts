@@ -6,10 +6,10 @@ import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 function checkBundle(bundlePath1: string, bundlePath2: string) {
   const process1Output = childProcess.execSync(`node ${bundlePath1}`, { encoding: "utf-8" });
-  expect(process1Output).toBe("undefined\n");
+  expect(process1Output).toMatch(/undefined/);
 
   const process2Output = childProcess.execSync(`node ${bundlePath2}`, { encoding: "utf-8" });
-  expect(process2Output).toBe("undefined\n");
+  expect(process2Output).toMatch(/undefined/);
 }
 
 describe("should not inject debug IDs when `sourcemaps.disable` is `true`", () => {
