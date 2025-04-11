@@ -8,7 +8,7 @@ import { promisify } from "util";
 import SentryCli from "@sentry/cli";
 import { dynamicSamplingContextToSentryBaggageHeader } from "@sentry/utils";
 import { safeFlushTelemetry } from "./sentry/telemetry";
-import { stripQueryAndHashFromPath } from "./utils";
+import { getDebugIdFromMagicComment, stripQueryAndHashFromPath } from "./utils";
 import { setMeasurement, spanToTraceHeader, startSpan } from "@sentry/core";
 import { getDynamicSamplingContextFromSpan, Scope } from "@sentry/core";
 import { Client } from "@sentry/types";
@@ -223,7 +223,8 @@ export async function prepareBundleForDebugIdUpload(
     return;
   }
 
-  const debugId = determineDebugIdFromBundleSource(bundleContent);
+  const debugIdFromMagicComment = getDebugIdFromMagicComment(bundleContent);
+  const debugId = debugIdFromMagicComment || getDebugIdFromPolyfill(bundleContent);
   if (debugId === undefined) {
     logger.debug(
       `Could not determine debug ID from bundle. This can happen if you did not clean your output folder before installing the Sentry plugin. File will not be source mapped: ${bundleFilePath}`
@@ -233,12 +234,14 @@ export async function prepareBundleForDebugIdUpload(
 
   const uniqueUploadName = `${debugId}-${chunkIndex}`;
 
-  bundleContent += `\n//# debugId=${debugId}`;
-  const writeSourceFilePromise = fs.promises.writeFile(
-    path.join(uploadFolder, `${uniqueUploadName}.js`),
-    bundleContent,
-    "utf-8"
-  );
+  // Only add the debug ID magic comment if source file does not already contain it
+  const writeSourceFilePromise = debugIdFromMagicComment
+    ? Promise.resolve()
+    : fs.promises.writeFile(
+        path.join(uploadFolder, `${uniqueUploadName}.js`),
+        bundleContent + `\n//# debugId=${debugId}`,
+        "utf-8"
+      );
 
   const writeSourceMapFilePromise = determineSourceMapPathFromBundle(
     bundleFilePath,
@@ -266,7 +269,7 @@ export async function prepareBundleForDebugIdUpload(
  *
  * The string pattern is injected via the debug ID injection snipped.
  */
-function determineDebugIdFromBundleSource(code: string): string | undefined {
+function getDebugIdFromPolyfill(code: string): string | undefined {
   const match = code.match(
     /sentry-dbid-([0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12})/
   );
