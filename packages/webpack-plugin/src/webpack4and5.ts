@@ -131,28 +131,31 @@ function webpackDebugIdInjectionPlugin(
   });
 }
 
-function webpackDebugIdUploadPlugin(): (
+function webpackDebugIdUploadPlugin(
   upload: (buildArtifacts: string[]) => Promise<void>,
   logger: Logger,
+  createDependencyOnBuildArtifacts: () => () => void,
   forceExitOnBuildCompletion?: boolean
-) => UnpluginOptions {
+): UnpluginOptions {
   const pluginName = "sentry-webpack-debug-id-upload-plugin";
-  return (
-    upload: (buildArtifacts: string[]) => Promise<void>,
-    logger: Logger,
-    forceExitOnBuildCompletion?: boolean
-  ) => ({
+  return {
     name: pluginName,
     webpack(compiler) {
+      const freeGlobalDependencyOnDebugIdSourcemapArtifacts = createDependencyOnBuildArtifacts();
+
       compiler.hooks.afterEmit.tapAsync(pluginName, (compilation, callback: () => void) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const outputPath = (compilation.outputOptions.path as string | undefined) ?? path.resolve();
         const buildArtifacts = Object.keys(compilation.assets as Record<string, unknown>).map(
           (asset) => path.join(outputPath, asset)
         );
-        void upload(buildArtifacts).then(() => {
-          callback();
-        });
+        void upload(buildArtifacts)
+          .then(() => {
+            callback();
+          })
+          .finally(() => {
+            freeGlobalDependencyOnDebugIdSourcemapArtifacts();
+          });
       });
 
       if (forceExitOnBuildCompletion && compiler.options.mode === "production") {
@@ -164,7 +167,7 @@ function webpackDebugIdUploadPlugin(): (
         });
       }
     },
-  });
+  };
 }
 
 function webpackModuleMetadataInjectionPlugin(
@@ -215,7 +218,7 @@ export function sentryWebpackUnpluginFactory({
     componentNameAnnotatePlugin: webpackComponentNameAnnotatePlugin(),
     moduleMetadataInjectionPlugin: webpackModuleMetadataInjectionPlugin(BannerPlugin),
     debugIdInjectionPlugin: webpackDebugIdInjectionPlugin(BannerPlugin),
-    debugIdUploadPlugin: webpackDebugIdUploadPlugin(),
+    debugIdUploadPlugin: webpackDebugIdUploadPlugin,
     bundleSizeOptimizationsPlugin: webpackBundleSizeOptimizationsPlugin(DefinePlugin),
   });
 }
