@@ -39,10 +39,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rollup": "3.2.0",
-    "rollup4": "npm:rollup@^4",
     "ts-node": "^10.9.1",
     "vite": "3.0.0",
-    "vite6": "npm:vite@^6",
     "webpack4": "npm:webpack@^4",
     "webpack5": "npm:webpack@5.74.0"
   },
