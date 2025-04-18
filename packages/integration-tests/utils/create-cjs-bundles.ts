@@ -10,15 +10,9 @@ import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
 import { sentryEsbuildPlugin } from "@sentry/esbuild-plugin";
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 
-const [NODE_MAJOR_VERSION] = process.version.replace('v', '').split(".").map(Number) as [number];
+const [NODE_MAJOR_VERSION] = process.version.replace("v", "").split(".").map(Number) as [number];
 
-type Bundlers =
-  | "webpack4"
-  | "webpack5"
-  | "esbuild"
-  | "rollup"
-  | "vite"
-  | string;
+type Bundlers = "webpack4" | "webpack5" | "esbuild" | "rollup" | "vite" | string;
 
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
