@@ -1,13 +1,12 @@
-import { defineConfig } from "rollup";
-import { sentryRollupPlugin } from "@sentry/rollup-plugin";
-import { join } from "path";
-
-const __dirname = new URL(".", import.meta.url).pathname;
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { defineConfig } = require("rollup");
+const { sentryRollupPlugin } = require("@sentry/rollup-plugin");
+const path = require("path");
 
 export default defineConfig({
-  input: { index: join(__dirname, "..", "bundle.js") },
+  input: { index: path.join(__dirname, "..", "bundle.js") },
   output: {
-    dir: join(__dirname, "..", "..", "out", "rollup4"),
+    dir: path.join(__dirname, "..", "..", "out", "rollup4"),
     sourcemap: true,
     sourcemapDebugIds: true,
   },

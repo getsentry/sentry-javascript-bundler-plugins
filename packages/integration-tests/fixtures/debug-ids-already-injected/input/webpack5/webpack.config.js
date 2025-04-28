@@ -1,14 +1,13 @@
-import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
-import { join } from "path";
-
-const __dirname = new URL(".", import.meta.url).pathname;
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
+const path = require("path");
 
 export default {
   devtool: "source-map-debugids",
   cache: false,
-  entry: { index: join(__dirname, "..", "bundle.js") },
+  entry: { index: path.join(__dirname, "..", "bundle.js") },
   output: {
-    path: join(__dirname, "..", "..", "out", "webpack5"),
+    path: path.join(__dirname, "..", "..", "out", "webpack5"),
     library: {
       type: "commonjs",
     },
