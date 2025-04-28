@@ -457,8 +457,11 @@ export function createSentryBuildPluginManager(
             const tmpUploadFolder = await startSpan(
               { name: "mkdtemp", scope: sentryScope },
               async () => {
-                return await fs.promises.mkdtemp(
-                  path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+                return (
+                  process.env?.["SENTRY_TEST_OVERRIDE_TEMP_DIR"] ||
+                  (await fs.promises.mkdtemp(
+                    path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+                  ))
                 );
               }
             );
@@ -586,7 +589,7 @@ export function createSentryBuildPluginManager(
             sentryScope.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
             handleRecoverableError(e, false);
           } finally {
-            if (folderToCleanUp) {
+            if (folderToCleanUp && !process.env?.["SENTRY_TEST_OVERRIDE_TEMP_DIR"]) {
               void startSpan({ name: "cleanup", scope: sentryScope }, async () => {
                 if (folderToCleanUp) {
                   await fs.promises.rm(folderToCleanUp, { recursive: true, force: true });
