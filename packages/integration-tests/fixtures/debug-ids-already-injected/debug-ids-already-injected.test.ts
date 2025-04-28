@@ -1,6 +1,4 @@
-/* eslint-disable jest/no-standalone-expect */
-/* eslint-disable jest/expect-expect */
-import path from "path";
+import * as path from "path";
 import * as fs from "fs";
 import * as os from "os";
 import { describeNode18Plus } from "../../utils/testIf";
