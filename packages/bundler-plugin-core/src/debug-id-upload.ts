@@ -50,7 +50,7 @@ export async function prepareBundleForDebugIdUpload(
 
   const uniqueUploadName = `${debugId}-${chunkIndex}`;
 
-  bundleContent += `\n//# debugId=${debugId}`;
+  bundleContent = addDebugIdToBundleSource(bundleContent, debugId);
   const writeSourceFilePromise = fs.promises.writeFile(
     path.join(uploadFolder, `${uniqueUploadName}.js`),
     bundleContent,
@@ -92,6 +92,20 @@ function determineDebugIdFromBundleSource(code: string): string | undefined {
     return match[1];
   } else {
     return undefined;
+  }
+}
+
+const SPEC_LAST_DEBUG_ID_REGEX = /\/\/# debugId=([a-fA-F0-9-]+)(?![\s\S]*\/\/# debugId=)/m;
+
+function hasSpecCompliantDebugId(bundleSource: string): boolean {
+  return SPEC_LAST_DEBUG_ID_REGEX.test(bundleSource);
+}
+
+function addDebugIdToBundleSource(bundleSource: string, debugId: string): string {
+  if (hasSpecCompliantDebugId(bundleSource)) {
+    return bundleSource.replace(SPEC_LAST_DEBUG_ID_REGEX, `//# debugId=${debugId}`);
+  } else {
+    return `${bundleSource}\n//# debugId=${debugId}`;
   }
 }
 

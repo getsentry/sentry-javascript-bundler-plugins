@@ -1,0 +1,7 @@
+{
+  "type": "module",
+  "dependencies": {
+    "webpack": "^5",
+    "webpack-cli": "^6"
+  }
+}
