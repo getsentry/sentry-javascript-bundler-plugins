@@ -124,8 +124,17 @@ export interface Options {
      *
      * Defaults to making all sources relative to `process.cwd()` while building.
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rewriteSources?: (source: string, map: any) => string;
+    rewriteSources?: RewriteSourcesHook;
+
+    /**
+     * Hook to customize source map file resolution.
+     *
+     * The hook is called with the absolute path of the build artifact and the value of the `//# sourceMappingURL=`
+     * comment, if present. The hook should then return an absolute path indicating where to find the artifact's
+     * corresponding `.map` file. If no path is returned or the returned path doesn't exist, the standard source map
+     * resolution process will be used.
+     */
+    resolveSourceMap?: ResolveSourceMapHook;
 
     /**
      * A glob or an array of globs that specifies the build artifacts that should be deleted after the artifact upload to Sentry has been completed.
@@ -355,6 +364,11 @@ export interface Options {
     };
   };
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type RewriteSourcesHook = (source: string, map: any) => string
+
+export type ResolveSourceMapHook = (artifactPath: string, sourceMappingUrl: string | undefined) => string | undefined | Promise<string | undefined>
 
 export interface ModuleMetadata {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
