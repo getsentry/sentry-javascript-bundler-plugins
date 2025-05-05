@@ -518,7 +518,8 @@ export function createSentryBuildPluginManager(
                         tmpUploadFolder,
                         chunkIndex,
                         logger,
-                        options.sourcemaps?.rewriteSources ?? defaultRewriteSourcesHook
+                        options.sourcemaps?.rewriteSources ?? defaultRewriteSourcesHook,
+                        options.sourcemaps?.resolveSourceMap
                       );
                     }
                   );
