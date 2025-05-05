@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 3.4.0
+
+- fix: Replace existing debug ID comments (#730)
+- feat: Expose bundler plugin primitives via `createSentryBuildPluginManager` (#714)
+
 ## 3.3.1
 
 - fix(webpack5): All `esm` files must have `.mjs` postfix (#721)
