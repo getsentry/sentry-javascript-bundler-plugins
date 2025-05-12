@@ -125,7 +125,10 @@ export async function determineSourceMapPathFromBundle(
   const searchLocations: string[] = [];
 
   if (resolveSourceMapHook) {
+    logger.debug(`Calling sourcemaps.resolveSourceMap(${JSON.stringify(bundlePath)}, ${JSON.stringify(sourceMappingUrl)})`);
     const customPath = await resolveSourceMapHook(bundlePath, sourceMappingUrl);
+    logger.debug(`resolveSourceMap hook returned: ${JSON.stringify(customPath)}`);
+
     if (customPath) {
       searchLocations.push(customPath);
     }
@@ -166,7 +169,8 @@ export async function determineSourceMapPathFromBundle(
 
   // This is just a debug message because it can be quite spammy for some frameworks
   logger.debug(
-    `Could not determine source map path for bundle: \`${bundlePath}\`` +
+    `Could not determine source map path for bundle \`${bundlePath}\`` +
+    ` with sourceMappingURL=${sourceMappingUrl === undefined ? "undefined" : `\`${sourceMappingUrl}\``}` +
     ` - Did you turn on source map generation in your bundler?` +
     ` (Attempted paths: ${searchLocations.map(e => `\`${e}\``).join(", ")})`
   );

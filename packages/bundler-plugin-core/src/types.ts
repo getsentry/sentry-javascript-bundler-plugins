@@ -130,9 +130,20 @@ export interface Options {
      * Hook to customize source map file resolution.
      *
      * The hook is called with the absolute path of the build artifact and the value of the `//# sourceMappingURL=`
-     * comment, if present. The hook should then return an absolute path indicating where to find the artifact's
-     * corresponding `.map` file. If no path is returned or the returned path doesn't exist, the standard source map
-     * resolution process will be used.
+     * comment, if present. The hook should then return an absolute path (or a promise that resolves to one) indicating
+     * where to find the artifact's corresponding source map file. If no path is returned or the returned path doesn't
+     * exist, the standard source map resolution process will be used.
+     *
+     * The standard process first tries to resolve based on the `//# sourceMappingURL=` value (it supports `file://`
+     * urls and absolute/relative paths). If that path doesn't exist, it then looks for a file named
+     * `${artifactName}.map` in the same directory as the artifact.
+     *
+     * Note: This is mostly helpful for complex builds with custom source map generation. For example, if you put source
+     * maps into a separate directory and rewrite the `//# sourceMappingURL=` comment to something other than a relative
+     * directory, sentry will be unable to locate the source maps for a given build artifact. This hook allows you to
+     * implement the resolution process yourself.
+     *
+     * Use the `debug` option to print information about source map resolution.
      */
     resolveSourceMap?: ResolveSourceMapHook;
 
