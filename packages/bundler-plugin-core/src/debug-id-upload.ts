@@ -1,14 +1,11 @@
 import fs from "fs";
 import path from "path";
+import * as url from "url";
 import * as util from "util";
 import { promisify } from "util";
 import { SentryBuildPluginManager } from "./build-plugin-manager";
 import { Logger } from "./logger";
-
-interface RewriteSourcesHook {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (source: string, map: any): string;
-}
+import { ResolveSourceMapHook, RewriteSourcesHook } from "./types";
 
 interface DebugIdUploadPluginOptions {
   sentryBuildPluginManager: SentryBuildPluginManager;
@@ -27,7 +24,8 @@ export async function prepareBundleForDebugIdUpload(
   uploadFolder: string,
   chunkIndex: number,
   logger: Logger,
-  rewriteSourcesHook: RewriteSourcesHook
+  rewriteSourcesHook: RewriteSourcesHook,
+  resolveSourceMapHook: ResolveSourceMapHook | undefined
 ) {
   let bundleContent;
   try {
@@ -60,7 +58,8 @@ export async function prepareBundleForDebugIdUpload(
   const writeSourceMapFilePromise = determineSourceMapPathFromBundle(
     bundleFilePath,
     bundleContent,
-    logger
+    logger,
+    resolveSourceMapHook
   ).then(async (sourceMapPath) => {
     if (sourceMapPath) {
       await prepareSourceMapForDebugIdUpload(
@@ -114,61 +113,72 @@ function addDebugIdToBundleSource(bundleSource: string, debugId: string): string
  *
  * @returns the path to the bundle's source map or `undefined` if none could be found.
  */
-async function determineSourceMapPathFromBundle(
+export async function determineSourceMapPathFromBundle(
   bundlePath: string,
   bundleSource: string,
-  logger: Logger
+  logger: Logger,
+  resolveSourceMapHook: ResolveSourceMapHook | undefined
 ): Promise<string | undefined> {
-  // 1. try to find source map at `sourceMappingURL` location
   const sourceMappingUrlMatch = bundleSource.match(/^\s*\/\/# sourceMappingURL=(.*)$/m);
-  if (sourceMappingUrlMatch) {
-    const sourceMappingUrl = path.normalize(sourceMappingUrlMatch[1] as string);
+  const sourceMappingUrl = sourceMappingUrlMatch ? (sourceMappingUrlMatch[1] as string) : undefined;
 
-    let isUrl;
-    let isSupportedUrl;
+  const searchLocations: string[] = [];
+
+  if (resolveSourceMapHook) {
+    logger.debug(
+      `Calling sourcemaps.resolveSourceMap(${JSON.stringify(bundlePath)}, ${JSON.stringify(
+        sourceMappingUrl
+      )})`
+    );
+    const customPath = await resolveSourceMapHook(bundlePath, sourceMappingUrl);
+    logger.debug(`resolveSourceMap hook returned: ${JSON.stringify(customPath)}`);
+
+    if (customPath) {
+      searchLocations.push(customPath);
+    }
+  }
+
+  // 1. try to find source map at `sourceMappingURL` location
+  if (sourceMappingUrl) {
+    let parsedUrl: URL | undefined;
     try {
-      const url = new URL(sourceMappingUrl);
-      isUrl = true;
-      isSupportedUrl = url.protocol === "file:";
+      parsedUrl = new URL(sourceMappingUrl);
     } catch {
-      isUrl = false;
-      isSupportedUrl = false;
-    }
-
-    let absoluteSourceMapPath;
-    if (isSupportedUrl) {
-      absoluteSourceMapPath = sourceMappingUrl;
-    } else if (isUrl) {
       // noop
-    } else if (path.isAbsolute(sourceMappingUrl)) {
-      absoluteSourceMapPath = sourceMappingUrl;
-    } else {
-      absoluteSourceMapPath = path.join(path.dirname(bundlePath), sourceMappingUrl);
     }
 
-    if (absoluteSourceMapPath) {
-      try {
-        // Check if the file actually exists
-        await util.promisify(fs.access)(absoluteSourceMapPath);
-        return absoluteSourceMapPath;
-      } catch (e) {
-        // noop
-      }
+    if (parsedUrl && parsedUrl.protocol === "file:") {
+      searchLocations.push(url.fileURLToPath(sourceMappingUrl));
+    } else if (parsedUrl) {
+      // noop, non-file urls don't translate to a local sourcemap file
+    } else if (path.isAbsolute(sourceMappingUrl)) {
+      searchLocations.push(path.normalize(sourceMappingUrl));
+    } else {
+      searchLocations.push(path.normalize(path.join(path.dirname(bundlePath), sourceMappingUrl)));
     }
   }
 
   // 2. try to find source map at path adjacent to chunk source, but with `.map` appended
-  try {
-    const adjacentSourceMapFilePath = bundlePath + ".map";
-    await util.promisify(fs.access)(adjacentSourceMapFilePath);
-    return adjacentSourceMapFilePath;
-  } catch (e) {
-    // noop
+  searchLocations.push(bundlePath + ".map");
+
+  for (const searchLocation of searchLocations) {
+    try {
+      await util.promisify(fs.access)(searchLocation);
+      logger.debug(`Source map found for bundle \`${bundlePath}\`: \`${searchLocation}\``);
+      return searchLocation;
+    } catch (e) {
+      // noop
+    }
   }
 
   // This is just a debug message because it can be quite spammy for some frameworks
   logger.debug(
-    `Could not determine source map path for bundle: ${bundlePath} - Did you turn on source map generation in your bundler?`
+    `Could not determine source map path for bundle \`${bundlePath}\`` +
+      ` with sourceMappingURL=${
+        sourceMappingUrl === undefined ? "undefined" : `\`${sourceMappingUrl}\``
+      }` +
+      ` - Did you turn on source map generation in your bundler?` +
+      ` (Attempted paths: ${searchLocations.map((e) => `\`${e}\``).join(", ")})`
   );
   return undefined;
 }
