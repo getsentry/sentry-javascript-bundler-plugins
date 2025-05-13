@@ -377,9 +377,12 @@ export interface Options {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type RewriteSourcesHook = (source: string, map: any) => string
+export type RewriteSourcesHook = (source: string, map: any) => string;
 
-export type ResolveSourceMapHook = (artifactPath: string, sourceMappingUrl: string | undefined) => string | undefined | Promise<string | undefined>
+export type ResolveSourceMapHook = (
+  artifactPath: string,
+  sourceMappingUrl: string | undefined
+) => string | undefined | Promise<string | undefined>;
 
 export interface ModuleMetadata {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

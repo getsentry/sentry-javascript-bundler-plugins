@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import * as url from "url"
+import * as url from "url";
 import * as util from "util";
 import { promisify } from "util";
 import { SentryBuildPluginManager } from "./build-plugin-manager";
@@ -120,12 +120,16 @@ export async function determineSourceMapPathFromBundle(
   resolveSourceMapHook: ResolveSourceMapHook | undefined
 ): Promise<string | undefined> {
   const sourceMappingUrlMatch = bundleSource.match(/^\s*\/\/# sourceMappingURL=(.*)$/m);
-  const sourceMappingUrl = sourceMappingUrlMatch ? sourceMappingUrlMatch[1] as string : undefined;
+  const sourceMappingUrl = sourceMappingUrlMatch ? (sourceMappingUrlMatch[1] as string) : undefined;
 
   const searchLocations: string[] = [];
 
   if (resolveSourceMapHook) {
-    logger.debug(`Calling sourcemaps.resolveSourceMap(${JSON.stringify(bundlePath)}, ${JSON.stringify(sourceMappingUrl)})`);
+    logger.debug(
+      `Calling sourcemaps.resolveSourceMap(${JSON.stringify(bundlePath)}, ${JSON.stringify(
+        sourceMappingUrl
+      )})`
+    );
     const customPath = await resolveSourceMapHook(bundlePath, sourceMappingUrl);
     logger.debug(`resolveSourceMap hook returned: ${JSON.stringify(customPath)}`);
 
@@ -148,19 +152,19 @@ export async function determineSourceMapPathFromBundle(
     } else if (parsedUrl) {
       // noop, non-file urls don't translate to a local sourcemap file
     } else if (path.isAbsolute(sourceMappingUrl)) {
-      searchLocations.push(path.normalize(sourceMappingUrl))
+      searchLocations.push(path.normalize(sourceMappingUrl));
     } else {
       searchLocations.push(path.normalize(path.join(path.dirname(bundlePath), sourceMappingUrl)));
     }
   }
 
   // 2. try to find source map at path adjacent to chunk source, but with `.map` appended
-  searchLocations.push(bundlePath + ".map")
+  searchLocations.push(bundlePath + ".map");
 
   for (const searchLocation of searchLocations) {
     try {
       await util.promisify(fs.access)(searchLocation);
-      logger.debug(`Source map found for bundle \`${bundlePath}\`: \`${searchLocation}\``)
+      logger.debug(`Source map found for bundle \`${bundlePath}\`: \`${searchLocation}\``);
       return searchLocation;
     } catch (e) {
       // noop
@@ -170,9 +174,11 @@ export async function determineSourceMapPathFromBundle(
   // This is just a debug message because it can be quite spammy for some frameworks
   logger.debug(
     `Could not determine source map path for bundle \`${bundlePath}\`` +
-    ` with sourceMappingURL=${sourceMappingUrl === undefined ? "undefined" : `\`${sourceMappingUrl}\``}` +
-    ` - Did you turn on source map generation in your bundler?` +
-    ` (Attempted paths: ${searchLocations.map(e => `\`${e}\``).join(", ")})`
+      ` with sourceMappingURL=${
+        sourceMappingUrl === undefined ? "undefined" : `\`${sourceMappingUrl}\``
+      }` +
+      ` - Did you turn on source map generation in your bundler?` +
+      ` (Attempted paths: ${searchLocations.map((e) => `\`${e}\``).join(", ")})`
   );
   return undefined;
 }

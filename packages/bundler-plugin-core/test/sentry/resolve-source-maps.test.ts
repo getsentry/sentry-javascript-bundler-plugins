@@ -15,10 +15,10 @@ const separateBundlePath = path.join(fixtureDir, "separate-directory/bundles/ind
 const separateSourceMapPath = path.join(fixtureDir, "separate-directory/sourcemaps/index.js.map");
 const separateBundleContent = fs.readFileSync(separateBundlePath, "utf-8");
 
-const sourceMapUrl = "https://sourcemaps.example.com/foo/index.js.map"
+const sourceMapUrl = "https://sourcemaps.example.com/foo/index.js.map";
 
 function srcMappingUrl(url: string): string {
-  return `\n//# sourceMappingURL=${url}`
+  return `\n//# sourceMappingURL=${url}`;
 }
 
 describe("Resolve source maps", () => {
@@ -82,7 +82,8 @@ describe("Resolve source maps", () => {
       expect(
         await determineSourceMapPathFromBundle(
           separateBundlePath,
-          separateBundleContent + srcMappingUrl(path.relative(path.dirname(separateBundlePath), separateSourceMapPath)),
+          separateBundleContent +
+            srcMappingUrl(path.relative(path.dirname(separateBundlePath), separateSourceMapPath)),
           logger,
           undefined
         )
@@ -103,7 +104,7 @@ describe("Resolve source maps", () => {
     });
 
     it("should pass the correct values to the resolveSourceMap hook", async () => {
-      const hook = jest.fn(() => separateSourceMapPath)
+      const hook = jest.fn(() => separateSourceMapPath);
       expect(
         await determineSourceMapPathFromBundle(
           separateBundlePath,
@@ -112,11 +113,11 @@ describe("Resolve source maps", () => {
           hook
         )
       ).toEqual(separateSourceMapPath);
-      expect(hook.mock.calls[0]).toEqual([separateBundlePath, sourceMapUrl])
+      expect(hook.mock.calls[0]).toEqual([separateBundlePath, sourceMapUrl]);
     });
 
     it("should pass the correct values to the resolveSourceMap hook when no sourceMappingURL is present", async () => {
-      const hook = jest.fn(() => separateSourceMapPath)
+      const hook = jest.fn(() => separateSourceMapPath);
       expect(
         await determineSourceMapPathFromBundle(
           separateBundlePath,
@@ -125,7 +126,7 @@ describe("Resolve source maps", () => {
           hook
         )
       ).toEqual(separateSourceMapPath);
-      expect(hook.mock.calls[0]).toEqual([separateBundlePath, undefined])
+      expect(hook.mock.calls[0]).toEqual([separateBundlePath, undefined]);
     });
 
     it("should prefer resolveSourceMap result over heuristic results", async () => {
