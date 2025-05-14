@@ -4,6 +4,8 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+Work in this release was contributed by @thecodewarrior. Thank you for your contribution!
+
 ## 3.4.0
 
 - fix: Replace existing debug ID comments (#730)
