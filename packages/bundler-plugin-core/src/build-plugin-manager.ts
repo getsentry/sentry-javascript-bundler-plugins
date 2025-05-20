@@ -12,8 +12,8 @@ import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { normalizeUserOptions, validateOptions } from "./options-mapping";
-import { createLogger } from "./logger";
+import { NormalizedOptions, normalizeUserOptions, validateOptions } from "./options-mapping";
+import { createLogger, Logger } from "./logger";
 import {
   allowedToSendTelemetry,
   createSentryInstance,
@@ -25,7 +25,60 @@ import { glob } from "glob";
 import { defaultRewriteSourcesHook, prepareBundleForDebugIdUpload } from "./debug-id-upload";
 import { dynamicSamplingContextToSentryBaggageHeader } from "@sentry/utils";
 
-export type SentryBuildPluginManager = ReturnType<typeof createSentryBuildPluginManager>;
+export type SentryBuildPluginManager = {
+  /**
+   * A logger instance that takes the options passed to the build plugin manager into account. (for silencing and log level etc.)
+   */
+  logger: Logger;
+
+  /**
+   * Options after normalization. Includes things like the inferred release name.
+   */
+  normalizedOptions: NormalizedOptions;
+  /**
+   * Magic strings and their replacement values that can be used for bundle size optimizations. This already takes
+   * into account the options passed to the build plugin manager.
+   */
+  bundleSizeOptimizationReplacementValues: SentrySDKBuildFlags;
+  /**
+   * Metadata that should be injected into bundles if possible. Takes into account options passed to the build plugin manager.
+   */
+  // See `generateModuleMetadataInjectorCode` for how this should be used exactly
+  bundleMetadata: Record<string, unknown>;
+
+  /**
+   * Contains utility functions for emitting telemetry via the build plugin manager.
+   */
+  telemetry: {
+    /**
+     * Emits a `Sentry Bundler Plugin execution` signal.
+     */
+    emitBundlerPluginExecutionSignal(): Promise<void>;
+  };
+
+  /**
+   * Will potentially create a release based on the build plugin manager options.
+   *
+   * Also
+   * - finalizes the release
+   * - sets commits
+   * - uploads legacy sourcemaps
+   * - adds deploy information
+   */
+  createRelease(): Promise<void>;
+
+  /**
+   * Uploads sourcemaps using the "Debug ID" method. This function takes a list of build artifact paths that will be uploaded
+   */
+  uploadSourcemaps(buildArtifactPaths: string[]): Promise<void>;
+
+  /**
+   * Will delete artifacts based on the passed `sourcemaps.filesToDeleteAfterUpload` option.
+   */
+  deleteArtifacts(): Promise<void>;
+
+  createDependencyOnBuildArtifacts: () => () => void;
+};
 
 /**
  * Creates a build plugin manager that exposes primitives for everything that a Sentry JavaScript SDK or build tooling may do during a build.
@@ -44,7 +97,7 @@ export function createSentryBuildPluginManager(
      */
     loggerPrefix: string;
   }
-) {
+): SentryBuildPluginManager {
   const logger = createLogger({
     prefix: bundlerPluginMetaContext.loggerPrefix,
     silent: userOptions.silent ?? false,
@@ -72,6 +125,36 @@ export function createSentryBuildPluginManager(
   }
 
   const options = normalizeUserOptions(userOptions);
+
+  if (options.disable) {
+    // Early-return a noop build plugin manager instance so that we
+    // don't continue validating options, setting up Sentry, etc.
+    // Otherwise we might create side-effects or log messages that
+    // users don't expect from a disabled plugin.
+    return {
+      normalizedOptions: options,
+      logger,
+      bundleSizeOptimizationReplacementValues: {},
+      telemetry: {
+        emitBundlerPluginExecutionSignal: async () => {
+          /* noop */
+        },
+      },
+      bundleMetadata: {},
+      createRelease: async () => {
+        /* noop */
+      },
+      uploadSourcemaps: async () => {
+        /* noop */
+      },
+      deleteArtifacts: async () => {
+        /* noop */
+      },
+      createDependencyOnBuildArtifacts: () => () => {
+        /* noop */
+      },
+    };
+  }
 
   const shouldSendTelemetry = allowedToSendTelemetry(options);
   const { sentryScope, sentryClient } = createSentryInstance(
