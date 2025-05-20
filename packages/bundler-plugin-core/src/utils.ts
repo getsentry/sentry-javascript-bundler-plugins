@@ -311,7 +311,7 @@ export function generateGlobalInjectorCode({
 }: {
   release: string;
   injectBuildInformation: boolean;
-}) {
+}): string {
   // The code below is mostly ternary operators because it saves bundle size.
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
   let code = `{
@@ -341,7 +341,7 @@ export function generateGlobalInjectorCode({
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function generateModuleMetadataInjectorCode(metadata: any) {
+export function generateModuleMetadataInjectorCode(metadata: any): string {
   // The code below is mostly ternary operators because it saves bundle size.
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
   // We are merging the metadata objects in case modules are bundled twice with the plugin
@@ -369,7 +369,11 @@ export function generateModuleMetadataInjectorCode(metadata: any) {
 }`;
 }
 
-function getBuildInformation() {
+export function getBuildInformation(): {
+  deps: string[];
+  depsVersions: Record<string, number>;
+  nodeVersion: number | undefined;
+} {
   const packageJson = getPackageJson();
 
   const { deps, depsVersions } = packageJson
@@ -413,7 +417,7 @@ export function replaceBooleanFlagsInCode(
 }
 
 // https://turbo.build/repo/docs/reference/system-environment-variables#environment-variables-in-tasks
-export function getTurborepoEnvPassthroughWarning(envVarName: string) {
+export function getTurborepoEnvPassthroughWarning(envVarName: string): string {
   return process.env["TURBO_HASH"]
     ? `\nYou seem to be using Turborepo, did you forget to put ${envVarName} in \`passThroughEnv\`? https://turbo.build/repo/docs/reference/configuration#passthroughenv`
     : "";

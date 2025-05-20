@@ -64,7 +64,7 @@ export function setTelemetryDataOnScope(
   options: NormalizedOptions,
   scope: Scope,
   buildTool: string
-) {
+): void {
   const { org, project, release, errorHandler, sourcemaps, reactComponentAnnotation } = options;
 
   scope.setTag("upload-legacy-sourcemaps", !!release.uploadLegacySourcemaps);
@@ -161,7 +161,7 @@ export async function allowedToSendTelemetry(options: NormalizedOptions): Promis
 /**
  * Flushing the SDK client can fail. We never want to crash the plugin because of telemetry.
  */
-export async function safeFlushTelemetry(sentryClient: Client) {
+export async function safeFlushTelemetry(sentryClient: Client): Promise<void> {
   try {
     await sentryClient.flush(2000);
   } catch {

@@ -172,7 +172,7 @@ export function createSentryBuildPluginManager(
 
   let sessionHasEnded = false; // Just to prevent infinite loops with beforeExit, which is called whenever the event loop empties out
 
-  function endSession() {
+  function endSession(): void {
     if (sessionHasEnded) {
       return;
     }
@@ -206,7 +206,7 @@ export function createSentryBuildPluginManager(
    * or continue up to them. By default, @param throwByDefault controls if the plugin
    * should throw an error (which causes a build fail in most bundlers) or continue.
    */
-  function handleRecoverableError(unknownError: unknown, throwByDefault: boolean) {
+  function handleRecoverableError(unknownError: unknown, throwByDefault: boolean): void {
     sentrySession.status = "abnormal";
     try {
       if (options.errorHandler) {
@@ -251,13 +251,13 @@ export function createSentryBuildPluginManager(
   const dependenciesOnBuildArtifacts = new Set<symbol>();
   const buildArtifactsDependencySubscribers: (() => void)[] = [];
 
-  function notifyBuildArtifactDependencySubscribers() {
+  function notifyBuildArtifactDependencySubscribers(): void {
     buildArtifactsDependencySubscribers.forEach((subscriber) => {
       subscriber();
     });
   }
 
-  function createDependencyOnBuildArtifacts() {
+  function createDependencyOnBuildArtifacts(): () => void {
     const dependencyIdentifier = Symbol();
     dependenciesOnBuildArtifacts.add(dependencyIdentifier);
 
@@ -273,7 +273,7 @@ export function createSentryBuildPluginManager(
    * It is very important that this function is called as late as possible before wanting to await the Promise to give
    * the dependency producers as much time as possible to register themselves.
    */
-  function waitUntilBuildArtifactDependenciesAreFreed() {
+  function waitUntilBuildArtifactDependenciesAreFreed(): Promise<void> {
     return new Promise<void>((resolve) => {
       buildArtifactsDependencySubscribers.push(() => {
         if (dependenciesOnBuildArtifacts.size === 0) {
@@ -607,7 +607,7 @@ export function createSentryBuildPluginManager(
                     }
                   );
                   const workers: Promise<void>[] = [];
-                  const worker = async () => {
+                  const worker = async (): Promise<void> => {
                     while (preparationTasks.length > 0) {
                       const task = preparationTasks.shift();
                       if (task) {

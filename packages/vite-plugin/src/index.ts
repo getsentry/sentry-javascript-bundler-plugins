@@ -10,7 +10,7 @@ import {
   createComponentNameAnnotateHooks,
   Logger,
 } from "@sentry/bundler-plugin-core";
-import { UnpluginOptions } from "unplugin";
+import { UnpluginOptions, VitePlugin } from "unplugin";
 
 function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   return {
@@ -33,14 +33,14 @@ function viteComponentNameAnnotatePlugin(ignoredComponents?: string[]): Unplugin
 function viteDebugIdInjectionPlugin(): UnpluginOptions {
   return {
     name: "sentry-vite-debug-id-injection-plugin",
-    vite: createRollupDebugIdInjectionHooks(),
+    vite: createRollupDebugIdInjectionHooks() as Partial<VitePlugin>,
   };
 }
 
 function viteModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOptions {
   return {
     name: "sentry-vite-module-metadata-injection-plugin",
-    vite: createRollupModuleMetadataInjectionHooks(injectionCode),
+    vite: createRollupModuleMetadataInjectionHooks(injectionCode) as Partial<VitePlugin>,
   };
 }
 
@@ -51,7 +51,11 @@ function viteDebugIdUploadPlugin(
 ): UnpluginOptions {
   return {
     name: "sentry-vite-debug-id-upload-plugin",
-    vite: createRollupDebugIdUploadHooks(upload, logger, createDependencyOnBuildArtifacts),
+    vite: createRollupDebugIdUploadHooks(
+      upload,
+      logger,
+      createDependencyOnBuildArtifacts
+    ) as Partial<VitePlugin>,
   };
 }
 

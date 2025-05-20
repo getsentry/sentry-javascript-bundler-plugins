@@ -22,4 +22,7 @@ module.exports = {
       version: jestPackageJson.version,
     },
   },
+  rules: {
+    "@typescript-eslint/explicit-function-return-type": "off",
+  },
 };

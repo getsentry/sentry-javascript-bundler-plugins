@@ -26,7 +26,7 @@ export async function prepareBundleForDebugIdUpload(
   logger: Logger,
   rewriteSourcesHook: RewriteSourcesHook,
   resolveSourceMapHook: ResolveSourceMapHook | undefined
-) {
+): Promise<void> {
   let bundleContent;
   try {
     bundleContent = await promisify(fs.readFile)(bundleFilePath, "utf8");
