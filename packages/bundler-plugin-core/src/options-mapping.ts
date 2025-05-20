@@ -1,12 +1,90 @@
 import { Logger } from "./logger";
-import { Options as UserOptions, SetCommitsOptions } from "./types";
+import {
+  Options as UserOptions,
+  SetCommitsOptions,
+  RewriteSourcesHook,
+  ResolveSourceMapHook,
+  IncludeEntry,
+  ModuleMetadata,
+  ModuleMetadataCallback,
+} from "./types";
 import { determineReleaseName } from "./utils";
 
-export type NormalizedOptions = ReturnType<typeof normalizeUserOptions>;
+export type NormalizedOptions = {
+  org: string | undefined;
+  project: string | undefined;
+  authToken: string | undefined;
+  url: string;
+  headers: Record<string, string> | undefined;
+  debug: boolean;
+  silent: boolean;
+  errorHandler: ((err: Error) => void) | undefined;
+  telemetry: boolean;
+  disable: boolean;
+  sourcemaps:
+    | {
+        disable?: boolean;
+        assets?: string | string[];
+        ignore?: string | string[];
+        rewriteSources?: RewriteSourcesHook;
+        resolveSourceMap?: ResolveSourceMapHook;
+        filesToDeleteAfterUpload?: string | string[] | Promise<string | string[] | undefined>;
+      }
+    | undefined;
+  release: {
+    name: string | undefined;
+    inject: boolean;
+    create: boolean;
+    finalize: boolean;
+    vcsRemote: string;
+    setCommits:
+      | (SetCommitsOptions & {
+          shouldNotThrowOnFailure?: boolean;
+        })
+      | false
+      | undefined;
+    dist?: string;
+    deploy?: {
+      env: string;
+      started?: number | string;
+      finished?: number | string;
+      time?: number;
+      name?: string;
+      url?: string;
+    };
+    uploadLegacySourcemaps?: string | IncludeEntry | Array<string | IncludeEntry>;
+  };
+  bundleSizeOptimizations:
+    | {
+        excludeDebugStatements?: boolean;
+        excludeTracing?: boolean;
+        excludeReplayCanvas?: boolean;
+        excludeReplayShadowDom?: boolean;
+        excludeReplayIframe?: boolean;
+        excludeReplayWorker?: boolean;
+      }
+    | undefined;
+  reactComponentAnnotation:
+    | {
+        enabled?: boolean;
+        ignoredComponents?: string[];
+      }
+    | undefined;
+  _metaOptions: {
+    telemetry: {
+      metaFramework: string | undefined;
+    };
+  };
+  applicationKey: string | undefined;
+  moduleMetadata: ModuleMetadata | ModuleMetadataCallback | undefined;
+  _experiments: {
+    injectBuildInformation?: boolean;
+  } & Record<string, unknown>;
+};
 
 export const SENTRY_SAAS_URL = "https://sentry.io";
 
-export function normalizeUserOptions(userOptions: UserOptions) {
+export function normalizeUserOptions(userOptions: UserOptions): NormalizedOptions {
   const options = {
     org: userOptions.org ?? process.env["SENTRY_ORG"],
     project: userOptions.project ?? process.env["SENTRY_PROJECT"],
