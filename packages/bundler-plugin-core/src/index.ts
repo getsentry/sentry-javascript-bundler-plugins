@@ -4,15 +4,9 @@ import SentryCli from "@sentry/cli";
 import { logger } from "@sentry/utils";
 import * as fs from "fs";
 import { glob } from "glob";
-import MagicString from "magic-string";
+import MagicString, { SourceMap } from "magic-string";
 import * as path from "path";
-import {
-  createUnplugin,
-  RollupPlugin,
-  TransformResult,
-  UnpluginInstance,
-  UnpluginOptions,
-} from "unplugin";
+import { createUnplugin, TransformResult, UnpluginInstance, UnpluginOptions } from "unplugin";
 import { createSentryBuildPluginManager } from "./build-plugin-manager";
 import { createDebugIdUploadFunction } from "./debug-id-upload";
 import { Logger } from "./logger";
@@ -273,8 +267,23 @@ const COMMENT_USE_STRICT_REGEX =
   // Note: CodeQL complains that this regex potentially has n^2 runtime. This likely won't affect realistic files.
   /^(?:\s*|\/\*(?:.|\r|\n)*?\*\/|\/\/.*[\n\r])*(?:"[^"]*";|'[^']*';)?/;
 
+/**
+ * Simplified `renderChunk` hook type from Rollup.
+ * We can't reference the type directly because the Vite plugin complains
+ * about type mismatches
+ */
+type RenderChunkHook = (
+  code: string,
+  chunk: {
+    fileName: string;
+  }
+) => {
+  code: string;
+  map: SourceMap;
+} | null;
+
 export function createRollupDebugIdInjectionHooks(): {
-  renderChunk: RollupPlugin["renderChunk"];
+  renderChunk: RenderChunkHook;
 } {
   return {
     renderChunk(code: string, chunk: { fileName: string }) {
@@ -313,7 +322,7 @@ export function createRollupDebugIdInjectionHooks(): {
 }
 
 export function createRollupModuleMetadataInjectionHooks(injectionCode: string): {
-  renderChunk: RollupPlugin["renderChunk"];
+  renderChunk: RenderChunkHook;
 } {
   return {
     renderChunk(code: string, chunk: { fileName: string }) {
@@ -353,7 +362,10 @@ export function createRollupDebugIdUploadHooks(
   _logger: Logger,
   createDependencyOnBuildArtifacts: () => () => void
 ): {
-  writeBundle: RollupPlugin["writeBundle"];
+  writeBundle: (
+    outputOptions: { dir?: string; file?: string },
+    bundle: { [fileName: string]: unknown }
+  ) => Promise<void>;
 } {
   const freeGlobalDependencyOnDebugIdSourcemapArtifacts = createDependencyOnBuildArtifacts();
   return {

@@ -10,7 +10,7 @@ import {
   createComponentNameAnnotateHooks,
   Logger,
 } from "@sentry/bundler-plugin-core";
-import { UnpluginOptions, VitePlugin } from "unplugin";
+import { UnpluginOptions } from "unplugin";
 
 function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   return {
@@ -33,14 +33,17 @@ function viteComponentNameAnnotatePlugin(ignoredComponents?: string[]): Unplugin
 function viteDebugIdInjectionPlugin(): UnpluginOptions {
   return {
     name: "sentry-vite-debug-id-injection-plugin",
-    vite: createRollupDebugIdInjectionHooks() as Partial<VitePlugin>,
+    // type cast necessary because the return type of createRollupDebugIdInjectionHooks
+    // is a pass-through from `rollup` which is not compatible with the VitePlugin type
+    // for some rason
+    vite: createRollupDebugIdInjectionHooks(),
   };
 }
 
 function viteModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOptions {
   return {
     name: "sentry-vite-module-metadata-injection-plugin",
-    vite: createRollupModuleMetadataInjectionHooks(injectionCode) as Partial<VitePlugin>,
+    vite: createRollupModuleMetadataInjectionHooks(injectionCode),
   };
 }
 
@@ -51,11 +54,7 @@ function viteDebugIdUploadPlugin(
 ): UnpluginOptions {
   return {
     name: "sentry-vite-debug-id-upload-plugin",
-    vite: createRollupDebugIdUploadHooks(
-      upload,
-      logger,
-      createDependencyOnBuildArtifacts
-    ) as Partial<VitePlugin>,
+    vite: createRollupDebugIdUploadHooks(upload, logger, createDependencyOnBuildArtifacts),
   };
 }
 
