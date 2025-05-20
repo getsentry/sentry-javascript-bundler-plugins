@@ -33,9 +33,6 @@ function viteComponentNameAnnotatePlugin(ignoredComponents?: string[]): Unplugin
 function viteDebugIdInjectionPlugin(): UnpluginOptions {
   return {
     name: "sentry-vite-debug-id-injection-plugin",
-    // type cast necessary because the return type of createRollupDebugIdInjectionHooks
-    // is a pass-through from `rollup` which is not compatible with the VitePlugin type
-    // for some rason
     vite: createRollupDebugIdInjectionHooks(),
   };
 }
