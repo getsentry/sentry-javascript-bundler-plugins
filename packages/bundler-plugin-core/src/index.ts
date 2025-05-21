@@ -4,9 +4,9 @@ import SentryCli from "@sentry/cli";
 import { logger } from "@sentry/utils";
 import * as fs from "fs";
 import { glob } from "glob";
-import MagicString from "magic-string";
+import MagicString, { SourceMap } from "magic-string";
 import * as path from "path";
-import { createUnplugin, TransformResult, UnpluginOptions } from "unplugin";
+import { createUnplugin, TransformResult, UnpluginInstance, UnpluginOptions } from "unplugin";
 import { createSentryBuildPluginManager } from "./build-plugin-manager";
 import { createDebugIdUploadFunction } from "./debug-id-upload";
 import { Logger } from "./logger";
@@ -14,9 +14,7 @@ import { Options, SentrySDKBuildFlags } from "./types";
 import {
   generateGlobalInjectorCode,
   generateModuleMetadataInjectorCode,
-  getDependencies,
-  getPackageJson,
-  parseMajorVersion,
+  getBuildInformation as actualGetBuildInformation,
   replaceBooleanFlagsInCode,
   stringToUUID,
   stripQueryAndHashFromPath,
@@ -46,7 +44,7 @@ export function sentryUnpluginFactory({
   debugIdInjectionPlugin,
   debugIdUploadPlugin,
   bundleSizeOptimizationsPlugin,
-}: SentryUnpluginFactoryOptions) {
+}: SentryUnpluginFactoryOptions): UnpluginInstance<Options | undefined, true> {
   return createUnplugin<Options | undefined, true>((userOptions = {}, unpluginMetaContext) => {
     const sentryBuildPluginManager = createSentryBuildPluginManager(userOptions, {
       loggerPrefix:
@@ -177,22 +175,11 @@ export function sentryUnpluginFactory({
 }
 
 /**
- * @deprecated
+ * @deprecated This will be removed in v4
  */
-// TODO(v4): Don't export this from the package
-export function getBuildInformation() {
-  const packageJson = getPackageJson();
-
-  const { deps, depsVersions } = packageJson
-    ? getDependencies(packageJson)
-    : { deps: [], depsVersions: {} };
-
-  return {
-    deps,
-    depsVersions,
-    nodeVersion: parseMajorVersion(process.version),
-  };
-}
+// TODO(v4): Don't export this from the package but keep the utils version
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export const getBuildInformation = actualGetBuildInformation;
 
 /**
  * Determines whether the Sentry CLI binary is in its expected location.
@@ -203,7 +190,11 @@ export function sentryCliBinaryExists(): boolean {
   return fs.existsSync(SentryCli.getPath());
 }
 
-export function createRollupReleaseInjectionHooks(injectionCode: string) {
+export function createRollupReleaseInjectionHooks(injectionCode: string): {
+  resolveId: UnpluginOptions["resolveId"];
+  load: UnpluginOptions["load"];
+  transform: UnpluginOptions["transform"];
+} {
   const virtualReleaseInjectionFileId = "\0sentry-release-injection-file";
   return {
     resolveId(id: string) {
@@ -260,7 +251,9 @@ export function createRollupReleaseInjectionHooks(injectionCode: string) {
   };
 }
 
-export function createRollupBundleSizeOptimizationHooks(replacementValues: SentrySDKBuildFlags) {
+export function createRollupBundleSizeOptimizationHooks(replacementValues: SentrySDKBuildFlags): {
+  transform: UnpluginOptions["transform"];
+} {
   return {
     transform(code: string) {
       return replaceBooleanFlagsInCode(code, replacementValues);
@@ -274,7 +267,24 @@ const COMMENT_USE_STRICT_REGEX =
   // Note: CodeQL complains that this regex potentially has n^2 runtime. This likely won't affect realistic files.
   /^(?:\s*|\/\*(?:.|\r|\n)*?\*\/|\/\/.*[\n\r])*(?:"[^"]*";|'[^']*';)?/;
 
-export function createRollupDebugIdInjectionHooks() {
+/**
+ * Simplified `renderChunk` hook type from Rollup.
+ * We can't reference the type directly because the Vite plugin complains
+ * about type mismatches
+ */
+type RenderChunkHook = (
+  code: string,
+  chunk: {
+    fileName: string;
+  }
+) => {
+  code: string;
+  map: SourceMap;
+} | null;
+
+export function createRollupDebugIdInjectionHooks(): {
+  renderChunk: RenderChunkHook;
+} {
   return {
     renderChunk(code: string, chunk: { fileName: string }) {
       if (
@@ -311,7 +321,9 @@ export function createRollupDebugIdInjectionHooks() {
   };
 }
 
-export function createRollupModuleMetadataInjectionHooks(injectionCode: string) {
+export function createRollupModuleMetadataInjectionHooks(injectionCode: string): {
+  renderChunk: RenderChunkHook;
+} {
   return {
     renderChunk(code: string, chunk: { fileName: string }) {
       if (
@@ -349,7 +361,12 @@ export function createRollupDebugIdUploadHooks(
   upload: (buildArtifacts: string[]) => Promise<void>,
   _logger: Logger,
   createDependencyOnBuildArtifacts: () => () => void
-) {
+): {
+  writeBundle: (
+    outputOptions: { dir?: string; file?: string },
+    bundle: { [fileName: string]: unknown }
+  ) => Promise<void>;
+} {
   const freeGlobalDependencyOnDebugIdSourcemapArtifacts = createDependencyOnBuildArtifacts();
   return {
     async writeBundle(
@@ -390,7 +407,9 @@ export function createRollupDebugIdUploadHooks(
   };
 }
 
-export function createComponentNameAnnotateHooks(ignoredComponents?: string[]) {
+export function createComponentNameAnnotateHooks(ignoredComponents?: string[]): {
+  transform: UnpluginOptions["transform"];
+} {
   type ParserPlugins = NonNullable<
     NonNullable<Parameters<typeof transformAsync>[1]>["parserOpts"]
   >["plugins"];

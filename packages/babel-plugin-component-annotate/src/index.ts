@@ -152,7 +152,7 @@ function functionBodyPushAttributes(
   sourceFileName: string | undefined,
   attributeNames: string[],
   ignoredComponents: string[]
-) {
+): void {
   let jsxNode: Babel.NodePath;
 
   const functionBody = path.get("body").get("body");
@@ -248,7 +248,7 @@ function processJSX(
   sourceFileName: string | undefined,
   attributeNames: string[],
   ignoredComponents: string[]
-) {
+): void {
   if (!jsxNode) {
     return;
   }
@@ -323,7 +323,7 @@ function applyAttributes(
   sourceFileName: string | undefined,
   attributeNames: string[],
   ignoredComponents: string[]
-) {
+): void {
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
 
   if (isReactFragment(t, openingElement)) {
@@ -390,7 +390,7 @@ function applyAttributes(
   }
 }
 
-function sourceFileNameFromState(state: AnnotationPluginPass) {
+function sourceFileNameFromState(state: AnnotationPluginPass): string | undefined {
   const name = fullSourceFileNameFromState(state);
   if (!name) {
     return undefined;
@@ -416,7 +416,7 @@ function fullSourceFileNameFromState(state: AnnotationPluginPass): string | null
   return null;
 }
 
-function isKnownIncompatiblePluginFromState(state: AnnotationPluginPass) {
+function isKnownIncompatiblePluginFromState(state: AnnotationPluginPass): boolean {
   const fullSourceFileName = fullSourceFileNameFromState(state);
 
   if (!fullSourceFileName) {

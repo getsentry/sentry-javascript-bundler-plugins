@@ -10,7 +10,7 @@ import path from "node:path";
 
 type PackageJson = Record<string, unknown>;
 
-function getCwdFor(dirName: string) {
+function getCwdFor(dirName: string): string {
   return path.resolve(__dirname + dirName);
 }
 

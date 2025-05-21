@@ -93,7 +93,7 @@ function createRequestExecutor(options: BaseTransportOptions): TransportRequestE
 /**
  * Creates a Transport that uses native the native 'http' and 'https' modules to send events to Sentry.
  */
-function makeNodeTransport(options: BaseTransportOptions) {
+function makeNodeTransport(options: BaseTransportOptions): Transport {
   const requestExecutor = createRequestExecutor(options);
   return createTransport(options, requestExecutor);
 }
