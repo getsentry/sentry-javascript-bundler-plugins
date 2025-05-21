@@ -6,6 +6,13 @@
 
 Work in this release was contributed by @thecodewarrior. Thank you for your contribution!
 
+## 3.5.0
+
+- feat(core): Add hook to customize source map file resolution ([#732](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/732))
+- fix(core): Avoid console output and telemetry init when plugins are disabled ([#741](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/741))
+
+Work in this release was contributed by @thecodewarrior. Thank you for your contribution!
+
 ## 3.4.0
 
 - fix: Replace existing debug ID comments (#730)
