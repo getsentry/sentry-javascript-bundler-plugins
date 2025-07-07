@@ -45,6 +45,12 @@ function rollupDebugIdUploadPlugin(
   logger: Logger,
   createDependencyOnBuildArtifacts: () => () => void
 ): UnpluginOptions {
+  // Only for testing purposes
+  if (process.env["NODE_ENV"] === "test") {
+    if ("__SENTRY_DEBUG_ID_UPLOAD_TEST__" in global) {
+      global.__SENTRY_DEBUG_ID_UPLOAD_TEST__ = true;
+    }
+  }
   return {
     name: "sentry-rollup-debug-id-upload-plugin",
     rollup: createRollupDebugIdUploadHooks(upload, logger, createDependencyOnBuildArtifacts),
