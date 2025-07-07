@@ -10,6 +10,7 @@ function getGlobalWithDebugIdUploads(): typeof global & {
 }
 
 test("should not call upload plugin when sourcemaps are disabled", async () => {
+  process.env["SENTRY_NODE_ENV"] = "test";
   const gbl = getGlobalWithDebugIdUploads();
   gbl.__SENTRY_DEBUG_ID_UPLOAD_TEST__ = false;
 
@@ -26,9 +27,11 @@ test("should not call upload plugin when sourcemaps are disabled", async () => {
   });
 
   expect(gbl.__SENTRY_DEBUG_ID_UPLOAD_TEST__).toBe(false);
+  delete process.env["SENTRY_NODE_ENV"];
 });
 
 test("should call upload plugin when sourcemaps are enabled", async () => {
+  process.env["SENTRY_NODE_ENV"] = "test";
   const gbl = getGlobalWithDebugIdUploads();
   gbl.__SENTRY_DEBUG_ID_UPLOAD_TEST__ = false;
 
@@ -42,4 +45,5 @@ test("should call upload plugin when sourcemaps are enabled", async () => {
   });
 
   expect(gbl.__SENTRY_DEBUG_ID_UPLOAD_TEST__).toBe(true);
+  delete process.env["SENTRY_NODE_ENV"];
 });

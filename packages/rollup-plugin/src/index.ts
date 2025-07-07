@@ -46,7 +46,7 @@ function rollupDebugIdUploadPlugin(
   createDependencyOnBuildArtifacts: () => () => void
 ): UnpluginOptions {
   // Only for testing purposes
-  if (process.env["NODE_ENV"] === "test") {
+  if (process.env["SENTRY_NODE_ENV"] === "test") {
     if ("__SENTRY_DEBUG_ID_UPLOAD_TEST__" in global) {
       global.__SENTRY_DEBUG_ID_UPLOAD_TEST__ = true;
     }
