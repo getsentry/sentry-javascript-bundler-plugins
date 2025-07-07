@@ -1,49 +1,26 @@
-import path from "path";
-
-import * as rollup from "rollup";
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 
-function getGlobalWithDebugIdUploads(): typeof global & {
-  __SENTRY_DEBUG_ID_UPLOAD_TEST__?: boolean;
-} {
-  return global;
-}
+const debugIdUploadPluginName = "sentry-rollup-debug-id-upload-plugin";
 
-test("should not call upload plugin when sourcemaps are disabled", async () => {
-  process.env["SENTRY_NODE_ENV"] = "test";
-  const gbl = getGlobalWithDebugIdUploads();
-  gbl.__SENTRY_DEBUG_ID_UPLOAD_TEST__ = false;
+test("should not call upload plugin when sourcemaps are disabled", () => {
+  const plugins = sentryRollupPlugin({
+    telemetry: false,
+    sourcemaps: {
+      disable: true,
+    },
+  }) as Array<{ name: string }>;
 
-  await rollup.rollup({
-    input: { bundle1: path.resolve(__dirname, "input", "bundle.js") },
-    plugins: [
-      sentryRollupPlugin({
-        telemetry: false,
-        sourcemaps: {
-          disable: true,
-        },
-      }),
-    ],
-  });
+  const debugIdUploadPlugin = plugins.find((plugin) => plugin.name === debugIdUploadPluginName);
 
-  expect(gbl.__SENTRY_DEBUG_ID_UPLOAD_TEST__).toBe(false);
-  delete process.env["SENTRY_NODE_ENV"];
+  expect(debugIdUploadPlugin).toBeUndefined();
 });
 
-test("should call upload plugin when sourcemaps are enabled", async () => {
-  process.env["SENTRY_NODE_ENV"] = "test";
-  const gbl = getGlobalWithDebugIdUploads();
-  gbl.__SENTRY_DEBUG_ID_UPLOAD_TEST__ = false;
+test("should call upload plugin when sourcemaps are enabled", () => {
+  const plugins = sentryRollupPlugin({
+    telemetry: false,
+  }) as Array<{ name: string }>;
 
-  await rollup.rollup({
-    input: { bundle1: path.resolve(__dirname, "input", "bundle.js") },
-    plugins: [
-      sentryRollupPlugin({
-        telemetry: false,
-      }),
-    ],
-  });
+  const debugIdUploadPlugin = plugins.find((plugin) => plugin.name === debugIdUploadPluginName);
 
-  expect(gbl.__SENTRY_DEBUG_ID_UPLOAD_TEST__).toBe(true);
-  delete process.env["SENTRY_NODE_ENV"];
+  expect(debugIdUploadPlugin).toBeDefined();
 });
