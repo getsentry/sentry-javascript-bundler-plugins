@@ -452,8 +452,28 @@ export function createSentryBuildPluginManager(
               ignore: includeEntry.ignore ? arrayify(includeEntry.ignore) : undefined,
             }));
 
+          const expandedInclude = await Promise.all(
+            normalizedInclude.map(async (includeEntry) => {
+              const expandedPaths = await Promise.all(
+                includeEntry.paths.map(async (pathPattern) => {
+                  const globResult = await glob(pathPattern, {
+                    absolute: true,
+                    nodir: true,
+                    ignore: includeEntry.ignore,
+                  });
+                  return globResult;
+                })
+              );
+
+              return {
+                ...includeEntry,
+                paths: expandedPaths.flat(),
+              };
+            })
+          );
+
           await cliInstance.releases.uploadSourceMaps(options.release.name, {
-            include: normalizedInclude,
+            include: expandedInclude,
             dist: options.release.dist,
           });
         }
