@@ -728,22 +728,26 @@ function canUploadSourceMaps(
       "Source map upload was disabled. Will not upload sourcemaps using debug ID process."
     );
     return false;
-  } else if (isDevMode) {
+  }
+  if (isDevMode) {
     logger.debug("Running in development mode. Will not upload sourcemaps.");
     return false;
-  } else if (!options.authToken) {
+  }
+  if (!options.authToken) {
     logger.warn(
       "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/" +
         getTurborepoEnvPassthroughWarning("SENTRY_AUTH_TOKEN")
     );
     return false;
-  } else if (!options.org && !options.authToken.startsWith("sntrys_")) {
+  }
+  if (!options.org && !options.authToken.startsWith("sntrys_")) {
     logger.warn(
       "No org provided. Will not upload source maps. Please set the `org` option to your Sentry organization slug." +
         getTurborepoEnvPassthroughWarning("SENTRY_ORG")
     );
     return false;
-  } else if (!options.project) {
+  }
+  if (!options.project) {
     logger.warn(
       "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug." +
         getTurborepoEnvPassthroughWarning("SENTRY_PROJECT")
