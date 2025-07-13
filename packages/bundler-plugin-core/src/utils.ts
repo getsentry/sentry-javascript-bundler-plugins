@@ -346,7 +346,7 @@ export function generateModuleMetadataInjectorCode(metadata: any): string {
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
   // We are merging the metadata objects in case modules are bundled twice with the plugin
   return `{
-  let _sentryModuleMetadataGlobal =
+  var _sentryModuleMetadataGlobal =
     typeof window !== "undefined"
       ? window
       : typeof global !== "undefined"
