@@ -37,7 +37,12 @@ describe("Error throwing by default (no errorHandler)", () => {
     "doesn't throw when Sentry server responds with error code for %s",
     async (bundler) => {
       const buildProcess = spawn("yarn", ["ts-node", path.join(__dirname, `build-${bundler}.ts`)], {
-        env: { ...process.env, FAKE_SENTRY_PORT },
+        env: {
+          ...process.env,
+          FAKE_SENTRY_PORT,
+          // only retry once to avoid the test from timing out due to retries
+          SENTRY_HTTP_MAX_RETRIES: "1",
+        },
         stdio: "ignore", // <-- set to "inherit" to get build output. Deactivated to avoid spamming test logs.
         shell: true,
       });
