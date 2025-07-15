@@ -8,3 +8,5 @@ yarn-error.log
 
 .nxcache
 packages/**/yarn.lock
+
+.DS_Store
