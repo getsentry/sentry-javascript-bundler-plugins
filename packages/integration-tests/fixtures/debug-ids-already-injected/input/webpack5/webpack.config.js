@@ -14,5 +14,12 @@ export default {
     },
   },
   mode: "production",
-  plugins: [sentryWebpackPlugin({ telemetry: false })],
+  plugins: [
+    sentryWebpackPlugin({
+      telemetry: false,
+      authToken: "fake-auth",
+      org: "fake-org",
+      project: "fake-project",
+    }),
+  ],
 };

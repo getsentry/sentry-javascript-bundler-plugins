@@ -17,5 +17,12 @@ export default defineConfig({
       },
     },
   },
-  plugins: [sentryVitePlugin({ telemetry: false })],
+  plugins: [
+    sentryVitePlugin({
+      telemetry: false,
+      authToken: "fake-auth",
+      org: "fake-org",
+      project: "fake-project",
+    }),
+  ],
 });
