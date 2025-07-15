@@ -503,27 +503,8 @@ export function createSentryBuildPluginManager(
      * Uploads sourcemaps using the "Debug ID" method. This function takes a list of build artifact paths that will be uploaded
      */
     async uploadSourcemaps(buildArtifactPaths: string[]) {
-      if (options.sourcemaps?.disable) {
-        logger.debug(
-          "Source map upload was disabled. Will not upload sourcemaps using debug ID process."
-        );
-      } else if (isDevMode) {
-        logger.debug("Running in development mode. Will not upload sourcemaps.");
-      } else if (!options.authToken) {
-        logger.warn(
-          "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/" +
-            getTurborepoEnvPassthroughWarning("SENTRY_AUTH_TOKEN")
-        );
-      } else if (!options.org && !options.authToken.startsWith("sntrys_")) {
-        logger.warn(
-          "No org provided. Will not upload source maps. Please set the `org` option to your Sentry organization slug." +
-            getTurborepoEnvPassthroughWarning("SENTRY_ORG")
-        );
-      } else if (!options.project) {
-        logger.warn(
-          "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug." +
-            getTurborepoEnvPassthroughWarning("SENTRY_PROJECT")
-        );
+      if (!canUploadSourceMaps(options, logger, isDevMode)) {
+        return;
       }
 
       await startSpan(
@@ -589,7 +570,7 @@ export function createSentryBuildPluginManager(
                 "Didn't find any matching sources for debug ID upload. Please check the `sourcemaps.assets` option."
               );
             } else {
-              await startSpan(
+              const numUploadedFiles = await startSpan(
                 { name: "prepare-bundles", scope: sentryScope },
                 async (prepBundlesSpan) => {
                   // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
@@ -664,10 +645,14 @@ export function createSentryBuildPluginManager(
                       }
                     );
                   });
+
+                  return files.length;
                 }
               );
 
-              logger.info("Successfully uploaded source maps to Sentry");
+              if (numUploadedFiles > 0) {
+                logger.info("Successfully uploaded source maps to Sentry");
+              }
             }
           } catch (e) {
             sentryScope.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
@@ -731,4 +716,44 @@ export function createSentryBuildPluginManager(
     },
     createDependencyOnBuildArtifacts,
   };
+}
+
+function canUploadSourceMaps(
+  options: NormalizedOptions,
+  logger: Logger,
+  isDevMode: boolean
+): boolean {
+  if (options.sourcemaps?.disable) {
+    logger.debug(
+      "Source map upload was disabled. Will not upload sourcemaps using debug ID process."
+    );
+    return false;
+  }
+  if (isDevMode) {
+    logger.debug("Running in development mode. Will not upload sourcemaps.");
+    return false;
+  }
+  if (!options.authToken) {
+    logger.warn(
+      "No auth token provided. Will not upload source maps. Please set the `authToken` option. You can find information on how to generate a Sentry auth token here: https://docs.sentry.io/api/auth/" +
+        getTurborepoEnvPassthroughWarning("SENTRY_AUTH_TOKEN")
+    );
+    return false;
+  }
+  if (!options.org && !options.authToken.startsWith("sntrys_")) {
+    logger.warn(
+      "No org provided. Will not upload source maps. Please set the `org` option to your Sentry organization slug." +
+        getTurborepoEnvPassthroughWarning("SENTRY_ORG")
+    );
+    return false;
+  }
+  if (!options.project) {
+    logger.warn(
+      "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug." +
+        getTurborepoEnvPassthroughWarning("SENTRY_PROJECT")
+    );
+    return false;
+  }
+
+  return true;
 }

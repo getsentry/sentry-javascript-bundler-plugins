@@ -11,5 +11,12 @@ export default defineConfig({
     sourcemap: true,
     sourcemapDebugIds: true,
   },
-  plugins: [sentryRollupPlugin({ telemetry: false })],
+  plugins: [
+    sentryRollupPlugin({
+      telemetry: false,
+      authToken: "fake-auth",
+      org: "fake-org",
+      project: "fake-project",
+    }),
+  ],
 });
