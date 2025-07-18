@@ -4,6 +4,18 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 4.0.0
+
+### Breaking Changes
+
+- (Type change) Vite plugin now returns `VitePlugin` type instead of `any`
+- Deprecated function `getBuildInformation` has been removed
+
+### List of Changes
+
+- feat(core)!: Remove `getBuildInformation` export ([#765](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/765))
+- feat(vite)!: Update return type of vite plugin ([#728](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/728))
+
 ## 3.6.1
 
 - fix(core): Observe and handle Sentry CLI sourcemap upload failures ([#763](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/763))
