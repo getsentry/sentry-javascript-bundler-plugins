@@ -4,7 +4,14 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
-Work in this release was contributed by @thecodewarrior. Thank you for your contribution!
+## 3.6.1
+
+- fix(core): Observe and handle Sentry CLI sourcemap upload failures ([#763](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/763))
+
+## 3.6.0
+
+- feat(core): Don't add `debugIdUploadPlugin` when sourcemaps option is disabled ([#753](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/753))
+- fix(core): Avoid showing success message if upload was disabled or nothing was uploaded ([#757](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/757))
 
 ## 3.5.0
 
