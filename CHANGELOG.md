@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 3.6.1
+
+- fix(core): Observe and handle Sentry CLI sourcemap upload failures ([#763](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/763))
+
 ## 3.6.0
 
 - feat(core): Don't add `debugIdUploadPlugin` when sourcemaps option is disabled ([#753](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/753))
