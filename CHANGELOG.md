@@ -14,7 +14,7 @@
 ### List of Changes
 
 - feat(core)!: Remove `getBuildInformation` export ([#765](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/765))
-- feat(vite): Update return type of vite plugin ([#728](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/728))
+- feat(vite)!: Update return type of vite plugin ([#728](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/728))
 
 ## 3.6.1
 
