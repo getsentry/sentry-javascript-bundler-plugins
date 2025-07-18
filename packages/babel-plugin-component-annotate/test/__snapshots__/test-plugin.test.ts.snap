@@ -1,5 +1,116 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Fragment Detection handles destructuring from aliased React imports 1`] = `
+"import MyReact from 'react';
+const {
+  Fragment
+} = MyReact;
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content from aliased React destructuring\\"));
+}"
+`;
+
+exports[`Fragment Detection handles destructuring from namespace imports 1`] = `
+"import * as ReactLib from 'react';
+const {
+  Fragment: F
+} = ReactLib;
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(F, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content from namespace destructuring\\"));
+}"
+`;
+
+exports[`Fragment Detection ignores Fragment assigned to variable 1`] = `
+"import { Fragment } from 'react';
+const MyFragment = Fragment;
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(MyFragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content in variable fragment\\"));
+}"
+`;
+
+exports[`Fragment Detection ignores Fragment from React destructuring 1`] = `
+"import React from 'react';
+const {
+  Fragment
+} = React;
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content in destructured fragment\\"));
+}"
+`;
+
+exports[`Fragment Detection ignores Fragment from mixed destructuring 1`] = `
+"import React from 'react';
+const {
+  Fragment,
+  createElement,
+  useState
+} = React;
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content with other destructured items\\"));
+}"
+`;
+
+exports[`Fragment Detection ignores Fragment imported with alias 1`] = `
+"import { Fragment as F } from 'react';
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(F, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content in aliased fragment\\"));
+}"
+`;
+
+exports[`Fragment Detection ignores Fragment with React namespace alias 1`] = `
+"import * as MyReact from 'react';
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(MyReact.Fragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content in namespaced fragment\\"));
+}"
+`;
+
+exports[`Fragment Detection ignores Fragment with destructuring alias 1`] = `
+"import React from 'react';
+const {
+  Fragment: MyFragment
+} = React;
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(MyFragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content in aliased destructured fragment\\"));
+}"
+`;
+
+exports[`Fragment Detection ignores JSX fragments (<>) 1`] = `
+"export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content in JSX fragment\\"), /*#__PURE__*/React.createElement(\\"span\\", null, \\"More content\\"));
+}"
+`;
+
+exports[`Fragment Detection ignores React default import with Fragment 1`] = `
+"import MyReact from 'react';
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(MyReact.Fragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content in default import fragment\\"));
+}"
+`;
+
+exports[`Fragment Detection ignores React.Fragment with member expression handling 1`] = `
+"import React from 'react';
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content\\"));
+}"
+`;
+
+exports[`Fragment Detection works with annotate-fragments option disabled 1`] = `
+"import { Fragment as F } from 'react';
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(F, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content\\"));
+}"
+`;
+
+exports[`Fragment Detection works with annotate-fragments option enabled 1`] = `
+"import { Fragment as F } from 'react';
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(F, null, /*#__PURE__*/React.createElement(\\"div\\", {
+    \\"data-sentry-component\\": \\"TestComponent\\",
+    \\"data-sentry-source-file\\": \\"filename-test.js\\"
+  }, \\"Content\\"));
+}"
+`;
+
 exports[`arrow snapshot matches 1`] = `
 "import React, { Component } from 'react';
 const componentName = () => {
