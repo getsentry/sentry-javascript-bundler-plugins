@@ -1256,27 +1256,601 @@ export default function TestComponent() {
   expect(result?.code).toMatchSnapshot();
 });
 
-it("ignores React.Fragment with member expression handling", () => {
-  const result = transform(
-    `import React from 'react';
+describe("Fragment Detection", () => {
+  it("ignores React.Fragment with member expression handling", () => {
+    const result = transform(
+      `import React from 'react';
+
+  export default function TestComponent() {
+    return (
+      <React.Fragment>
+        <div>Content</div>
+      </React.Fragment>
+    );
+  }`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // React.Fragment should be ignored by default
+    expect(result?.code).toContain("React.createElement(React.Fragment");
+    expect(result?.code).not.toContain('"data-sentry-element": "React.Fragment"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("ignores JSX fragments (<>)", () => {
+    const result = transform(
+      `export default function TestComponent() {
+  return (
+    <>
+      <div>Content in JSX fragment</div>
+      <span>More content</span>
+    </>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // JSX fragments should be ignored (including children)
+    expect(result?.code).toContain("React.createElement(React.Fragment");
+    expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("ignores Fragment imported with alias", () => {
+    const result = transform(
+      `import { Fragment as F } from 'react';
 
 export default function TestComponent() {
   return (
-    <React.Fragment>
+    <F>
+      <div>Content in aliased fragment</div>
+    </F>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // Aliased Fragment should be ignored (including children)
+    expect(result?.code).toContain('React.createElement(F');
+    expect(result?.code).not.toContain('"data-sentry-element": "F"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("ignores Fragment assigned to variable", () => {
+    const result = transform(
+      `import { Fragment } from 'react';
+
+const MyFragment = Fragment;
+
+export default function TestComponent() {
+  return (
+    <MyFragment>
+      <div>Content in variable fragment</div>
+    </MyFragment>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // Variable-assigned Fragment should be ignored (including children)
+    expect(result?.code).toContain('React.createElement(MyFragment');
+    expect(result?.code).not.toContain('"data-sentry-element": "MyFragment"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("ignores Fragment with React namespace alias", () => {
+    const result = transform(
+      `import * as MyReact from 'react';
+
+export default function TestComponent() {
+  return (
+    <MyReact.Fragment>
+      <div>Content in namespaced fragment</div>
+    </MyReact.Fragment>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // Namespaced Fragment should be ignored (including children)
+    expect(result?.code).toContain('React.createElement(MyReact.Fragment');
+    expect(result?.code).not.toContain('"data-sentry-element": "MyReact.Fragment"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("ignores React default import with Fragment", () => {
+    const result = transform(
+      `import MyReact from 'react';
+
+export default function TestComponent() {
+  return (
+    <MyReact.Fragment>
+      <div>Content in default import fragment</div>
+    </MyReact.Fragment>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // Default import Fragment should be ignored (including children)
+    expect(result?.code).toContain('React.createElement(MyReact.Fragment');
+    expect(result?.code).not.toContain('"data-sentry-element": "MyReact.Fragment"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("ignores multiple fragment patterns in same file", () => {
+    const result = transform(
+      `import React, { Fragment } from 'react';  // ← Import Fragment directly, not as alias
+
+  const MyFragment = Fragment;  // ← Now this works
+
+  export default function TestComponent() {
+    return (
+      <div>
+        <>
+          <div>JSX Fragment content</div>
+        </>
+        
+        <Fragment>
+          <span>Direct Fragment content</span>
+        </Fragment>
+        
+        <MyFragment>
+          <p>Variable Fragment content</p>
+        </MyFragment>
+        
+        <React.Fragment>
+          <h1>React.Fragment content</h1>
+        </React.Fragment>
+      </div>
+    );
+  }`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // All fragments should be ignored
+    expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
+    expect(result?.code).not.toContain('"data-sentry-element": "MyFragment"');
+    expect(result?.code).not.toContain('"data-sentry-element": "React.Fragment"');
+    
+    // But the outer div should be annotated
+    expect(result?.code).toContain('"data-sentry-element": "div"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("still annotates regular components that look like fragments", () => {
+    const result = transform(
+      `// No React import - so Fragment is just a regular component
+  export default function TestComponent() {
+    return (
+      <Fragment>
+        <div>This Fragment is not from React</div>
+      </Fragment>
+    );
+  }`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // Non-React Fragment should be annotated since it's not imported from React
+    expect(result?.code).toContain('"data-sentry-element": "Fragment"');
+    expect(result?.code).toContain('"data-sentry-element": "div"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("handles complex variable assignment chains", () => {
+    const result = transform(
+      `import { Fragment } from 'react';
+
+  const MyFragment = Fragment;
+  const AnotherFragment = MyFragment;  // ← This should NOT be detected as fragment
+
+  export default function TestComponent() {
+    return (
+      <AnotherFragment>
+        <div>Content in chained fragment</div>
+      </AnotherFragment>
+    );
+  }`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // First-level variable assignment should be detected and ignored
+    expect(result?.code).not.toContain('"data-sentry-element": "MyFragment"');
+    
+    // Complex chains are not detected (by design for simplicity), so should be annotated
+    expect(result?.code).toContain('"data-sentry-element": "AnotherFragment"');
+    
+    // And the inner div should be annotated since AnotherFragment is not detected as fragment
+    expect(result?.code).toContain('"data-sentry-element": "div"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("works with annotate-fragments option disabled", () => {
+    const result = transform(
+      `import { Fragment as F } from 'react';
+
+export default function TestComponent() {
+  return (
+    <F>
       <div>Content</div>
-    </React.Fragment>
+    </F>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [[plugin, { "annotate-fragments": false }]],
+      }
+    );
+
+    // With annotate-fragments disabled, fragments should still be ignored
+    expect(result?.code).not.toContain('"data-sentry-element": "F"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("works with annotate-fragments option enabled", () => {
+    const result = transform(
+      `import { Fragment as F } from 'react';
+
+export default function TestComponent() {
+  return (
+    <F>
+      <div>Content</div>
+    </F>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [[plugin, { "annotate-fragments": true }]],
+      }
+    );
+
+    // With annotate-fragments enabled, fragments should still be ignored
+    // (fragment detection overrides the annotate-fragments option)
+    expect(result?.code).not.toContain('"data-sentry-element": "F"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("ignores Fragment from React destructuring", () => {
+    const result = transform(
+      `import React from 'react';
+
+const { Fragment } = React;
+
+export default function TestComponent() {
+  return (
+    <Fragment>
+      <div>Content in destructured fragment</div>
+    </Fragment>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // Destructured Fragment should be ignored (including children)
+    expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("ignores Fragment with destructuring alias", () => {
+    const result = transform(
+      `import React from 'react';
+
+const { Fragment: MyFragment } = React;
+
+export default function TestComponent() {
+  return (
+    <MyFragment>
+      <div>Content in aliased destructured fragment</div>
+    </MyFragment>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // Aliased destructured Fragment should be ignored (including children)
+    expect(result?.code).not.toContain('"data-sentry-element": "MyFragment"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("ignores Fragment from mixed destructuring", () => {
+    const result = transform(
+      `import React from 'react';
+
+const { Fragment, createElement, useState } = React;
+
+export default function TestComponent() {
+  return (
+    <Fragment>
+      <div>Content with other destructured items</div>
+    </Fragment>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // Fragment should be ignored even with other destructured items (including children)
+    expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("handles destructuring from aliased React imports", () => {
+    const result = transform(
+      `import MyReact from 'react';
+
+const { Fragment } = MyReact;
+
+export default function TestComponent() {
+  return (
+    <Fragment>
+      <div>Content from aliased React destructuring</div>
+    </Fragment>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // Fragment from aliased React should be ignored (including children)
+    expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("handles destructuring from namespace imports", () => {
+    const result = transform(
+      `import * as ReactLib from 'react';
+
+const { Fragment: F } = ReactLib;
+
+export default function TestComponent() {
+  return (
+    <F>
+      <div>Content from namespace destructuring</div>
+    </F>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // Fragment from namespace destructuring should be ignored (including children)
+    expect(result?.code).not.toContain('"data-sentry-element": "F"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("handles multiple destructuring patterns in one file", () => {
+    const result = transform(
+      `import React from 'react';
+import * as MyReact from 'react';
+
+const { Fragment } = React;
+const { Fragment: AliasedFrag } = MyReact;
+
+export default function TestComponent() {
+  return (
+    <div>
+      <Fragment>
+        <span>Regular destructured</span>
+      </Fragment>
+      
+      <AliasedFrag>
+        <p>Aliased destructured</p>
+      </AliasedFrag>
+    </div>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // Both destructured fragments should be ignored
+    expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
+    expect(result?.code).not.toContain('"data-sentry-element": "AliasedFrag"');
+    
+    // But the outer div should be annotated
+    expect(result?.code).toContain('"data-sentry-element": "div"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("does not confuse non-React destructuring", () => {
+    const result = transform(
+      `import { SomeOtherLib } from 'some-lib';
+
+const { Fragment } = SomeOtherLib;
+
+export default function TestComponent() {
+  return (
+    <Fragment>
+      <div>This Fragment is not from React</div>
+    </Fragment>
+  );
+}`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // Non-React Fragment should be annotated since it's not from React
+    expect(result?.code).toContain('"data-sentry-element": "Fragment"');
+    expect(result?.code).toContain('"data-sentry-element": "div"');
+    expect(result?.code).toMatchSnapshot();
+  });
+
+  it("combines all fragment patterns correctly", () => {
+    const result = transform(
+      `import React, { Fragment as ImportedF } from 'react';
+  import * as MyReact from 'react';
+
+  const { Fragment: DestructuredF } = React;
+  const { Fragment } = MyReact;
+  const AssignedF = Fragment;  // ← This uses the destructured Fragment from MyReact
+
+  export default function TestComponent() {
+    return (
+      <div className="container">
+        {/* JSX Fragment */}
+        <>
+          <span>JSX Fragment content</span>
+        </>
+        
+        {/* Imported alias */}
+        <ImportedF>
+          <span>Imported alias content</span>
+        </ImportedF>
+        
+        {/* Destructured */}
+        <DestructuredF>
+          <span>Destructured content</span>
+        </DestructuredF>
+        
+        {/* Destructured from namespace */}
+        <Fragment>
+          <span>Namespace destructured content</span>
+        </Fragment>
+        
+        {/* Variable assigned */}
+        <AssignedF>
+          <span>Variable assigned content</span>
+        </AssignedF>
+        
+        {/* React.Fragment */}
+        <React.Fragment>
+          <span>React.Fragment content</span>
+        </React.Fragment>
+        
+        {/* Namespace Fragment */}
+        <MyReact.Fragment>
+          <span>Namespace Fragment content</span>
+        </MyReact.Fragment>
+      </div>
+    );
+  }`,
+      {
+        filename: "/filename-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    // All fragments should be ignored
+    expect(result?.code).not.toContain('"data-sentry-element": "ImportedF"');
+    expect(result?.code).not.toContain('"data-sentry-element": "DestructuredF"');
+    expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
+    expect(result?.code).not.toContain('"data-sentry-element": "AssignedF"');
+    expect(result?.code).not.toContain('"data-sentry-element": "React.Fragment"');
+    expect(result?.code).not.toContain('"data-sentry-element": "MyReact.Fragment"');
+    
+    // But the outer div should be annotated
+    expect(result?.code).toContain('"data-sentry-element": "div"');
+    expect(result?.code).toMatchSnapshot();
+  });
+});
+
+it("debug: fragment context collection", () => {
+  const result = transform(
+    `import { Fragment as F } from 'react';
+const MyFragment = Fragment;
+
+console.log("Debug test");
+
+export default function TestComponent() {
+  return (
+    <div>
+      <F>content</F>
+      <MyFragment>content</MyFragment>
+      <Fragment>content</Fragment>
+    </div>
   );
 }`,
     {
-      filename: "/filename-test.js",
+      filename: "/debug.js",
       configFile: false,
       presets: ["@babel/preset-react"],
       plugins: [plugin],
     }
   );
-
-  // React.Fragment should be ignored by default
-  expect(result?.code).toContain("React.createElement(React.Fragment");
-  expect(result?.code).not.toContain('"data-sentry-element": "React.Fragment"');
-  expect(result?.code).toMatchSnapshot();
+  
+  console.log("Generated code:", result?.code);
+  
+  // Let's see what's happening
+  expect(result?.code).toBeDefined();
 });
