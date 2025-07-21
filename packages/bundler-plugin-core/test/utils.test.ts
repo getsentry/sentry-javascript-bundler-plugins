@@ -220,8 +220,8 @@ describe("generateModuleMetadataInjectorCode", () => {
   it("generates code with empty metadata object", () => {
     const generatedCode = generateModuleMetadataInjectorCode({});
     expect(generatedCode).toMatchInlineSnapshot(`
-      "{
-        let _sentryModuleMetadataGlobal =
+      "(function(){
+        var _sentryModuleMetadataGlobal =
           typeof window !== \\"undefined\\"
             ? window
             : typeof global !== \\"undefined\\"
@@ -241,7 +241,7 @@ describe("generateModuleMetadataInjectorCode", () => {
             _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
             {}
           );
-      }"
+      })();"
     `);
   });
 
@@ -255,8 +255,8 @@ describe("generateModuleMetadataInjectorCode", () => {
       },
     });
     expect(generatedCode).toMatchInlineSnapshot(`
-      "{
-        let _sentryModuleMetadataGlobal =
+      "(function(){
+        var _sentryModuleMetadataGlobal =
           typeof window !== \\"undefined\\"
             ? window
             : typeof global !== \\"undefined\\"
@@ -276,7 +276,7 @@ describe("generateModuleMetadataInjectorCode", () => {
             _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
             {\\"file1.js\\":{\\"foo\\":\\"bar\\"},\\"file2.js\\":{\\"bar\\":\\"baz\\"}}
           );
-      }"
+      })();"
     `);
   });
 });
