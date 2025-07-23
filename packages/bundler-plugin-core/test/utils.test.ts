@@ -1,4 +1,5 @@
 import {
+  generateGlobalInjectorCode,
   generateModuleMetadataInjectorCode,
   getDependencies,
   getPackageJson,
@@ -6,6 +7,9 @@ import {
   replaceBooleanFlagsInCode,
   stringToUUID,
 } from "../src/utils";
+
+import fs from "fs";
+
 import path from "node:path";
 
 type PackageJson = Record<string, unknown>;
@@ -216,12 +220,73 @@ if (false && true) {
   });
 });
 
+describe("generateGlobalInjectorCode", () => {
+  it("generates code with release", () => {
+    const generatedCode = generateGlobalInjectorCode({
+      release: "1.2.3",
+      injectBuildInformation: false,
+    });
+
+    expect(generatedCode).toMatchInlineSnapshot(`
+      "(function(){
+          var _global =
+            typeof window !== 'undefined' ?
+              window :
+              typeof global !== 'undefined' ?
+                global :
+                typeof globalThis !== 'undefined' ?
+                  globalThis :
+                  typeof self !== 'undefined' ?
+                    self :
+                    {};
+
+          _global.SENTRY_RELEASE={id:\\"1.2.3\\"};})();"
+    `);
+  });
+
+  it("generates code with release and build information", () => {
+    jest.spyOn(fs, "readFileSync").mockReturnValueOnce(
+      JSON.stringify({
+        name: "test-app",
+        dependencies: {
+          myDep: "^2.1.4",
+        },
+        devDependencies: {
+          rollup: "^3.1.4",
+        },
+      })
+    );
+
+    const generatedCode = generateGlobalInjectorCode({
+      release: "1.2.3",
+      injectBuildInformation: true,
+    });
+
+    expect(generatedCode).toMatchInlineSnapshot(`
+      "(function(){
+          var _global =
+            typeof window !== 'undefined' ?
+              window :
+              typeof global !== 'undefined' ?
+                global :
+                typeof globalThis !== 'undefined' ?
+                  globalThis :
+                  typeof self !== 'undefined' ?
+                    self :
+                    {};
+
+          _global.SENTRY_RELEASE={id:\\"1.2.3\\"};
+          _global.SENTRY_BUILD_INFO={\\"deps\\":[\\"myDep\\",\\"rollup\\"],\\"depsVersions\\":{\\"rollup\\":3},\\"nodeVersion\\":18};})();"
+    `);
+  });
+});
+
 describe("generateModuleMetadataInjectorCode", () => {
   it("generates code with empty metadata object", () => {
     const generatedCode = generateModuleMetadataInjectorCode({});
     expect(generatedCode).toMatchInlineSnapshot(`
-      "{
-        let _sentryModuleMetadataGlobal =
+      "(function(){
+        var _sentryModuleMetadataGlobal =
           typeof window !== \\"undefined\\"
             ? window
             : typeof global !== \\"undefined\\"
@@ -241,7 +306,7 @@ describe("generateModuleMetadataInjectorCode", () => {
             _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
             {}
           );
-      }"
+      })();"
     `);
   });
 
@@ -255,8 +320,8 @@ describe("generateModuleMetadataInjectorCode", () => {
       },
     });
     expect(generatedCode).toMatchInlineSnapshot(`
-      "{
-        let _sentryModuleMetadataGlobal =
+      "(function(){
+        var _sentryModuleMetadataGlobal =
           typeof window !== \\"undefined\\"
             ? window
             : typeof global !== \\"undefined\\"
@@ -276,7 +341,7 @@ describe("generateModuleMetadataInjectorCode", () => {
             _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
             {\\"file1.js\\":{\\"foo\\":\\"bar\\"},\\"file2.js\\":{\\"bar\\":\\"baz\\"}}
           );
-      }"
+      })();"
     `);
   });
 });
