@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+- fix(core): Make plugin inject ES5-friendly code ([#770](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/770))
+
+Work in this release was contributed by @grushetsky. Thank you for your contribution!
+
 ## 4.0.0
 
 ### Breaking Changes
