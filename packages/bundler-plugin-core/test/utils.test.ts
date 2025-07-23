@@ -1,4 +1,5 @@
 import {
+  generateGlobalInjectorCode,
   generateModuleMetadataInjectorCode,
   getDependencies,
   getPackageJson,
@@ -6,6 +7,9 @@ import {
   replaceBooleanFlagsInCode,
   stringToUUID,
 } from "../src/utils";
+
+import fs from "fs";
+
 import path from "node:path";
 
 type PackageJson = Record<string, unknown>;
@@ -213,6 +217,67 @@ if (false && true) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       map: expect.anything(),
     });
+  });
+});
+
+describe("generateGlobalInjectorCode", () => {
+  it("generates code with release", () => {
+    const generatedCode = generateGlobalInjectorCode({
+      release: "1.2.3",
+      injectBuildInformation: false,
+    });
+
+    expect(generatedCode).toMatchInlineSnapshot(`
+      "(function(){
+          var _global =
+            typeof window !== 'undefined' ?
+              window :
+              typeof global !== 'undefined' ?
+                global :
+                typeof globalThis !== 'undefined' ?
+                  globalThis :
+                  typeof self !== 'undefined' ?
+                    self :
+                    {};
+
+          _global.SENTRY_RELEASE={id:\\"1.2.3\\"};})();"
+    `);
+  });
+
+  it("generates code with release and build information", () => {
+    jest.spyOn(fs, "readFileSync").mockReturnValueOnce(
+      JSON.stringify({
+        name: "test-app",
+        dependencies: {
+          myDep: "^2.1.4",
+        },
+        devDependencies: {
+          rollup: "^3.1.4",
+        },
+      })
+    );
+
+    const generatedCode = generateGlobalInjectorCode({
+      release: "1.2.3",
+      injectBuildInformation: true,
+    });
+
+    expect(generatedCode).toMatchInlineSnapshot(`
+      "(function(){
+          var _global =
+            typeof window !== 'undefined' ?
+              window :
+              typeof global !== 'undefined' ?
+                global :
+                typeof globalThis !== 'undefined' ?
+                  globalThis :
+                  typeof self !== 'undefined' ?
+                    self :
+                    {};
+
+          _global.SENTRY_RELEASE={id:\\"1.2.3\\"};
+          _global.SENTRY_BUILD_INFO={\\"deps\\":[\\"myDep\\",\\"rollup\\"],\\"depsVersions\\":{\\"rollup\\":3},\\"nodeVersion\\":18};})();"
+    `);
   });
 });
 

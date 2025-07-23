@@ -332,7 +332,7 @@ export function generateGlobalInjectorCode({
     const buildInfo = getBuildInformation();
 
     code += `
-      _global.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)};`;
+    _global.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)};`;
   }
 
   code += "})();";
