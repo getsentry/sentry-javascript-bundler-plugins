@@ -14,7 +14,6 @@ import { Options, SentrySDKBuildFlags } from "./types";
 import {
   generateGlobalInjectorCode,
   generateModuleMetadataInjectorCode,
-  getBuildInformation as actualGetBuildInformation,
   replaceBooleanFlagsInCode,
   stringToUUID,
   stripQueryAndHashFromPath,
@@ -173,13 +172,6 @@ export function sentryUnpluginFactory({
     return plugins;
   });
 }
-
-/**
- * @deprecated This will be removed in v4
- */
-// TODO(v4): Don't export this from the package but keep the utils version
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const getBuildInformation = actualGetBuildInformation;
 
 /**
  * Determines whether the Sentry CLI binary is in its expected location.
@@ -439,7 +431,7 @@ export function createComponentNameAnnotateHooks(ignoredComponents?: string[]): 
 }
 
 export function getDebugIdSnippet(debugId: string): string {
-  return `;{try{let e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{},n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="${debugId}",e._sentryDebugIdIdentifier="sentry-dbid-${debugId}")}catch(e){}};`;
+  return `;{try{(function(){var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{},n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="${debugId}",e._sentryDebugIdIdentifier="sentry-dbid-${debugId}");})();}catch(e){}};`;
 }
 
 export type { Logger } from "./logger";

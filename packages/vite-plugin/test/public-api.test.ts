@@ -1,4 +1,3 @@
-import { VitePlugin } from "unplugin";
 import { sentryVitePlugin } from "../src";
 
 test("Vite plugin should exist", () => {
@@ -16,7 +15,7 @@ describe("sentryVitePlugin", () => {
       authToken: "test-token",
       org: "test-org",
       project: "test-project",
-    }) as VitePlugin[];
+    });
 
     expect(Array.isArray(plugins)).toBe(true);
 

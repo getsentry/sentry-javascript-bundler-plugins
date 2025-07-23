@@ -455,6 +455,9 @@ export function createSentryBuildPluginManager(
           await cliInstance.releases.uploadSourceMaps(options.release.name, {
             include: normalizedInclude,
             dist: options.release.dist,
+            // We want this promise to throw if the sourcemaps fail to upload so that we know about it.
+            // see: https://github.com/getsentry/sentry-cli/pull/2605
+            live: "rejectOnError",
           });
         }
 
@@ -642,6 +645,9 @@ export function createSentryBuildPluginManager(
                             dist: options.release.dist,
                           },
                         ],
+                        // We want this promise to throw if the sourcemaps fail to upload so that we know about it.
+                        // see: https://github.com/getsentry/sentry-cli/pull/2605
+                        live: "rejectOnError",
                       }
                     );
                   });
