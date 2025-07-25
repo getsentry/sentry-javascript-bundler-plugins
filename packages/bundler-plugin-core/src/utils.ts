@@ -358,13 +358,29 @@ export function generateModuleMetadataInjectorCode(metadata: any) {
   _sentryModuleMetadataGlobal._sentryModuleMetadata =
     _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
 
-  _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack] =
-    Object.assign(
-      {},
-      _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
-      ${JSON.stringify(metadata)}
-    );
-}`;
+  (function () {
+    var key,
+      stackKey = new _sentryModuleMetadataGlobal.Error().stack;
+    var existing = _sentryModuleMetadataGlobal._sentryModuleMetadata[stackKey] || {};
+    var newData = ${JSON.stringify(metadata)};
+    var merged = {};
+
+    for (key in existing) {
+      if (existing.hasOwnProperty(key)) {
+        merged[key] = existing[key];
+      }
+    }
+
+    for (key in newData) {
+      if (newData.hasOwnProperty(key)) {
+        merged[key] = newData[key];
+      }
+    }
+
+    _sentryModuleMetadataGlobal._sentryModuleMetadata[stackKey] = merged;
+  })();
+}
+`;
 }
 
 function getBuildInformation() {
