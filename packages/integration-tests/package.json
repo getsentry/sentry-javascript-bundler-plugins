@@ -11,8 +11,8 @@
     "check:types": "tsc --project ./tsconfig.json --noEmit",
     "clean": "run-s clean:build",
     "clean:all": "run-p clean clean:deps",
-    "clean:build": "rimraf ./fixtures/*/out",
-    "clean:deps": "rimraf node_modules"
+    "clean:build": "premove ./fixtures/*/out",
+    "clean:deps": "premove node_modules"
   },
   "dependencies": {
     "@babel/preset-react": "^7.23.3",
@@ -43,6 +43,9 @@
     "vite": "3.0.0",
     "webpack4": "npm:webpack@^4",
     "webpack5": "npm:webpack@5.74.0"
+  },
+  "devDependencies": {
+    "premove": "^4.0.0"
   },
   "volta": {
     "extends": "../../package.json"

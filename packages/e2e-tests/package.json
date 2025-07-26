@@ -10,8 +10,8 @@
     "check:types": "tsc --project ./tsconfig.json --noEmit",
     "clean": "run-s clean:build",
     "clean:all": "run-p clean clean:deps",
-    "clean:build": "rimraf ./scenarios/*/out",
-    "clean:deps": "rimraf node_modules",
+    "clean:build": "premove ./scenarios/*/out",
+    "clean:deps": "premove node_modules",
     "lint": "eslint ."
   },
   "dependencies": {
@@ -33,6 +33,7 @@
     "eslint": "^8.18.0",
     "glob": "8.0.3",
     "jest": "^28.1.3",
+    "premove": "^4.0.0",
     "rollup": "2.77.0",
     "ts-node": "^10.9.1",
     "vite": "3.0.0",
