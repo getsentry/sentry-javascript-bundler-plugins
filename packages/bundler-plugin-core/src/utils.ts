@@ -343,44 +343,9 @@ export function generateModuleMetadataInjectorCode(metadata: any) {
   // The code below is mostly ternary operators because it saves bundle size.
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
   // We are merging the metadata objects in case modules are bundled twice with the plugin
-  return `{
-  var _sentryModuleMetadataGlobal =
-    typeof window !== "undefined"
-      ? window
-      : typeof global !== "undefined"
-      ? global
-      : typeof globalThis !== "undefined"
-      ? globalThis
-      : typeof self !== "undefined"
-      ? self
-      : {};
-
-  _sentryModuleMetadataGlobal._sentryModuleMetadata =
-    _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
-
-  (function () {
-    var key,
-      stackKey = new _sentryModuleMetadataGlobal.Error().stack;
-    var existing = _sentryModuleMetadataGlobal._sentryModuleMetadata[stackKey] || {};
-    var newData = ${JSON.stringify(metadata)};
-    var merged = {};
-
-    for (key in existing) {
-      if (existing.hasOwnProperty(key)) {
-        merged[key] = existing[key];
-      }
-    }
-
-    for (key in newData) {
-      if (newData.hasOwnProperty(key)) {
-        merged[key] = newData[key];
-      }
-    }
-
-    _sentryModuleMetadataGlobal._sentryModuleMetadata[stackKey] = merged;
-  })();
-}
-`;
+  return `!function(){var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{};e._sentryModuleMetadata=e._sentryModuleMetadata||{},function(){var n,t=(new e.Error).stack,a=e._sentryModuleMetadata[t]||{},o=${JSON.stringify(
+    metadata
+  )},d={};for(n in a)a.hasOwnProperty(n)&&(d[n]=a[n]);for(n in o)o.hasOwnProperty(n)&&(d[n]=o[n]);e._sentryModuleMetadata[t]=d}()}();`;
 }
 
 function getBuildInformation() {

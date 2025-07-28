@@ -219,30 +219,7 @@ if (false && true) {
 describe("generateModuleMetadataInjectorCode", () => {
   it("generates code with empty metadata object", () => {
     const generatedCode = generateModuleMetadataInjectorCode({});
-    expect(generatedCode).toMatchInlineSnapshot(`
-      "{
-        var _sentryModuleMetadataGlobal =
-          typeof window !== \\"undefined\\"
-            ? window
-            : typeof global !== \\"undefined\\"
-            ? global
-            : typeof globalThis !== \\"undefined\\"
-            ? globalThis
-            : typeof self !== \\"undefined\\"
-            ? self
-            : {};
-
-        _sentryModuleMetadataGlobal._sentryModuleMetadata =
-          _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
-
-        _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack] =
-          Object.assign(
-            {},
-            _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
-            {}
-          );
-      }"
-    `);
+    expect(generatedCode).toMatchSnapshot();
   });
 
   it("generates code with metadata object", () => {
@@ -254,29 +231,6 @@ describe("generateModuleMetadataInjectorCode", () => {
         bar: "baz",
       },
     });
-    expect(generatedCode).toMatchInlineSnapshot(`
-      "{
-        var _sentryModuleMetadataGlobal =
-          typeof window !== \\"undefined\\"
-            ? window
-            : typeof global !== \\"undefined\\"
-            ? global
-            : typeof globalThis !== \\"undefined\\"
-            ? globalThis
-            : typeof self !== \\"undefined\\"
-            ? self
-            : {};
-
-        _sentryModuleMetadataGlobal._sentryModuleMetadata =
-          _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
-
-        _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack] =
-          Object.assign(
-            {},
-            _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
-            {\\"file1.js\\":{\\"foo\\":\\"bar\\"},\\"file2.js\\":{\\"bar\\":\\"baz\\"}}
-          );
-      }"
-    `);
+    expect(generatedCode).toMatchSnapshot();
   });
 });

@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateModuleMetadataInjectorCode generates code with empty metadata object 1`] = `"!function(){var e=\\"undefined\\"!=typeof window?window:\\"undefined\\"!=typeof global?global:\\"undefined\\"!=typeof globalThis?globalThis:\\"undefined\\"!=typeof self?self:{};e._sentryModuleMetadata=e._sentryModuleMetadata||{},function(){var n,t=(new e.Error).stack,a=e._sentryModuleMetadata[t]||{},o={},d={};for(n in a)a.hasOwnProperty(n)&&(d[n]=a[n]);for(n in o)o.hasOwnProperty(n)&&(d[n]=o[n]);e._sentryModuleMetadata[t]=d}()}();"`;
+
+exports[`generateModuleMetadataInjectorCode generates code with metadata object 1`] = `"!function(){var e=\\"undefined\\"!=typeof window?window:\\"undefined\\"!=typeof global?global:\\"undefined\\"!=typeof globalThis?globalThis:\\"undefined\\"!=typeof self?self:{};e._sentryModuleMetadata=e._sentryModuleMetadata||{},function(){var n,t=(new e.Error).stack,a=e._sentryModuleMetadata[t]||{},o={\\"file1.js\\":{\\"foo\\":\\"bar\\"},\\"file2.js\\":{\\"bar\\":\\"baz\\"}},d={};for(n in a)a.hasOwnProperty(n)&&(d[n]=a[n]);for(n in o)o.hasOwnProperty(n)&&(d[n]=o[n]);e._sentryModuleMetadata[t]=d}()}();"`;
