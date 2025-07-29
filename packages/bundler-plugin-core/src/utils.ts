@@ -334,7 +334,7 @@ export function generateModuleMetadataInjectorCode(metadata: any): string {
   // The code below is mostly ternary operators because it saves bundle size.
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
   // We are merging the metadata objects in case modules are bundled twice with the plugin
-  return `!function(){var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{};e._sentryModuleMetadata=e._sentryModuleMetadata||{},e._sentryModuleMetadata[(new e.Error).stack]=Object.assign({},e._sentryModuleMetadata[(new e.Error).stack],${JSON.stringify(
+  return `!function(){var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{};e._sentryModuleMetadata=e._sentryModuleMetadata||{},e._sentryModuleMetadata[(new e.Error).stack]=function(e){for(var n=1;n<arguments.length;n++){var a=arguments[n];if(null!=a)for(var t in a)a.hasOwnProperty(t)&&(e[t]=a[t])}return e}({},e._sentryModuleMetadata[(new e.Error).stack],${JSON.stringify(
     metadata
   )})}();`;
 }
