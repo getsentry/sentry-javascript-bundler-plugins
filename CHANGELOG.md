@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 2.23.1
+
+- fix(v2/core): Make `moduleMetadata` injection code ES5-compliant (#773)
+
 ## 2.23.0
 
 - chore(deps): bump nanoid from 3.3.6 to 3.3.8 (#641)
