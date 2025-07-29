@@ -61,6 +61,12 @@ type AnnotationPlugin = PluginObj<AnnotationPluginPass>;
 export default function componentNameAnnotatePlugin({ types: t }: typeof Babel): AnnotationPlugin {
   return {
     visitor: {
+      Program: {
+        enter(path, state) {
+          const fragmentContext = collectFragmentContext(path);
+          state['sentryFragmentContext'] = fragmentContext;
+        }
+      },
       FunctionDeclaration(path, state) {
         if (!path.node.id || !path.node.id.name) {
           return;
@@ -69,6 +75,8 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
+        const fragmentContext = state['sentryFragmentContext'] as FragmentContext | undefined;
+
         functionBodyPushAttributes(
           state.opts["annotate-fragments"] === true,
           t,
@@ -76,7 +84,8 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           path.node.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          state.opts.ignoredComponents ?? []
+          state.opts.ignoredComponents ?? [],
+          fragmentContext
         );
       },
       ArrowFunctionExpression(path, state) {
@@ -97,6 +106,8 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
+        const fragmentContext = state['sentryFragmentContext'] as FragmentContext | undefined;
+
         functionBodyPushAttributes(
           state.opts["annotate-fragments"] === true,
           t,
@@ -104,7 +115,8 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           parent.id.name,
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
-          state.opts.ignoredComponents ?? []
+          state.opts.ignoredComponents ?? [],
+          fragmentContext
         );
       },
       ClassDeclaration(path, state) {
@@ -119,6 +131,8 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
         }
 
         const ignoredComponents = state.opts.ignoredComponents ?? [];
+
+        const fragmentContext = state['sentryFragmentContext'] as FragmentContext | undefined;
 
         render.traverse({
           ReturnStatement(returnStatement) {
@@ -135,7 +149,8 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
               name.node && name.node.name,
               sourceFileNameFromState(state),
               attributeNamesFromState(state),
-              ignoredComponents
+              ignoredComponents,
+              fragmentContext
             );
           },
         });
@@ -151,7 +166,8 @@ function functionBodyPushAttributes(
   componentName: string,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  ignoredComponents: string[]
+  ignoredComponents: string[],
+  fragmentContext?: FragmentContext
 ): void {
   let jsxNode: Babel.NodePath;
 
@@ -200,7 +216,8 @@ function functionBodyPushAttributes(
           componentName,
           sourceFileName,
           attributeNames,
-          ignoredComponents
+          ignoredComponents,
+          fragmentContext
         );
       }
       const alternate = arg.get("alternate");
@@ -212,7 +229,8 @@ function functionBodyPushAttributes(
           componentName,
           sourceFileName,
           attributeNames,
-          ignoredComponents
+          ignoredComponents,
+          fragmentContext
         );
       }
       return;
@@ -236,7 +254,8 @@ function functionBodyPushAttributes(
     componentName,
     sourceFileName,
     attributeNames,
-    ignoredComponents
+    ignoredComponents,
+    fragmentContext
   );
 }
 
@@ -247,7 +266,8 @@ function processJSX(
   componentName: string | null,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  ignoredComponents: string[]
+  ignoredComponents: string[],
+  fragmentContext?: FragmentContext
 ): void {
   if (!jsxNode) {
     return;
@@ -264,7 +284,8 @@ function processJSX(
       componentName,
       sourceFileName,
       attributeNames,
-      ignoredComponents
+      ignoredComponents,
+      fragmentContext
     );
   });
 
@@ -300,7 +321,8 @@ function processJSX(
         componentName,
         sourceFileName,
         attributeNames,
-        ignoredComponents
+        ignoredComponents,
+        fragmentContext
       );
     } else {
       processJSX(
@@ -310,7 +332,8 @@ function processJSX(
         null,
         sourceFileName,
         attributeNames,
-        ignoredComponents
+        ignoredComponents,
+        fragmentContext
       );
     }
   });
@@ -322,11 +345,12 @@ function applyAttributes(
   componentName: string | null,
   sourceFileName: string | undefined,
   attributeNames: string[],
-  ignoredComponents: string[]
+  ignoredComponents: string[],
+  fragmentContext?: FragmentContext
 ): void {
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
 
-  if (isReactFragment(t, openingElement)) {
+  if (isReactFragment(t, openingElement, fragmentContext)) {
     return;
   }
   // e.g., Raw JSX text like the `A` in `<h1>a</h1>`
@@ -443,18 +467,106 @@ function attributeNamesFromState(state: AnnotationPluginPass): [string, string, 
   return [webComponentName, webElementName, webSourceFileName];
 }
 
-function isReactFragment(t: typeof Babel.types, openingElement: Babel.NodePath): boolean {
+interface FragmentContext {
+  fragmentAliases: Set<string>;
+  reactNamespaceAliases: Set<string>;
+}
+
+function collectFragmentContext(programPath: Babel.NodePath): FragmentContext {
+  const fragmentAliases = new Set<string>();
+  const reactNamespaceAliases = new Set<string>(['React']); // Default React namespace
+  
+  programPath.traverse({
+    ImportDeclaration(importPath) {
+      const source = importPath.node.source.value;
+      
+      // Handle React imports
+      if (source === 'react' || source === 'React') {
+        importPath.node.specifiers.forEach(spec => {
+          if (spec.type === 'ImportSpecifier' && spec.imported.type === 'Identifier') {
+            // import { Fragment } from 'react' -> Fragment
+            // import { Fragment as F } from 'react' -> F
+            if (spec.imported.name === 'Fragment') {
+              fragmentAliases.add(spec.local.name);
+            }
+          } else if (spec.type === 'ImportDefaultSpecifier') {
+            // import React from 'react' -> React
+            reactNamespaceAliases.add(spec.local.name);
+          } else if (spec.type === 'ImportNamespaceSpecifier') {
+            // import * as React from 'react' -> React
+            reactNamespaceAliases.add(spec.local.name);
+          }
+        });
+      }
+    },
+
+    // Handle simple variable assignments only (avoid complex cases)
+    VariableDeclarator(varPath) {
+      if (varPath.node.init) {
+        const init = varPath.node.init;
+        
+        // Handle identifier assignments: const MyFragment = Fragment
+        if (varPath.node.id.type === 'Identifier') {
+          // Handle: const MyFragment = Fragment (only if Fragment is a known alias)
+          if (init.type === 'Identifier' && fragmentAliases.has(init.name)) {
+            fragmentAliases.add(varPath.node.id.name);
+          }
+          
+          // Handle: const MyFragment = React.Fragment (only for known React namespaces)
+          if (init.type === 'MemberExpression' && 
+              init.object.type === 'Identifier' && 
+              init.property.type === 'Identifier' &&
+              reactNamespaceAliases.has(init.object.name) && 
+              init.property.name === 'Fragment') {
+            fragmentAliases.add(varPath.node.id.name);
+          }
+        }
+        
+        // Handle destructuring assignments: const { Fragment } = React
+        if (varPath.node.id.type === 'ObjectPattern') {
+          if (init.type === 'Identifier' && reactNamespaceAliases.has(init.name)) {
+            (varPath.node.id as any).properties.forEach((prop: any) => {
+              if (prop.type === 'ObjectProperty' && 
+                  prop.key?.type === 'Identifier' && 
+                  prop.value?.type === 'Identifier' &&
+                  prop.key.name === 'Fragment') {
+                fragmentAliases.add(prop.value.name);
+              }
+            });
+          }
+        }
+      }
+    }
+  });
+
+  return { fragmentAliases, reactNamespaceAliases };
+}
+
+function isReactFragment(
+  t: typeof Babel.types, 
+  openingElement: Babel.NodePath,
+  context?: FragmentContext // Add this optional parameter
+): boolean {
+  // Handle JSX fragments (<>)
   if (openingElement.isJSXFragment()) {
     return true;
   }
 
   const elementName = getPathName(t, openingElement);
 
+  // Direct fragment references
   if (elementName === "Fragment" || elementName === "React.Fragment") {
     return true;
   }
 
   // TODO: All these objects are typed as unknown, maybe an oversight in Babel types?
+  
+  // Check if the element name is a known fragment alias
+  if (context && elementName && context.fragmentAliases.has(elementName)) {
+    return true;
+  }
+
+  // Handle JSXMemberExpression
   if (
     openingElement.node &&
     "name" in openingElement.node &&
@@ -463,10 +575,6 @@ function isReactFragment(t: typeof Babel.types, openingElement: Babel.NodePath):
     "type" in openingElement.node.name &&
     openingElement.node.name.type === "JSXMemberExpression"
   ) {
-    if (!("name" in openingElement.node)) {
-      return false;
-    }
-
     const nodeName = openingElement.node.name;
     if (typeof nodeName !== "object" || !nodeName) {
       return false;
@@ -487,8 +595,22 @@ function isReactFragment(t: typeof Babel.types, openingElement: Babel.NodePath):
       const objectName = "name" in nodeNameObject && nodeNameObject.name;
       const propertyName = "name" in nodeNameProperty && nodeNameProperty.name;
 
+      // React.Fragment check
       if (objectName === "React" && propertyName === "Fragment") {
         return true;
+      }
+
+      // Enhanced checks using context
+      if (context) {
+        // Check React.Fragment pattern with known React namespaces
+        if (context.reactNamespaceAliases.has(objectName as string) && propertyName === "Fragment") {
+          return true;
+        }
+
+        // Check MyFragment.Fragment pattern
+        if (context.fragmentAliases.has(objectName as string) && propertyName === "Fragment") {
+          return true;
+        }
       }
     }
   }
