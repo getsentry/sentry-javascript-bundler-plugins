@@ -13,7 +13,8 @@
     "plugin"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "tag": "v2"
   },
   "files": [
     "dist"
