@@ -4,6 +4,10 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 4.0.2
+
+- fix(core): Make `moduleMetadata` injection snippet ES5-compliant ([#774](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/774))
+
 ## 4.0.1
 
 - fix(core): Make plugin inject ES5-friendly code ([#770](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/770))
@@ -117,6 +121,10 @@ Work in this release was contributed by @thecodewarrior. Thank you for your cont
 - fix: Use correct replacement matcher for `bundleSizeOptimizations.excludeTracing` (#644)
 
 Work in this release contributed by @jdelStrother. Thank you for your contribution!
+
+## 2.23.1
+
+- fix(v2/core): Make `moduleMetadata` injection code ES5-compliant (#773)
 
 ## 2.23.0
 
