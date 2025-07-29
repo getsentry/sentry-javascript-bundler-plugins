@@ -14,7 +14,8 @@
     "plugin"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "tag": "v3"
   },
   "files": [
     "dist"
