@@ -40,12 +40,14 @@ const options: OptionDocumentation[] = [
   {
     name: "debug",
     type: "boolean",
-    fullDescription: "Enable debug information logs during build-time. Enabling this will give you, for example, logs about source maps. Defaults to `false`.",
+    fullDescription:
+      "Enable debug information logs during build-time. Enabling this will give you, for example, logs about source maps. Defaults to `false`.",
   },
   {
     name: "silent",
     type: "boolean",
-    fullDescription: "Suppresses all build logs (all log levels, including errors). Defaults to `false`.",
+    fullDescription:
+      "Suppresses all build logs (all log levels, including errors). Defaults to `false`.",
   },
   {
     name: "errorHandler",
@@ -219,7 +221,8 @@ Use the \`debug\` option to print information about source map resolution.
       },
       {
         name: "deploy",
-        fullDescription: "Configuration for adding deployment information to the release in Sentry.",
+        fullDescription:
+          "Configuration for adding deployment information to the release in Sentry.",
         children: [
           {
             name: "env",
