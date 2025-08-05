@@ -154,7 +154,7 @@ Use the \`debug\` option to print information about source map resolution.
         name: "create",
         type: "boolean",
         fullDescription:
-          "Whether to create a new release.\n\nNote that a release may still appear in Sentry even if this is value is `false` because any Sentry event that has a release value attached will automatically create a release. (for example via the `inject` option)\n\nDefaults to `true`.",
+          "Whether the plugin should create a release on Sentry during the build.\n\nNote that a release may still appear in Sentry even if this is value is `false` because any Sentry event that has a release value attached will automatically create a release. (for example via the `inject` option)\n\nDefaults to `true`.",
       },
       {
         name: "finalize",

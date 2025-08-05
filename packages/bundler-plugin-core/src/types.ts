@@ -29,7 +29,7 @@ export interface Options {
    *
    * This value can also be set via the `SENTRY_URL` environment variable.
    *
-   * @default "https://sentry.io"
+   * @default "https://sentry.io" (correct value for SaaS customers)
    */
   url?: string;
 
@@ -193,7 +193,7 @@ export interface Options {
     inject?: boolean;
 
     /**
-     * Whether to create a new release.
+     * Whether the plugin should create a release on Sentry during the build.
      *
      * Note that a release may still appear in Sentry even if this value is `false`. Any Sentry event that has a release value attached
      * will automatically create a release (for example, via the `inject` option).
