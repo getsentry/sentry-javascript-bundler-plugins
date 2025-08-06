@@ -51,8 +51,14 @@ interface AnnotationOpts {
   ignoredComponents?: string[];
 }
 
+interface FragmentContext {
+  fragmentAliases: Set<string>;
+  reactNamespaceAliases: Set<string>;
+}
+
 interface AnnotationPluginPass extends PluginPass {
   opts: AnnotationOpts;
+  sentryFragmentContext?: FragmentContext;
 }
 
 type AnnotationPlugin = PluginObj<AnnotationPluginPass>;
@@ -64,7 +70,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
       Program: {
         enter(path, state) {
           const fragmentContext = collectFragmentContext(path);
-          state['sentryFragmentContext'] = fragmentContext;
+          state.sentryFragmentContext = fragmentContext;
         }
       },
       FunctionDeclaration(path, state) {
@@ -75,8 +81,6 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
-        const fragmentContext = state['sentryFragmentContext'] as FragmentContext | undefined;
-
         functionBodyPushAttributes(
           state.opts["annotate-fragments"] === true,
           t,
@@ -85,7 +89,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
           state.opts.ignoredComponents ?? [],
-          fragmentContext
+          state.sentryFragmentContext
         );
       },
       ArrowFunctionExpression(path, state) {
@@ -106,8 +110,6 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
-        const fragmentContext = state['sentryFragmentContext'] as FragmentContext | undefined;
-
         functionBodyPushAttributes(
           state.opts["annotate-fragments"] === true,
           t,
@@ -116,7 +118,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           sourceFileNameFromState(state),
           attributeNamesFromState(state),
           state.opts.ignoredComponents ?? [],
-          fragmentContext
+          state.sentryFragmentContext
         );
       },
       ClassDeclaration(path, state) {
@@ -131,8 +133,6 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
         }
 
         const ignoredComponents = state.opts.ignoredComponents ?? [];
-
-        const fragmentContext = state['sentryFragmentContext'] as FragmentContext | undefined;
 
         render.traverse({
           ReturnStatement(returnStatement) {
@@ -150,7 +150,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
               sourceFileNameFromState(state),
               attributeNamesFromState(state),
               ignoredComponents,
-              fragmentContext
+              state.sentryFragmentContext
             );
           },
         });
@@ -465,11 +465,6 @@ function attributeNamesFromState(state: AnnotationPluginPass): [string, string, 
   }
 
   return [webComponentName, webElementName, webSourceFileName];
-}
-
-interface FragmentContext {
-  fragmentAliases: Set<string>;
-  reactNamespaceAliases: Set<string>;
 }
 
 function collectFragmentContext(programPath: Babel.NodePath): FragmentContext {
