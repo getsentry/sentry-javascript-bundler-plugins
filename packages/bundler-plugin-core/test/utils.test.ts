@@ -1,4 +1,5 @@
 import {
+  generateGlobalInjectorCode,
   generateModuleMetadataInjectorCode,
   getDependencies,
   getPackageJson,
@@ -6,6 +7,9 @@ import {
   replaceBooleanFlagsInCode,
   stringToUUID,
 } from "../src/utils";
+
+import fs from "fs";
+
 import path from "node:path";
 
 type PackageJson = Record<string, unknown>;
@@ -216,33 +220,42 @@ if (false && true) {
   });
 });
 
+describe("generateGlobalInjectorCode", () => {
+  it("generates code with release", () => {
+    const generatedCode = generateGlobalInjectorCode({
+      release: "1.2.3",
+      injectBuildInformation: false,
+    });
+
+    expect(generatedCode).toMatchSnapshot();
+  });
+
+  it("generates code with release and build information", () => {
+    jest.spyOn(fs, "readFileSync").mockReturnValueOnce(
+      JSON.stringify({
+        name: "test-app",
+        dependencies: {
+          myDep: "^2.1.4",
+        },
+        devDependencies: {
+          rollup: "^3.1.4",
+        },
+      })
+    );
+
+    const generatedCode = generateGlobalInjectorCode({
+      release: "1.2.3",
+      injectBuildInformation: true,
+    });
+
+    expect(generatedCode).toMatchSnapshot();
+  });
+});
+
 describe("generateModuleMetadataInjectorCode", () => {
   it("generates code with empty metadata object", () => {
     const generatedCode = generateModuleMetadataInjectorCode({});
-    expect(generatedCode).toMatchInlineSnapshot(`
-      "{
-        let _sentryModuleMetadataGlobal =
-          typeof window !== \\"undefined\\"
-            ? window
-            : typeof global !== \\"undefined\\"
-            ? global
-            : typeof globalThis !== \\"undefined\\"
-            ? globalThis
-            : typeof self !== \\"undefined\\"
-            ? self
-            : {};
-
-        _sentryModuleMetadataGlobal._sentryModuleMetadata =
-          _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
-
-        _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack] =
-          Object.assign(
-            {},
-            _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
-            {}
-          );
-      }"
-    `);
+    expect(generatedCode).toMatchSnapshot();
   });
 
   it("generates code with metadata object", () => {
@@ -254,29 +267,6 @@ describe("generateModuleMetadataInjectorCode", () => {
         bar: "baz",
       },
     });
-    expect(generatedCode).toMatchInlineSnapshot(`
-      "{
-        let _sentryModuleMetadataGlobal =
-          typeof window !== \\"undefined\\"
-            ? window
-            : typeof global !== \\"undefined\\"
-            ? global
-            : typeof globalThis !== \\"undefined\\"
-            ? globalThis
-            : typeof self !== \\"undefined\\"
-            ? self
-            : {};
-
-        _sentryModuleMetadataGlobal._sentryModuleMetadata =
-          _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
-
-        _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack] =
-          Object.assign(
-            {},
-            _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
-            {\\"file1.js\\":{\\"foo\\":\\"bar\\"},\\"file2.js\\":{\\"bar\\":\\"baz\\"}}
-          );
-      }"
-    `);
+    expect(generatedCode).toMatchSnapshot();
   });
 });
