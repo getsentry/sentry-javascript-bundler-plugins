@@ -63,6 +63,24 @@ interface AnnotationPluginPass extends PluginPass {
 
 type AnnotationPlugin = PluginObj<AnnotationPluginPass>;
 
+// Shared context object for all JSX processing functions
+interface JSXProcessingContext {
+  /** Whether to annotate React fragments */
+  annotateFragments: boolean;
+  /** Babel types object */
+  t: typeof Babel.types;
+  /** Name of the React component */
+  componentName: string;
+  /** Source file name (optional) */
+  sourceFileName?: string;
+  /** Array of attribute names [component, element, sourceFile] */
+  attributeNames: string[];
+  /** Array of component names to ignore */
+  ignoredComponents: string[];
+  /** Fragment context for identifying React fragments */
+  fragmentContext?: FragmentContext;
+}
+
 // We must export the plugin as default, otherwise the Babel loader will not be able to resolve it when configured using its string identifier
 export default function componentNameAnnotatePlugin({ types: t }: typeof Babel): AnnotationPlugin {
   return {
@@ -81,16 +99,8 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
-        functionBodyPushAttributes(
-          state.opts["annotate-fragments"] === true,
-          t,
-          path,
-          path.node.id.name,
-          sourceFileNameFromState(state),
-          attributeNamesFromState(state),
-          state.opts.ignoredComponents ?? [],
-          state.sentryFragmentContext
-        );
+        const context = createJSXProcessingContext(state, t, path.node.id.name);
+        functionBodyPushAttributes(context, path);
       },
       ArrowFunctionExpression(path, state) {
         // We're expecting a `VariableDeclarator` like `const MyComponent =`
@@ -110,16 +120,8 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
-        functionBodyPushAttributes(
-          state.opts["annotate-fragments"] === true,
-          t,
-          path,
-          parent.id.name,
-          sourceFileNameFromState(state),
-          attributeNamesFromState(state),
-          state.opts.ignoredComponents ?? [],
-          state.sentryFragmentContext
-        );
+        const context = createJSXProcessingContext(state, t, parent.id.name);
+        functionBodyPushAttributes(context, path);
       },
       ClassDeclaration(path, state) {
         const name = path.get("id");
@@ -132,7 +134,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
-        const ignoredComponents = state.opts.ignoredComponents ?? [];
+        const context = createJSXProcessingContext(state, t, name.node?.name || "");
 
         render.traverse({
           ReturnStatement(returnStatement) {
@@ -142,16 +144,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
               return;
             }
 
-            processJSX(
-              state.opts["annotate-fragments"] === true,
-              t,
-              arg,
-              name.node && name.node.name,
-              sourceFileNameFromState(state),
-              attributeNamesFromState(state),
-              ignoredComponents,
-              state.sentryFragmentContext
-            );
+            processJSX(context, arg);
           },
         });
       },
@@ -159,15 +152,33 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
   };
 }
 
-function functionBodyPushAttributes(
-  annotateFragments: boolean,
+/**
+ * Creates a JSX processing context from the plugin state
+ */
+function createJSXProcessingContext(
+  state: AnnotationPluginPass,
   t: typeof Babel.types,
-  path: Babel.NodePath<Babel.types.Function>,
-  componentName: string,
-  sourceFileName: string | undefined,
-  attributeNames: string[],
-  ignoredComponents: string[],
-  fragmentContext?: FragmentContext
+  componentName: string
+): JSXProcessingContext {
+  return {
+    annotateFragments: state.opts["annotate-fragments"] === true,
+    t,
+    componentName,
+    sourceFileName: sourceFileNameFromState(state),
+    attributeNames: attributeNamesFromState(state),
+    ignoredComponents: state.opts.ignoredComponents ?? [],
+    fragmentContext: state.sentryFragmentContext,
+  };
+}
+
+/**
+ * Processes the body of a function to add Sentry tracking attributes to JSX elements.
+ * Handles various function body structures including direct JSX returns, conditional expressions,
+ * and nested JSX elements.
+ */
+function functionBodyPushAttributes(
+  context: JSXProcessingContext,
+  path: Babel.NodePath<Babel.types.Function>
 ): void {
   let jsxNode: Babel.NodePath;
 
@@ -209,29 +220,11 @@ function functionBodyPushAttributes(
     if (arg.isConditionalExpression()) {
       const consequent = arg.get("consequent");
       if (consequent.isJSXFragment() || consequent.isJSXElement()) {
-        processJSX(
-          annotateFragments,
-          t,
-          consequent,
-          componentName,
-          sourceFileName,
-          attributeNames,
-          ignoredComponents,
-          fragmentContext
-        );
+        processJSX(context, consequent);
       }
       const alternate = arg.get("alternate");
       if (alternate.isJSXFragment() || alternate.isJSXElement()) {
-        processJSX(
-          annotateFragments,
-          t,
-          alternate,
-          componentName,
-          sourceFileName,
-          attributeNames,
-          ignoredComponents,
-          fragmentContext
-        );
+        processJSX(context, alternate);
       }
       return;
     }
@@ -247,31 +240,26 @@ function functionBodyPushAttributes(
     return;
   }
 
-  processJSX(
-    annotateFragments,
-    t,
-    jsxNode,
-    componentName,
-    sourceFileName,
-    attributeNames,
-    ignoredComponents,
-    fragmentContext
-  );
+  processJSX(context, jsxNode);
 }
 
+/**
+ * Recursively processes JSX elements to add Sentry tracking attributes.
+ * Handles both JSX elements and fragments, applying appropriate attributes
+ * based on configuration and component context.
+ */
 function processJSX(
-  annotateFragments: boolean,
-  t: typeof Babel.types,
+  context: JSXProcessingContext,
   jsxNode: Babel.NodePath,
-  componentName: string | null,
-  sourceFileName: string | undefined,
-  attributeNames: string[],
-  ignoredComponents: string[],
-  fragmentContext?: FragmentContext
+  componentName?: string | null
 ): void {
   if (!jsxNode) {
     return;
   }
+
+  // Use provided componentName or fall back to context componentName
+  const currentComponentName = componentName !== undefined ? componentName : context.componentName;
+
   // NOTE: I don't know of a case where `openingElement` would have more than one item,
   // but it's safer to always iterate
   const paths = jsxNode.get("openingElement");
@@ -279,13 +267,9 @@ function processJSX(
 
   openingElements.forEach((openingElement) => {
     applyAttributes(
-      t,
+      context,
       openingElement as Babel.NodePath<Babel.types.JSXOpeningElement>,
-      componentName,
-      sourceFileName,
-      attributeNames,
-      ignoredComponents,
-      fragmentContext
+      currentComponentName
     );
   });
 
@@ -296,7 +280,7 @@ function processJSX(
     children = [children];
   }
 
-  let shouldSetComponentName = annotateFragments;
+  let shouldSetComponentName = context.annotateFragments;
 
   children.forEach((child) => {
     // Happens for some node types like plain text
@@ -314,40 +298,24 @@ function processJSX(
 
     if (shouldSetComponentName && openingElement && openingElement.node) {
       shouldSetComponentName = false;
-      processJSX(
-        annotateFragments,
-        t,
-        child,
-        componentName,
-        sourceFileName,
-        attributeNames,
-        ignoredComponents,
-        fragmentContext
-      );
+      processJSX(context, child, currentComponentName);
     } else {
-      processJSX(
-        annotateFragments,
-        t,
-        child,
-        null,
-        sourceFileName,
-        attributeNames,
-        ignoredComponents,
-        fragmentContext
-      );
+      processJSX(context, child, null);
     }
   });
 }
 
+/**
+ * Applies Sentry tracking attributes to a JSX opening element.
+ * Adds component name, element name, and source file attributes while
+ * respecting ignore lists and fragment detection.
+ */
 function applyAttributes(
-  t: typeof Babel.types,
+  context: JSXProcessingContext,
   openingElement: Babel.NodePath<Babel.types.JSXOpeningElement>,
-  componentName: string | null,
-  sourceFileName: string | undefined,
-  attributeNames: string[],
-  ignoredComponents: string[],
-  fragmentContext?: FragmentContext
+  componentName: string | null
 ): void {
+  const { t, attributeNames, ignoredComponents, fragmentContext, sourceFileName } = context;
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
 
   // e.g., Raw JSX text like the `A` in `<h1>a</h1>`
