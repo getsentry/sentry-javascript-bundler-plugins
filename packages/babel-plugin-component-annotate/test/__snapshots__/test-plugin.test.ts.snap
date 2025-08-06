@@ -1,5 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Fragment Detection combines all fragment patterns correctly 1`] = `
+"import React, { Fragment as ImportedF } from 'react';
+import * as MyReact from 'react';
+const {
+  Fragment: DestructuredF
+} = React;
+const {
+  Fragment
+} = MyReact;
+const AssignedF = Fragment; // ← This uses the destructured Fragment from MyReact
+
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(\\"div\\", {
+    className: \\"container\\",
+    \\"data-sentry-component\\": \\"TestComponent\\",
+    \\"data-sentry-source-file\\": \\"filename-test.js\\"
+  }, /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(\\"span\\", null, \\"JSX Fragment content\\")), /*#__PURE__*/React.createElement(ImportedF, null, /*#__PURE__*/React.createElement(\\"span\\", null, \\"Imported alias content\\")), /*#__PURE__*/React.createElement(DestructuredF, null, /*#__PURE__*/React.createElement(\\"span\\", null, \\"Destructured content\\")), /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(\\"span\\", null, \\"Namespace destructured content\\")), /*#__PURE__*/React.createElement(AssignedF, null, /*#__PURE__*/React.createElement(\\"span\\", null, \\"Variable assigned content\\")), /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(\\"span\\", null, \\"React.Fragment content\\")), /*#__PURE__*/React.createElement(MyReact.Fragment, null, /*#__PURE__*/React.createElement(\\"span\\", null, \\"Namespace Fragment content\\")));
+}"
+`;
+
+exports[`Fragment Detection handles complex variable assignment chains 1`] = `
+"import { Fragment } from 'react';
+const MyFragment = Fragment;
+const AnotherFragment = MyFragment;
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(AnotherFragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content in chained fragment\\"));
+}"
+`;
+
 exports[`Fragment Detection handles destructuring from aliased React imports 1`] = `
 "import MyReact from 'react';
 const {
@@ -17,6 +46,23 @@ const {
 } = ReactLib;
 export default function TestComponent() {
   return /*#__PURE__*/React.createElement(F, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content from namespace destructuring\\"));
+}"
+`;
+
+exports[`Fragment Detection handles multiple destructuring patterns in one file 1`] = `
+"import React from 'react';
+import * as MyReact from 'react';
+const {
+  Fragment
+} = React;
+const {
+  Fragment: AliasedFrag
+} = MyReact;
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(\\"div\\", {
+    \\"data-sentry-component\\": \\"TestComponent\\",
+    \\"data-sentry-source-file\\": \\"filename-test.js\\"
+  }, /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(\\"span\\", null, \\"Regular destructured\\")), /*#__PURE__*/React.createElement(AliasedFrag, null, /*#__PURE__*/React.createElement(\\"p\\", null, \\"Aliased destructured\\")));
 }"
 `;
 
@@ -91,6 +137,17 @@ exports[`Fragment Detection ignores React.Fragment with member expression handli
 "import React from 'react';
 export default function TestComponent() {
   return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content\\"));
+}"
+`;
+
+exports[`Fragment Detection ignores multiple fragment patterns in same file 1`] = `
+"import React, { Fragment } from 'react';
+const MyFragment = Fragment;
+export default function TestComponent() {
+  return /*#__PURE__*/React.createElement(\\"div\\", {
+    \\"data-sentry-component\\": \\"TestComponent\\",
+    \\"data-sentry-source-file\\": \\"filename-test.js\\"
+  }, /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"JSX Fragment content\\")), /*#__PURE__*/React.createElement(Fragment, null, /*#__PURE__*/React.createElement(\\"span\\", null, \\"Direct Fragment content\\")), /*#__PURE__*/React.createElement(MyFragment, null, /*#__PURE__*/React.createElement(\\"p\\", null, \\"Variable Fragment content\\")), /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(\\"h1\\", null, \\"React.Fragment content\\")));
 }"
 `;
 

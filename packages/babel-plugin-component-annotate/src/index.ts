@@ -71,7 +71,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
         enter(path, state) {
           const fragmentContext = collectFragmentContext(path);
           state.sentryFragmentContext = fragmentContext;
-        }
+        },
       },
       FunctionDeclaration(path, state) {
         if (!path.node.id || !path.node.id.name) {
@@ -350,11 +350,14 @@ function applyAttributes(
 ): void {
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
 
-  if (isReactFragment(t, openingElement, fragmentContext)) {
-    return;
-  }
   // e.g., Raw JSX text like the `A` in `<h1>a</h1>`
   if (!openingElement.node) {
+    return;
+  }
+
+  // Check if this is a React fragment - if so, skip attribute addition entirely
+  const isFragment = isReactFragment(t, openingElement, fragmentContext);
+  if (isFragment) {
     return;
   }
 
@@ -367,15 +370,11 @@ function applyAttributes(
 
   // Add a stable attribute for the element name but only for non-DOM names
   let isAnIgnoredElement = false;
-  if (
-    !isAnIgnoredComponent &&
-    !hasAttributeWithName(openingElement, componentAttributeName) &&
-    (componentAttributeName !== elementAttributeName || !componentName)
-  ) {
+  if (!isAnIgnoredComponent && !hasAttributeWithName(openingElement, elementAttributeName)) {
     if (DEFAULT_IGNORED_ELEMENTS.includes(elementName)) {
       isAnIgnoredElement = true;
     } else {
-      // TODO: Is it possible to avoid this null check?
+      // Always add element attribute for non-ignored elements
       if (elementAttributeName) {
         openingElement.node.attributes.push(
           t.jSXAttribute(t.jSXIdentifier(elementAttributeName), t.stringLiteral(elementName))
@@ -390,7 +389,6 @@ function applyAttributes(
     !isAnIgnoredComponent &&
     !hasAttributeWithName(openingElement, componentAttributeName)
   ) {
-    // TODO: Is it possible to avoid this null check?
     if (componentAttributeName) {
       openingElement.node.attributes.push(
         t.jSXAttribute(t.jSXIdentifier(componentAttributeName), t.stringLiteral(componentName))
@@ -398,14 +396,16 @@ function applyAttributes(
     }
   }
 
-  // Add a stable attribute for the source file name (absent for non-root elements)
+  // Add a stable attribute for the source file name
+  // Updated condition: add source file for elements that have either:
+  // 1. A component name (root elements), OR
+  // 2. An element name that's not ignored (child elements)
   if (
     sourceFileName &&
     !isAnIgnoredComponent &&
-    (componentName || isAnIgnoredElement === false) &&
+    (componentName || !isAnIgnoredElement) &&
     !hasAttributeWithName(openingElement, sourceFileAttributeName)
   ) {
-    // TODO: Is it possible to avoid this null check?
     if (sourceFileAttributeName) {
       openingElement.node.attributes.push(
         t.jSXAttribute(t.jSXIdentifier(sourceFileAttributeName), t.stringLiteral(sourceFileName))
@@ -469,25 +469,25 @@ function attributeNamesFromState(state: AnnotationPluginPass): [string, string, 
 
 function collectFragmentContext(programPath: Babel.NodePath): FragmentContext {
   const fragmentAliases = new Set<string>();
-  const reactNamespaceAliases = new Set<string>(['React']); // Default React namespace
-  
+  const reactNamespaceAliases = new Set<string>(["React"]); // Default React namespace
+
   programPath.traverse({
     ImportDeclaration(importPath) {
       const source = importPath.node.source.value;
-      
+
       // Handle React imports
-      if (source === 'react' || source === 'React') {
-        importPath.node.specifiers.forEach(spec => {
-          if (spec.type === 'ImportSpecifier' && spec.imported.type === 'Identifier') {
+      if (source === "react" || source === "React") {
+        importPath.node.specifiers.forEach((spec) => {
+          if (spec.type === "ImportSpecifier" && spec.imported.type === "Identifier") {
             // import { Fragment } from 'react' -> Fragment
             // import { Fragment as F } from 'react' -> F
-            if (spec.imported.name === 'Fragment') {
+            if (spec.imported.name === "Fragment") {
               fragmentAliases.add(spec.local.name);
             }
-          } else if (spec.type === 'ImportDefaultSpecifier') {
+          } else if (spec.type === "ImportDefaultSpecifier") {
             // import React from 'react' -> React
             reactNamespaceAliases.add(spec.local.name);
-          } else if (spec.type === 'ImportNamespaceSpecifier') {
+          } else if (spec.type === "ImportNamespaceSpecifier") {
             // import * as React from 'react' -> React
             reactNamespaceAliases.add(spec.local.name);
           }
@@ -499,37 +499,39 @@ function collectFragmentContext(programPath: Babel.NodePath): FragmentContext {
     VariableDeclarator(varPath) {
       if (varPath.node.init) {
         const init = varPath.node.init;
-        
+
         // Handle identifier assignments: const MyFragment = Fragment
-        if (varPath.node.id.type === 'Identifier') {
+        if (varPath.node.id.type === "Identifier") {
           // Handle: const MyFragment = Fragment (only if Fragment is a known alias)
-          if (init.type === 'Identifier' && fragmentAliases.has(init.name)) {
+          if (init.type === "Identifier" && fragmentAliases.has(init.name)) {
             fragmentAliases.add(varPath.node.id.name);
           }
-          
+
           // Handle: const MyFragment = React.Fragment (only for known React namespaces)
-          if (init.type === 'MemberExpression' && 
-              init.object.type === 'Identifier' && 
-              init.property.type === 'Identifier' &&
-              reactNamespaceAliases.has(init.object.name) && 
-              init.property.name === 'Fragment') {
+          if (
+            init.type === "MemberExpression" &&
+            init.object.type === "Identifier" &&
+            init.property.type === "Identifier" &&
+            reactNamespaceAliases.has(init.object.name) &&
+            init.property.name === "Fragment"
+          ) {
             fragmentAliases.add(varPath.node.id.name);
           }
         }
-        
+
         // Handle destructuring assignments: const { Fragment } = React
-        if (varPath.node.id.type === 'ObjectPattern') {
-          if (init.type === 'Identifier' && reactNamespaceAliases.has(init.name)) {
+        if (varPath.node.id.type === "ObjectPattern") {
+          if (init.type === "Identifier" && reactNamespaceAliases.has(init.name)) {
             const properties = varPath.node.id.properties;
-            
+
             for (const prop of properties) {
               if (
-                prop.type === 'ObjectProperty' && 
+                prop.type === "ObjectProperty" &&
                 prop.key &&
-                prop.key.type === 'Identifier' && 
+                prop.key.type === "Identifier" &&
                 prop.value &&
-                prop.value.type === 'Identifier' &&
-                prop.key.name === 'Fragment'
+                prop.value.type === "Identifier" &&
+                prop.key.name === "Fragment"
               ) {
                 fragmentAliases.add(prop.value.name);
               }
@@ -537,14 +539,14 @@ function collectFragmentContext(programPath: Babel.NodePath): FragmentContext {
           }
         }
       }
-    }
+    },
   });
 
   return { fragmentAliases, reactNamespaceAliases };
 }
 
 function isReactFragment(
-  t: typeof Babel.types, 
+  t: typeof Babel.types,
   openingElement: Babel.NodePath,
   context?: FragmentContext // Add this optional parameter
 ): boolean {
@@ -561,7 +563,7 @@ function isReactFragment(
   }
 
   // TODO: All these objects are typed as unknown, maybe an oversight in Babel types?
-  
+
   // Check if the element name is a known fragment alias
   if (context && elementName && context.fragmentAliases.has(elementName)) {
     return true;
@@ -604,7 +606,10 @@ function isReactFragment(
       // Enhanced checks using context
       if (context) {
         // Check React.Fragment pattern with known React namespaces
-        if (context.reactNamespaceAliases.has(objectName as string) && propertyName === "Fragment") {
+        if (
+          context.reactNamespaceAliases.has(objectName as string) &&
+          propertyName === "Fragment"
+        ) {
           return true;
         }
 

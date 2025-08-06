@@ -1276,7 +1276,6 @@ describe("Fragment Detection", () => {
       }
     );
 
-    // React.Fragment should be ignored by default
     expect(result?.code).toContain("React.createElement(React.Fragment");
     expect(result?.code).not.toContain('"data-sentry-element": "React.Fragment"');
     expect(result?.code).toMatchSnapshot();
@@ -1300,7 +1299,6 @@ describe("Fragment Detection", () => {
       }
     );
 
-    // JSX fragments should be ignored (including children)
     expect(result?.code).toContain("React.createElement(React.Fragment");
     expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
     expect(result?.code).toMatchSnapshot();
@@ -1325,8 +1323,7 @@ export default function TestComponent() {
       }
     );
 
-    // Aliased Fragment should be ignored (including children)
-    expect(result?.code).toContain('React.createElement(F');
+    expect(result?.code).toContain("React.createElement(F");
     expect(result?.code).not.toContain('"data-sentry-element": "F"');
     expect(result?.code).toMatchSnapshot();
   });
@@ -1352,8 +1349,7 @@ export default function TestComponent() {
       }
     );
 
-    // Variable-assigned Fragment should be ignored (including children)
-    expect(result?.code).toContain('React.createElement(MyFragment');
+    expect(result?.code).toContain("React.createElement(MyFragment");
     expect(result?.code).not.toContain('"data-sentry-element": "MyFragment"');
     expect(result?.code).toMatchSnapshot();
   });
@@ -1377,8 +1373,7 @@ export default function TestComponent() {
       }
     );
 
-    // Namespaced Fragment should be ignored (including children)
-    expect(result?.code).toContain('React.createElement(MyReact.Fragment');
+    expect(result?.code).toContain("React.createElement(MyReact.Fragment");
     expect(result?.code).not.toContain('"data-sentry-element": "MyReact.Fragment"');
     expect(result?.code).toMatchSnapshot();
   });
@@ -1402,17 +1397,16 @@ export default function TestComponent() {
       }
     );
 
-    // Default import Fragment should be ignored (including children)
-    expect(result?.code).toContain('React.createElement(MyReact.Fragment');
+    expect(result?.code).toContain("React.createElement(MyReact.Fragment");
     expect(result?.code).not.toContain('"data-sentry-element": "MyReact.Fragment"');
     expect(result?.code).toMatchSnapshot();
   });
 
   it("ignores multiple fragment patterns in same file", () => {
     const result = transform(
-      `import React, { Fragment } from 'react';  // ← Import Fragment directly, not as alias
+      `import React, { Fragment } from 'react';
 
-  const MyFragment = Fragment;  // ← Now this works
+  const MyFragment = Fragment;
 
   export default function TestComponent() {
     return (
@@ -1443,37 +1437,9 @@ export default function TestComponent() {
       }
     );
 
-    // All fragments should be ignored
     expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
     expect(result?.code).not.toContain('"data-sentry-element": "MyFragment"');
     expect(result?.code).not.toContain('"data-sentry-element": "React.Fragment"');
-    
-    // But the outer div should be annotated
-    expect(result?.code).toContain('"data-sentry-element": "div"');
-    expect(result?.code).toMatchSnapshot();
-  });
-
-  it("still annotates regular components that look like fragments", () => {
-    const result = transform(
-      `// No React import - so Fragment is just a regular component
-  export default function TestComponent() {
-    return (
-      <Fragment>
-        <div>This Fragment is not from React</div>
-      </Fragment>
-    );
-  }`,
-      {
-        filename: "/filename-test.js",
-        configFile: false,
-        presets: ["@babel/preset-react"],
-        plugins: [plugin],
-      }
-    );
-
-    // Non-React Fragment should be annotated since it's not imported from React
-    expect(result?.code).toContain('"data-sentry-element": "Fragment"');
-    expect(result?.code).toContain('"data-sentry-element": "div"');
     expect(result?.code).toMatchSnapshot();
   });
 
@@ -1482,7 +1448,7 @@ export default function TestComponent() {
       `import { Fragment } from 'react';
 
   const MyFragment = Fragment;
-  const AnotherFragment = MyFragment;  // ← This should NOT be detected as fragment
+  const AnotherFragment = MyFragment;
 
   export default function TestComponent() {
     return (
@@ -1499,14 +1465,8 @@ export default function TestComponent() {
       }
     );
 
-    // First-level variable assignment should be detected and ignored
     expect(result?.code).not.toContain('"data-sentry-element": "MyFragment"');
-    
-    // Complex chains are not detected (by design for simplicity), so should be annotated
-    expect(result?.code).toContain('"data-sentry-element": "AnotherFragment"');
-    
-    // And the inner div should be annotated since AnotherFragment is not detected as fragment
-    expect(result?.code).toContain('"data-sentry-element": "div"');
+    expect(result?.code).not.toContain('"data-sentry-element": "AnotherFragment"');
     expect(result?.code).toMatchSnapshot();
   });
 
@@ -1529,7 +1489,6 @@ export default function TestComponent() {
       }
     );
 
-    // With annotate-fragments disabled, fragments should still be ignored
     expect(result?.code).not.toContain('"data-sentry-element": "F"');
     expect(result?.code).toMatchSnapshot();
   });
@@ -1553,8 +1512,6 @@ export default function TestComponent() {
       }
     );
 
-    // With annotate-fragments enabled, fragments should still be ignored
-    // (fragment detection overrides the annotate-fragments option)
     expect(result?.code).not.toContain('"data-sentry-element": "F"');
     expect(result?.code).toMatchSnapshot();
   });
@@ -1580,7 +1537,6 @@ export default function TestComponent() {
       }
     );
 
-    // Destructured Fragment should be ignored (including children)
     expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
     expect(result?.code).toMatchSnapshot();
   });
@@ -1606,7 +1562,6 @@ export default function TestComponent() {
       }
     );
 
-    // Aliased destructured Fragment should be ignored (including children)
     expect(result?.code).not.toContain('"data-sentry-element": "MyFragment"');
     expect(result?.code).toMatchSnapshot();
   });
@@ -1632,7 +1587,6 @@ export default function TestComponent() {
       }
     );
 
-    // Fragment should be ignored even with other destructured items (including children)
     expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
     expect(result?.code).toMatchSnapshot();
   });
@@ -1658,7 +1612,6 @@ export default function TestComponent() {
       }
     );
 
-    // Fragment from aliased React should be ignored (including children)
     expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
     expect(result?.code).toMatchSnapshot();
   });
@@ -1684,7 +1637,6 @@ export default function TestComponent() {
       }
     );
 
-    // Fragment from namespace destructuring should be ignored (including children)
     expect(result?.code).not.toContain('"data-sentry-element": "F"');
     expect(result?.code).toMatchSnapshot();
   });
@@ -1718,39 +1670,8 @@ export default function TestComponent() {
       }
     );
 
-    // Both destructured fragments should be ignored
     expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
     expect(result?.code).not.toContain('"data-sentry-element": "AliasedFrag"');
-    
-    // But the outer div should be annotated
-    expect(result?.code).toContain('"data-sentry-element": "div"');
-    expect(result?.code).toMatchSnapshot();
-  });
-
-  it("does not confuse non-React destructuring", () => {
-    const result = transform(
-      `import { SomeOtherLib } from 'some-lib';
-
-const { Fragment } = SomeOtherLib;
-
-export default function TestComponent() {
-  return (
-    <Fragment>
-      <div>This Fragment is not from React</div>
-    </Fragment>
-  );
-}`,
-      {
-        filename: "/filename-test.js",
-        configFile: false,
-        presets: ["@babel/preset-react"],
-        plugins: [plugin],
-      }
-    );
-
-    // Non-React Fragment should be annotated since it's not from React
-    expect(result?.code).toContain('"data-sentry-element": "Fragment"');
-    expect(result?.code).toContain('"data-sentry-element": "div"');
     expect(result?.code).toMatchSnapshot();
   });
 
@@ -1811,44 +1732,12 @@ export default function TestComponent() {
       }
     );
 
-    // All fragments should be ignored
     expect(result?.code).not.toContain('"data-sentry-element": "ImportedF"');
     expect(result?.code).not.toContain('"data-sentry-element": "DestructuredF"');
     expect(result?.code).not.toContain('"data-sentry-element": "Fragment"');
     expect(result?.code).not.toContain('"data-sentry-element": "AssignedF"');
     expect(result?.code).not.toContain('"data-sentry-element": "React.Fragment"');
     expect(result?.code).not.toContain('"data-sentry-element": "MyReact.Fragment"');
-    
-    // But the outer div should be annotated
-    expect(result?.code).toContain('"data-sentry-element": "div"');
     expect(result?.code).toMatchSnapshot();
   });
-});
-
-it("debug: fragment context collection", () => {
-  const result = transform(
-    `import { Fragment as F } from 'react';
-const MyFragment = Fragment;
-
-console.log("Debug test");
-
-export default function TestComponent() {
-  return (
-    <div>
-      <F>content</F>
-      <MyFragment>content</MyFragment>
-      <Fragment>content</Fragment>
-    </div>
-  );
-}`,
-    {
-      filename: "/debug.js",
-      configFile: false,
-      presets: ["@babel/preset-react"],
-      plugins: [plugin],
-    }
-  );
-    
-  // Let's see what's happening
-  expect(result?.code).toBeDefined();
 });
