@@ -415,13 +415,6 @@ export default function componentName() {
 }"
 `;
 
-exports[`ignores React.Fragment with member expression handling 1`] = `
-"import React from 'react';
-export default function TestComponent() {
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"Content\\"));
-}"
-`;
-
 exports[`ignores components with member expressions when in ignoredComponents 1`] = `
 "import React from 'react';
 import { Tab } from '@headlessui/react';
