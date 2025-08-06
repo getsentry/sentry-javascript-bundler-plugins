@@ -1848,9 +1848,7 @@ export default function TestComponent() {
       plugins: [plugin],
     }
   );
-  
-  console.log("Generated code:", result?.code);
-  
+    
   // Let's see what's happening
   expect(result?.code).toBeDefined();
 });

@@ -520,14 +520,20 @@ function collectFragmentContext(programPath: Babel.NodePath): FragmentContext {
         // Handle destructuring assignments: const { Fragment } = React
         if (varPath.node.id.type === 'ObjectPattern') {
           if (init.type === 'Identifier' && reactNamespaceAliases.has(init.name)) {
-            (varPath.node.id as any).properties.forEach((prop: any) => {
-              if (prop.type === 'ObjectProperty' && 
-                  prop.key?.type === 'Identifier' && 
-                  prop.value?.type === 'Identifier' &&
-                  prop.key.name === 'Fragment') {
+            const properties = varPath.node.id.properties;
+            
+            for (const prop of properties) {
+              if (
+                prop.type === 'ObjectProperty' && 
+                prop.key &&
+                prop.key.type === 'Identifier' && 
+                prop.value &&
+                prop.value.type === 'Identifier' &&
+                prop.key.name === 'Fragment'
+              ) {
                 fragmentAliases.add(prop.value.name);
               }
-            });
+            }
           }
         }
       }
