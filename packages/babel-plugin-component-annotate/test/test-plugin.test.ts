@@ -26,6 +26,13 @@
 import { transform } from "@babel/core";
 import plugin from "../src/index";
 
+const getTime = (): number => {
+  if (typeof performance !== "undefined" && performance.now) {
+    return performance.now();
+  }
+  return Date.now();
+};
+
 const BananasPizzaAppStandardInput = `import React, { Component } from 'react';
 import { StyleSheet, Text, TextInput, View, Image, UIManager } from 'react-native';
 
@@ -1739,5 +1746,142 @@ export default function TestComponent() {
     expect(result?.code).not.toContain('"data-sentry-element": "React.Fragment"');
     expect(result?.code).not.toContain('"data-sentry-element": "MyReact.Fragment"');
     expect(result?.code).toMatchSnapshot();
+  });
+});
+
+describe("Fragment Performance Benchmarks", () => {
+  interface TestFile {
+    filename: string;
+    code: string;
+  }
+
+  interface BenchmarkResult {
+    avg: number;
+    min: number;
+    max: number;
+    median: number;
+  }
+
+  const createTestProject = (fileCount: number, fragmentRatio = 0.4): TestFile[] => {
+    const files: TestFile[] = [];
+
+    for (let i = 0; i < fileCount; i++) {
+      const hasFragment = Math.random() < fragmentRatio;
+      const patterns = [
+        `import React, { Fragment } from 'react';`,
+        `import { Fragment } from 'react';`,
+        `import * as React from 'react';`,
+        `import React from 'react';\nconst { Fragment } = React;`,
+        `import MyReact from 'react';\nconst { Fragment: F } = MyReact;`,
+      ];
+
+      const pattern = patterns[Math.floor(Math.random() * patterns.length)] as string;
+      const fragmentType = getFragmentType(pattern);
+
+      // Add imports to other files for realistic import traversal
+      const imports: string[] = [];
+      const numImports = Math.min(3, i);
+      for (let j = 0; j < numImports; j++) {
+        imports.push(`import Component${j} from './component${j}';`);
+      }
+
+      const code = `${pattern}
+${imports.join("\n")}
+
+export default function Component${i}() {
+  return ${
+    hasFragment
+      ? `<${fragmentType}><div>Content ${i}</div></${fragmentType}>`
+      : `<div>Component ${i}</div>`
+  };
+}`;
+
+      files.push({ filename: `component${i}.js`, code });
+    }
+
+    return files;
+  };
+
+  const getFragmentType = (pattern: string): string => {
+    if (pattern.includes("Fragment: F")) return "F";
+    if (pattern.includes("Fragment }")) return "Fragment";
+    if (pattern.includes("* as React")) return "React.Fragment";
+    if (pattern.includes("const { Fragment }")) return "Fragment";
+    return "Fragment";
+  };
+
+  const runBenchmark = (files: TestFile[], iterations = 10): BenchmarkResult => {
+    const times: number[] = [];
+
+    for (let i = 0; i < iterations; i++) {
+      const start = getTime();
+
+      // Transform all files (simulating your plugin processing)
+      files.forEach((file: TestFile) => {
+        const result = transform(file.code, {
+          filename: `/${file.filename}`,
+          configFile: false,
+          presets: ["@babel/preset-react"],
+          plugins: [plugin],
+        });
+        if (!result?.code) throw new Error("Transform failed");
+      });
+
+      const end = getTime();
+      times.push(end - start);
+    }
+
+    const sortedTimes = [...times].sort((a, b) => a - b);
+    return {
+      avg: times.reduce((a, b) => a + b) / times.length,
+      min: Math.min(...times),
+      max: Math.max(...times),
+      median: sortedTimes[Math.floor(sortedTimes.length / 2)],
+    };
+  };
+
+  // Test different project sizes
+  const scenarios = [
+    { name: "small" as const, files: 20, expectedMaxTime: 50 },
+    { name: "medium" as const, files: 50, expectedMaxTime: 200 },
+    { name: "large" as const, files: 200, expectedMaxTime: 500 },
+  ];
+
+  scenarios.forEach((scenario) => {
+    it(`should perform well on ${scenario.name} projects (${scenario.files} files)`, () => {
+      const testFiles = createTestProject(scenario.files);
+      const results = runBenchmark(testFiles);
+
+      expect(results.avg).toBeGreaterThan(0);
+      expect(results.avg).toBeLessThan(scenario.expectedMaxTime);
+      expect(results.median).toBeLessThan(scenario.expectedMaxTime * 0.8);
+    });
+  });
+
+  it("should handle fragment-heavy projects efficiently", () => {
+    const fragmentHeavyFiles = createTestProject(25, 0.8);
+    const normalFiles = createTestProject(25, 0.2);
+
+    const fragmentResults = runBenchmark(fragmentHeavyFiles, 5);
+    const normalResults = runBenchmark(normalFiles, 5);
+
+    const overhead = (fragmentResults.avg - normalResults.avg) / normalResults.avg;
+
+    expect(overhead).toBeLessThan(0.5); // Less than 50% overhead
+    expect(fragmentResults.avg).toBeLessThan(300);
+  });
+
+  it("should not consume excessive memory", () => {
+    const testFiles = createTestProject(50);
+
+    if (global.gc) global.gc();
+
+    const memBefore = process.memoryUsage().heapUsed;
+    runBenchmark(testFiles, 1);
+    const memAfter = process.memoryUsage().heapUsed;
+
+    const memoryDelta = (memAfter - memBefore) / 1024 / 1024;
+
+    expect(memoryDelta).toBeLessThan(50);
   });
 });
