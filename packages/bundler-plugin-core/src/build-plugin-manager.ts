@@ -2,10 +2,9 @@ import SentryCli from "@sentry/cli";
 import {
   closeSession,
   DEFAULT_ENVIRONMENT,
-  getDynamicSamplingContextFromSpan,
+  getTraceData,
   makeSession,
   setMeasurement,
-  spanToTraceHeader,
   startSpan,
 } from "@sentry/core";
 import * as dotenv from "dotenv";
@@ -23,7 +22,6 @@ import { Options, SentrySDKBuildFlags } from "./types";
 import { arrayify, getTurborepoEnvPassthroughWarning, stripQueryAndHashFromPath } from "./utils";
 import { glob } from "glob";
 import { defaultRewriteSourcesHook, prepareBundleForDebugIdUpload } from "./debug-id-upload";
-import { dynamicSamplingContextToSentryBaggageHeader } from "@sentry/utils";
 
 export type SentryBuildPluginManager = {
   /**
@@ -89,10 +87,7 @@ export type SentryBuildPluginManager = {
   createDependencyOnBuildArtifacts: () => () => void;
 };
 
-function createCliInstance(
-  options: NormalizedOptions,
-  additionalHeaders: Record<string, string> = {}
-): SentryCli {
+function createCliInstance(options: NormalizedOptions): SentryCli {
   return new SentryCli(null, {
     authToken: options.authToken,
     org: options.org,
@@ -101,8 +96,7 @@ function createCliInstance(
     url: options.url,
     vcsRemote: options.release.vcsRemote,
     headers: {
-      ...options.headers,
-      ...additionalHeaders,
+      ...getTraceData(),
     },
   });
 }
@@ -666,14 +660,8 @@ export function createSentryBuildPluginManager(
                   setMeasurement("files", files.length, "none", prepBundlesSpan);
                   setMeasurement("upload_size", uploadSize, "byte", prepBundlesSpan);
 
-                  await startSpan({ name: "upload", scope: sentryScope }, async (uploadSpan) => {
-                    const cliInstance = createCliInstance(options, {
-                      "sentry-trace": spanToTraceHeader(uploadSpan),
-                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                      baggage: dynamicSamplingContextToSentryBaggageHeader(
-                        getDynamicSamplingContextFromSpan(uploadSpan)
-                      )!,
-                    });
+                  await startSpan({ name: "upload", scope: sentryScope }, async () => {
+                    const cliInstance = createCliInstance(options);
 
                     await cliInstance.releases.uploadSourceMaps(
                       options.release.name ?? "undefined", // unfortunately this needs a value for now but it will not matter since debug IDs overpower releases anyhow
