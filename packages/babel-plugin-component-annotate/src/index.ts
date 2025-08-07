@@ -447,8 +447,8 @@ function collectFragmentContext(programPath: Babel.NodePath): FragmentContext {
       if (source === "react" || source === "React") {
         importPath.node.specifiers.forEach((spec) => {
           if (spec.type === "ImportSpecifier" && spec.imported.type === "Identifier") {
-            // import { Fragment } from 'react' -> Fragment
-            // import { Fragment as F } from 'react' -> F
+            // Detect aliased React.Fragment imports (e.g., `Fragment as F`)
+            // so we can later identify <F> as a fragment in JSX.
             if (spec.imported.name === "Fragment") {
               fragmentAliases.add(spec.local.name);
             }
