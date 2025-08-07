@@ -68,6 +68,15 @@ export type SentryBuildPluginManager = {
   createRelease(): Promise<void>;
 
   /**
+   * Injects debug IDs into the build artifacts.
+   *
+   * This is a separate function from `uploadSourcemaps` because that needs to run before the sourcemaps are uploaded.
+   * Usually the respective bundler-plugin will take care of this before the sourcemaps are uploaded.
+   * Only use this if you need to manually inject debug IDs into the build artifacts.
+   */
+  injectDebugIds(buildArtifactPaths: string[]): Promise<void>;
+
+  /**
    * Uploads sourcemaps using the "Debug ID" method. This function takes a list of build artifact paths that will be uploaded
    */
   uploadSourcemaps(buildArtifactPaths: string[]): Promise<void>;
@@ -79,6 +88,24 @@ export type SentryBuildPluginManager = {
 
   createDependencyOnBuildArtifacts: () => () => void;
 };
+
+function createCliInstance(
+  options: NormalizedOptions,
+  additionalHeaders: Record<string, string> = {}
+): SentryCli {
+  return new SentryCli(null, {
+    authToken: options.authToken,
+    org: options.org,
+    project: options.project,
+    silent: options.silent,
+    url: options.url,
+    vcsRemote: options.release.vcsRemote,
+    headers: {
+      ...options.headers,
+      ...additionalHeaders,
+    },
+  });
+}
 
 /**
  * Creates a build plugin manager that exposes primitives for everything that a Sentry JavaScript SDK or build tooling may do during a build.
@@ -151,6 +178,9 @@ export function createSentryBuildPluginManager(
         /* noop */
       },
       createDependencyOnBuildArtifacts: () => () => {
+        /* noop */
+      },
+      injectDebugIds: async () => {
         /* noop */
       },
     };
@@ -424,15 +454,7 @@ export function createSentryBuildPluginManager(
         createDependencyOnBuildArtifacts();
 
       try {
-        const cliInstance = new SentryCli(null, {
-          authToken: options.authToken,
-          org: options.org,
-          project: options.project,
-          silent: options.silent,
-          url: options.url,
-          vcsRemote: options.release.vcsRemote,
-          headers: options.headers,
-        });
+        const cliInstance = createCliInstance(options);
 
         if (options.release.create) {
           await cliInstance.releases.new(options.release.name);
@@ -500,6 +522,33 @@ export function createSentryBuildPluginManager(
       } finally {
         freeWriteBundleInvocationDependencyOnSourcemapFiles();
       }
+    },
+
+    /*
+      Injects debug IDs into the build artifacts.
+
+      This is a separate function from `uploadSourcemaps` because that needs to run before the sourcemaps are uploaded.
+      Usually the respective bundler-plugin will take care of this before the sourcemaps are uploaded.
+      Only use this if you need to manually inject debug IDs into the build artifacts.
+    */
+    async injectDebugIds(buildArtifactPaths: string[]) {
+      await startSpan(
+        { name: "inject-debug-ids", scope: sentryScope, forceTransaction: true },
+        async () => {
+          try {
+            const cliInstance = createCliInstance(options);
+            await cliInstance.execute(
+              ["sourcemaps", "inject", ...buildArtifactPaths],
+              options.debug ?? false
+            );
+          } catch (e) {
+            sentryScope.captureException('Error in "debugIdInjectionPlugin" writeBundle hook');
+            handleRecoverableError(e, false);
+          } finally {
+            await safeFlushTelemetry(sentryClient);
+          }
+        }
+      );
     },
 
     /**
@@ -618,21 +667,12 @@ export function createSentryBuildPluginManager(
                   setMeasurement("upload_size", uploadSize, "byte", prepBundlesSpan);
 
                   await startSpan({ name: "upload", scope: sentryScope }, async (uploadSpan) => {
-                    const cliInstance = new SentryCli(null, {
-                      authToken: options.authToken,
-                      org: options.org,
-                      project: options.project,
-                      silent: options.silent,
-                      url: options.url,
-                      vcsRemote: options.release.vcsRemote,
-                      headers: {
-                        "sentry-trace": spanToTraceHeader(uploadSpan),
-                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        baggage: dynamicSamplingContextToSentryBaggageHeader(
-                          getDynamicSamplingContextFromSpan(uploadSpan)
-                        )!,
-                        ...options.headers,
-                      },
+                    const cliInstance = createCliInstance(options, {
+                      "sentry-trace": spanToTraceHeader(uploadSpan),
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                      baggage: dynamicSamplingContextToSentryBaggageHeader(
+                        getDynamicSamplingContextFromSpan(uploadSpan)
+                      )!,
                     });
 
                     await cliInstance.releases.uploadSourceMaps(
