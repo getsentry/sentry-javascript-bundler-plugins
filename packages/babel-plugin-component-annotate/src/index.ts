@@ -481,8 +481,8 @@ function collectFragmentContext(programPath: Babel.NodePath): FragmentContext {
             init.type === "MemberExpression" &&
             init.object.type === "Identifier" &&
             init.property.type === "Identifier" &&
-            reactNamespaceAliases.has(init.object.name) &&
-            init.property.name === "Fragment"
+            init.property.name === "Fragment" &&
+            reactNamespaceAliases.has(init.object.name)
           ) {
             fragmentAliases.add(varPath.node.id.name);
           }
