@@ -251,14 +251,14 @@ function functionBodyPushAttributes(
 function processJSX(
   context: JSXProcessingContext,
   jsxNode: Babel.NodePath,
-  componentName?: string | null
+  componentName?: string
 ): void {
   if (!jsxNode) {
     return;
   }
 
   // Use provided componentName or fall back to context componentName
-  const currentComponentName = componentName !== undefined ? componentName : context.componentName;
+  const currentComponentName = componentName ?? context.componentName;
 
   // NOTE: I don't know of a case where `openingElement` would have more than one item,
   // but it's safer to always iterate
@@ -300,7 +300,7 @@ function processJSX(
       shouldSetComponentName = false;
       processJSX(context, child, currentComponentName);
     } else {
-      processJSX(context, child, null);
+      processJSX(context, child, "");
     }
   });
 }
@@ -313,7 +313,7 @@ function processJSX(
 function applyAttributes(
   context: JSXProcessingContext,
   openingElement: Babel.NodePath<Babel.types.JSXOpeningElement>,
-  componentName: string | null
+  componentName: string
 ): void {
   const { t, attributeNames, ignoredComponents, fragmentContext, sourceFileName } = context;
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
