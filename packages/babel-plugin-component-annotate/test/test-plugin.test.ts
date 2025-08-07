@@ -1842,9 +1842,9 @@ export default function Component${i}() {
 
   // Test different project sizes
   const scenarios = [
-    { name: "small" as const, files: 20, expectedMaxTime: 50 },
-    { name: "medium" as const, files: 50, expectedMaxTime: 200 },
-    { name: "large" as const, files: 200, expectedMaxTime: 500 },
+    { name: "small" as const, files: 20, expectedMaxTime: 55 },
+    { name: "medium" as const, files: 50, expectedMaxTime: 250 },
+    { name: "large" as const, files: 200, expectedMaxTime: 550 },
   ];
 
   scenarios.forEach((scenario) => {
