@@ -452,12 +452,9 @@ function collectFragmentContext(programPath: Babel.NodePath): FragmentContext {
             if (spec.imported.name === "Fragment") {
               fragmentAliases.add(spec.local.name);
             }
-          } else if (spec.type === "ImportDefaultSpecifier") {
-            // import React from 'react' -> React
-            reactNamespaceAliases.add(spec.local.name);
-          } else if (spec.type === "ImportNamespaceSpecifier") {
-            // import * as React from 'react' -> React
-            reactNamespaceAliases.add(spec.local.name);
+          } else if (spec.type === "ImportDefaultSpecifier" || spec.type === "ImportNamespaceSpecifier" ) {
+            // import React from 'react' -> React OR
+            // import * as React from 'react' -> React            reactNamespaceAliases.add(spec.local.name);
           }
         });
       }
