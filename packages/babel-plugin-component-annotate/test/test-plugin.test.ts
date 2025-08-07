@@ -26,13 +26,6 @@
 import { transform } from "@babel/core";
 import plugin from "../src/index";
 
-const getTime = (): number => {
-  if (typeof performance !== "undefined" && performance.now) {
-    return performance.now();
-  }
-  return Date.now();
-};
-
 const BananasPizzaAppStandardInput = `import React, { Component } from 'react';
 import { StyleSheet, Text, TextInput, View, Image, UIManager } from 'react-native';
 
