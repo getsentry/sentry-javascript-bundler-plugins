@@ -126,22 +126,24 @@ export function sentryUnpluginFactory({
     if (!options.sourcemaps?.disable) {
       plugins.push(debugIdInjectionPlugin(logger));
 
-      // This option is only strongly typed for the webpack plugin, where it is used. It has no effect on other plugins
-      const webpack_forceExitOnBuildComplete =
-        typeof options._experiments["forceExitOnBuildCompletion"] === "boolean"
-          ? options._experiments["forceExitOnBuildCompletion"]
-          : undefined;
+      if (options.sourcemaps?.disable !== "disable-upload") {
+        // This option is only strongly typed for the webpack plugin, where it is used. It has no effect on other plugins
+        const webpack_forceExitOnBuildComplete =
+          typeof options._experiments["forceExitOnBuildCompletion"] === "boolean"
+            ? options._experiments["forceExitOnBuildCompletion"]
+            : undefined;
 
-      plugins.push(
-        debugIdUploadPlugin(
-          createDebugIdUploadFunction({
-            sentryBuildPluginManager,
-          }),
-          logger,
-          sentryBuildPluginManager.createDependencyOnBuildArtifacts,
-          webpack_forceExitOnBuildComplete
-        )
-      );
+        plugins.push(
+          debugIdUploadPlugin(
+            createDebugIdUploadFunction({
+              sentryBuildPluginManager,
+            }),
+            logger,
+            sentryBuildPluginManager.createDependencyOnBuildArtifacts,
+            webpack_forceExitOnBuildComplete
+          )
+        );
+      }
     }
 
     if (options.reactComponentAnnotation) {

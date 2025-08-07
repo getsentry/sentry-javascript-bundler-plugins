@@ -95,7 +95,7 @@ export interface Options {
      *
      * Defaults to `false`.
      */
-    disable?: boolean;
+    disable?: boolean | "disable-upload";
 
     /**
      * A glob or an array of globs that specifies the build artifacts that should be uploaded to Sentry.
