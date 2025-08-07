@@ -168,6 +168,22 @@ export default function TestComponent() {
 }"
 `;
 
+exports[`Fragment Performance Benchmarks handles Fragment aliased correctly when used by other non-Fragment components in a different scope 1`] = `
+"import { Fragment as OriginalF } from 'react';
+import { OtherComponent } from 'some-library';
+function TestComponent() {
+  const F = OriginalF;
+
+  // Use Fragment alias - should be ignored
+  return /*#__PURE__*/React.createElement(F, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"This should NOT have data-sentry-element (Fragment)\\"));
+}
+function AnotherComponent() {
+  // Different component with same alias name in different function scope
+  const F = OtherComponent;
+  return /*#__PURE__*/React.createElement(F, null, /*#__PURE__*/React.createElement(\\"div\\", null, \\"This SHOULD have data-sentry-element (not Fragment)\\"));
+}"
+`;
+
 exports[`arrow snapshot matches 1`] = `
 "import React, { Component } from 'react';
 const componentName = () => {

@@ -1884,4 +1884,43 @@ export default function Component${i}() {
 
     expect(memoryDelta).toBeLessThan(50);
   });
+
+  it("handles Fragment aliased correctly when used by other non-Fragment components in a different scope", () => {
+    const result = transform(
+      `import { Fragment as OriginalF } from 'react';
+import { OtherComponent } from 'some-library';
+
+function TestComponent() {
+  const F = OriginalF;
+
+  // Use Fragment alias - should be ignored
+  return (
+    <F>
+      <div>This should NOT have data-sentry-element (Fragment)</div>
+    </F>
+  );
+}
+
+function AnotherComponent() {
+  // Different component with same alias name in different function scope
+  const F = OtherComponent;
+  
+  return (
+    <F>
+      <div>This SHOULD have data-sentry-element (not Fragment)</div>
+    </F>
+  );
+}
+`,
+      {
+        filename: "/variable-assignment-test.js",
+        configFile: false,
+        presets: ["@babel/preset-react"],
+        plugins: [plugin],
+      }
+    );
+
+    expect(result?.code).not.toContain('"data-sentry-element": "F"');
+    expect(result?.code).toMatchSnapshot();
+  });
 });
