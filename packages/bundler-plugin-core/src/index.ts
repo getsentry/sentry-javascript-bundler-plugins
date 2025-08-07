@@ -123,7 +123,7 @@ export function sentryUnpluginFactory({
       },
     });
 
-    if (!options.sourcemaps?.disable) {
+    if (options.sourcemaps?.disable !== true) {
       plugins.push(debugIdInjectionPlugin(logger));
 
       if (options.sourcemaps?.disable !== "disable-upload") {
