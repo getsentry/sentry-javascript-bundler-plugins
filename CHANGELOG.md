@@ -3,6 +3,7 @@
 ## Unreleased
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
+- fix(react-native): Enhance fragment detection for indirect references ([#767](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/767))
 
 ## 4.0.2
 
