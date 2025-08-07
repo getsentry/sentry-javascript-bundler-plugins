@@ -1836,7 +1836,7 @@ export default function Component${i}() {
       avg: times.reduce((a, b) => a + b) / times.length,
       min: Math.min(...times),
       max: Math.max(...times),
-      median: sortedTimes[Math.floor(sortedTimes.length / 2)],
+      median: sortedTimes[Math.floor(sortedTimes.length / 2)] ?? -1,
     };
   };
 
