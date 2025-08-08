@@ -23,7 +23,7 @@ export type NormalizedOptions = {
   disable: boolean;
   sourcemaps:
     | {
-        disable?: boolean;
+        disable?: boolean | "disable-upload";
         assets?: string | string[];
         ignore?: string | string[];
         rewriteSources?: RewriteSourcesHook;
