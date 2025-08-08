@@ -95,11 +95,14 @@ export interface Options {
    */
   sourcemaps?: {
     /**
-     * If this flag is `true`, any functionality related to source maps will be disabled.
+     * Disables all functionality related to sourcemaps if set to `true`.
+     *
+     * If set to `"disable-upload"`, the plugin will not upload sourcemaps to Sentry, but will inject debug IDs into the build artifacts.
+     * This is useful if you want to manually upload sourcemaps to Sentry at a later point in time.
      *
      * @default false
      */
-    disable?: boolean;
+    disable?: boolean | "disable-upload";
 
     /**
      * A glob or an array of globs that specify the build artifacts and source maps that will be uploaded to Sentry.
