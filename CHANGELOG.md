@@ -4,6 +4,14 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 4.1.0
+
+- feat(deps): Bump @sentry/cli to 2.51.0 [#786](https://github.com/gestsentry/sentry-javascript-bundler-plugins/pull/786)
+- feat(core): Add flag for disabling sourcemaps upload [#785](https://github.com/gestsentry/sentry-javascript-bundler-plugins/pull/785)
+- fix(debugId): Add guards for injected code to avoid errors [#783](https://github.com/gestsentry/sentry-javascript-bundler-plugins/pull/783)
+- docs(options): Improve JSDoc for options [#781](https://github.com/gestsentry/sentry-javascript-bundler-plugins/pull/781)
+- feat(core): Expose method for injecting debug Ids from plugin manager [#784](https://github.com/gestsentry/sentry-javascript-bundler-plugins/pull/784)
+
 ## 4.0.2
 
 - fix(core): Make `moduleMetadata` injection snippet ES5-compliant ([#774](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/774))
