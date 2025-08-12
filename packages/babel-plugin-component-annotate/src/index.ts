@@ -51,16 +51,46 @@ interface AnnotationOpts {
   ignoredComponents?: string[];
 }
 
+interface FragmentContext {
+  fragmentAliases: Set<string>;
+  reactNamespaceAliases: Set<string>;
+}
+
 interface AnnotationPluginPass extends PluginPass {
   opts: AnnotationOpts;
+  sentryFragmentContext?: FragmentContext;
 }
 
 type AnnotationPlugin = PluginObj<AnnotationPluginPass>;
+
+// Shared context object for all JSX processing functions
+interface JSXProcessingContext {
+  /** Whether to annotate React fragments */
+  annotateFragments: boolean;
+  /** Babel types object */
+  t: typeof Babel.types;
+  /** Name of the React component */
+  componentName: string;
+  /** Source file name (optional) */
+  sourceFileName?: string;
+  /** Array of attribute names [component, element, sourceFile] */
+  attributeNames: string[];
+  /** Array of component names to ignore */
+  ignoredComponents: string[];
+  /** Fragment context for identifying React fragments */
+  fragmentContext?: FragmentContext;
+}
 
 // We must export the plugin as default, otherwise the Babel loader will not be able to resolve it when configured using its string identifier
 export default function componentNameAnnotatePlugin({ types: t }: typeof Babel): AnnotationPlugin {
   return {
     visitor: {
+      Program: {
+        enter(path, state) {
+          const fragmentContext = collectFragmentContext(path);
+          state.sentryFragmentContext = fragmentContext;
+        },
+      },
       FunctionDeclaration(path, state) {
         if (!path.node.id || !path.node.id.name) {
           return;
@@ -69,15 +99,8 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
-        functionBodyPushAttributes(
-          state.opts["annotate-fragments"] === true,
-          t,
-          path,
-          path.node.id.name,
-          sourceFileNameFromState(state),
-          attributeNamesFromState(state),
-          state.opts.ignoredComponents ?? []
-        );
+        const context = createJSXProcessingContext(state, t, path.node.id.name);
+        functionBodyPushAttributes(context, path);
       },
       ArrowFunctionExpression(path, state) {
         // We're expecting a `VariableDeclarator` like `const MyComponent =`
@@ -97,15 +120,8 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
-        functionBodyPushAttributes(
-          state.opts["annotate-fragments"] === true,
-          t,
-          path,
-          parent.id.name,
-          sourceFileNameFromState(state),
-          attributeNamesFromState(state),
-          state.opts.ignoredComponents ?? []
-        );
+        const context = createJSXProcessingContext(state, t, parent.id.name);
+        functionBodyPushAttributes(context, path);
       },
       ClassDeclaration(path, state) {
         const name = path.get("id");
@@ -118,7 +134,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
           return;
         }
 
-        const ignoredComponents = state.opts.ignoredComponents ?? [];
+        const context = createJSXProcessingContext(state, t, name.node?.name || "");
 
         render.traverse({
           ReturnStatement(returnStatement) {
@@ -128,15 +144,7 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
               return;
             }
 
-            processJSX(
-              state.opts["annotate-fragments"] === true,
-              t,
-              arg,
-              name.node && name.node.name,
-              sourceFileNameFromState(state),
-              attributeNamesFromState(state),
-              ignoredComponents
-            );
+            processJSX(context, arg);
           },
         });
       },
@@ -144,14 +152,33 @@ export default function componentNameAnnotatePlugin({ types: t }: typeof Babel):
   };
 }
 
-function functionBodyPushAttributes(
-  annotateFragments: boolean,
+/**
+ * Creates a JSX processing context from the plugin state
+ */
+function createJSXProcessingContext(
+  state: AnnotationPluginPass,
   t: typeof Babel.types,
-  path: Babel.NodePath<Babel.types.Function>,
-  componentName: string,
-  sourceFileName: string | undefined,
-  attributeNames: string[],
-  ignoredComponents: string[]
+  componentName: string
+): JSXProcessingContext {
+  return {
+    annotateFragments: state.opts["annotate-fragments"] === true,
+    t,
+    componentName,
+    sourceFileName: sourceFileNameFromState(state),
+    attributeNames: attributeNamesFromState(state),
+    ignoredComponents: state.opts.ignoredComponents ?? [],
+    fragmentContext: state.sentryFragmentContext,
+  };
+}
+
+/**
+ * Processes the body of a function to add Sentry tracking attributes to JSX elements.
+ * Handles various function body structures including direct JSX returns, conditional expressions,
+ * and nested JSX elements.
+ */
+function functionBodyPushAttributes(
+  context: JSXProcessingContext,
+  path: Babel.NodePath<Babel.types.Function>
 ): void {
   let jsxNode: Babel.NodePath;
 
@@ -193,27 +220,11 @@ function functionBodyPushAttributes(
     if (arg.isConditionalExpression()) {
       const consequent = arg.get("consequent");
       if (consequent.isJSXFragment() || consequent.isJSXElement()) {
-        processJSX(
-          annotateFragments,
-          t,
-          consequent,
-          componentName,
-          sourceFileName,
-          attributeNames,
-          ignoredComponents
-        );
+        processJSX(context, consequent);
       }
       const alternate = arg.get("alternate");
       if (alternate.isJSXFragment() || alternate.isJSXElement()) {
-        processJSX(
-          annotateFragments,
-          t,
-          alternate,
-          componentName,
-          sourceFileName,
-          attributeNames,
-          ignoredComponents
-        );
+        processJSX(context, alternate);
       }
       return;
     }
@@ -229,29 +240,26 @@ function functionBodyPushAttributes(
     return;
   }
 
-  processJSX(
-    annotateFragments,
-    t,
-    jsxNode,
-    componentName,
-    sourceFileName,
-    attributeNames,
-    ignoredComponents
-  );
+  processJSX(context, jsxNode);
 }
 
+/**
+ * Recursively processes JSX elements to add Sentry tracking attributes.
+ * Handles both JSX elements and fragments, applying appropriate attributes
+ * based on configuration and component context.
+ */
 function processJSX(
-  annotateFragments: boolean,
-  t: typeof Babel.types,
+  context: JSXProcessingContext,
   jsxNode: Babel.NodePath,
-  componentName: string | null,
-  sourceFileName: string | undefined,
-  attributeNames: string[],
-  ignoredComponents: string[]
+  componentName?: string
 ): void {
   if (!jsxNode) {
     return;
   }
+
+  // Use provided componentName or fall back to context componentName
+  const currentComponentName = componentName ?? context.componentName;
+
   // NOTE: I don't know of a case where `openingElement` would have more than one item,
   // but it's safer to always iterate
   const paths = jsxNode.get("openingElement");
@@ -259,12 +267,9 @@ function processJSX(
 
   openingElements.forEach((openingElement) => {
     applyAttributes(
-      t,
+      context,
       openingElement as Babel.NodePath<Babel.types.JSXOpeningElement>,
-      componentName,
-      sourceFileName,
-      attributeNames,
-      ignoredComponents
+      currentComponentName
     );
   });
 
@@ -275,7 +280,7 @@ function processJSX(
     children = [children];
   }
 
-  let shouldSetComponentName = annotateFragments;
+  let shouldSetComponentName = context.annotateFragments;
 
   children.forEach((child) => {
     // Happens for some node types like plain text
@@ -293,44 +298,34 @@ function processJSX(
 
     if (shouldSetComponentName && openingElement && openingElement.node) {
       shouldSetComponentName = false;
-      processJSX(
-        annotateFragments,
-        t,
-        child,
-        componentName,
-        sourceFileName,
-        attributeNames,
-        ignoredComponents
-      );
+      processJSX(context, child, currentComponentName);
     } else {
-      processJSX(
-        annotateFragments,
-        t,
-        child,
-        null,
-        sourceFileName,
-        attributeNames,
-        ignoredComponents
-      );
+      processJSX(context, child, "");
     }
   });
 }
 
+/**
+ * Applies Sentry tracking attributes to a JSX opening element.
+ * Adds component name, element name, and source file attributes while
+ * respecting ignore lists and fragment detection.
+ */
 function applyAttributes(
-  t: typeof Babel.types,
+  context: JSXProcessingContext,
   openingElement: Babel.NodePath<Babel.types.JSXOpeningElement>,
-  componentName: string | null,
-  sourceFileName: string | undefined,
-  attributeNames: string[],
-  ignoredComponents: string[]
+  componentName: string
 ): void {
+  const { t, attributeNames, ignoredComponents, fragmentContext, sourceFileName } = context;
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
 
-  if (isReactFragment(t, openingElement)) {
-    return;
-  }
   // e.g., Raw JSX text like the `A` in `<h1>a</h1>`
   if (!openingElement.node) {
+    return;
+  }
+
+  // Check if this is a React fragment - if so, skip attribute addition entirely
+  const isFragment = isReactFragment(t, openingElement, fragmentContext);
+  if (isFragment) {
     return;
   }
 
@@ -343,15 +338,11 @@ function applyAttributes(
 
   // Add a stable attribute for the element name but only for non-DOM names
   let isAnIgnoredElement = false;
-  if (
-    !isAnIgnoredComponent &&
-    !hasAttributeWithName(openingElement, componentAttributeName) &&
-    (componentAttributeName !== elementAttributeName || !componentName)
-  ) {
+  if (!isAnIgnoredComponent && !hasAttributeWithName(openingElement, elementAttributeName)) {
     if (DEFAULT_IGNORED_ELEMENTS.includes(elementName)) {
       isAnIgnoredElement = true;
     } else {
-      // TODO: Is it possible to avoid this null check?
+      // Always add element attribute for non-ignored elements
       if (elementAttributeName) {
         openingElement.node.attributes.push(
           t.jSXAttribute(t.jSXIdentifier(elementAttributeName), t.stringLiteral(elementName))
@@ -366,7 +357,6 @@ function applyAttributes(
     !isAnIgnoredComponent &&
     !hasAttributeWithName(openingElement, componentAttributeName)
   ) {
-    // TODO: Is it possible to avoid this null check?
     if (componentAttributeName) {
       openingElement.node.attributes.push(
         t.jSXAttribute(t.jSXIdentifier(componentAttributeName), t.stringLiteral(componentName))
@@ -374,14 +364,16 @@ function applyAttributes(
     }
   }
 
-  // Add a stable attribute for the source file name (absent for non-root elements)
+  // Add a stable attribute for the source file name
+  // Updated condition: add source file for elements that have either:
+  // 1. A component name (root elements), OR
+  // 2. An element name that's not ignored (child elements)
   if (
     sourceFileName &&
     !isAnIgnoredComponent &&
-    (componentName || isAnIgnoredElement === false) &&
+    (componentName || !isAnIgnoredElement) &&
     !hasAttributeWithName(openingElement, sourceFileAttributeName)
   ) {
-    // TODO: Is it possible to avoid this null check?
     if (sourceFileAttributeName) {
       openingElement.node.attributes.push(
         t.jSXAttribute(t.jSXIdentifier(sourceFileAttributeName), t.stringLiteral(sourceFileName))
@@ -443,18 +435,110 @@ function attributeNamesFromState(state: AnnotationPluginPass): [string, string, 
   return [webComponentName, webElementName, webSourceFileName];
 }
 
-function isReactFragment(t: typeof Babel.types, openingElement: Babel.NodePath): boolean {
+function collectFragmentContext(programPath: Babel.NodePath): FragmentContext {
+  const fragmentAliases = new Set<string>();
+  const reactNamespaceAliases = new Set<string>(["React"]); // Default React namespace
+
+  programPath.traverse({
+    ImportDeclaration(importPath) {
+      const source = importPath.node.source.value;
+
+      // Handle React imports
+      if (source === "react" || source === "React") {
+        importPath.node.specifiers.forEach((spec) => {
+          if (spec.type === "ImportSpecifier" && spec.imported.type === "Identifier") {
+            // Detect aliased React.Fragment imports (e.g., `Fragment as F`)
+            // so we can later identify <F> as a fragment in JSX.
+            if (spec.imported.name === "Fragment") {
+              fragmentAliases.add(spec.local.name);
+            }
+          } else if (
+            spec.type === "ImportDefaultSpecifier" ||
+            spec.type === "ImportNamespaceSpecifier"
+          ) {
+            // import React from 'react' -> React OR
+            // import * as React from 'react' -> React
+            reactNamespaceAliases.add(spec.local.name);
+          }
+        });
+      }
+    },
+
+    // Handle simple variable assignments only (avoid complex cases)
+    VariableDeclarator(varPath) {
+      if (varPath.node.init) {
+        const init = varPath.node.init;
+
+        // Handle identifier assignments: const MyFragment = Fragment
+        if (varPath.node.id.type === "Identifier") {
+          // Handle: const MyFragment = Fragment (only if Fragment is a known alias)
+          if (init.type === "Identifier" && fragmentAliases.has(init.name)) {
+            fragmentAliases.add(varPath.node.id.name);
+          }
+
+          // Handle: const MyFragment = React.Fragment (only for known React namespaces)
+          if (
+            init.type === "MemberExpression" &&
+            init.object.type === "Identifier" &&
+            init.property.type === "Identifier" &&
+            init.property.name === "Fragment" &&
+            reactNamespaceAliases.has(init.object.name)
+          ) {
+            fragmentAliases.add(varPath.node.id.name);
+          }
+        }
+
+        // Handle destructuring assignments: const { Fragment } = React
+        if (varPath.node.id.type === "ObjectPattern") {
+          if (init.type === "Identifier" && reactNamespaceAliases.has(init.name)) {
+            const properties = varPath.node.id.properties;
+
+            for (const prop of properties) {
+              if (
+                prop.type === "ObjectProperty" &&
+                prop.key &&
+                prop.key.type === "Identifier" &&
+                prop.value &&
+                prop.value.type === "Identifier" &&
+                prop.key.name === "Fragment"
+              ) {
+                fragmentAliases.add(prop.value.name);
+              }
+            }
+          }
+        }
+      }
+    },
+  });
+
+  return { fragmentAliases, reactNamespaceAliases };
+}
+
+function isReactFragment(
+  t: typeof Babel.types,
+  openingElement: Babel.NodePath,
+  context?: FragmentContext // Add this optional parameter
+): boolean {
+  // Handle JSX fragments (<>)
   if (openingElement.isJSXFragment()) {
     return true;
   }
 
   const elementName = getPathName(t, openingElement);
 
+  // Direct fragment references
   if (elementName === "Fragment" || elementName === "React.Fragment") {
     return true;
   }
 
   // TODO: All these objects are typed as unknown, maybe an oversight in Babel types?
+
+  // Check if the element name is a known fragment alias
+  if (context && elementName && context.fragmentAliases.has(elementName)) {
+    return true;
+  }
+
+  // Handle JSXMemberExpression
   if (
     openingElement.node &&
     "name" in openingElement.node &&
@@ -463,10 +547,6 @@ function isReactFragment(t: typeof Babel.types, openingElement: Babel.NodePath):
     "type" in openingElement.node.name &&
     openingElement.node.name.type === "JSXMemberExpression"
   ) {
-    if (!("name" in openingElement.node)) {
-      return false;
-    }
-
     const nodeName = openingElement.node.name;
     if (typeof nodeName !== "object" || !nodeName) {
       return false;
@@ -487,8 +567,25 @@ function isReactFragment(t: typeof Babel.types, openingElement: Babel.NodePath):
       const objectName = "name" in nodeNameObject && nodeNameObject.name;
       const propertyName = "name" in nodeNameProperty && nodeNameProperty.name;
 
+      // React.Fragment check
       if (objectName === "React" && propertyName === "Fragment") {
         return true;
+      }
+
+      // Enhanced checks using context
+      if (context) {
+        // Check React.Fragment pattern with known React namespaces
+        if (
+          context.reactNamespaceAliases.has(objectName as string) &&
+          propertyName === "Fragment"
+        ) {
+          return true;
+        }
+
+        // Check MyFragment.Fragment pattern
+        if (context.fragmentAliases.has(objectName as string) && propertyName === "Fragment") {
+          return true;
+        }
       }
     }
   }
