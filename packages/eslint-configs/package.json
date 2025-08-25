@@ -15,11 +15,12 @@
     "eslint-plugin-react-hooks": "^4.4.0"
   },
   "devDependencies": {
-    "eslint": "^8.14.0"
+    "eslint": "^8.14.0",
+    "premove": "^4.0.0"
   },
   "scripts": {
     "clean:all": "run-s clean:deps",
-    "clean:deps": "rimraf node_modules"
+    "clean:deps": "premove node_modules"
   },
   "volta": {
     "extends": "../../package.json"

@@ -13,8 +13,8 @@
     "build:smallNodeApp": "vite build --config vite.config.smallNodeApp.js",
     "clean": "run-s clean:build",
     "clean:all": "run-p clean:deps",
-    "clean:build": "rimraf ./out",
-    "clean:deps": "rimraf node_modules",
+    "clean:build": "premove ./out",
+    "clean:deps": "premove node_modules",
     "start:proxyLogger": "ts-node scripts/request-logger-proxy.ts"
   },
   "dependencies": {
@@ -30,6 +30,9 @@
     "vite": "3.0.0",
     "webpack4": "npm:webpack@4.46.0",
     "webpack5": "npm:webpack@5"
+  },
+  "devDependencies": {
+    "premove": "^4.0.0"
   },
   "volta": {
     "extends": "../../package.json"

@@ -34,7 +34,7 @@
   "module": "dist/esm/index.mjs",
   "types": "dist/types/index.d.ts",
   "scripts": {
-    "build": "rimraf ./dist && run-p build:rollup build:types",
+    "build": "premove ./dist && run-p build:rollup build:types",
     "build:watch": "run-p build:rollup:watch build:types:watch",
     "build:rollup": "rollup --config rollup.config.js",
     "build:rollup:watch": "rollup --config rollup.config.js --watch --no-watch.clearScreen",
@@ -46,8 +46,8 @@
     "build:npm": "npm pack",
     "clean": "run-s clean:build",
     "clean:all": "run-p clean clean:deps",
-    "clean:build": "rimraf ./dist *.tgz",
-    "clean:deps": "rimraf node_modules",
+    "clean:build": "premove ./dist *.tgz",
+    "clean:deps": "premove node_modules",
     "test": "jest",
     "lint": "eslint ./src ./test",
     "prepack": "ts-node ./src/prepack.ts"
@@ -73,7 +73,7 @@
     "@types/webpack": "npm:@types/webpack@^4",
     "eslint": "^8.18.0",
     "jest": "^28.1.1",
-    "rimraf": "^3.0.2",
+    "premove": "^4.0.0",
     "rollup": "2.79.2",
     "ts-node": "^10.9.1",
     "typescript": "^4.7.4",
