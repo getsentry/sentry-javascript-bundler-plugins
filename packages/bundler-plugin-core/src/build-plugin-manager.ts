@@ -77,7 +77,10 @@ export type SentryBuildPluginManager = {
   /**
    * Uploads sourcemaps using the "Debug ID" method. This function takes a list of build artifact paths that will be uploaded
    */
-  uploadSourcemaps(buildArtifactPaths: string[]): Promise<void>;
+  uploadSourcemaps(
+    buildArtifactPaths: string[],
+    opts?: { prepareArtifacts?: boolean }
+  ): Promise<void>;
 
   /**
    * Will delete artifacts based on the passed `sourcemaps.filesToDeleteAfterUpload` option.
@@ -546,9 +549,16 @@ export function createSentryBuildPluginManager(
     },
 
     /**
-     * Uploads sourcemaps using the "Debug ID" method. This function takes a list of build artifact paths that will be uploaded
+     * Uploads sourcemaps using the "Debug ID" method.
+     *
+     * By default, this prepares bundles in a temporary folder before uploading. You can opt into an
+     * in-place, direct upload path by setting `prepareArtifacts` to `false`. If `prepareArtifacts` is set to
+     * `false`, no preparation (e.g. adding `//# debugId=...` and writing adjusted source maps) is performed and no temp folder is used.
+     *
+     * @param buildArtifactPaths - The paths of the build artifacts to upload
+     * @param opts - Optional flags to control temp folder usage and preparation
      */
-    async uploadSourcemaps(buildArtifactPaths: string[]) {
+    async uploadSourcemaps(buildArtifactPaths: string[], opts?: { prepareArtifacts?: boolean }) {
       if (!canUploadSourceMaps(options, logger, isDevMode)) {
         return;
       }
@@ -557,6 +567,9 @@ export function createSentryBuildPluginManager(
         // This is `forceTransaction`ed because this span is used in dashboards in the form of indexed transactions.
         { name: "debug-id-sourcemap-upload", scope: sentryScope, forceTransaction: true },
         async () => {
+          // If we're not using a temp folder, we must not prepare artifacts in-place (to avoid mutating user files)
+          const shouldPrepare = opts?.prepareArtifacts ?? true;
+
           let folderToCleanUp: string | undefined;
 
           // It is possible that this writeBundle hook (which calls this function) is called multiple times in one build (for example when reusing the plugin, or when using build tooling like `@vitejs/plugin-legacy`)
@@ -564,19 +577,6 @@ export function createSentryBuildPluginManager(
           const freeUploadDependencyOnBuildArtifacts = createDependencyOnBuildArtifacts();
 
           try {
-            const tmpUploadFolder = await startSpan(
-              { name: "mkdtemp", scope: sentryScope },
-              async () => {
-                return (
-                  process.env?.["SENTRY_TEST_OVERRIDE_TEMP_DIR"] ||
-                  (await fs.promises.mkdtemp(
-                    path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
-                  ))
-                );
-              }
-            );
-
-            folderToCleanUp = tmpUploadFolder;
             const assets = options.sourcemaps?.assets;
 
             let globAssets: string | string[];
@@ -594,14 +594,17 @@ export function createSentryBuildPluginManager(
               async () =>
                 await glob(globAssets, {
                   absolute: true,
-                  nodir: true,
+                  // If we do not use a temp folder, we allow directories and files; CLI will traverse as needed when given paths.
+                  nodir: shouldPrepare,
                   ignore: options.sourcemaps?.ignore,
                 })
             );
 
-            const debugIdChunkFilePaths = globResult.filter((debugIdChunkFilePath) => {
-              return !!stripQueryAndHashFromPath(debugIdChunkFilePath).match(/\.(js|mjs|cjs)$/);
-            });
+            const debugIdChunkFilePaths = shouldPrepare
+              ? globResult.filter((debugIdChunkFilePath) => {
+                  return !!stripQueryAndHashFromPath(debugIdChunkFilePath).match(/\.(js|mjs|cjs)$/);
+                })
+              : globResult;
 
             // The order of the files output by glob() is not deterministic
             // Ensure order within the files so that {debug-id}-{chunkIndex} coupling is consistent
@@ -616,75 +619,101 @@ export function createSentryBuildPluginManager(
                 "Didn't find any matching sources for debug ID upload. Please check the `sourcemaps.assets` option."
               );
             } else {
-              const numUploadedFiles = await startSpan(
-                { name: "prepare-bundles", scope: sentryScope },
-                async (prepBundlesSpan) => {
-                  // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
-                  // instead we do it with a maximum of 16 concurrent workers
-                  const preparationTasks = debugIdChunkFilePaths.map(
-                    (chunkFilePath, chunkIndex) => async () => {
-                      await prepareBundleForDebugIdUpload(
-                        chunkFilePath,
-                        tmpUploadFolder,
-                        chunkIndex,
-                        logger,
-                        options.sourcemaps?.rewriteSources ?? defaultRewriteSourcesHook,
-                        options.sourcemaps?.resolveSourceMap
-                      );
-                    }
-                  );
-                  const workers: Promise<void>[] = [];
-                  const worker = async (): Promise<void> => {
-                    while (preparationTasks.length > 0) {
-                      const task = preparationTasks.shift();
-                      if (task) {
-                        await task();
-                      }
-                    }
-                  };
-                  for (let workerIndex = 0; workerIndex < 16; workerIndex++) {
-                    workers.push(worker());
-                  }
-
-                  await Promise.all(workers);
-
-                  const files = await fs.promises.readdir(tmpUploadFolder);
-                  const stats = files.map((file) =>
-                    fs.promises.stat(path.join(tmpUploadFolder, file))
-                  );
-                  const uploadSize = (await Promise.all(stats)).reduce(
-                    (accumulator, { size }) => accumulator + size,
-                    0
-                  );
-
-                  setMeasurement("files", files.length, "none", prepBundlesSpan);
-                  setMeasurement("upload_size", uploadSize, "byte", prepBundlesSpan);
-
-                  await startSpan({ name: "upload", scope: sentryScope }, async () => {
-                    const cliInstance = createCliInstance(options);
-
-                    await cliInstance.releases.uploadSourceMaps(
-                      options.release.name ?? "undefined", // unfortunately this needs a value for now but it will not matter since debug IDs overpower releases anyhow
+              if (!shouldPrepare) {
+                // Direct CLI upload from existing artifact paths (no preparation or temp copies)
+                await startSpan({ name: "upload", scope: sentryScope }, async () => {
+                  const cliInstance = createCliInstance(options);
+                  await cliInstance.releases.uploadSourceMaps(options.release.name ?? "undefined", {
+                    include: [
                       {
-                        include: [
-                          {
-                            paths: [tmpUploadFolder],
-                            rewrite: false,
-                            dist: options.release.dist,
-                          },
-                        ],
-                        // We want this promise to throw if the sourcemaps fail to upload so that we know about it.
-                        // see: https://github.com/getsentry/sentry-cli/pull/2605
-                        live: "rejectOnError",
+                        paths: debugIdChunkFilePaths,
+                        rewrite: false,
+                        dist: options.release.dist,
+                      },
+                    ],
+                    live: "rejectOnError",
+                  });
+                });
+
+                logger.info("Successfully uploaded source maps to Sentry");
+              } else {
+                const tmpUploadFolder = await startSpan(
+                  { name: "mkdtemp", scope: sentryScope },
+                  async () => {
+                    return (
+                      process.env?.["SENTRY_TEST_OVERRIDE_TEMP_DIR"] ||
+                      (await fs.promises.mkdtemp(
+                        path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
+                      ))
+                    );
+                  }
+                );
+                folderToCleanUp = tmpUploadFolder;
+
+                // Prepare into temp folder, then upload
+                await startSpan(
+                  { name: "prepare-bundles", scope: sentryScope },
+                  async (prepBundlesSpan) => {
+                    // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
+                    // instead we do it with a maximum of 16 concurrent workers
+                    const preparationTasks = debugIdChunkFilePaths.map(
+                      (chunkFilePath, chunkIndex) => async () => {
+                        await prepareBundleForDebugIdUpload(
+                          chunkFilePath,
+                          tmpUploadFolder,
+                          chunkIndex,
+                          logger,
+                          options.sourcemaps?.rewriteSources ?? defaultRewriteSourcesHook,
+                          options.sourcemaps?.resolveSourceMap
+                        );
                       }
                     );
-                  });
+                    const workers: Promise<void>[] = [];
+                    const worker = async (): Promise<void> => {
+                      while (preparationTasks.length > 0) {
+                        const task = preparationTasks.shift();
+                        if (task) {
+                          await task();
+                        }
+                      }
+                    };
+                    for (let workerIndex = 0; workerIndex < 16; workerIndex++) {
+                      workers.push(worker());
+                    }
 
-                  return files.length;
-                }
-              );
+                    await Promise.all(workers);
 
-              if (numUploadedFiles > 0) {
+                    const files = await fs.promises.readdir(tmpUploadFolder);
+                    const stats = files.map((file) =>
+                      fs.promises.stat(path.join(tmpUploadFolder, file))
+                    );
+                    const uploadSize = (await Promise.all(stats)).reduce(
+                      (accumulator, { size }) => accumulator + size,
+                      0
+                    );
+
+                    setMeasurement("files", files.length, "none", prepBundlesSpan);
+                    setMeasurement("upload_size", uploadSize, "byte", prepBundlesSpan);
+
+                    await startSpan({ name: "upload", scope: sentryScope }, async () => {
+                      const cliInstance = createCliInstance(options);
+                      await cliInstance.releases.uploadSourceMaps(
+                        options.release.name ?? "undefined",
+                        {
+                          include: [
+                            {
+                              paths: [tmpUploadFolder],
+                              rewrite: false,
+                              dist: options.release.dist,
+                            },
+                          ],
+                          live: "rejectOnError",
+                        }
+                      );
+                    });
+                  }
+                );
+
                 logger.info("Successfully uploaded source maps to Sentry");
               }
             }
