@@ -100,6 +100,7 @@ function createCliInstance(options: NormalizedOptions): SentryCli {
     vcsRemote: options.release.vcsRemote,
     headers: {
       ...getTraceData(),
+      ...options.headers,
     },
   });
 }
