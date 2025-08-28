@@ -8,6 +8,9 @@
 
 - feat(core): Add `prepareArtifacts` option for uploading sourcemaps ([#794](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/794))
 - perf: use premove for build clean ([#792](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/792))
+- fix(core): Forward headers option to sentry-cli ([#797](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/797))
+
+Work in this release contributed by @liAmirali. Thank you for your contribution!
 
 ## 4.1.1
 
