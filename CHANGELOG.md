@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 4.2.0
+
+- feat(core): Add `prepareArtifacts` option for uploading sourcemaps ([#794](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/794))
+- perf: use premove for build clean ([#792](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/792))
+
 ## 4.1.1
 
 - fix(react-native): Enhance fragment detection for indirect references ([#767](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/767))
