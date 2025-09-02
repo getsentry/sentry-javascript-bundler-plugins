@@ -98,9 +98,6 @@ describe("createSentryBuildPluginManager", () => {
     it("uploads in-place when prepareArtifacts is false", async () => {
       mockCliUploadSourceMaps.mockResolvedValue(undefined);
 
-      // Return a mixture of files/dirs; in-place path should pass through as-is
-      mockGlob.mockResolvedValue(["/app/dist/a.js", "/app/dist/dir", "/app/dist/a.js.map"]);
-
       const manager = createSentryBuildPluginManager(
         {
           authToken: "t",
@@ -123,12 +120,8 @@ describe("createSentryBuildPluginManager", () => {
           include: expect.arrayContaining([
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              paths: expect.arrayContaining([
-                "/app/dist/a.js",
-                "/app/dist/dir",
-                "/app/dist/a.js.map",
-              ]),
+              // User-provided assets should be passed directly to CLI (no globbing)
+              paths: ["/app/dist/**/*"],
               rewrite: false,
               dist: "1",
             }),
@@ -136,6 +129,84 @@ describe("createSentryBuildPluginManager", () => {
           live: "rejectOnError",
         })
       );
+      // Should not glob when prepareArtifacts is false
+      expect(mockGlob).not.toHaveBeenCalled();
+      expect(mockPrepareBundleForDebugIdUpload).not.toHaveBeenCalled();
+    });
+
+    it("uploads build artifact paths when prepareArtifacts is false and no assets provided", async () => {
+      mockCliUploadSourceMaps.mockResolvedValue(undefined);
+
+      const manager = createSentryBuildPluginManager(
+        {
+          authToken: "t",
+          org: "o",
+          project: "p",
+          release: { name: "some-release-name", dist: "1" },
+          // No assets provided
+        },
+        { buildTool: "webpack", loggerPrefix: "[sentry-webpack-plugin]" }
+      );
+
+      await manager.uploadSourcemaps([".next", "dist"], { prepareArtifacts: false });
+
+      expect(mockCliUploadSourceMaps).toHaveBeenCalledTimes(1);
+      expect(mockCliUploadSourceMaps).toHaveBeenCalledWith(
+        "some-release-name",
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        expect.objectContaining({
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          include: expect.arrayContaining([
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            expect.objectContaining({
+              // Should use buildArtifactPaths directly
+              paths: [".next", "dist"],
+              rewrite: false,
+              dist: "1",
+            }),
+          ]),
+          live: "rejectOnError",
+        })
+      );
+      expect(mockGlob).not.toHaveBeenCalled();
+      expect(mockPrepareBundleForDebugIdUpload).not.toHaveBeenCalled();
+    });
+
+    it("exits early when assets is an empty array", async () => {
+      const manager = createSentryBuildPluginManager(
+        {
+          authToken: "t",
+          org: "o",
+          project: "p",
+          release: { name: "some-release-name", dist: "1" },
+          sourcemaps: { assets: [] },
+        },
+        { buildTool: "webpack", loggerPrefix: "[sentry-webpack-plugin]" }
+      );
+
+      await manager.uploadSourcemaps([".next"], { prepareArtifacts: false });
+
+      expect(mockCliUploadSourceMaps).not.toHaveBeenCalled();
+      expect(mockGlob).not.toHaveBeenCalled();
+      expect(mockPrepareBundleForDebugIdUpload).not.toHaveBeenCalled();
+    });
+
+    it("exits early when assets is an empty array even for default mode", async () => {
+      const manager = createSentryBuildPluginManager(
+        {
+          authToken: "t",
+          org: "o",
+          project: "p",
+          release: { name: "some-release-name", dist: "1" },
+          sourcemaps: { assets: [] },
+        },
+        { buildTool: "webpack", loggerPrefix: "[sentry-webpack-plugin]" }
+      );
+
+      await manager.uploadSourcemaps([".next"]);
+
+      expect(mockCliUploadSourceMaps).not.toHaveBeenCalled();
+      expect(mockGlob).not.toHaveBeenCalled();
       expect(mockPrepareBundleForDebugIdUpload).not.toHaveBeenCalled();
     });
 
