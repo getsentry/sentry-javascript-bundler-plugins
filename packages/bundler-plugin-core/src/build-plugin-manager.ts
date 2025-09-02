@@ -614,7 +614,7 @@ export function createSentryBuildPluginManager(
                   include: [
                     {
                       paths: pathsToUpload,
-                      rewrite: false,
+                      rewrite: true,
                       dist: options.release.dist,
                     },
                   ],
