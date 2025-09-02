@@ -221,8 +221,9 @@ Use the \`debug\` option to print information about source map resolution.
       },
       {
         name: "deploy",
+        type: "DeployOptions | false",
         fullDescription:
-          "Configuration for adding deployment information to the release in Sentry.",
+          "Configuration for adding deployment information to the release in Sentry.\n\nSet to `false` to disable automatic deployment detection and creation (e.g., when deploying on Vercel).",
         children: [
           {
             name: "env",

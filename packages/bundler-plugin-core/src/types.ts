@@ -239,8 +239,10 @@ export interface Options {
 
     /**
      * Configuration for adding deployment information to the release in Sentry.
+     *
+     * Set to `false` to disable automatic deployment detection and creation.
      */
-    deploy?: DeployOptions;
+    deploy?: DeployOptions | false;
 
     /**
      * Legacy method of uploading source maps. (not recommended unless necessary)
