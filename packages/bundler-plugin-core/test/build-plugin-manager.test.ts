@@ -122,7 +122,7 @@ describe("createSentryBuildPluginManager", () => {
             expect.objectContaining({
               // User-provided assets should be passed directly to CLI (no globbing)
               paths: ["/app/dist/**/*"],
-              rewrite: false,
+              rewrite: true,
               dist: "1",
             }),
           ]),
@@ -161,7 +161,7 @@ describe("createSentryBuildPluginManager", () => {
             expect.objectContaining({
               // Should use buildArtifactPaths directly
               paths: [".next", "dist"],
-              rewrite: false,
+              rewrite: true,
               dist: "1",
             }),
           ]),
