@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 4.3.0
+
+- feat(core): Extend deploy option to allow opting out of automatic deploy creation ([#801](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/801))
+- feat(core): No asset globbing for direct upload ([#800](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/800))
+
 ## 4.2.0
 
 - feat(core): Add `prepareArtifacts` option for uploading sourcemaps ([#794](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/794))
