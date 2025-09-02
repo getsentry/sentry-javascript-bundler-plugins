@@ -564,6 +564,15 @@ export function createSentryBuildPluginManager(
         return;
       }
 
+      // Early exit if assets is explicitly set to an empty array
+      const assets = options.sourcemaps?.assets;
+      if (Array.isArray(assets) && assets.length === 0) {
+        logger.debug(
+          "Empty `sourcemaps.assets` option provided. Will not upload sourcemaps with debug ID."
+        );
+        return;
+      }
+
       await startSpan(
         // This is `forceTransaction`ed because this span is used in dashboards in the form of indexed transactions.
         { name: "debug-id-sourcemap-upload", scope: sentryScope, forceTransaction: true },
@@ -578,65 +587,77 @@ export function createSentryBuildPluginManager(
           const freeUploadDependencyOnBuildArtifacts = createDependencyOnBuildArtifacts();
 
           try {
-            const assets = options.sourcemaps?.assets;
+            if (!shouldPrepare) {
+              // Direct CLI upload from existing artifact paths (no globbing, no preparation)
+              let pathsToUpload: string[];
 
-            let globAssets: string | string[];
-            if (assets) {
-              globAssets = assets;
-            } else {
-              logger.debug(
-                "No `sourcemaps.assets` option provided, falling back to uploading detected build artifacts."
-              );
-              globAssets = buildArtifactPaths;
-            }
+              if (assets) {
+                pathsToUpload = Array.isArray(assets) ? assets : [assets];
+                logger.debug(
+                  `Direct upload mode: passing user-provided assets directly to CLI: ${pathsToUpload.join(
+                    ", "
+                  )}`
+                );
+              } else {
+                // Use original paths e.g. like ['.next/server'] directly –> preferred way when no globbing is done
+                pathsToUpload = buildArtifactPaths;
+              }
 
-            const globResult = await startSpan(
-              { name: "glob", scope: sentryScope },
-              async () =>
-                await glob(globAssets, {
-                  absolute: true,
-                  // If we do not use a temp folder, we allow directories and files; CLI will traverse as needed when given paths.
-                  nodir: shouldPrepare,
-                  ignore: options.sourcemaps?.ignore,
-                })
-            );
-
-            const debugIdChunkFilePaths = shouldPrepare
-              ? globResult.filter((debugIdChunkFilePath) => {
-                  return !!stripQueryAndHashFromPath(debugIdChunkFilePath).match(/\.(js|mjs|cjs)$/);
-                })
-              : globResult;
-
-            // The order of the files output by glob() is not deterministic
-            // Ensure order within the files so that {debug-id}-{chunkIndex} coupling is consistent
-            debugIdChunkFilePaths.sort();
-
-            if (Array.isArray(assets) && assets.length === 0) {
-              logger.debug(
-                "Empty `sourcemaps.assets` option provided. Will not upload sourcemaps with debug ID."
-              );
-            } else if (debugIdChunkFilePaths.length === 0) {
-              logger.warn(
-                "Didn't find any matching sources for debug ID upload. Please check the `sourcemaps.assets` option."
-              );
-            } else {
-              if (!shouldPrepare) {
-                // Direct CLI upload from existing artifact paths (no preparation or temp copies)
-                await startSpan({ name: "upload", scope: sentryScope }, async () => {
-                  const cliInstance = createCliInstance(options);
-                  await cliInstance.releases.uploadSourceMaps(options.release.name ?? "undefined", {
-                    include: [
-                      {
-                        paths: debugIdChunkFilePaths,
-                        rewrite: false,
-                        dist: options.release.dist,
-                      },
-                    ],
-                    live: "rejectOnError",
-                  });
+              const ignorePaths = options.sourcemaps?.ignore
+                ? Array.isArray(options.sourcemaps?.ignore)
+                  ? options.sourcemaps?.ignore
+                  : [options.sourcemaps?.ignore]
+                : [];
+              await startSpan({ name: "upload", scope: sentryScope }, async () => {
+                const cliInstance = createCliInstance(options);
+                await cliInstance.releases.uploadSourceMaps(options.release.name ?? "undefined", {
+                  include: [
+                    {
+                      paths: pathsToUpload,
+                      rewrite: true,
+                      dist: options.release.dist,
+                    },
+                  ],
+                  ignore: ignorePaths,
+                  live: "rejectOnError",
                 });
+              });
 
-                logger.info("Successfully uploaded source maps to Sentry");
+              logger.info("Successfully uploaded source maps to Sentry");
+            } else {
+              // Prepare artifacts in temp folder before uploading
+              let globAssets: string | string[];
+              if (assets) {
+                globAssets = assets;
+              } else {
+                logger.debug(
+                  "No `sourcemaps.assets` option provided, falling back to uploading detected build artifacts."
+                );
+                globAssets = buildArtifactPaths;
+              }
+
+              const globResult = await startSpan(
+                { name: "glob", scope: sentryScope },
+                async () =>
+                  await glob(globAssets, {
+                    absolute: true,
+                    nodir: true, // We need individual files for preparation
+                    ignore: options.sourcemaps?.ignore,
+                  })
+              );
+
+              const debugIdChunkFilePaths = globResult.filter((debugIdChunkFilePath) => {
+                return !!stripQueryAndHashFromPath(debugIdChunkFilePath).match(/\.(js|mjs|cjs)$/);
+              });
+
+              // The order of the files output by glob() is not deterministic
+              // Ensure order within the files so that {debug-id}-{chunkIndex} coupling is consistent
+              debugIdChunkFilePaths.sort();
+
+              if (debugIdChunkFilePaths.length === 0) {
+                logger.warn(
+                  "Didn't find any matching sources for debug ID upload. Please check the `sourcemaps.assets` option."
+                );
               } else {
                 const tmpUploadFolder = await startSpan(
                   { name: "mkdtemp", scope: sentryScope },
