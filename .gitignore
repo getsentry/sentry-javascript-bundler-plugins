@@ -7,3 +7,6 @@ yarn-error.log
 *.tgz
 
 .nxcache
+packages/**/yarn.lock
+
+.DS_Store

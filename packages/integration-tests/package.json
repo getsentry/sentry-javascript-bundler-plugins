@@ -1,6 +1,6 @@
 {
   "name": "@sentry-internal/integration-tests",
-  "version": "2.23.0",
+  "version": "4.2.0",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -11,21 +11,21 @@
     "check:types": "tsc --project ./tsconfig.json --noEmit",
     "clean": "run-s clean:build",
     "clean:all": "run-p clean clean:deps",
-    "clean:build": "rimraf ./fixtures/*/out",
-    "clean:deps": "rimraf node_modules"
+    "clean:build": "premove ./fixtures/*/out",
+    "clean:deps": "premove node_modules"
   },
   "dependencies": {
     "@babel/preset-react": "^7.23.3",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
-    "@sentry-internal/eslint-config": "2.23.0",
-    "@sentry-internal/sentry-bundler-plugin-tsconfig": "2.23.0",
-    "@sentry/bundler-plugin-core": "2.23.0",
-    "@sentry/esbuild-plugin": "2.23.0",
-    "@sentry/rollup-plugin": "2.23.0",
-    "@sentry/vite-plugin": "2.23.0",
-    "@sentry/webpack-plugin": "2.23.0",
+    "@sentry-internal/eslint-config": "4.2.0",
+    "@sentry-internal/sentry-bundler-plugin-tsconfig": "4.2.0",
+    "@sentry/bundler-plugin-core": "4.2.0",
+    "@sentry/esbuild-plugin": "4.2.0",
+    "@sentry/rollup-plugin": "4.2.0",
+    "@sentry/vite-plugin": "4.2.0",
+    "@sentry/webpack-plugin": "4.2.0",
     "@swc/jest": "^0.2.21",
     "@types/jest": "^28.1.3",
     "@types/react": "^18.2.0",
@@ -43,6 +43,9 @@
     "vite": "3.0.0",
     "webpack4": "npm:webpack@^4",
     "webpack5": "npm:webpack@5.74.0"
+  },
+  "devDependencies": {
+    "premove": "^4.0.0"
   },
   "volta": {
     "extends": "../../package.json"

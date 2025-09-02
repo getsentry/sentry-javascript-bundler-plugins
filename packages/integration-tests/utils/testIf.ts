@@ -1,3 +1,5 @@
+const [NODE_MAJOR_VERSION] = process.version.replace("v", "").split(".").map(Number) as [number];
+
 // eslint-disable-next-line no-undef
 export function testIf(condition: boolean): jest.It {
   if (condition) {
@@ -15,7 +17,11 @@ export function testIf(condition: boolean): jest.It {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-undef, @typescript-eslint/no-unsafe-assignment
 export const testIfNodeMajorVersionIsLessThan18: jest.It = function () {
-  const nodejsMajorversion = process.version.split(".")[0]?.slice(1);
-  return testIf(!nodejsMajorversion || parseInt(nodejsMajorversion) < 18);
+  return testIf(NODE_MAJOR_VERSION < 18);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
+
+// eslint-disable-next-line no-undef
+export const describeNode18Plus: jest.Describe =
+  // eslint-disable-next-line no-undef
+  NODE_MAJOR_VERSION >= 18 ? describe : describe.skip;

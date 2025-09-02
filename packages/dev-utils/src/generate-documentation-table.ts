@@ -24,7 +24,7 @@ const options: OptionDocumentation[] = [
     name: "authToken",
     type: "string",
     fullDescription:
-      "The authentication token to use for all communication with Sentry. Can be obtained from https://sentry.io/orgredirect/organizations/:orgslug/settings/auth-tokens/.\n\nThis value can also be specified via the `SENTRY_AUTH_TOKEN` environment variable.",
+      "The authentication token to use for all communication with Sentry.\nCan be obtained from https://sentry.io/orgredirect/organizations/:orgslug/settings/auth-tokens/.\n\nThis value can also be specified via the `SENTRY_AUTH_TOKEN` environment variable.\n\nCheck out the docs on organization tokens: https://docs.sentry.io/product/accounts/auth-tokens/#organization-auth-tokens",
   },
   {
     name: "url",
@@ -35,17 +35,19 @@ const options: OptionDocumentation[] = [
   {
     name: "headers",
     type: "Record<string, string>",
-    fullDescription: "Headers added to every outgoing network request.",
+    fullDescription: "Additional headers to send with every outgoing request to Sentry.",
   },
   {
     name: "debug",
     type: "boolean",
-    fullDescription: "Print useful debug information. Defaults to `false`.",
+    fullDescription:
+      "Enable debug information logs during build-time. Enabling this will give you, for example, logs about source maps. Defaults to `false`.",
   },
   {
     name: "silent",
     type: "boolean",
-    fullDescription: "Suppresses all logs. Defaults to `false`.",
+    fullDescription:
+      "Suppresses all build logs (all log levels, including errors). Defaults to `false`.",
   },
   {
     name: "errorHandler",
@@ -67,7 +69,7 @@ errorHandler: (err) => {
     name: "telemetry",
     type: "boolean",
     fullDescription:
-      "If set to true, internal plugin errors and performance data will be sent to Sentry.\n\nAt Sentry we like to use Sentry ourselves to deliver faster and more stable products. We're very careful of what we're sending. We won't collect anything other than error and high-level performance data. We will never collect your code or any details of the projects in which you're using this plugin.\n\nDefaults to `true`.",
+      "If this flag is `true`, internal plugin errors and performance data will be sent to Sentry. It will not collect any sensitive or user-specific data.\n\nAt Sentry, we like to use Sentry ourselves to deliver faster and more stable products. We're very careful of what we're sending. We won't collect anything other than error and high-level performance data. We will never collect your code or any details of the projects in which you're using this plugin.\n\nDefaults to `true`.",
   },
   {
     name: "disable",
@@ -76,19 +78,19 @@ errorHandler: (err) => {
   },
   {
     name: "sourcemaps",
-    fullDescription: "Options for uploading source maps.",
+    fullDescription: "Options related to source maps upload and processing.",
     children: [
       {
         name: "assets",
         type: "string | string[]",
         fullDescription:
-          "A glob or an array of globs that specifies the build artifacts that should be uploaded to Sentry.\n\nIf this option is not specified, the plugin will try to upload all JavaScript files and source map files that are created during build.\n\nThe globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)\n\nUse the `debug` option to print information about which files end up being uploaded.",
+          "A glob or an array of globs that specify the build artifacts and source maps that will be uploaded to Sentry.\n\nThe globbing patterns must follow the implementation of the `glob` package: https://www.npmjs.com/package/glob#glob-primer\n\nIf this option is not specified, the plugin will try to upload all JavaScript files and source map files that are created during build.\n\nUse the `debug` option to print information about which files end up being uploaded.",
       },
       {
         name: "ignore",
         type: "string | string[]",
         fullDescription:
-          "A glob or an array of globs that specifies which build artifacts should not be uploaded to Sentry.\n\nDefault: `[]`\n\nThe globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)\n\nUse the `debug` option to print information about which files end up being uploaded.",
+          "A glob or an array of globs that specifies which build artifacts should not be uploaded to Sentry.\n\nThe globbing patterns must follow the implementation of the `glob` package: https://www.npmjs.com/package/glob#glob-primer\n\nUse the `debug` option to print information about which files end up being uploaded.\n\nDefault: `[]`",
       },
       {
         name: "rewriteSources",
@@ -97,16 +99,38 @@ errorHandler: (err) => {
           "Hook to rewrite the `sources` field inside the source map before being uploaded to Sentry. Does not modify the actual source map. Effectively, this modifies how files inside the stacktrace will show up in Sentry.\n\nDefaults to making all sources relative to `process.cwd()` while building.",
       },
       {
+        name: "resolveSourceMap",
+        type: "(artifactPath: string, sourceMappingUrl: string | undefined) => string | undefined | Promise<string | undefined>",
+        fullDescription: `Hook to customize source map file resolution.
+
+The hook is called with the absolute path of the build artifact and the value of the \`//# sourceMappingURL=\`
+comment, if present. The hook should then return an absolute path (or a promise that resolves to one) indicating
+where to find the artifact's corresponding source map file. If no path is returned or the returned path doesn't
+exist, the standard source map resolution process will be used.
+
+The standard process first tries to resolve based on the \`//# sourceMappingURL=\` value (it supports \`file://\`
+urls and absolute/relative paths). If that path doesn't exist, it then looks for a file named
+\`\${artifactName}.map\` in the same directory as the artifact.
+
+Note: This is mostly helpful for complex builds with custom source map generation. For example, if you put source
+maps into a separate directory and rewrite the \`//# sourceMappingURL=\` comment to something other than a relative
+directory, sentry will be unable to locate the source maps for a given build artifact. This hook allows you to 
+implement the resolution process yourself.
+
+Use the \`debug\` option to print information about source map resolution.
+`,
+      },
+      {
         name: "filesToDeleteAfterUpload",
-        type: "string | string[]",
+        type: "string | string[] | Promise<string | string[]>",
         fullDescription:
-          "A glob or an array of globs that specifies the build artifacts that should be deleted after the artifact upload to Sentry has been completed.\n\nThe globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)\n\nUse the `debug` option to print information about which files end up being deleted.",
+          "A glob, an array of globs or a promise resolving a glob or array of globs that specifies the build artifacts that should be deleted after the artifact upload to Sentry has been completed.\n\nNote: If you pass in a Promise that resolves to a string or array, the plugin will await the Promise and use the resolved value globs. This is useful if you need to dynamically determine the files to delete. Some higher-level Sentry SDKs or options use this feature (e.g., SvelteKit).\n\nThe globbing patterns must follow the implementation of the `glob` package: https://www.npmjs.com/package/glob#glob-primer\n\nUse the `debug` option to print information about which files end up being deleted.",
       },
       {
         name: "disable",
         type: "boolean",
         fullDescription:
-          "Disables all functionality related to sourcemaps.\n\nDefaults to `false`.",
+          "If this flag is `true`, any functionality related to source maps will be disabled.\n\nDefaults to `false`.",
       },
     ],
   },
@@ -120,7 +144,7 @@ errorHandler: (err) => {
         name: "name",
         type: "string",
         fullDescription:
-          "Unique identifier for the release you want to create.\n\nThis value can also be specified via the `SENTRY_RELEASE` environment variable.\n\nDefaults to automatically detecting a value for your environment. This includes values for Cordova, Heroku, AWS CodeBuild, CircleCI, Xcode, and Gradle, and otherwise uses the git `HEAD`'s commit SHA. (the latter requires access to git CLI and for the root directory to be a valid repository)\n\nIf you didn't provide a value and the plugin can't automatically detect one, no release will be created.",
+          "Unique identifier for the release you want to create.\n\nThis value can also be specified via the `SENTRY_RELEASE` environment variable.\n\nDefaults to automatically detecting a value for your environment. This includes values for Cordova, Heroku, AWS CodeBuild, CircleCI, Xcode, and Gradle, and otherwise uses the git `HEAD`'s commit SHA (the latter requires access to git CLI and for the root directory to be a valid repository).\n\nIf no `name` is provided and the plugin can't automatically detect one, no release will be created.",
       },
       {
         name: "inject",
@@ -132,29 +156,30 @@ errorHandler: (err) => {
         name: "create",
         type: "boolean",
         fullDescription:
-          "Whether the plugin should create a release on Sentry during the build. Note that a release may still appear in Sentry even if this is value is `false` because any Sentry event that has a release value attached will automatically create a release. (for example via the `inject` option)\n\nDefaults to `true`.",
+          "Whether the plugin should create a release on Sentry during the build.\n\nNote that a release may still appear in Sentry even if this is value is `false` because any Sentry event that has a release value attached will automatically create a release. (for example via the `inject` option)\n\nDefaults to `true`.",
       },
       {
         name: "finalize",
         type: "boolean",
         fullDescription:
-          "Whether the Sentry release should be automatically finalized (meaning an end timestamp is added) after the build ends.\n\nDefaults to `true`.",
+          "Whether to automatically finalize the release. The release is finalized by adding an end timestamp after the build ends.\n\nDefaults to `true`.",
       },
       {
         name: "dist",
         type: "string",
         fullDescription:
-          "Unique identifier for the distribution, used to further segment your release.",
+          "Unique distribution identifier for the release. Used to further segment the release.\n\nUsually your build number.",
       },
       {
         name: "vcsRemote",
         type: "string",
         fullDescription:
-          "Version control system remote name.\n\nThis value can also be specified via the `SENTRY_VSC_REMOTE` environment variable.\n\nDefaults to 'origin'.",
+          "Version control system (VCS) remote name.\n\nThis value can also be specified via the `SENTRY_VSC_REMOTE` environment variable.\n\nDefaults to 'origin'.",
       },
       {
         name: "setCommits",
-        fullDescription: "Option to associate the created release with its commits in Sentry.",
+        fullDescription:
+          "Configuration for associating the release with its commits in Sentry.\n\nSet to `false` to disable commit association.\n\nDefaults to `{ auto: true }`.",
         children: [
           {
             name: "previousCommit",
@@ -196,7 +221,8 @@ errorHandler: (err) => {
       },
       {
         name: "deploy",
-        fullDescription: "Adds deployment information to the release in Sentry.",
+        fullDescription:
+          "Configuration for adding deployment information to the release in Sentry.",
         children: [
           {
             name: "env",
@@ -345,43 +371,39 @@ type IncludeEntry = {
   },
   {
     name: "bundleSizeOptimizations",
-    fullDescription: `Options related to bundle size optimizations. These options will allow you to optimize and reduce the bundle size of the Sentry SDK.`,
+    fullDescription: `Options for bundle size optimizations by excluding certain features.`,
     children: [
       {
         name: "excludeDebugStatements",
         type: "boolean",
-        fullDescription: `If set to \`true\`, the plugin will attempt to tree-shake (remove) any debugging code within the Sentry SDK.\nNote that the success of this depends on tree shaking being enabled in your build tooling.\n\nSetting this option to \`true\` will disable features like the SDK's \`debug\` option.`,
+        fullDescription: `Exclude debug statements from the bundle, thus disabling features like the SDK's \`debug\` option.\n\nIf set to \`true\`, the plugin will attempt to tree-shake (remove) any debugging code within the Sentry SDK during the build.\nNote that the success of this depends on tree-shaking being enabled in your build tooling.\n\nDefaults to \`false\`.`,
       },
       {
         name: "excludeTracing",
         type: "boolean",
-        fullDescription: `If set to \`true\`, the plugin will attempt to tree-shake (remove) code within the Sentry SDK that is related to tracing and performance monitoring.\nNote that the success of this depends on tree shaking being enabled in your build tooling.\n\n**Notice:** Do not enable this when you're using any performance monitoring-related SDK features (e.g. \`Sentry.startTransaction()\`).`,
+        fullDescription: `Exclude tracing functionality from the bundle, thus disabling features like performance monitoring.\n\nIf set to \`true\`, the plugin will attempt to tree-shake (remove) code within the Sentry SDK that is related to tracing and performance monitoring.\nNote that the success of this depends on tree-shaking being enabled in your build tooling.\n\n**Notice:** Do not enable this when you're using any performance monitoring-related SDK features (e.g. \`Sentry.startTransaction()\`).\n\nDefaults to \`false\`.`,
       },
       {
         name: "excludeReplayShadowDom",
         type: "boolean",
-        fullDescription: `If set to \`true\`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay Shadow DOM recording functionality.\nNote that the success of this depends on tree shaking being enabled in your build tooling.\n\nThis option is safe to be used when you do not want to capture any Shadow DOM activity via Sentry Session Replay.`,
+        fullDescription: `Exclude Replay Shadow DOM functionality from the bundle.\n\nIf set to \`true\`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay Shadow DOM recording functionality.\nNote that the success of this depends on tree-shaking being enabled in your build tooling.\n\nThis option is safe to be used when you do not want to capture any Shadow DOM activity via Sentry Session Replay.\n\nDefaults to \`false\`.`,
       },
       {
         name: "excludeReplayIframe",
         type: "boolean",
-        fullDescription: `If set to \`true\`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay \`iframe\` recording functionality.\nNote that the success of this depends on tree shaking being enabled in your build tooling.\n\nYou can safely do this when you do not want to capture any \`iframe\` activity via Sentry Session Replay.`,
+        fullDescription: `Exclude Replay iFrame functionality from the bundle.\n\nIf set to \`true\`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay \`iframe\` recording functionality.\nNote that the success of this depends on tree-shaking being enabled in your build tooling.\n\nYou can safely do this when you do not want to capture any \`iframe\` activity via Sentry Session Replay.\n\nDefaults to \`false\`.`,
       },
       {
         name: "excludeReplayWorker",
         type: "boolean",
-        fullDescription: `If set to \`true\`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay's Compression Web Worker.\nNote that the success of this depends on tree shaking being enabled in your build tooling.\n\n**Notice:** You should only use this option if you manually host a compression worker and configure it in your Sentry Session Replay integration config via the \`workerUrl\` option.`,
+        fullDescription: `Exclude Replay worker functionality from the bundle.\n\nIf set to \`true\`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay's Compression Web Worker.\nNote that the success of this depends on tree-shaking being enabled in your build tooling.\n\n**Notice:** You should only use this option if you manually host a compression worker and configure it in your Sentry Session Replay integration config via the \`workerUrl\` option.\n\nDefaults to \`false\`.`,
       },
     ],
   },
   {
     name: "reactComponentAnnotation",
-    fullDescription: `Options related to react component name annotations.
-      Disabled by default, unless a value is set for this option.
-      When enabled, your app's DOM will automatically be annotated during build-time with their respective component names.
-      This will unlock the capability to search for Replays in Sentry by component name, as well as see component names in breadcrumbs and performance monitoring.
-      Please note that this feature is not currently supported by the esbuild bundler plugins, and will only annotate React components
-    `,
+    fullDescription: `(NOTICE: Use the react component annotation feature with caution. The option will pass additional properties to your React components which may lead to errors if libraries or your own code iterate through component props without checking for the additional Sentry props.)\n\nOptions related to react component name annotations.
+      Disabled by default, unless a value is set for this option.\nWhen enabled, your app's DOM will automatically be annotated during build-time with their respective component names.\nThis will unlock the capability to search for Replays in Sentry by component name, as well as see component names in breadcrumbs and performance monitoring.`,
     supportedBundlers: ["webpack", "vite", "rollup"],
     children: [
       {

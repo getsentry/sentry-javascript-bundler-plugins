@@ -10,14 +10,15 @@ import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
 import { sentryEsbuildPlugin } from "@sentry/esbuild-plugin";
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const nodejsMajorversion = process.version.split(".")[0]!.slice(1);
+const [NODE_MAJOR_VERSION] = process.version.replace("v", "").split(".").map(Number) as [number];
+
+type Bundlers = "webpack4" | "webpack5" | "esbuild" | "rollup" | "vite" | string;
 
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
   outFolder: string,
   sentryUnpluginOptions: Options,
-  plugins: string[] = []
+  plugins: Bundlers[] = []
 ): void {
   if (plugins.length === 0 || plugins.includes("vite")) {
     void vite.build({
@@ -36,6 +37,7 @@ export function createCjsBundles(
       plugins: [sentryVitePlugin(sentryUnpluginOptions)],
     });
   }
+
   if (plugins.length === 0 || plugins.includes("rollup")) {
     void rollup
       .rollup({
@@ -65,7 +67,7 @@ export function createCjsBundles(
   }
 
   // Webpack 4 doesn't work on Node.js versions >= 18
-  if (parseInt(nodejsMajorversion) < 18 && (plugins.length === 0 || plugins.includes("webpack4"))) {
+  if (NODE_MAJOR_VERSION < 18 && (plugins.length === 0 || plugins.includes("webpack4"))) {
     webpack4(
       {
         devtool: "source-map",

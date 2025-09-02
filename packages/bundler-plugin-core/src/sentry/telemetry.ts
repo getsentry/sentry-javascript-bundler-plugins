@@ -13,7 +13,7 @@ const stackParser = createStackParser(nodeStackLineParser());
 export function createSentryInstance(
   options: NormalizedOptions,
   shouldSendTelemetry: Promise<boolean>,
-  bundler: string
+  buildTool: string
 ): { sentryScope: Scope; sentryClient: Client } {
   const clientOptions: ServerRuntimeClientOptions = {
     platform: "node",
@@ -55,12 +55,16 @@ export function createSentryInstance(
   const scope = new Scope();
   scope.setClient(client);
 
-  setTelemetryDataOnScope(options, scope, bundler);
+  setTelemetryDataOnScope(options, scope, buildTool);
 
   return { sentryScope: scope, sentryClient: client };
 }
 
-export function setTelemetryDataOnScope(options: NormalizedOptions, scope: Scope, bundler: string) {
+export function setTelemetryDataOnScope(
+  options: NormalizedOptions,
+  scope: Scope,
+  buildTool: string
+): void {
   const { org, project, release, errorHandler, sourcemaps, reactComponentAnnotation } = options;
 
   scope.setTag("upload-legacy-sourcemaps", !!release.uploadLegacySourcemaps);
@@ -86,10 +90,7 @@ export function setTelemetryDataOnScope(options: NormalizedOptions, scope: Scope
   // Miscellaneous options
   scope.setTag("custom-error-handler", !!errorHandler);
   scope.setTag("sourcemaps-assets", !!sourcemaps?.assets);
-  scope.setTag(
-    "delete-after-upload",
-    !!sourcemaps?.deleteFilesAfterUpload || !!sourcemaps?.filesToDeleteAfterUpload
-  );
+  scope.setTag("delete-after-upload", !!sourcemaps?.filesToDeleteAfterUpload);
   scope.setTag("sourcemaps-disabled", !!sourcemaps?.disable);
 
   scope.setTag("react-annotate", !!reactComponentAnnotation?.enabled);
@@ -106,7 +107,7 @@ export function setTelemetryDataOnScope(options: NormalizedOptions, scope: Scope
   scope.setTags({
     organization: org,
     project,
-    bundler,
+    bundler: buildTool,
   });
 
   scope.setUser({ id: org });
@@ -137,7 +138,7 @@ export async function allowedToSendTelemetry(options: NormalizedOptions): Promis
   let cliInfo;
   try {
     // Makes a call to SentryCLI to get the Sentry server URL the CLI uses.
-    // We need to check and decide to use telemetry based on the CLI's respone to this call
+    // We need to check and decide to use telemetry based on the CLI's response to this call
     // because only at this time we checked a possibly existing .sentryclirc file. This file
     // could point to another URL than the default URL.
     cliInfo = await cli.execute(["info"], false);
@@ -160,7 +161,7 @@ export async function allowedToSendTelemetry(options: NormalizedOptions): Promis
 /**
  * Flushing the SDK client can fail. We never want to crash the plugin because of telemetry.
  */
-export async function safeFlushTelemetry(sentryClient: Client) {
+export async function safeFlushTelemetry(sentryClient: Client): Promise<void> {
   try {
     await sentryClient.flush(2000);
   } catch {

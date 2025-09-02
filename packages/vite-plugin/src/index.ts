@@ -8,8 +8,9 @@ import {
   SentrySDKBuildFlags,
   createRollupBundleSizeOptimizationHooks,
   createComponentNameAnnotateHooks,
+  Logger,
 } from "@sentry/bundler-plugin-core";
-import { UnpluginOptions } from "unplugin";
+import { UnpluginOptions, VitePlugin } from "unplugin";
 
 function viteReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   return {
@@ -44,11 +45,13 @@ function viteModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOptio
 }
 
 function viteDebugIdUploadPlugin(
-  upload: (buildArtifacts: string[]) => Promise<void>
+  upload: (buildArtifacts: string[]) => Promise<void>,
+  logger: Logger,
+  createDependencyOnBuildArtifacts: () => () => void
 ): UnpluginOptions {
   return {
     name: "sentry-vite-debug-id-upload-plugin",
-    vite: createRollupDebugIdUploadHooks(upload),
+    vite: createRollupDebugIdUploadHooks(upload, logger, createDependencyOnBuildArtifacts),
   };
 }
 
@@ -70,8 +73,7 @@ const sentryUnplugin = sentryUnpluginFactory({
   bundleSizeOptimizationsPlugin: viteBundleSizeOptimizationsPlugin,
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const sentryVitePlugin: (options?: Options) => any = sentryUnplugin.vite;
+export const sentryVitePlugin: (options?: Options) => VitePlugin[] = sentryUnplugin.vite;
 
 export type { Options as SentryVitePluginOptions } from "@sentry/bundler-plugin-core";
 export { sentryCliBinaryExists } from "@sentry/bundler-plugin-core";

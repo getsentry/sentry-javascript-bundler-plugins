@@ -1,207 +1,21 @@
 import fs from "fs";
-import { glob } from "glob";
-import os from "os";
 import path from "path";
+import * as url from "url";
 import * as util from "util";
-import { Logger } from "./sentry/logger";
 import { promisify } from "util";
-import SentryCli from "@sentry/cli";
-import { dynamicSamplingContextToSentryBaggageHeader } from "@sentry/utils";
-import { safeFlushTelemetry } from "./sentry/telemetry";
-import { stripQueryAndHashFromPath } from "./utils";
-import { setMeasurement, spanToTraceHeader, startSpan } from "@sentry/core";
-import { getDynamicSamplingContextFromSpan, Scope } from "@sentry/core";
-import { Client } from "@sentry/types";
-
-interface RewriteSourcesHook {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (source: string, map: any): string;
-}
+import { SentryBuildPluginManager } from "./build-plugin-manager";
+import { Logger } from "./logger";
+import { ResolveSourceMapHook, RewriteSourcesHook } from "./types";
 
 interface DebugIdUploadPluginOptions {
-  logger: Logger;
-  assets?: string | string[];
-  ignore?: string | string[];
-  releaseName?: string;
-  dist?: string;
-  rewriteSourcesHook?: RewriteSourcesHook;
-  handleRecoverableError: (error: unknown) => void;
-  sentryScope: Scope;
-  sentryClient: Client;
-  sentryCliOptions: {
-    url: string;
-    authToken: string;
-    org?: string;
-    project: string;
-    vcsRemote: string;
-    silent: boolean;
-    headers?: Record<string, string>;
-  };
-  createDependencyOnSourcemapFiles: () => () => void;
+  sentryBuildPluginManager: SentryBuildPluginManager;
 }
 
 export function createDebugIdUploadFunction({
-  assets,
-  ignore,
-  logger,
-  releaseName,
-  dist,
-  handleRecoverableError,
-  sentryScope,
-  sentryClient,
-  sentryCliOptions,
-  rewriteSourcesHook,
-  createDependencyOnSourcemapFiles,
+  sentryBuildPluginManager,
 }: DebugIdUploadPluginOptions) {
-  const freeGlobalDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
-
   return async (buildArtifactPaths: string[]) => {
-    await startSpan(
-      // This is `forceTransaction`ed because this span is used in dashboards in the form of indexed transactions.
-      { name: "debug-id-sourcemap-upload", scope: sentryScope, forceTransaction: true },
-      async () => {
-        let folderToCleanUp: string | undefined;
-
-        // It is possible that this writeBundle hook (which calls this function) is called multiple times in one build (for example when reusing the plugin, or when using build tooling like `@vitejs/plugin-legacy`)
-        // Therefore we need to actually register the execution of this hook as dependency on the sourcemap files.
-        const freeUploadDependencyOnSourcemapFiles = createDependencyOnSourcemapFiles();
-
-        try {
-          const tmpUploadFolder = await startSpan(
-            { name: "mkdtemp", scope: sentryScope },
-            async () => {
-              return await fs.promises.mkdtemp(
-                path.join(os.tmpdir(), "sentry-bundler-plugin-upload-")
-              );
-            }
-          );
-
-          folderToCleanUp = tmpUploadFolder;
-
-          let globAssets: string | string[];
-          if (assets) {
-            globAssets = assets;
-          } else {
-            logger.debug(
-              "No `sourcemaps.assets` option provided, falling back to uploading detected build artifacts."
-            );
-            globAssets = buildArtifactPaths;
-          }
-
-          const globResult = await startSpan(
-            { name: "glob", scope: sentryScope },
-            async () => await glob(globAssets, { absolute: true, nodir: true, ignore: ignore })
-          );
-
-          const debugIdChunkFilePaths = globResult.filter((debugIdChunkFilePath) => {
-            return !!stripQueryAndHashFromPath(debugIdChunkFilePath).match(/\.(js|mjs|cjs)$/);
-          });
-
-          // The order of the files output by glob() is not deterministic
-          // Ensure order within the files so that {debug-id}-{chunkIndex} coupling is consistent
-          debugIdChunkFilePaths.sort();
-
-          if (Array.isArray(assets) && assets.length === 0) {
-            logger.debug(
-              "Empty `sourcemaps.assets` option provided. Will not upload sourcemaps with debug ID."
-            );
-          } else if (debugIdChunkFilePaths.length === 0) {
-            logger.warn(
-              "Didn't find any matching sources for debug ID upload. Please check the `sourcemaps.assets` option."
-            );
-          } else {
-            await startSpan(
-              { name: "prepare-bundles", scope: sentryScope },
-              async (prepBundlesSpan) => {
-                // Preparing the bundles can be a lot of work and doing it all at once has the potential of nuking the heap so
-                // instead we do it with a maximum of 16 concurrent workers
-                const preparationTasks = debugIdChunkFilePaths.map(
-                  (chunkFilePath, chunkIndex) => async () => {
-                    await prepareBundleForDebugIdUpload(
-                      chunkFilePath,
-                      tmpUploadFolder,
-                      chunkIndex,
-                      logger,
-                      rewriteSourcesHook ?? defaultRewriteSourcesHook
-                    );
-                  }
-                );
-                const workers: Promise<void>[] = [];
-                const worker = async () => {
-                  while (preparationTasks.length > 0) {
-                    const task = preparationTasks.shift();
-                    if (task) {
-                      await task();
-                    }
-                  }
-                };
-                for (let workerIndex = 0; workerIndex < 16; workerIndex++) {
-                  workers.push(worker());
-                }
-
-                await Promise.all(workers);
-
-                const files = await fs.promises.readdir(tmpUploadFolder);
-                const stats = files.map((file) =>
-                  fs.promises.stat(path.join(tmpUploadFolder, file))
-                );
-                const uploadSize = (await Promise.all(stats)).reduce(
-                  (accumulator, { size }) => accumulator + size,
-                  0
-                );
-
-                setMeasurement("files", files.length, "none", prepBundlesSpan);
-                setMeasurement("upload_size", uploadSize, "byte", prepBundlesSpan);
-
-                await startSpan({ name: "upload", scope: sentryScope }, async (uploadSpan) => {
-                  const cliInstance = new SentryCli(null, {
-                    ...sentryCliOptions,
-                    headers: {
-                      "sentry-trace": spanToTraceHeader(uploadSpan),
-                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                      baggage: dynamicSamplingContextToSentryBaggageHeader(
-                        getDynamicSamplingContextFromSpan(uploadSpan)
-                      )!,
-                      ...sentryCliOptions.headers,
-                    },
-                  });
-
-                  await cliInstance.releases.uploadSourceMaps(
-                    releaseName ?? "undefined", // unfortunetly this needs a value for now but it will not matter since debug IDs overpower releases anyhow
-                    {
-                      include: [
-                        {
-                          paths: [tmpUploadFolder],
-                          rewrite: false,
-                          dist: dist,
-                        },
-                      ],
-                      useArtifactBundle: true,
-                    }
-                  );
-                });
-              }
-            );
-
-            logger.info("Successfully uploaded source maps to Sentry");
-          }
-        } catch (e) {
-          sentryScope.captureException('Error in "debugIdUploadPlugin" writeBundle hook');
-          handleRecoverableError(e);
-        } finally {
-          if (folderToCleanUp) {
-            void startSpan({ name: "cleanup", scope: sentryScope }, async () => {
-              if (folderToCleanUp) {
-                await fs.promises.rm(folderToCleanUp, { recursive: true, force: true });
-              }
-            });
-          }
-          freeGlobalDependencyOnSourcemapFiles();
-          freeUploadDependencyOnSourcemapFiles();
-          await safeFlushTelemetry(sentryClient);
-        }
-      }
-    );
+    await sentryBuildPluginManager.uploadSourcemaps(buildArtifactPaths);
   };
 }
 
@@ -210,8 +24,9 @@ export async function prepareBundleForDebugIdUpload(
   uploadFolder: string,
   chunkIndex: number,
   logger: Logger,
-  rewriteSourcesHook: RewriteSourcesHook
-) {
+  rewriteSourcesHook: RewriteSourcesHook,
+  resolveSourceMapHook: ResolveSourceMapHook | undefined
+): Promise<void> {
   let bundleContent;
   try {
     bundleContent = await promisify(fs.readFile)(bundleFilePath, "utf8");
@@ -233,7 +48,7 @@ export async function prepareBundleForDebugIdUpload(
 
   const uniqueUploadName = `${debugId}-${chunkIndex}`;
 
-  bundleContent += `\n//# debugId=${debugId}`;
+  bundleContent = addDebugIdToBundleSource(bundleContent, debugId);
   const writeSourceFilePromise = fs.promises.writeFile(
     path.join(uploadFolder, `${uniqueUploadName}.js`),
     bundleContent,
@@ -243,7 +58,8 @@ export async function prepareBundleForDebugIdUpload(
   const writeSourceMapFilePromise = determineSourceMapPathFromBundle(
     bundleFilePath,
     bundleContent,
-    logger
+    logger,
+    resolveSourceMapHook
   ).then(async (sourceMapPath) => {
     if (sourceMapPath) {
       await prepareSourceMapForDebugIdUpload(
@@ -278,66 +94,91 @@ function determineDebugIdFromBundleSource(code: string): string | undefined {
   }
 }
 
+const SPEC_LAST_DEBUG_ID_REGEX = /\/\/# debugId=([a-fA-F0-9-]+)(?![\s\S]*\/\/# debugId=)/m;
+
+function hasSpecCompliantDebugId(bundleSource: string): boolean {
+  return SPEC_LAST_DEBUG_ID_REGEX.test(bundleSource);
+}
+
+function addDebugIdToBundleSource(bundleSource: string, debugId: string): string {
+  if (hasSpecCompliantDebugId(bundleSource)) {
+    return bundleSource.replace(SPEC_LAST_DEBUG_ID_REGEX, `//# debugId=${debugId}`);
+  } else {
+    return `${bundleSource}\n//# debugId=${debugId}`;
+  }
+}
+
 /**
  * Applies a set of heuristics to find the source map for a particular bundle.
  *
  * @returns the path to the bundle's source map or `undefined` if none could be found.
  */
-async function determineSourceMapPathFromBundle(
+export async function determineSourceMapPathFromBundle(
   bundlePath: string,
   bundleSource: string,
-  logger: Logger
+  logger: Logger,
+  resolveSourceMapHook: ResolveSourceMapHook | undefined
 ): Promise<string | undefined> {
-  // 1. try to find source map at `sourceMappingURL` location
   const sourceMappingUrlMatch = bundleSource.match(/^\s*\/\/# sourceMappingURL=(.*)$/m);
-  if (sourceMappingUrlMatch) {
-    const sourceMappingUrl = path.normalize(sourceMappingUrlMatch[1] as string);
+  const sourceMappingUrl = sourceMappingUrlMatch ? (sourceMappingUrlMatch[1] as string) : undefined;
 
-    let isUrl;
-    let isSupportedUrl;
+  const searchLocations: string[] = [];
+
+  if (resolveSourceMapHook) {
+    logger.debug(
+      `Calling sourcemaps.resolveSourceMap(${JSON.stringify(bundlePath)}, ${JSON.stringify(
+        sourceMappingUrl
+      )})`
+    );
+    const customPath = await resolveSourceMapHook(bundlePath, sourceMappingUrl);
+    logger.debug(`resolveSourceMap hook returned: ${JSON.stringify(customPath)}`);
+
+    if (customPath) {
+      searchLocations.push(customPath);
+    }
+  }
+
+  // 1. try to find source map at `sourceMappingURL` location
+  if (sourceMappingUrl) {
+    let parsedUrl: URL | undefined;
     try {
-      const url = new URL(sourceMappingUrl);
-      isUrl = true;
-      isSupportedUrl = url.protocol === "file:";
+      parsedUrl = new URL(sourceMappingUrl);
     } catch {
-      isUrl = false;
-      isSupportedUrl = false;
-    }
-
-    let absoluteSourceMapPath;
-    if (isSupportedUrl) {
-      absoluteSourceMapPath = sourceMappingUrl;
-    } else if (isUrl) {
       // noop
-    } else if (path.isAbsolute(sourceMappingUrl)) {
-      absoluteSourceMapPath = sourceMappingUrl;
-    } else {
-      absoluteSourceMapPath = path.join(path.dirname(bundlePath), sourceMappingUrl);
     }
 
-    if (absoluteSourceMapPath) {
-      try {
-        // Check if the file actually exists
-        await util.promisify(fs.access)(absoluteSourceMapPath);
-        return absoluteSourceMapPath;
-      } catch (e) {
-        // noop
-      }
+    if (parsedUrl && parsedUrl.protocol === "file:") {
+      searchLocations.push(url.fileURLToPath(sourceMappingUrl));
+    } else if (parsedUrl) {
+      // noop, non-file urls don't translate to a local sourcemap file
+    } else if (path.isAbsolute(sourceMappingUrl)) {
+      searchLocations.push(path.normalize(sourceMappingUrl));
+    } else {
+      searchLocations.push(path.normalize(path.join(path.dirname(bundlePath), sourceMappingUrl)));
     }
   }
 
   // 2. try to find source map at path adjacent to chunk source, but with `.map` appended
-  try {
-    const adjacentSourceMapFilePath = bundlePath + ".map";
-    await util.promisify(fs.access)(adjacentSourceMapFilePath);
-    return adjacentSourceMapFilePath;
-  } catch (e) {
-    // noop
+  searchLocations.push(bundlePath + ".map");
+
+  for (const searchLocation of searchLocations) {
+    try {
+      await util.promisify(fs.access)(searchLocation);
+      logger.debug(`Source map found for bundle \`${bundlePath}\`: \`${searchLocation}\``);
+      return searchLocation;
+    } catch (e) {
+      // noop
+    }
   }
 
   // This is just a debug message because it can be quite spammy for some frameworks
   logger.debug(
-    `Could not determine source map path for bundle: ${bundlePath} - Did you turn on source map generation in your bundler?`
+    `Could not determine source map path for bundle \`${bundlePath}\`` +
+      ` with sourceMappingURL=${
+        sourceMappingUrl === undefined ? "undefined" : `\`${sourceMappingUrl}\``
+      }` +
+      ` - Did you turn on source map generation in your bundler?` +
+      ` (Attempted paths: ${searchLocations.map((e) => `\`${e}\``).join(", ")})`
   );
   return undefined;
 }
@@ -388,7 +229,7 @@ async function prepareSourceMapForDebugIdUpload(
 }
 
 const PROTOCOL_REGEX = /^[a-zA-Z][a-zA-Z0-9+\-.]*:\/\//;
-function defaultRewriteSourcesHook(source: string): string {
+export function defaultRewriteSourcesHook(source: string): string {
   if (source.match(PROTOCOL_REGEX)) {
     return source.replace(PROTOCOL_REGEX, "");
   } else {

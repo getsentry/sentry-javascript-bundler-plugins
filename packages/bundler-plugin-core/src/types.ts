@@ -18,6 +18,8 @@ export interface Options {
    * Can be obtained from https://sentry.io/orgredirect/organizations/:orgslug/settings/auth-tokens/.
    *
    * This value can also be specified via the `SENTRY_AUTH_TOKEN` environment variable.
+   *
+   * @see https://docs.sentry.io/product/accounts/auth-tokens/#organization-auth-tokens
    */
   authToken?: string;
 
@@ -27,26 +29,27 @@ export interface Options {
    *
    * This value can also be set via the `SENTRY_URL` environment variable.
    *
-   * Defaults to https://sentry.io/, which is the correct value for SaaS customers.
+   * @default "https://sentry.io" (correct value for SaaS customers)
    */
   url?: string;
 
   /**
-   * Headers added to every outgoing network request.
+   * Additional headers to send with every outgoing request to Sentry.
    */
   headers?: Record<string, string>;
 
   /**
-   * Print useful debug information.
+   * Enable debug information logs during build-time.
+   * Enabling this will give you, for example, logs about source maps.
    *
-   * Defaults to `false`.
+   * @default false
    */
   debug?: boolean;
 
   /**
-   * Suppresses all logs.
+   * Suppresses all build logs (all log levels, including errors).
    *
-   * Defaults to `false`.
+   * @default false
    */
   silent?: boolean;
 
@@ -68,14 +71,15 @@ export interface Options {
   errorHandler?: (err: Error) => void;
 
   /**
-   * If set to true, internal plugin errors and performance data will be sent to Sentry.
+   * If this flag is `true`, internal plugin errors and performance data will be sent to Sentry.
+   * It will not collect any sensitive or user-specific data.
    *
-   * At Sentry we like to use Sentry ourselves to deliver faster and more stable products.
+   * At Sentry, we like to use Sentry ourselves to deliver faster and more stable products.
    * We're very careful of what we're sending. We won't collect anything other than error
    * and high-level performance data. We will never collect your code or any details of the
    * projects in which you're using this plugin.
    *
-   * Defaults to `true`.
+   * @default true
    */
   telemetry?: boolean;
 
@@ -87,35 +91,39 @@ export interface Options {
   disable?: boolean;
 
   /**
-   * Options for source maps uploading.
+   * Options related to source maps upload and processing.
    */
   sourcemaps?: {
     /**
-     * Disables all functionality related to sourcemaps.
+     * Disables all functionality related to sourcemaps if set to `true`.
      *
-     * Defaults to `false`.
+     * If set to `"disable-upload"`, the plugin will not upload sourcemaps to Sentry, but will inject debug IDs into the build artifacts.
+     * This is useful if you want to manually upload sourcemaps to Sentry at a later point in time.
+     *
+     * @default false
      */
-    disable?: boolean;
+    disable?: boolean | "disable-upload";
 
     /**
-     * A glob or an array of globs that specifies the build artifacts that should be uploaded to Sentry.
+     * A glob or an array of globs that specify the build artifacts and source maps that will be uploaded to Sentry.
+     *
+     * The globbing patterns must follow the implementation of the `glob` package: https://www.npmjs.com/package/glob#glob-primer
      *
      * If this option is not specified, the plugin will try to upload all JavaScript files and source map files that are created during build.
      *
-     * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
-     *
      * Use the `debug` option to print information about which files end up being uploaded.
+     *
      */
     assets?: string | string[];
 
     /**
      * A glob or an array of globs that specifies which build artifacts should not be uploaded to Sentry.
      *
-     * Default: `[]`
-     *
-     * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
+     * The globbing patterns must follow the implementation of the `glob` package: https://www.npmjs.com/package/glob#glob-primer
      *
      * Use the `debug` option to print information about which files end up being uploaded.
+     *
+     * @default []
      */
     ignore?: string | string[];
 
@@ -124,29 +132,41 @@ export interface Options {
      *
      * Defaults to making all sources relative to `process.cwd()` while building.
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    rewriteSources?: (source: string, map: any) => string;
+    rewriteSources?: RewriteSourcesHook;
+
+    /**
+     * Hook to customize source map file resolution.
+     *
+     * The hook is called with the absolute path of the build artifact and the value of the `//# sourceMappingURL=`
+     * comment, if present. The hook should then return an absolute path (or a promise that resolves to one) indicating
+     * where to find the artifact's corresponding source map file. If no path is returned or the returned path doesn't
+     * exist, the standard source map resolution process will be used.
+     *
+     * The standard process first tries to resolve based on the `//# sourceMappingURL=` value (it supports `file://`
+     * urls and absolute/relative paths). If that path doesn't exist, it then looks for a file named
+     * `${artifactName}.map` in the same directory as the artifact.
+     *
+     * Note: This is mostly helpful for complex builds with custom source map generation. For example, if you put source
+     * maps into a separate directory and rewrite the `//# sourceMappingURL=` comment to something other than a relative
+     * directory, sentry will be unable to locate the source maps for a given build artifact. This hook allows you to
+     * implement the resolution process yourself.
+     *
+     * Use the `debug` option to print information about source map resolution.
+     */
+    resolveSourceMap?: ResolveSourceMapHook;
 
     /**
      * A glob or an array of globs that specifies the build artifacts that should be deleted after the artifact upload to Sentry has been completed.
      *
-     * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
+     * Note: If you pass in a Promise that resolves to a string or array, the plugin will await the Promise and use
+     * the resolved value globs. This is useful if you need to dynamically determine the files to delete. Some
+     * higher-level Sentry SDKs or options use this feature (e.g., SvelteKit).
      *
-     * Use the `debug` option to print information about which files end up being deleted.
-     *
-     * @deprecated Use `filesToDeleteAfterUpload` instead.
-     */
-    // TODO(v3): Remove this option.
-    deleteFilesAfterUpload?: string | string[];
-
-    /**
-     * A glob or an array of globs that specifies the build artifacts that should be deleted after the artifact upload to Sentry has been completed.
-     *
-     * The globbing patterns follow the implementation of the `glob` package. (https://www.npmjs.com/package/glob)
+     * The globbing patterns must follow the implementation of the `glob` package: https://www.npmjs.com/package/glob#glob-primer
      *
      * Use the `debug` option to print information about which files end up being deleted.
      */
-    filesToDeleteAfterUpload?: string | string[];
+    filesToDeleteAfterUpload?: string | string[] | Promise<string | string[] | undefined>;
   };
 
   /**
@@ -161,10 +181,10 @@ export interface Options {
      * This value can also be specified via the `SENTRY_RELEASE` environment variable.
      *
      * Defaults to automatically detecting a value for your environment.
-     * This includes values for Cordova, Heroku, AWS CodeBuild, CircleCI, Xcode, and Gradle, and otherwise uses the git `HEAD`'s commit SHA.
-     * (the latter requires access to git CLI and for the root directory to be a valid repository)
+     * This includes values for Cordova, Heroku, AWS CodeBuild, CircleCI, Xcode, and Gradle, and otherwise uses the git `HEAD`'s commit SHA
+     * (the latter requires access to git CLI and for the root directory to be a valid repository).
      *
-     * If you didn't provide a value and the plugin can't automatically detect one, no release will be created.
+     * If no `name` is provided and the plugin can't automatically detect one, no release will be created.
      */
     name?: string;
 
@@ -177,56 +197,50 @@ export interface Options {
 
     /**
      * Whether the plugin should create a release on Sentry during the build.
-     * Note that a release may still appear in Sentry even if this is value is `false` because any Sentry event that has a release value attached will automatically create a release.
-     * (for example via the `inject` option)
      *
-     * Defaults to `true`.
+     * Note that a release may still appear in Sentry even if this value is `false`. Any Sentry event that has a release value attached
+     * will automatically create a release (for example, via the `inject` option).
+     *
+     * @default true
      */
     create?: boolean;
 
     /**
-     * Whether the Sentry release should be automatically finalized (meaning an end timestamp is added) after the build ends.
+     * Whether to automatically finalize the release. The release is finalized by adding an end timestamp after the build ends.
      *
-     * Defaults to `true`.
+     * @default true
      */
     finalize?: boolean;
 
     /**
-     * Unique identifier for the distribution, used to further segment your release.
+     * Unique distribution identifier for the release. Used to further segment the release.
+     *
      * Usually your build number.
      */
     dist?: string;
 
     /**
-     * Version control system remote name.
+     * Version control system (VCS) remote name.
      *
      * This value can also be specified via the `SENTRY_VSC_REMOTE` environment variable.
      *
-     * Defaults to 'origin'.
+     * @default "origin"
      */
     vcsRemote?: string;
 
     /**
-     * Associates the release with its commits in Sentry.
+     * Configuration for associating the release with its commits in Sentry.
+     *
+     * Set to `false` to disable commit association.
+     *
+     * @default { auto: true }
      */
-    setCommits?: SetCommitsOptions;
+    setCommits?: SetCommitsOptions | false;
 
     /**
-     * Adds deployment information to the release in Sentry.
+     * Configuration for adding deployment information to the release in Sentry.
      */
     deploy?: DeployOptions;
-
-    /**
-     * Remove all previously uploaded artifacts for this release on Sentry before the upload.
-     *
-     * Defaults to `false`.
-     *
-     * @deprecated `cleanArtifacts` is deprecated and currently doesn't do anything. Historically it was needed
-     * since uploading the same artifacts twice was not allowed. Nowadays, when uploading artifacts with the same name
-     * more than once to the same release on Sentry, Sentry will prefer the most recent artifact for source mapping.
-     */
-    // TODO(v3): Remove this option
-    cleanArtifacts?: boolean;
 
     /**
      * Legacy method of uploading source maps. (not recommended unless necessary)
@@ -242,39 +256,34 @@ export interface Options {
   };
 
   /**
-   * Options related to bundle size optimizations.
+   * Options for bundle size optimizations by excluding certain features.
    */
   bundleSizeOptimizations?: {
     /**
-     * If set to `true`, the plugin will attempt to tree-shake (remove) any debugging code within the Sentry SDK.
-     * Note that the success of this depends on tree shaking being enabled in your build tooling.
+     * Exclude debug statements from the bundle, thus disabling features like the SDK's `debug` option.
      *
-     * Setting this option to `true` will disable features like the SDK's `debug` option.
+     * If set to `true`, the plugin will attempt to tree-shake (remove) any debugging code within the Sentry SDK during the build.
+     * Note that the success of this depends on tree-shaking being enabled in your build tooling.
+     *
+     * @default false
      */
     excludeDebugStatements?: boolean;
 
     /**
-     * If set to `true`, the plugin will attempt to tree-shake (remove) code within the Sentry SDK that is related to tracing and performance monitoring.
-     * Note that the success of this depends on tree shaking being enabled in your build tooling.
+     * Exclude tracing functionality from the bundle, thus disabling features like performance monitoring.
      *
-     * **Notice**: Do not enable this when you're using any performance monitoring-related SDK features (e.g. `Sentry.startTransaction()`).
-     *
-     * @deprecated This option has been replaced with the `excludeTracing`. Currently, this option is an alias for `excludeTracing` but `excludePerformanceMonitoring` will be removed in the next major version.
-     */
-    // TODO(v3): Remove this option
-    excludePerformanceMonitoring?: boolean;
-
-    /**
      * If set to `true`, the plugin will attempt to tree-shake (remove) code within the Sentry SDK that is related to tracing and performance monitoring.
-     * Note that the success of this depends on tree shaking being enabled in your build tooling.
+     * Note that the success of this depends on tree-shaking being enabled in your build tooling.
      *
      * **Notice:** Do not enable this when you're using any performance monitoring-related SDK features (e.g. `Sentry.startTransaction()`).
+
+     * @default false
      */
     excludeTracing?: boolean;
 
     /**
      * If set to `true`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay Canvas recording functionality.
-     * Note that the success of this depends on tree shaking being enabled in your build tooling.
+     * Note that the success of this depends on tree-shaking being enabled in your build tooling.
      *
      * You can safely do this when you do not want to capture any Canvas activity via Sentry Session Replay.
      *
@@ -283,26 +292,38 @@ export interface Options {
     excludeReplayCanvas?: boolean;
 
     /**
+     * Exclude Replay Shadow DOM functionality from the bundle.
+     *
      * If set to `true`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay Shadow DOM recording functionality.
-     * Note that the success of this depends on tree shaking being enabled in your build tooling.
+     * Note that the success of this depends on tree-shaking being enabled in your build tooling.
      *
      * This option is safe to be used when you do not want to capture any Shadow DOM activity via Sentry Session Replay.
+     *
+     * @default false
      */
     excludeReplayShadowDom?: boolean;
 
     /**
-     * If set to `true`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay `iframe` recording functionality.
-     * Note that the success of this depends on tree shaking being enabled in your build tooling.
+     * Exclude Replay iFrame functionality from the bundle.
+     *
+     * If set to `true`, the Sentry SDK will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay `iframe` recording functionality.
+     * Note that the success of this depends on tree-shaking being enabled in your build tooling.
      *
      * You can safely do this when you do not want to capture any `iframe` activity via Sentry Session Replay.
+     *
+     * @default false
      */
     excludeReplayIframe?: boolean;
 
     /**
-     * If set to `true`, the plugin will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay's Compression Web Worker.
-     * Note that the success of this depends on tree shaking being enabled in your build tooling.
+     * Exclude Replay worker functionality from the bundle.
+     *
+     * If set to `true`, the Sentry SDK will attempt to tree-shake (remove) code related to the Sentry SDK's Session Replay's Compression Web Worker.
+     * Note that the success of this depends on tree-shaking being enabled in your build tooling.
      *
      * **Notice:** You should only use this option if you manually host a compression worker and configure it in your Sentry Session Replay integration config via the `workerUrl` option.
+     *
+     * @default false
      */
     excludeReplayWorker?: boolean;
   };
@@ -351,7 +372,6 @@ export interface Options {
    *
    * @experimental API that does not follow semantic versioning and may change in any release
    */
-  // TODO(v3): Remove these
   _experiments?: {
     /**
      * If set to true, the plugin will inject an additional `SENTRY_BUILD_INFO` variable.
@@ -360,26 +380,7 @@ export interface Options {
      * Defaults to `false`.
      */
     injectBuildInformation?: boolean;
-
-    /**
-     * NOTE: This option has been promoted to stable.
-     *
-     * Metadata that should be associated with the built application.
-     *
-     * The metadata is serialized and can be looked up at runtime from within the SDK (for example in the `beforeSend`,
-     * event processors, or the transport), allowing for custom event filtering logic or routing of events.
-     *
-     * Metadata can either be passed directly or alternatively a callback can be provided that will be
-     * called with the following parameters:
-     * - `org`: The organization slug.
-     * - `project`: The project slug.
-     * - `release`: The release name.
-     *
-     * @deprecated Use the non-experimental `moduleMetadata` option instead. (Basically just move this option out of `_experiments`)
-     */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    moduleMetadata?: ModuleMetadata | ModuleMetadataCallback;
-  };
+  } & Record<string, unknown>;
 
   /**
    * Options that are useful for building wrappers around the plugin. You likely don't need these options unless you
@@ -404,6 +405,14 @@ export interface Options {
     };
   };
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type RewriteSourcesHook = (source: string, map: any) => string;
+
+export type ResolveSourceMapHook = (
+  artifactPath: string,
+  sourceMappingUrl: string | undefined
+) => string | undefined | Promise<string | undefined>;
 
 export interface ModuleMetadata {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -502,14 +511,14 @@ export type IncludeEntry = {
 
 export interface SentrySDKBuildFlags extends Record<string, boolean | undefined> {
   __SENTRY_DEBUG__?: boolean;
-  __SENTRY_TRACE__?: boolean;
+  __SENTRY_TRACING__?: boolean;
   __RRWEB_EXCLUDE_CANVAS__?: boolean;
   __RRWEB_EXCLUDE_IFRAME__?: boolean;
   __RRWEB_EXCLUDE_SHADOW_DOM__?: boolean;
   __SENTRY_EXCLUDE_REPLAY_WORKER__?: boolean;
 }
 
-type SetCommitsOptions = (AutoSetCommitsOptions | ManualSetCommitsOptions) & {
+export type SetCommitsOptions = (AutoSetCommitsOptions | ManualSetCommitsOptions) & {
   /**
    * The commit before the beginning of this release (in other words,
    * the last commit of the previous release).
@@ -594,7 +603,7 @@ type DeployOptions = {
   time?: number;
 
   /**
-   * Human readable name for the deployment.
+   * Human-readable name for the deployment.
    */
   name?: string;
 
@@ -603,3 +612,5 @@ type DeployOptions = {
    */
   url?: string;
 };
+
+export type HandleRecoverableErrorFn = (error: unknown, throwByDefault: boolean) => void;

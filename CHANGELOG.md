@@ -4,6 +4,148 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 4.2.0
+
+- feat(core): Add `prepareArtifacts` option for uploading sourcemaps ([#794](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/794))
+- perf: use premove for build clean ([#792](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/792))
+- fix(core): Forward headers option to sentry-cli ([#797](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/797))
+
+Work in this release contributed by @liAmirali. Thank you for your contribution!
+
+## 4.1.1
+
+- fix(react-native): Enhance fragment detection for indirect references ([#767](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/767))
+
+## 4.1.0
+
+- feat(deps): Bump @sentry/cli to 2.51.0 [#786](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/786)
+- feat(core): Add flag for disabling sourcemaps upload [#785](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/785)
+- fix(debugId): Add guards for injected code to avoid errors [#783](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/783)
+- docs(options): Improve JSDoc for options [#781](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/781)
+- feat(core): Expose method for injecting debug Ids from plugin manager [#784](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/784)
+
+## 4.0.2
+
+- fix(core): Make `moduleMetadata` injection snippet ES5-compliant ([#774](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/774))
+
+## 4.0.1
+
+- fix(core): Make plugin inject ES5-friendly code ([#770](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/770))
+- fix(core): Use `renderChunk` for release injection for Rollup/Rolldown/Vite ([#761](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/761))
+
+Work in this release was contributed by @grushetsky. Thank you for your contribution!
+
+## 4.0.0
+
+### Breaking Changes
+
+- (Type change) Vite plugin now returns `VitePlugin` type instead of `any`
+- Deprecated function `getBuildInformation` has been removed
+
+### List of Changes
+
+- feat(core)!: Remove `getBuildInformation` export ([#765](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/765))
+- feat(vite)!: Update return type of vite plugin ([#728](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/728))
+
+## 3.6.1
+
+- fix(core): Observe and handle Sentry CLI sourcemap upload failures ([#763](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/763))
+
+## 3.6.0
+
+- feat(core): Don't add `debugIdUploadPlugin` when sourcemaps option is disabled ([#753](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/753))
+- fix(core): Avoid showing success message if upload was disabled or nothing was uploaded ([#757](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/757))
+
+## 3.5.0
+
+- feat(core): Add hook to customize source map file resolution ([#732](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/732))
+- fix(core): Avoid console output and telemetry init when plugins are disabled ([#741](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/741))
+
+Work in this release was contributed by @thecodewarrior. Thank you for your contribution!
+
+## 3.4.0
+
+- fix: Replace existing debug ID comments (#730)
+- feat: Expose bundler plugin primitives via `createSentryBuildPluginManager` (#714)
+
+## 3.3.1
+
+- fix(webpack5): All `esm` files must have `.mjs` postfix (#721)
+
+## 3.3.0
+
+- feat(webpack): Add `@sentry/webpack-plugin/webpack5` export for webpack 5.1+ and compatible environments (#715)
+- feat: Only do automatic commit association for Vercel production environments (#711)
+
+## 3.2.4
+
+- Revert "feat(core): Use path instead of debug IDs as artifact names for debug ID upload (#700)" (#709)
+- ref: Remove deprecated use of `useArtifacBundles` (#707)
+
+## 3.2.3
+
+- feat(core): Use path instead of debug IDs as artifact names for debug ID upload (#700)
+- feat(webpack): Primarily use `contentHash` for debug ID hash (#702)
+- feat: Detect Vercel commits and env (#694)
+- feat: Default to automatically setting commits on release (#692)
+
+## 3.2.2
+
+- feat(annotation): Handle JSX member expressions (#690)
+- fix(core): Don't crash on recoverable CLI command error (#682)
+- chore: Suggest putting `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT` in `passThroughEnv` when using Turborepo (#675)
+
+## 3.2.1
+
+- deps: Bump @sentry/cli to 2.42.2 (#685)
+
+## 3.2.0
+
+- feat(core): Accept and await a promise in `sourcemaps.filesToDeleteAfterUpload` (#677)
+
+## 3.1.2
+
+- deps: Bump `@sentry/cli` to `2.41.1` (#671)
+
+## 3.1.1
+
+- fix(core): Disable release creation and source maps upload in dev mode (#666)
+
+  This fix disables any external calls to the Sentry API for managing releases or uploading source maps, when detecting that the plugin is running in dev-mode. While this rarely actually happened,
+  it also polluted the dev server output with unnecessary logs about missing auth tokens, which shouldn't
+  be required in dev mode.
+
+## 3.1.0
+
+- feat(webpack): Gate forced process exit behind experimental flag (#663)
+
+## 3.0.0
+
+### Breaking Changes
+
+- Injected code will now use `let`, which was added in ES6 (ES2015).
+  This means that ES6 is the minimum JavaScript version that the Sentry bundler plugins support.
+
+- Deprecated options have been removed:
+  - `deleteFilesAfterUpload` - Use `filesToDeleteAfterUpload` instead
+  - `bundleSizeOptimizations.excludePerformanceMonitoring` - Use `bundleSizeOptimizations.excludeTracing` instead
+  - `_experiments.moduleMetadata` - Use `moduleMetadata` instead
+  - `cleanArtifacts` - Did not do anything
+
+### List of Changes
+
+- fix!: Wrap injected code in block-statement to contain scope (#646)
+- chore!: Remove deprecated options (#654)
+- feat(logger): Use console methods respective to log level (#652)
+- fix(webpack): Ensure process exits when done (#653)
+- fix: Use correct replacement matcher for `bundleSizeOptimizations.excludeTracing` (#644)
+
+Work in this release contributed by @jdelStrother. Thank you for your contribution!
+
+## 2.23.1
+
+- fix(v2/core): Make `moduleMetadata` injection code ES5-compliant (#773)
+
 ## 2.23.0
 
 - chore(deps): bump nanoid from 3.3.6 to 3.3.8 (#641)

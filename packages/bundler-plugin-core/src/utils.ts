@@ -311,63 +311,40 @@ export function generateGlobalInjectorCode({
 }: {
   release: string;
   injectBuildInformation: boolean;
-}) {
+}): string {
   // The code below is mostly ternary operators because it saves bundle size.
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
-  let code = `
-    var _global =
-      typeof window !== 'undefined' ?
-        window :
-        typeof global !== 'undefined' ?
-          global :
-          typeof globalThis !== 'undefined' ?
-            globalThis :
-            typeof self !== 'undefined' ?
-              self :
-              {};
+  let code = `!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{};`;
 
-    _global.SENTRY_RELEASE={id:${JSON.stringify(release)}};`;
+  code += `e.SENTRY_RELEASE={id:${JSON.stringify(release)}};`;
 
   if (injectBuildInformation) {
     const buildInfo = getBuildInformation();
 
-    code += `
-      _global.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)};`;
+    code += `e.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)};`;
   }
+
+  code += "}catch(e){}}();";
 
   return code;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function generateModuleMetadataInjectorCode(metadata: any) {
+export function generateModuleMetadataInjectorCode(metadata: any): string {
   // The code below is mostly ternary operators because it saves bundle size.
   // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
   // We are merging the metadata objects in case modules are bundled twice with the plugin
-  return `{
-  var _sentryModuleMetadataGlobal =
-    typeof window !== "undefined"
-      ? window
-      : typeof global !== "undefined"
-      ? global
-      : typeof globalThis !== "undefined"
-      ? globalThis
-      : typeof self !== "undefined"
-      ? self
-      : {};
-
-  _sentryModuleMetadataGlobal._sentryModuleMetadata =
-    _sentryModuleMetadataGlobal._sentryModuleMetadata || {};
-
-  _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack] =
-    Object.assign(
-      {},
-      _sentryModuleMetadataGlobal._sentryModuleMetadata[new _sentryModuleMetadataGlobal.Error().stack],
-      ${JSON.stringify(metadata)}
-    );
-}`;
+  // Use try-catch to avoid issues when bundlers rename global variables like 'window' to 'k'
+  return `!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{};e._sentryModuleMetadata=e._sentryModuleMetadata||{},e._sentryModuleMetadata[(new e.Error).stack]=function(e){for(var n=1;n<arguments.length;n++){var a=arguments[n];if(null!=a)for(var t in a)a.hasOwnProperty(t)&&(e[t]=a[t])}return e}({},e._sentryModuleMetadata[(new e.Error).stack],${JSON.stringify(
+    metadata
+  )})}catch(e){}}();`;
 }
 
-function getBuildInformation() {
+export function getBuildInformation(): {
+  deps: string[];
+  depsVersions: Record<string, number>;
+  nodeVersion: number | undefined;
+} {
   const packageJson = getPackageJson();
 
   const { deps, depsVersions } = packageJson
@@ -408,4 +385,11 @@ export function replaceBooleanFlagsInCode(
   }
 
   return null;
+}
+
+// https://turbo.build/repo/docs/reference/system-environment-variables#environment-variables-in-tasks
+export function getTurborepoEnvPassthroughWarning(envVarName: string): string {
+  return process.env["TURBO_HASH"]
+    ? `\nYou seem to be using Turborepo, did you forget to put ${envVarName} in \`passThroughEnv\`? https://turbo.build/repo/docs/reference/configuration#passthroughenv`
+    : "";
 }

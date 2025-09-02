@@ -16,7 +16,7 @@ createCjsBundles(
     telemetry: false,
     bundleSizeOptimizations: {
       excludeDebugStatements: true,
-      excludePerformanceMonitoring: true,
+      excludeTracing: true,
       excludeReplayCanvas: true,
       excludeReplayIframe: true,
       excludeReplayShadowDom: true,

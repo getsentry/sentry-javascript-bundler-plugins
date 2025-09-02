@@ -1,12 +1,90 @@
-import { Logger } from "./sentry/logger";
-import { Options as UserOptions } from "./types";
+import { Logger } from "./logger";
+import {
+  Options as UserOptions,
+  SetCommitsOptions,
+  RewriteSourcesHook,
+  ResolveSourceMapHook,
+  IncludeEntry,
+  ModuleMetadata,
+  ModuleMetadataCallback,
+} from "./types";
 import { determineReleaseName } from "./utils";
 
-export type NormalizedOptions = ReturnType<typeof normalizeUserOptions>;
+export type NormalizedOptions = {
+  org: string | undefined;
+  project: string | undefined;
+  authToken: string | undefined;
+  url: string;
+  headers: Record<string, string> | undefined;
+  debug: boolean;
+  silent: boolean;
+  errorHandler: ((err: Error) => void) | undefined;
+  telemetry: boolean;
+  disable: boolean;
+  sourcemaps:
+    | {
+        disable?: boolean | "disable-upload";
+        assets?: string | string[];
+        ignore?: string | string[];
+        rewriteSources?: RewriteSourcesHook;
+        resolveSourceMap?: ResolveSourceMapHook;
+        filesToDeleteAfterUpload?: string | string[] | Promise<string | string[] | undefined>;
+      }
+    | undefined;
+  release: {
+    name: string | undefined;
+    inject: boolean;
+    create: boolean;
+    finalize: boolean;
+    vcsRemote: string;
+    setCommits:
+      | (SetCommitsOptions & {
+          shouldNotThrowOnFailure?: boolean;
+        })
+      | false
+      | undefined;
+    dist?: string;
+    deploy?: {
+      env: string;
+      started?: number | string;
+      finished?: number | string;
+      time?: number;
+      name?: string;
+      url?: string;
+    };
+    uploadLegacySourcemaps?: string | IncludeEntry | Array<string | IncludeEntry>;
+  };
+  bundleSizeOptimizations:
+    | {
+        excludeDebugStatements?: boolean;
+        excludeTracing?: boolean;
+        excludeReplayCanvas?: boolean;
+        excludeReplayShadowDom?: boolean;
+        excludeReplayIframe?: boolean;
+        excludeReplayWorker?: boolean;
+      }
+    | undefined;
+  reactComponentAnnotation:
+    | {
+        enabled?: boolean;
+        ignoredComponents?: string[];
+      }
+    | undefined;
+  _metaOptions: {
+    telemetry: {
+      metaFramework: string | undefined;
+    };
+  };
+  applicationKey: string | undefined;
+  moduleMetadata: ModuleMetadata | ModuleMetadataCallback | undefined;
+  _experiments: {
+    injectBuildInformation?: boolean;
+  } & Record<string, unknown>;
+};
 
 export const SENTRY_SAAS_URL = "https://sentry.io";
 
-export function normalizeUserOptions(userOptions: UserOptions) {
+export function normalizeUserOptions(userOptions: UserOptions): NormalizedOptions {
   const options = {
     org: userOptions.org ?? process.env["SENTRY_ORG"],
     project: userOptions.project ?? process.env["SENTRY_PROJECT"],
@@ -26,6 +104,10 @@ export function normalizeUserOptions(userOptions: UserOptions) {
       create: userOptions.release?.create ?? true,
       finalize: userOptions.release?.finalize ?? true,
       vcsRemote: userOptions.release?.vcsRemote ?? process.env["SENTRY_VSC_REMOTE"] ?? "origin",
+      setCommits: userOptions.release?.setCommits as
+        | (SetCommitsOptions & { shouldNotThrowOnFailure?: boolean })
+        | false
+        | undefined,
     },
     bundleSizeOptimizations: userOptions.bundleSizeOptimizations,
     reactComponentAnnotation: userOptions.reactComponentAnnotation,
@@ -35,9 +117,49 @@ export function normalizeUserOptions(userOptions: UserOptions) {
       },
     },
     applicationKey: userOptions.applicationKey,
-    moduleMetadata: userOptions.moduleMetadata || userOptions._experiments?.moduleMetadata,
+    moduleMetadata: userOptions.moduleMetadata,
     _experiments: userOptions._experiments ?? {},
   };
+
+  if (options.release.setCommits === undefined) {
+    if (
+      process.env["VERCEL"] &&
+      process.env["VERCEL_GIT_COMMIT_SHA"] &&
+      process.env["VERCEL_GIT_REPO_SLUG"] &&
+      process.env["VERCEL_GIT_REPO_OWNER"] &&
+      // We only want to set commits for the production env because Sentry becomes extremely noisy (eg on slack) for
+      // preview environments because the previous commit is always the "stem" commit of the preview/PR causing Sentry
+      // to notify you for other people creating PRs.
+      process.env["VERCEL_TARGET_ENV"] === "production"
+    ) {
+      options.release.setCommits = {
+        shouldNotThrowOnFailure: true,
+        commit: process.env["VERCEL_GIT_COMMIT_SHA"],
+        previousCommit: process.env["VERCEL_GIT_PREVIOUS_SHA"],
+        repo: `${process.env["VERCEL_GIT_REPO_OWNER"]}/${process.env["VERCEL_GIT_REPO_SLUG"]}`,
+        ignoreEmpty: true,
+        ignoreMissing: true,
+      };
+    } else {
+      options.release.setCommits = {
+        shouldNotThrowOnFailure: true,
+        auto: true,
+        ignoreEmpty: true,
+        ignoreMissing: true,
+      };
+    }
+  }
+
+  if (
+    options.release.deploy === undefined &&
+    process.env["VERCEL"] &&
+    process.env["VERCEL_TARGET_ENV"]
+  ) {
+    options.release.deploy = {
+      env: `vercel-${process.env["VERCEL_TARGET_ENV"]}`,
+      url: process.env["VERCEL_URL"] ? `https://${process.env["VERCEL_URL"]}` : undefined,
+    };
+  }
 
   return options;
 }

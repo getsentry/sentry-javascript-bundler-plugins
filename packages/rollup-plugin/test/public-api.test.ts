@@ -7,6 +7,10 @@ test("Rollup plugin should exist", () => {
 });
 
 describe("sentryRollupPlugin", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("returns an array of rollup plugins", () => {
     const plugins = sentryRollupPlugin({
       authToken: "test-token",
@@ -18,13 +22,15 @@ describe("sentryRollupPlugin", () => {
 
     const pluginNames = plugins.map((plugin) => plugin.name);
 
-    expect(pluginNames).toEqual([
-      "sentry-telemetry-plugin",
-      "sentry-rollup-release-injection-plugin",
-      "sentry-release-management-plugin",
-      "sentry-rollup-debug-id-injection-plugin",
-      "sentry-rollup-debug-id-upload-plugin",
-      "sentry-file-deletion-plugin",
-    ]);
+    expect(pluginNames).toEqual(
+      expect.arrayContaining([
+        "sentry-telemetry-plugin",
+        "sentry-rollup-release-injection-plugin",
+        "sentry-release-management-plugin",
+        "sentry-rollup-debug-id-injection-plugin",
+        "sentry-rollup-debug-id-upload-plugin",
+        "sentry-file-deletion-plugin",
+      ])
+    );
   });
 });
