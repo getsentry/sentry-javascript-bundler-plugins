@@ -110,6 +110,86 @@ describe("normalizeUserOptions()", () => {
       expect(normalizeUserOptions(options).telemetry).toBe(true);
     }
   );
+
+  describe("Vercel deploy detection", () => {
+    const originalEnv = process.env;
+
+    beforeEach(() => {
+      process.env = { ...originalEnv };
+    });
+
+    afterEach(() => {
+      process.env = originalEnv;
+    });
+
+    test("should automatically create deploy config when Vercel env vars are present", () => {
+      process.env["VERCEL"] = "1";
+      process.env["VERCEL_TARGET_ENV"] = "production";
+      process.env["VERCEL_URL"] = "my-app.vercel.app";
+
+      const userOptions: Options = {
+        org: "my-org",
+        project: "my-project",
+        authToken: "my-auth-token",
+        release: { name: "my-release" },
+      };
+
+      const normalizedOptions = normalizeUserOptions(userOptions);
+      
+      expect(normalizedOptions.release.deploy).toEqual({
+        env: "vercel-production",
+        url: "https://my-app.vercel.app",
+      });
+    });
+
+    test("should not create deploy config when deploy is explicitly set to false", () => {
+      process.env["VERCEL"] = "1";
+      process.env["VERCEL_TARGET_ENV"] = "production";
+      process.env["VERCEL_URL"] = "my-app.vercel.app";
+
+      const userOptions: Options = {
+        org: "my-org",
+        project: "my-project",
+        authToken: "my-auth-token",
+        release: { name: "my-release", deploy: false },
+      };
+
+      const normalizedOptions = normalizeUserOptions(userOptions);
+      
+      expect(normalizedOptions.release.deploy).toBe(false);
+    });
+
+    test("should not override manually provided deploy config", () => {
+      process.env["VERCEL"] = "1";
+      process.env["VERCEL_TARGET_ENV"] = "production";
+      process.env["VERCEL_URL"] = "my-app.vercel.app";
+
+      const manualDeployConfig = { env: "custom-env", name: "custom-deploy" };
+      const userOptions: Options = {
+        org: "my-org",
+        project: "my-project",
+        authToken: "my-auth-token",
+        release: { name: "my-release", deploy: manualDeployConfig },
+      };
+
+      const normalizedOptions = normalizeUserOptions(userOptions);
+      
+      expect(normalizedOptions.release.deploy).toEqual(manualDeployConfig);
+    });
+
+    test("should not create deploy config when Vercel env vars are missing", () => {
+      const userOptions: Options = {
+        org: "my-org",
+        project: "my-project",
+        authToken: "my-auth-token",
+        release: { name: "my-release" },
+      };
+
+      const normalizedOptions = normalizeUserOptions(userOptions);
+      
+      expect(normalizedOptions.release.deploy).toBeUndefined();
+    });
+  });
 });
 
 describe("validateOptions", () => {
@@ -164,7 +244,14 @@ describe("validateOptions", () => {
   });
 
   it("should return `true` if `deploy`is set and `env` is provided", () => {
-    const options = { deploy: { env: "my-env" } } as Partial<NormalizedOptions>;
+    const options = { release: { deploy: { env: "my-env" } } } as Partial<NormalizedOptions>;
+
+    expect(validateOptions(options as unknown as NormalizedOptions, mockedLogger)).toBe(true);
+    expect(mockedLogger.error).not.toHaveBeenCalled();
+  });
+
+  it("should return `true` if `deploy` is set to `false`", () => {
+    const options = { release: { deploy: false } } as Partial<NormalizedOptions>;
 
     expect(validateOptions(options as unknown as NormalizedOptions, mockedLogger)).toBe(true);
     expect(mockedLogger.error).not.toHaveBeenCalled();
