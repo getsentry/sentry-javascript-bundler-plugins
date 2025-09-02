@@ -135,7 +135,7 @@ describe("normalizeUserOptions()", () => {
       };
 
       const normalizedOptions = normalizeUserOptions(userOptions);
-      
+
       expect(normalizedOptions.release.deploy).toEqual({
         env: "vercel-production",
         url: "https://my-app.vercel.app",
@@ -155,7 +155,7 @@ describe("normalizeUserOptions()", () => {
       };
 
       const normalizedOptions = normalizeUserOptions(userOptions);
-      
+
       expect(normalizedOptions.release.deploy).toBe(false);
     });
 
@@ -173,7 +173,7 @@ describe("normalizeUserOptions()", () => {
       };
 
       const normalizedOptions = normalizeUserOptions(userOptions);
-      
+
       expect(normalizedOptions.release.deploy).toEqual(manualDeployConfig);
     });
 
@@ -186,7 +186,7 @@ describe("normalizeUserOptions()", () => {
       };
 
       const normalizedOptions = normalizeUserOptions(userOptions);
-      
+
       expect(normalizedOptions.release.deploy).toBeUndefined();
     });
   });

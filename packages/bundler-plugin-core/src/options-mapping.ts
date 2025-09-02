@@ -44,14 +44,16 @@ export type NormalizedOptions = {
       | false
       | undefined;
     dist?: string;
-    deploy?: {
-      env: string;
-      started?: number | string;
-      finished?: number | string;
-      time?: number;
-      name?: string;
-      url?: string;
-    } | false;
+    deploy?:
+      | {
+          env: string;
+          started?: number | string;
+          finished?: number | string;
+          time?: number;
+          name?: string;
+          url?: string;
+        }
+      | false;
     uploadLegacySourcemaps?: string | IncludeEntry | Array<string | IncludeEntry>;
   };
   bundleSizeOptimizations:
@@ -195,7 +197,11 @@ export function validateOptions(options: NormalizedOptions, logger: Logger): boo
     }
   }
 
-  if (options.release?.deploy && typeof options.release.deploy === "object" && !options.release.deploy.env) {
+  if (
+    options.release?.deploy &&
+    typeof options.release.deploy === "object" &&
+    !options.release.deploy.env
+  ) {
     logger.error(
       "The `deploy` option was specified but is missing the required `env` property.",
       "Please set the `env` property."
