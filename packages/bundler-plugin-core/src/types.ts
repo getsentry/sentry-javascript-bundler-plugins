@@ -21,7 +21,7 @@ export interface Options {
    *
    * @see https://docs.sentry.io/product/accounts/auth-tokens/#organization-auth-tokens
    */
-  authToken?: string;
+  authToken?: string | undefined;
 
   /**
    * The base URL of your Sentry instance. Use this if you are using a self-hosted
