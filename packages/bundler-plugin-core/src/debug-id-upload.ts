@@ -15,7 +15,10 @@ export function createDebugIdUploadFunction({
   sentryBuildPluginManager,
 }: DebugIdUploadPluginOptions) {
   return async (buildArtifactPaths: string[]) => {
-    await sentryBuildPluginManager.uploadSourcemaps(buildArtifactPaths);
+    // Webpack and perhaps other bundlers allow you to append query strings to
+    // filenames for cache busting purposes. We should strip these before upload.
+    const cleanedPaths = buildArtifactPaths.map((p) => p.split("?")[0] || p);
+    await sentryBuildPluginManager.uploadSourcemaps(cleanedPaths);
   };
 }
 

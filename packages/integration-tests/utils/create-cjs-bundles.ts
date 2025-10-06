@@ -77,6 +77,7 @@ export function createCjsBundles(
         output: {
           path: path.join(outFolder, "webpack4"),
           libraryTarget: "commonjs",
+          filename: "[name].js?[contenthash]",
         },
         target: "node", // needed for webpack 4 so we can access node api
         plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
