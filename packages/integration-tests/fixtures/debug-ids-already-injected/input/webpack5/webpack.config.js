@@ -12,9 +12,9 @@ console.log({
 export default {
   devtool: "source-map-debugids",
   cache: false,
-  entry: { index: join(__dirname, "..", "bundle.js") },
+  entry: { index: posix.join(__dirname, "..", "bundle.js") },
   output: {
-    path: join(__dirname, "..", "..", "out", "webpack5"),
+    path: posix.join(__dirname, "..", "..", "out", "webpack5"),
     library: {
       type: "commonjs",
     },
