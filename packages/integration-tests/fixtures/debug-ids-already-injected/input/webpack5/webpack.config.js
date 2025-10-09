@@ -1,9 +1,9 @@
 import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
-import { join, posix, basename } from "path";
+import { join, posix, dirname } from "path";
 import { fileURLToPath } from "url";
 import { existsSync } from "fs";
 
-const __dirname = basename(fileURLToPath(import.meta.url));
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 console.log({
   __dirname,
