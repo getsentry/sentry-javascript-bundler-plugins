@@ -7,18 +7,18 @@ const __dirname = new URL(".", import.meta.url).pathname;
 
 console.log({
   __dirname,
-  input: join(__dirname, "bundle.js"),
+  input: "./bundle.js",
   existsInput: existsSync(join(__dirname, "bundle.js")),
   existsInputPosix: existsSync(posix.join(__dirname, "bundle.js")),
   existsInputDumb: existsSync(`${__dirname}/bundle.js`),
   outputPath: join(__dirname, "..", "..", "out", "rollup4"),
-  allFilesInDirname: readdirSync(join(__dirname, ".")),
+  // allFilesInDirname: readdirSync(join(__dirname, ".")),
 });
 
 export default defineConfig({
-  input: { index: `${__dirname}/bundle.js` },
+  input: { index: "./bundle.js" },
   output: {
-    dir: join(__dirname, "..", "..", "out", "rollup4"),
+    dir: join("..", "..", "out", "rollup4"),
     sourcemap: true,
     sourcemapDebugIds: true,
   },
