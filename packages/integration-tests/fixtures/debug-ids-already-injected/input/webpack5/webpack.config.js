@@ -2,7 +2,7 @@ import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
 import { join, posix } from "path";
 import { fileURLToPath } from "url";
 
-const __dirname = fileURLToPath(new URL(".", import.meta.url));
+const __dirname = fileURLToPath(import.meta.url);
 
 console.log({
   __dirname,
