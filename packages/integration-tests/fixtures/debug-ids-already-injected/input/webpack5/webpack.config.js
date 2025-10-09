@@ -1,11 +1,13 @@
 import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
 import { join, posix } from "path";
 import { fileURLToPath } from "url";
+import { existsSync } from "fs";
 
 const __dirname = fileURLToPath(import.meta.url);
 
 console.log({
   __dirname,
+  existsDirname: existsSync(__dirname),
   posixInput: posix.join(__dirname, "..", "bundle.js"),
   input: join(__dirname, "..", "bundle.js"),
   outputPath: posix.join(__dirname, "..", "..", "out", "webpack5"),
@@ -14,9 +16,9 @@ console.log({
 export default {
   devtool: "source-map-debugids",
   cache: false,
-  entry: { index: posix.join(__dirname, "..", "bundle.js") },
+  entry: { index: join(__dirname, "..", "bundle.js") },
   output: {
-    path: posix.join(__dirname, "..", "..", "out", "webpack5"),
+    path: join(__dirname, "..", "..", "out", "webpack5"),
     library: {
       type: "commonjs",
     },
