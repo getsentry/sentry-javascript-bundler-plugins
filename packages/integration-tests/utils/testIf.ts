@@ -21,6 +21,8 @@ export const testIfNodeMajorVersionIsLessThan18: jest.It = function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
 
+console.log("xx NODE_MAJOR_VERSION", NODE_MAJOR_VERSION);
+
 // eslint-disable-next-line no-undef
 export const describeNode18Plus: jest.Describe =
   // eslint-disable-next-line no-undef
