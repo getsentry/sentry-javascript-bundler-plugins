@@ -8,15 +8,15 @@ const __dirname = fileURLToPath(import.meta.url);
 console.log({
   __dirname,
   existsDirname: existsSync(__dirname),
-  posixInput: posix.join(__dirname, "..", "bundle.js"),
-  input: join(__dirname, "..", "bundle.js"),
-  outputPath: posix.join(__dirname, "..", "..", "out", "webpack5"),
+  posixInput: posix.join(__dirname, "bundle.js"),
+  input: join(__dirname, "bundle.js"),
+  outputPath: posix.join(__dirname, "..", "out", "webpack5"),
 });
 
 export default {
   devtool: "source-map-debugids",
   cache: false,
-  entry: { index: join(__dirname, "..", "bundle.js") },
+  entry: { index: join(__dirname, "bundle.js") },
   output: {
     path: join(__dirname, "..", "..", "out", "webpack5"),
     library: {
