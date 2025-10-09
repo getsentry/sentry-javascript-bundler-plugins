@@ -22,9 +22,9 @@ export const testIfNodeMajorVersionIsLessThan18: jest.It = function () {
 } as any;
 
 // eslint-disable-next-line no-undef
-export function describeNode18Plus(): jest.Describe {
+export const describeNode18Plus: jest.Describe = function () {
   // eslint-disable-next-line no-undef
   console.log({ NODE_MAJOR_VERSION, describe, describeSkip: describe.skip });
   // eslint-disable-next-line no-undef
   return NODE_MAJOR_VERSION >= 18 ? describe : describe.skip;
-}
+};
