@@ -1,6 +1,6 @@
 import { defineConfig } from "rollup";
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
-import { join } from "path";
+import { join, posix } from "path";
 import { existsSync } from "fs";
 
 const __dirname = new URL(".", import.meta.url).pathname;
@@ -9,11 +9,13 @@ console.log({
   __dirname,
   input: join(__dirname, "bundle.js"),
   existsInput: existsSync(join(__dirname, "bundle.js")),
+  existsInputPosix: existsSync(posix.join(__dirname, "bundle.js")),
+  existsInputDumb: existsSync(`${__dirname}/bundle.js`),
   outputPath: join(__dirname, "..", "..", "out", "rollup4"),
 });
 
 export default defineConfig({
-  input: { index: join(__dirname, "bundle.js") },
+  input: { index: `${__dirname}/bundle.js` },
   output: {
     dir: join(__dirname, "..", "..", "out", "rollup4"),
     sourcemap: true,
