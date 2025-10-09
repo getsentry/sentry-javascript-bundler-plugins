@@ -8,12 +8,14 @@ console.log({
   __dirname,
   posixInput: posix.join(__dirname, "..", "bundle.js"),
   input: join(__dirname, "..", "bundle.js"),
+  outputPath: join(__dirname, "..", "..", "out", "rollup4"),
+  posixOutputPath: posix.join(__dirname, "..", "..", "out", "rollup4"),
 });
 
 export default defineConfig({
-  input: { index: join(__dirname, "..", "bundle.js") },
+  input: { index: posix.join(__dirname, "..", "bundle.js") },
   output: {
-    dir: join(__dirname, "..", "..", "out", "rollup4"),
+    dir: posix.join(__dirname, "..", "..", "out", "rollup4"),
     sourcemap: true,
     sourcemapDebugIds: true,
   },

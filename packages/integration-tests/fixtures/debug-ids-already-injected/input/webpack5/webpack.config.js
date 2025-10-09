@@ -7,6 +7,7 @@ console.log({
   __dirname,
   posixInput: posix.join(__dirname, "..", "bundle.js"),
   input: join(__dirname, "..", "bundle.js"),
+  outputPath: posix.join(__dirname, "..", "..", "out", "webpack5"),
 });
 
 export default {
