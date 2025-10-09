@@ -6,6 +6,7 @@ import { promisify } from "util";
 import { SentryBuildPluginManager } from "./build-plugin-manager";
 import { Logger } from "./logger";
 import { ResolveSourceMapHook, RewriteSourcesHook } from "./types";
+import { stripQueryAndHashFromPath } from "./utils";
 
 interface DebugIdUploadPluginOptions {
   sentryBuildPluginManager: SentryBuildPluginManager;
@@ -15,7 +16,10 @@ export function createDebugIdUploadFunction({
   sentryBuildPluginManager,
 }: DebugIdUploadPluginOptions) {
   return async (buildArtifactPaths: string[]) => {
-    await sentryBuildPluginManager.uploadSourcemaps(buildArtifactPaths);
+    // Webpack and perhaps other bundlers allow you to append query strings to
+    // filenames for cache busting purposes. We should strip these before upload.
+    const cleanedPaths = buildArtifactPaths.map(stripQueryAndHashFromPath);
+    await sentryBuildPluginManager.uploadSourcemaps(cleanedPaths);
   };
 }
 
