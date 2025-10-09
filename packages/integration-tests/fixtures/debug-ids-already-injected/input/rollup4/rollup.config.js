@@ -12,7 +12,7 @@ console.log({
   existsInputPosix: existsSync(posix.join(__dirname, "bundle.js")),
   existsInputDumb: existsSync(`${__dirname}/bundle.js`),
   outputPath: join(__dirname, "..", "..", "out", "rollup4"),
-  allFilesInDirname: readdirSync(__dirname),
+  allFilesInDirname: readdirSync(join(__dirname, ".")),
 });
 
 export default defineConfig({
