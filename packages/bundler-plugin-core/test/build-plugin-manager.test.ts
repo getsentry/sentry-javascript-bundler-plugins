@@ -44,6 +44,153 @@ const mockPrepareBundleForDebugIdUpload = prepareBundleForDebugIdUpload as jest.
 describe("createSentryBuildPluginManager", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Clean up environment variables
+    delete process.env["SENTRY_LOG_LEVEL"];
+  });
+
+  describe("debug option", () => {
+    it("should set SENTRY_LOG_LEVEL environment variable when debug is true", () => {
+      createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+          debug: true,
+        },
+        {
+          buildTool: "webpack",
+          loggerPrefix: "[sentry-webpack-plugin]",
+        }
+      );
+
+      expect(process.env["SENTRY_LOG_LEVEL"]).toBe("debug");
+    });
+
+    it("should not set SENTRY_LOG_LEVEL environment variable when debug is false", () => {
+      createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+          debug: false,
+        },
+        {
+          buildTool: "webpack",
+          loggerPrefix: "[sentry-webpack-plugin]",
+        }
+      );
+
+      expect(process.env["SENTRY_LOG_LEVEL"]).toBeUndefined();
+    });
+
+    it("should not set SENTRY_LOG_LEVEL environment variable when debug is not specified", () => {
+      createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+        },
+        {
+          buildTool: "webpack",
+          loggerPrefix: "[sentry-webpack-plugin]",
+        }
+      );
+
+      expect(process.env["SENTRY_LOG_LEVEL"]).toBeUndefined();
+    });
+
+    it("should have SENTRY_LOG_LEVEL set when CLI operations are performed with debug enabled", async () => {
+      mockCliExecute.mockImplementation(() => {
+        // Verify the environment variable is set at the time the CLI is called
+        expect(process.env["SENTRY_LOG_LEVEL"]).toBe("debug");
+        return Promise.resolve(undefined);
+      });
+
+      const buildPluginManager = createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+          debug: true,
+        },
+        {
+          buildTool: "webpack",
+          loggerPrefix: "[sentry-webpack-plugin]",
+        }
+      );
+
+      // Verify it's set immediately after creation
+      expect(process.env["SENTRY_LOG_LEVEL"]).toBe("debug");
+
+      // Perform a CLI operation and verify the env var is still set
+      await buildPluginManager.injectDebugIds(["/path/to/bundle"]);
+
+      expect(mockCliExecute).toHaveBeenCalled();
+    });
+
+    it("should have SENTRY_LOG_LEVEL set during error scenarios with debug enabled", async () => {
+      // Simulate CLI error
+      mockCliExecute.mockImplementation(() => {
+        // Verify the environment variable is set even when CLI encounters an error
+        // This ensures the CLI won't emit the "Add --log-level=debug" warning
+        expect(process.env["SENTRY_LOG_LEVEL"]).toBe("debug");
+        return Promise.reject(new Error("CLI error"));
+      });
+
+      const buildPluginManager = createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+          debug: true,
+        },
+        {
+          buildTool: "webpack",
+          loggerPrefix: "[sentry-webpack-plugin]",
+        }
+      );
+
+      // Verify it's set before the error
+      expect(process.env["SENTRY_LOG_LEVEL"]).toBe("debug");
+
+      // Perform a CLI operation that will fail
+      await buildPluginManager.injectDebugIds(["/path/to/bundle"]);
+
+      // The error should have been caught, but env var should still be set
+      expect(process.env["SENTRY_LOG_LEVEL"]).toBe("debug");
+    });
+
+    it("should NOT have SENTRY_LOG_LEVEL set during error scenarios when debug is disabled", async () => {
+      // Simulate CLI error
+      mockCliExecute.mockImplementation(() => {
+        // Verify the environment variable is NOT set
+        // In this case, the CLI WOULD emit the "Add --log-level=debug" warning
+        expect(process.env["SENTRY_LOG_LEVEL"]).toBeUndefined();
+        return Promise.reject(new Error("CLI error"));
+      });
+
+      const buildPluginManager = createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+          debug: false,
+        },
+        {
+          buildTool: "webpack",
+          loggerPrefix: "[sentry-webpack-plugin]",
+        }
+      );
+
+      // Verify it's not set
+      expect(process.env["SENTRY_LOG_LEVEL"]).toBeUndefined();
+
+      // Perform a CLI operation that will fail
+      await buildPluginManager.injectDebugIds(["/path/to/bundle"]);
+
+      // The error should have been caught, and env var should still not be set
+      expect(process.env["SENTRY_LOG_LEVEL"]).toBeUndefined();
+    });
   });
 
   describe("when disabled", () => {

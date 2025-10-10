@@ -220,6 +220,11 @@ export function createSentryBuildPluginManager(
     "SENTRY_PIPELINE"
   ] = `${bundlerPluginMetaContext.buildTool}-plugin/${__PACKAGE_VERSION__}`;
 
+  // Propagate debug flag to Sentry CLI via environment variable
+  if (options.debug) {
+    process.env["SENTRY_LOG_LEVEL"] = "debug";
+  }
+
   // Not a bulletproof check but should be good enough to at least sometimes determine
   // if the plugin is called in dev/watch mode or for a  prod build. The important part
   // here is to avoid a false positive. False negatives are okay.
