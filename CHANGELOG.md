@@ -4,6 +4,13 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 4.4.0
+
+- feat(core): Explicitly allow `undefined` as value for `authToken` option ([#805](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/805))
+- fix(core): Strip query strings from asset paths ([#806](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/806))
+
+Work in this release was contributed by @aiktb. Thank you for your contribution!
+
 ## 4.3.0
 
 - feat(core): Extend deploy option to allow opting out of automatic deploy creation ([#801](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/801))
