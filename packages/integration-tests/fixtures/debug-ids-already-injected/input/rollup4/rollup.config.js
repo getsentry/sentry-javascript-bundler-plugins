@@ -1,8 +1,9 @@
 import { defineConfig } from "rollup";
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
-const __dirname = new URL(".", import.meta.url).pathname;
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   input: { index: join(__dirname, "..", "bundle.js") },

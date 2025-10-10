@@ -56,13 +56,13 @@ describeNode18Plus("vite 6 bundle", () => {
 });
 
 describeNode18Plus("webpack 5 bundle", () => {
-  const viteRoot = path.join(__dirname, "input", "webpack5");
+  const webpackRoot = path.join(__dirname, "input", "webpack5");
   const tempDir = createTempDir();
 
   beforeEach(() => {
-    execSync("yarn install", { cwd: viteRoot, stdio: "inherit" });
+    execSync("yarn install", { cwd: webpackRoot, stdio: "inherit" });
     execSync("yarn webpack build", {
-      cwd: viteRoot,
+      cwd: webpackRoot,
       stdio: "inherit",
       env: { ...process.env, SENTRY_TEST_OVERRIDE_TEMP_DIR: tempDir },
     });
@@ -81,13 +81,13 @@ describeNode18Plus("webpack 5 bundle", () => {
 });
 
 describeNode18Plus("rollup bundle", () => {
-  const viteRoot = path.join(__dirname, "input", "rollup4");
+  const rollupRoot = path.join(__dirname, "input", "rollup4");
   const tempDir = createTempDir();
 
   beforeEach(() => {
-    execSync("yarn install", { cwd: viteRoot, stdio: "inherit" });
+    execSync("yarn install", { cwd: rollupRoot, stdio: "inherit" });
     execSync("yarn rollup --config rollup.config.js", {
-      cwd: viteRoot,
+      cwd: rollupRoot,
       stdio: "inherit",
       env: { ...process.env, SENTRY_TEST_OVERRIDE_TEMP_DIR: tempDir },
     });
