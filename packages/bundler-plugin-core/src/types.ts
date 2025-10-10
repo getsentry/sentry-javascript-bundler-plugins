@@ -42,6 +42,10 @@ export interface Options {
    * Enable debug information logs during build-time.
    * Enabling this will give you, for example, logs about source maps.
    *
+   * This option also propagates the debug flag to the Sentry CLI by setting
+   * the `SENTRY_LOG_LEVEL` environment variable to `"debug"` if it's not already set.
+   * If you have explicitly set `SENTRY_LOG_LEVEL`, this option will be ignored.
+   *
    * @default false
    */
   debug?: boolean;
