@@ -66,6 +66,27 @@ describe("createSentryBuildPluginManager", () => {
       expect(process.env["SENTRY_LOG_LEVEL"]).toBe("debug");
     });
 
+    it("should NOT override existing SENTRY_LOG_LEVEL even when debug is true", () => {
+      // User explicitly set SENTRY_LOG_LEVEL to "info"
+      process.env["SENTRY_LOG_LEVEL"] = "info";
+
+      createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+          debug: true,
+        },
+        {
+          buildTool: "webpack",
+          loggerPrefix: "[sentry-webpack-plugin]",
+        }
+      );
+
+      // Should respect the user's explicit setting
+      expect(process.env["SENTRY_LOG_LEVEL"]).toBe("info");
+    });
+
     it("should not set SENTRY_LOG_LEVEL environment variable when debug is false", () => {
       createSentryBuildPluginManager(
         {

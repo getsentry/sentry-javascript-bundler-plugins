@@ -221,7 +221,8 @@ export function createSentryBuildPluginManager(
   ] = `${bundlerPluginMetaContext.buildTool}-plugin/${__PACKAGE_VERSION__}`;
 
   // Propagate debug flag to Sentry CLI via environment variable
-  if (options.debug) {
+  // Only set if not already defined to respect user's explicit configuration
+  if (options.debug && !process.env["SENTRY_LOG_LEVEL"]) {
     process.env["SENTRY_LOG_LEVEL"] = "debug";
   }
 
