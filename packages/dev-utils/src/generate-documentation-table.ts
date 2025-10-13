@@ -41,7 +41,7 @@ const options: OptionDocumentation[] = [
     name: "debug",
     type: "boolean",
     fullDescription:
-      "Enable debug information logs during build-time. Enabling this will give you, for example, logs about source maps. Defaults to `false`.",
+      'Enable debug information logs during build-time. Enabling this will give you, for example, logs about source maps. This option also propagates the debug flag to the Sentry CLI by setting the `SENTRY_LOG_LEVEL` environment variable to `"debug"` if it\'s not already set. If you have explicitly set `SENTRY_LOG_LEVEL`, this option will be ignored. Defaults to `false`.',
   },
   {
     name: "silent",
@@ -114,7 +114,7 @@ urls and absolute/relative paths). If that path doesn't exist, it then looks for
 
 Note: This is mostly helpful for complex builds with custom source map generation. For example, if you put source
 maps into a separate directory and rewrite the \`//# sourceMappingURL=\` comment to something other than a relative
-directory, sentry will be unable to locate the source maps for a given build artifact. This hook allows you to 
+directory, sentry will be unable to locate the source maps for a given build artifact. This hook allows you to
 implement the resolution process yourself.
 
 Use the \`debug\` option to print information about source map resolution.
