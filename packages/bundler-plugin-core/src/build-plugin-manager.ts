@@ -750,14 +750,19 @@ export function createSentryBuildPluginManager(
             handleRecoverableError(e, false);
           } finally {
             if (folderToCleanUp && !process.env?.["SENTRY_TEST_OVERRIDE_TEMP_DIR"]) {
+              logger.debug("Cleaning up temporary files...");
               void startSpan({ name: "cleanup", scope: sentryScope }, async () => {
                 if (folderToCleanUp) {
                   await fs.promises.rm(folderToCleanUp, { recursive: true, force: true });
+                  logger.debug(`Temporary folder deleted: ${folderToCleanUp}`);
                 }
               });
             }
+            logger.debug("Freeing upload dependencies...");
             freeUploadDependencyOnBuildArtifacts();
+            logger.debug("Flushing telemetry data...");
             await safeFlushTelemetry(sentryClient);
+            logger.debug("Telemetry flushed. Plugin upload process complete.");
           }
         }
       );
