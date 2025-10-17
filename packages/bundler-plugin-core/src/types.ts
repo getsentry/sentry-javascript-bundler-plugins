@@ -9,9 +9,13 @@ export interface Options {
   /**
    * The slug of the Sentry project associated with the app.
    *
+   * When uploading source maps, you can specify multiple projects (as an array) to upload
+   * the same source maps to multiple projects. This is useful in monorepo environments
+   * where multiple projects share the same release.
+   *
    * This value can also be specified via the `SENTRY_PROJECT` environment variable.
    */
-  project?: string;
+  project?: string | string[];
 
   /**
    * The authentication token to use for all communication with Sentry.
@@ -361,7 +365,8 @@ export interface Options {
    * Metadata can either be passed directly or alternatively a callback can be provided that will be
    * called with the following parameters:
    * - `org`: The organization slug.
-   * - `project`: The project slug.
+   * - `project`: The project slug (when multiple projects are configured, this is the first project).
+   * - `projects`: An array of all project slugs (available when multiple projects are configured).
    * - `release`: The release name.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -428,6 +433,7 @@ export interface ModuleMetadata {
 export interface ModuleMetadataCallbackArgs {
   org?: string;
   project?: string;
+  projects?: string[];
   release?: string;
 }
 

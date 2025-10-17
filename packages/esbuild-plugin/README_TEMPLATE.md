@@ -53,6 +53,31 @@ require("esbuild").build({
 });
 ```
 
+### Multi-Project Configuration
+
+If you want to upload the same source maps to multiple Sentry projects:
+
+```js
+// esbuild.config.js
+const { sentryEsbuildPlugin } = require("@sentry/esbuild-plugin");
+
+require("esbuild").build({
+  sourcemap: true,
+  plugins: [
+    sentryEsbuildPlugin({
+      org: process.env.SENTRY_ORG,
+      project: ["frontend-team-a", "frontend-team-b", "frontend-team-c"],
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+    }),
+  ],
+});
+```
+
+Or via environment variable:
+```bash
+SENTRY_PROJECT=frontend-team-a,frontend-team-b,frontend-team-c
+```
+
 #OPTIONS_SECTION_INSERT#
 
 ### Configuration File

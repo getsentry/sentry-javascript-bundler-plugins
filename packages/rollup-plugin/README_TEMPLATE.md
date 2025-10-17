@@ -55,6 +55,33 @@ export default {
 };
 ```
 
+### Multi-Project Configuration
+
+If you want to upload the same source maps to multiple Sentry projects:
+
+```js
+// rollup.config.js
+import { sentryRollupPlugin } from "@sentry/rollup-plugin";
+
+export default {
+  plugins: [
+    sentryRollupPlugin({
+      org: process.env.SENTRY_ORG,
+      project: ["frontend-team-a", "frontend-team-b", "frontend-team-c"],
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+    }),
+  ],
+  output: {
+    sourcemap: true,
+  },
+};
+```
+
+Or via environment variable:
+```bash
+SENTRY_PROJECT=frontend-team-a,frontend-team-b,frontend-team-c
+```
+
 #OPTIONS_SECTION_INSERT#
 
 ### Configuration File

@@ -94,7 +94,8 @@ function createCliInstance(options: NormalizedOptions): SentryCli {
   return new SentryCli(null, {
     authToken: options.authToken,
     org: options.org,
-    project: options.project,
+    // Default to the first project if multiple projects are specified
+    project: Array.isArray(options.project) ? options.project[0] : options.project,
     silent: options.silent,
     url: options.url,
     vcsRemote: options.release.vcsRemote,
@@ -360,7 +361,12 @@ export function createSentryBuildPluginManager(
     if (typeof options.moduleMetadata === "function") {
       const args = {
         org: options.org,
-        project: options.project,
+        project: Array.isArray(options.project) ? options.project[0] : options.project,
+        projects: Array.isArray(options.project)
+          ? options.project
+          : options.project
+          ? [options.project]
+          : undefined,
         release: options.release.name,
       };
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -444,7 +450,10 @@ export function createSentryBuildPluginManager(
             getTurborepoEnvPassthroughWarning("SENTRY_ORG")
         );
         return;
-      } else if (!options.project) {
+      } else if (
+        !options.project ||
+        (Array.isArray(options.project) && options.project.length === 0)
+      ) {
         logger.warn(
           "No project provided. Will not create release. Please set the `project` option to your Sentry project slug." +
             getTurborepoEnvPassthroughWarning("SENTRY_PROJECT")
@@ -481,6 +490,9 @@ export function createSentryBuildPluginManager(
           await cliInstance.releases.uploadSourceMaps(options.release.name, {
             include: normalizedInclude,
             dist: options.release.dist,
+            // @ts-expect-error - projects is not a valid option for uploadSourceMaps but is implemented in the CLI
+            // Remove once https://github.com/getsentry/sentry-cli/pull/2856 is released
+            projects: Array.isArray(options.project) ? options.project : [options.project],
             // We want this promise to throw if the sourcemaps fail to upload so that we know about it.
             // see: https://github.com/getsentry/sentry-cli/pull/2605
             live: "rejectOnError",
@@ -625,6 +637,9 @@ export function createSentryBuildPluginManager(
                     },
                   ],
                   ignore: ignorePaths,
+                  // @ts-expect-error - projects is not a valid option for uploadSourceMaps but is implemented in the CLI
+                  // Remove once https://github.com/getsentry/sentry-cli/pull/2856 is released
+                  projects: Array.isArray(options.project) ? options.project : [options.project],
                   live: "rejectOnError",
                 });
               });
@@ -735,6 +750,11 @@ export function createSentryBuildPluginManager(
                               dist: options.release.dist,
                             },
                           ],
+                          // @ts-expect-error - projects is not a valid option for uploadSourceMaps but is implemented in the CLI
+                          // Remove once https://github.com/getsentry/sentry-cli/pull/2856 is released
+                          projects: Array.isArray(options.project)
+                            ? options.project
+                            : [options.project],
                           live: "rejectOnError",
                         }
                       );
@@ -843,7 +863,7 @@ function canUploadSourceMaps(
     );
     return false;
   }
-  if (!options.project) {
+  if (!options.project || (Array.isArray(options.project) && options.project.length === 0)) {
     logger.warn(
       "No project provided. Will not upload source maps. Please set the `project` option to your Sentry project slug." +
         getTurborepoEnvPassthroughWarning("SENTRY_PROJECT")

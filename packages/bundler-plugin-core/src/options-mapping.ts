@@ -12,7 +12,7 @@ import { determineReleaseName } from "./utils";
 
 export type NormalizedOptions = {
   org: string | undefined;
-  project: string | undefined;
+  project: string | string[] | undefined;
   authToken: string | undefined;
   url: string;
   headers: Record<string, string> | undefined;
@@ -89,7 +89,9 @@ export const SENTRY_SAAS_URL = "https://sentry.io";
 export function normalizeUserOptions(userOptions: UserOptions): NormalizedOptions {
   const options = {
     org: userOptions.org ?? process.env["SENTRY_ORG"],
-    project: userOptions.project ?? process.env["SENTRY_PROJECT"],
+    project: userOptions.project ?? (process.env["SENTRY_PROJECT"]?.includes(',')
+      ? process.env["SENTRY_PROJECT"].split(',').map(p => p.trim())
+      : process.env["SENTRY_PROJECT"]),
     authToken: userOptions.authToken ?? process.env["SENTRY_AUTH_TOKEN"],
     url: userOptions.url ?? process.env["SENTRY_URL"] ?? SENTRY_SAAS_URL,
     headers: userOptions.headers,
@@ -207,6 +209,27 @@ export function validateOptions(options: NormalizedOptions, logger: Logger): boo
       "Please set the `env` property."
     );
     return false;
+  }
+
+  if (options.project) {
+    if (Array.isArray(options.project)) {
+      if (options.project.length === 0) {
+        logger.error(
+          "The `project` option was specified as an array but is empty.",
+          "Please provide at least one project slug."
+        );
+        return false;
+      }
+      // Check each project is a non-empty string
+      const invalidProjects = options.project.filter(p => typeof p !== 'string' || p.trim() === '');
+      if (invalidProjects.length > 0) {
+        logger.error(
+          "The `project` option contains invalid project slugs.",
+          "All projects must be non-empty strings."
+        );
+        return false;
+      }
+    }
   }
 
   return true;

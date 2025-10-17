@@ -106,7 +106,7 @@ export function setTelemetryDataOnScope(
 
   scope.setTags({
     organization: org,
-    project,
+    project: Array.isArray(project) ? project.join(", ") : project ?? "undefined",
     bundler: buildTool,
   });
 
@@ -129,7 +129,7 @@ export async function allowedToSendTelemetry(options: NormalizedOptions): Promis
     url,
     authToken,
     org,
-    project,
+    project: Array.isArray(project) ? project[0] : project,
     vcsRemote: release.vcsRemote,
     silent,
     headers,

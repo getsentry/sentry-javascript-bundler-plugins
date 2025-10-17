@@ -408,6 +408,7 @@ describe("createSentryBuildPluginManager", () => {
       // Should upload from temp folder
       expect(mockCliUploadSourceMaps).toHaveBeenCalledWith("some-release-name", {
         include: [{ paths: ["/tmp/sentry-upload-xyz"], rewrite: false, dist: "1" }],
+        projects: ["p"],
         live: "rejectOnError",
       });
     });
@@ -461,6 +462,173 @@ describe("createSentryBuildPluginManager", () => {
         ["sourcemaps", "inject", "/path/to/bundle"],
         true
       );
+    });
+  });
+
+  describe("uploadSourcemaps with multiple projects", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockGlob.mockResolvedValue(["/path/to/bundle.js"]);
+      mockPrepareBundleForDebugIdUpload.mockResolvedValue(undefined);
+      mockCliUploadSourceMaps.mockResolvedValue(undefined);
+
+      // Mock fs operations needed for temp folder upload path
+      jest.spyOn(fs.promises, "mkdtemp").mockResolvedValue("/tmp/sentry-test");
+      jest.spyOn(fs.promises, "readdir").mockResolvedValue([]);
+      jest.spyOn(fs.promises, "stat").mockResolvedValue({ size: 1000 } as fs.Stats);
+      jest.spyOn(fs.promises, "rm").mockResolvedValue(undefined);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should pass projects array to uploadSourceMaps when multiple projects configured", async () => {
+      const buildPluginManager = createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: ["proj-a", "proj-b", "proj-c"],
+          release: { name: "test-release" },
+        },
+        {
+          buildTool: "webpack",
+          loggerPrefix: "[sentry-webpack-plugin]",
+        }
+      );
+
+      await buildPluginManager.uploadSourcemaps(["/path/to/bundle.js"]);
+
+      expect(mockCliUploadSourceMaps).toHaveBeenCalledWith(
+        "test-release",
+        expect.objectContaining({
+          projects: ["proj-a", "proj-b", "proj-c"],
+        })
+      );
+    });
+
+    it("should pass single project as array to uploadSourceMaps", async () => {
+      const buildPluginManager = createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "single-project",
+          release: { name: "test-release" },
+        },
+        {
+          buildTool: "webpack",
+          loggerPrefix: "[sentry-webpack-plugin]",
+        }
+      );
+
+      await buildPluginManager.uploadSourcemaps(["/path/to/bundle.js"]);
+
+      expect(mockCliUploadSourceMaps).toHaveBeenCalledWith(
+        "test-release",
+        expect.objectContaining({
+          projects: ["single-project"],
+        })
+      );
+    });
+
+    it("should pass projects array in direct upload mode", async () => {
+      const buildPluginManager = createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: ["proj-a", "proj-b"],
+          release: { name: "test-release" },
+        },
+        {
+          buildTool: "webpack",
+          loggerPrefix: "[sentry-webpack-plugin]",
+        }
+      );
+
+      await buildPluginManager.uploadSourcemaps(["/path/to/bundle.js"], { prepareArtifacts: false });
+
+      expect(mockCliUploadSourceMaps).toHaveBeenCalledWith(
+        "test-release",
+        expect.objectContaining({
+          projects: ["proj-a", "proj-b"],
+        })
+      );
+    });
+  });
+
+  describe("moduleMetadata callback with multiple projects", () => {
+    it("should pass project as string and projects as array when multiple projects configured", () => {
+      const moduleMetadataCallback = jest.fn().mockReturnValue({ custom: "metadata" });
+
+      createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: ["proj-a", "proj-b", "proj-c"],
+          release: { name: "test-release" },
+          moduleMetadata: moduleMetadataCallback,
+        },
+        {
+          buildTool: "webpack",
+          loggerPrefix: "[sentry-webpack-plugin]",
+        }
+      );
+
+      expect(moduleMetadataCallback).toHaveBeenCalledWith({
+        org: "test-org",
+        project: "proj-a",
+        projects: ["proj-a", "proj-b", "proj-c"],
+        release: "test-release",
+      });
+    });
+
+    it("should pass project as string and projects as array with single project", () => {
+      const moduleMetadataCallback = jest.fn().mockReturnValue({ custom: "metadata" });
+
+      createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "single-project",
+          release: { name: "test-release" },
+          moduleMetadata: moduleMetadataCallback,
+        },
+        {
+          buildTool: "webpack",
+          loggerPrefix: "[sentry-webpack-plugin]",
+        }
+      );
+
+      expect(moduleMetadataCallback).toHaveBeenCalledWith({
+        org: "test-org",
+        project: "single-project",
+        projects: ["single-project"],
+        release: "test-release",
+      });
+    });
+
+    it("should pass undefined for projects when no project configured", () => {
+      const moduleMetadataCallback = jest.fn().mockReturnValue({ custom: "metadata" });
+
+      createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          release: { name: "test-release" },
+          moduleMetadata: moduleMetadataCallback,
+        },
+        {
+          buildTool: "webpack",
+          loggerPrefix: "[sentry-webpack-plugin]",
+        }
+      );
+
+      expect(moduleMetadataCallback).toHaveBeenCalledWith({
+        org: "test-org",
+        project: undefined,
+        projects: undefined,
+        release: "test-release",
+      });
     });
   });
 });
