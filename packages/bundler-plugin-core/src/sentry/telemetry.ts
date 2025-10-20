@@ -5,6 +5,7 @@ import { NormalizedOptions, SENTRY_SAAS_URL } from "../options-mapping";
 import { Scope } from "@sentry/core";
 import { createStackParser, nodeStackLineParser } from "@sentry/utils";
 import { makeOptionallyEnabledNodeTransport } from "./transports";
+import { getProjects } from "../utils";
 
 const SENTRY_SAAS_HOSTNAME = "sentry.io";
 
@@ -106,7 +107,7 @@ export function setTelemetryDataOnScope(
 
   scope.setTags({
     organization: org,
-    project,
+    project: Array.isArray(project) ? project.join(", ") : project ?? "undefined",
     bundler: buildTool,
   });
 
@@ -129,7 +130,7 @@ export async function allowedToSendTelemetry(options: NormalizedOptions): Promis
     url,
     authToken,
     org,
-    project,
+    project: getProjects(project)?.[0],
     vcsRemote: release.vcsRemote,
     silent,
     headers,

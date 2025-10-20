@@ -17,8 +17,9 @@ const options: OptionDocumentation[] = [
   },
   {
     name: "project",
+    type: "string | string[]",
     fullDescription:
-      "The slug of the Sentry project associated with the app.\n\nThis value can also be specified via the `SENTRY_PROJECT` environment variable.",
+      "The slug of the Sentry project associated with the app. You can also provide an array of project slugs to upload source maps to multiple projects with the same release.\n\nThis value can also be specified via the `SENTRY_PROJECT` environment variable. To specify multiple projects via the environment variable, separate them with commas: `SENTRY_PROJECT=project1,project2,project3`.",
   },
   {
     name: "authToken",

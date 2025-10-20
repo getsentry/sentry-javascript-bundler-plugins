@@ -60,6 +60,35 @@ export default defineConfig({
 });
 ```
 
+### Multi-Project Configuration
+
+If you want to upload the same source maps to multiple Sentry projects:
+
+```ts
+// vite.config.ts
+import { defineConfig } from "vite";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
+
+export default defineConfig({
+  build: {
+    sourcemap: true,
+  },
+  plugins: [
+    sentryVitePlugin({
+      org: process.env.SENTRY_ORG,
+      project: ["frontend-team-a", "frontend-team-b", "frontend-team-c"],
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+    }),
+  ],
+});
+```
+
+Or via environment variable:
+
+```bash
+SENTRY_PROJECT=frontend-team-a,frontend-team-b,frontend-team-c
+```
+
 #OPTIONS_SECTION_INSERT#
 
 ### Configuration File

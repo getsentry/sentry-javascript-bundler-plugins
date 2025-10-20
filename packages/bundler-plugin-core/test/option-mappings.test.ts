@@ -190,6 +190,68 @@ describe("normalizeUserOptions()", () => {
       expect(normalizedOptions.release.deploy).toBeUndefined();
     });
   });
+
+  describe("multi-project support", () => {
+    test("should accept project as a string array", () => {
+      const userOptions: Options = {
+        org: "my-org",
+        project: ["project-a", "project-b", "project-c"],
+        authToken: "my-auth-token",
+        release: { name: "my-release" },
+      };
+
+      const normalized = normalizeUserOptions(userOptions);
+      expect(normalized.project).toEqual(["project-a", "project-b", "project-c"]);
+    });
+
+    test("should parse comma-separated SENTRY_PROJECT env var", () => {
+      const originalEnv = process.env;
+      process.env = { ...originalEnv };
+      process.env["SENTRY_PROJECT"] = "proj1,proj2,proj3";
+
+      const userOptions: Options = {
+        org: "my-org",
+        authToken: "my-auth-token",
+      };
+
+      const normalized = normalizeUserOptions(userOptions);
+      expect(normalized.project).toEqual(["proj1", "proj2", "proj3"]);
+
+      process.env = originalEnv;
+    });
+
+    test("should trim whitespace from comma-separated projects", () => {
+      const originalEnv = process.env;
+      process.env = { ...originalEnv };
+      process.env["SENTRY_PROJECT"] = "proj1 , proj2 , proj3";
+
+      const userOptions: Options = {
+        org: "my-org",
+        authToken: "my-auth-token",
+      };
+
+      const normalized = normalizeUserOptions(userOptions);
+      expect(normalized.project).toEqual(["proj1", "proj2", "proj3"]);
+
+      process.env = originalEnv;
+    });
+
+    test("should keep single project as string (no comma)", () => {
+      const originalEnv = process.env;
+      process.env = { ...originalEnv };
+      process.env["SENTRY_PROJECT"] = "single-project";
+
+      const userOptions: Options = {
+        org: "my-org",
+        authToken: "my-auth-token",
+      };
+
+      const normalized = normalizeUserOptions(userOptions);
+      expect(normalized.project).toBe("single-project");
+
+      process.env = originalEnv;
+    });
+  });
 });
 
 describe("validateOptions", () => {
@@ -268,5 +330,41 @@ describe("validateOptions", () => {
 
     expect(validateOptions(options as unknown as NormalizedOptions, mockedLogger)).toBe(true);
     expect(mockedLogger.error).not.toHaveBeenCalled();
+  });
+
+  describe("multi-project validation", () => {
+    it("should return `false` if project array is empty", () => {
+      const options = { project: [] } as Partial<NormalizedOptions>;
+
+      expect(validateOptions(options as unknown as NormalizedOptions, mockedLogger)).toBe(false);
+      expect(mockedLogger.error).toHaveBeenCalledWith(
+        expect.stringMatching(/project.*array.*empty/i),
+        expect.stringMatching(/at least one/i)
+      );
+    });
+
+    it("should return `false` if project array contains invalid strings", () => {
+      const options = { project: ["valid", "", "  ", "also-valid"] } as Partial<NormalizedOptions>;
+
+      expect(validateOptions(options as unknown as NormalizedOptions, mockedLogger)).toBe(false);
+      expect(mockedLogger.error).toHaveBeenCalledWith(
+        expect.stringMatching(/invalid.*project/i),
+        expect.stringMatching(/non-empty strings/i)
+      );
+    });
+
+    it("should return `true` for valid project array", () => {
+      const options = { project: ["proj-a", "proj-b"] } as Partial<NormalizedOptions>;
+
+      expect(validateOptions(options as unknown as NormalizedOptions, mockedLogger)).toBe(true);
+      expect(mockedLogger.error).not.toHaveBeenCalled();
+    });
+
+    it("should return `true` for valid single project string", () => {
+      const options = { project: "single-project" } as Partial<NormalizedOptions>;
+
+      expect(validateOptions(options as unknown as NormalizedOptions, mockedLogger)).toBe(true);
+      expect(mockedLogger.error).not.toHaveBeenCalled();
+    });
   });
 });
