@@ -545,7 +545,9 @@ describe("createSentryBuildPluginManager", () => {
         }
       );
 
-      await buildPluginManager.uploadSourcemaps(["/path/to/bundle.js"], { prepareArtifacts: false });
+      await buildPluginManager.uploadSourcemaps(["/path/to/bundle.js"], {
+        prepareArtifacts: false,
+      });
 
       expect(mockCliUploadSourceMaps).toHaveBeenCalledWith(
         "test-release",

@@ -84,6 +84,7 @@ export default defineConfig({
 ```
 
 Or via environment variable:
+
 ```bash
 SENTRY_PROJECT=frontend-team-a,frontend-team-b,frontend-team-c
 ```
