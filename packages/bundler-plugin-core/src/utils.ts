@@ -393,3 +393,18 @@ export function getTurborepoEnvPassthroughWarning(envVarName: string): string {
     ? `\nYou seem to be using Turborepo, did you forget to put ${envVarName} in \`passThroughEnv\`? https://turbo.build/repo/docs/reference/configuration#passthroughenv`
     : "";
 }
+
+/**
+ * Gets the projects from the project option. This might be a single project or an array of projects.
+ */
+export function getProjects(project: string | string[] | undefined): string[] | undefined {
+  if (Array.isArray(project)) {
+    return project;
+  }
+
+  if (project) {
+    return [project];
+  }
+
+  return undefined;
+}
