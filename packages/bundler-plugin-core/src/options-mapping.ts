@@ -213,26 +213,22 @@ export function validateOptions(options: NormalizedOptions, logger: Logger): boo
     return false;
   }
 
-  if (options.project) {
-    if (Array.isArray(options.project)) {
-      if (options.project.length === 0) {
-        logger.error(
-          "The `project` option was specified as an array but is empty.",
-          "Please provide at least one project slug."
-        );
-        return false;
-      }
-      // Check each project is a non-empty string
-      const invalidProjects = options.project.filter(
-        (p) => typeof p !== "string" || p.trim() === ""
+  if (options.project && Array.isArray(options.project)) {
+    if (options.project.length === 0) {
+      logger.error(
+        "The `project` option was specified as an array but is empty.",
+        "Please provide at least one project slug."
       );
-      if (invalidProjects.length > 0) {
-        logger.error(
-          "The `project` option contains invalid project slugs.",
-          "All projects must be non-empty strings."
-        );
-        return false;
-      }
+      return false;
+    }
+    // Check each project is a non-empty string
+    const invalidProjects = options.project.filter((p) => typeof p !== "string" || p.trim() === "");
+    if (invalidProjects.length > 0) {
+      logger.error(
+        "The `project` option contains invalid project slugs.",
+        "All projects must be non-empty strings."
+      );
+      return false;
     }
   }
 
