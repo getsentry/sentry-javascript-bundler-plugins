@@ -4,6 +4,13 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 4.5.0
+
+- docs: added info on debug flag value precedence ([#811](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/811))
+- feat: add debug statements after sourcemap uploads ([#812](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/812))
+- feat(core): Allow multi-project sourcemaps upload ([#813](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/813))
+- fix: propagate the debug option to the cli ([#810](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/810))
+
 ## 4.4.0
 
 - feat(core): Explicitly allow `undefined` as value for `authToken` option ([#805](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/805))
