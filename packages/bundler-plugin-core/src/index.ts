@@ -77,8 +77,15 @@ export function sentryUnpluginFactory({
     // Add plugin to emit a telemetry signal when the build starts
     plugins.push({
       name: "sentry-telemetry-plugin",
-      async buildStart() {
-        await sentryBuildPluginManager.telemetry.emitBundlerPluginExecutionSignal();
+      buildStart() {
+        // Technically, for very fast builds we might miss the telemetry signal
+        // but it's okay because telemetry is not critical for us.
+        // We cannot await the flush here because it would block the build start
+        // which in turn would break module federation builds, see
+        // https://github.com/getsentry/sentry-javascript-bundler-plugins/issues/816
+        sentryBuildPluginManager.telemetry.emitBundlerPluginExecutionSignal().catch(() => {
+          // Nothing for the users to do here. If telemetry fails it's acceptable.
+        });
       },
     });
 
