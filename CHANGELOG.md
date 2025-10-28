@@ -4,6 +4,11 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 4.6.0
+
+- fix(core): Stop awaiting build start telemetry to avoid breaking module federation builds ([#818](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/818))
+- feat(core): Bump @sentry/cli from 2.51.0 to 2.57.0 ([#819](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/819))
+
 ## 4.5.0
 
 - docs: added info on debug flag value precedence ([#811](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/811))
