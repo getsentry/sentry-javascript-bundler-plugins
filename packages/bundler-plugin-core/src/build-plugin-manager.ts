@@ -491,8 +491,6 @@ export function createSentryBuildPluginManager(
           await cliInstance.releases.uploadSourceMaps(options.release.name, {
             include: normalizedInclude,
             dist: options.release.dist,
-            // @ts-expect-error - projects is not a valid option for uploadSourceMaps but is implemented in the CLI
-            // Remove once https://github.com/getsentry/sentry-cli/pull/2856 is released
             projects: getProjects(options.project),
             // We want this promise to throw if the sourcemaps fail to upload so that we know about it.
             // see: https://github.com/getsentry/sentry-cli/pull/2605
@@ -638,8 +636,6 @@ export function createSentryBuildPluginManager(
                     },
                   ],
                   ignore: ignorePaths,
-                  // @ts-expect-error - projects is not a valid option for uploadSourceMaps but is implemented in the CLI
-                  // Remove once https://github.com/getsentry/sentry-cli/pull/2856 is released
                   projects: getProjects(options.project),
                   live: "rejectOnError",
                 });
@@ -751,8 +747,6 @@ export function createSentryBuildPluginManager(
                               dist: options.release.dist,
                             },
                           ],
-                          // @ts-expect-error - projects is not a valid option for uploadSourceMaps but is implemented in the CLI
-                          // Remove once https://github.com/getsentry/sentry-cli/pull/2856 is released
                           projects: getProjects(options.project),
                           live: "rejectOnError",
                         }
