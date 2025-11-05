@@ -471,7 +471,8 @@ export function createSentryBuildPluginManager(
         const cliInstance = createCliInstance(options);
 
         if (options.release.create) {
-          await cliInstance.releases.new(options.release.name);
+          const releaseOutput = await cliInstance.releases.new(options.release.name);
+          logger.debug("Release created:", releaseOutput);
         }
 
         if (options.release.uploadLegacySourcemaps) {
