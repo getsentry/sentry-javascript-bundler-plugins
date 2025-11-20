@@ -57,7 +57,7 @@
     "@sentry/cli": "^2.57.0",
     "dotenv": "^16.3.1",
     "find-up": "^5.0.0",
-    "glob": "^9.3.2",
+    "glob": "^10.5.0",
     "magic-string": "0.30.8",
     "unplugin": "1.0.1"
   },
