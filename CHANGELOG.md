@@ -4,6 +4,16 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 4.6.1
+
+- chore(deps): Update glob to 10.5.0 ([#823](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/823))
+
+<details>
+  <summary> <strong>Internal Changes</strong> </summary>
+
+- chore(core): Log release output ([#821](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/821))
+</details>
+
 ## 4.6.0
 
 - fix(core): Stop awaiting build start telemetry to avoid breaking module federation builds ([#818](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/818))
