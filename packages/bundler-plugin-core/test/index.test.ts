@@ -1,5 +1,5 @@
 import { Compiler } from "webpack";
-import { getDebugIdSnippet, sentryUnpluginFactory } from "../src";
+import { getDebugIdSnippet, sentryUnpluginFactory, createRollupDebugIdInjectionHooks } from "../src";
 
 describe("getDebugIdSnippet", () => {
   it("returns the debugId injection snippet for a passed debugId", () => {
@@ -7,6 +7,85 @@ describe("getDebugIdSnippet", () => {
     expect(snippet).toMatchInlineSnapshot(
       `";{try{(function(){var e=\\"undefined\\"!=typeof window?window:\\"undefined\\"!=typeof global?global:\\"undefined\\"!=typeof globalThis?globalThis:\\"undefined\\"!=typeof self?self:{},n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]=\\"1234\\",e._sentryDebugIdIdentifier=\\"sentry-dbid-1234\\");})();}catch(e){}};"`
     );
+  });
+});
+
+describe("createRollupDebugIdInjectionHooks", () => {
+  const hooks = createRollupDebugIdInjectionHooks();
+
+  describe("renderChunk", () => {
+    it("should inject debug ID into clean JavaScript files", () => {
+      const code = 'console.log("Hello world");';
+      const result = hooks.renderChunk(code, { fileName: "bundle.js" });
+
+      expect(result).not.toBeNull();
+      expect(result?.code).toContain("_sentryDebugIdIdentifier");
+      expect(result?.code).toContain('console.log("Hello world");');
+    });
+
+    it("should inject debug ID after 'use strict'", () => {
+      const code = '"use strict";\nconsole.log("Hello world");';
+      const result = hooks.renderChunk(code, { fileName: "bundle.js" });
+
+      expect(result).not.toBeNull();
+      expect(result?.code).toMatch(/^"use strict";.*;{try/);
+    });
+
+    it.each([
+      ["bundle.js", true],
+      ["bundle.mjs", true],
+      ["bundle.cjs", true],
+      ["bundle.js?foo=bar", true],
+      ["bundle.js#hash", true],
+      ["index.html", false],
+      ["styles.css", false],
+    ])("should process file '%s': %s", (fileName, shouldProcess) => {
+      const code = 'console.log("test");';
+      const result = hooks.renderChunk(code, { fileName });
+
+      if (shouldProcess) {
+        expect(result).not.toBeNull();
+        expect(result?.code).toContain("_sentryDebugIdIdentifier");
+      } else {
+        expect(result).toBeNull();
+      }
+    });
+
+    it.each([
+      [
+        "inline format at start",
+        ';{try{(function(){var e="undefined"!=typeof window?window:e._sentryDebugIdIdentifier="sentry-dbid-existing-id");})();}catch(e){}};console.log("test");',
+      ],
+      [
+        "comment format at end",
+        'console.log("test");\n//# debugId=f6ccd6f4-7ea0-4854-8384-1c9f8340af81\n//# sourceMappingURL=bundle.js.map',
+      ],
+      [
+        "inline format with large file",
+        '"use strict";\n' +
+          "// comment\n".repeat(10) +
+          ';{try{(function(){var e="undefined"!=typeof window?window:e._sentryDebugIdIdentifier="sentry-dbid-existing-id");})();}catch(e){}};' +
+          '\nconsole.log("line");\n'.repeat(100),
+      ],
+    ])("should NOT inject when debug ID already exists (%s)", (_description, code) => {
+      const result = hooks.renderChunk(code, { fileName: "bundle.js" });
+      expect(result).toBeNull();
+    });
+
+    it("should only check boundaries for performance (not entire file)", () => {
+      // Inline format beyond first 2KB boundary
+      const codeWithInlineBeyond2KB =
+        "a".repeat(2100) +
+        ';{try{(function(){var e="undefined"!=typeof window?window:e._sentryDebugIdIdentifier="sentry-dbid-existing-id");})();}catch(e){}};';
+
+      expect(hooks.renderChunk(codeWithInlineBeyond2KB, { fileName: "bundle.js" })).not.toBeNull();
+
+      // Comment format beyond last 500 bytes boundary
+      const codeWithCommentBeyond500B =
+        "//# debugId=f6ccd6f4-7ea0-4854-8384-1c9f8340af81\n" + "a".repeat(600);
+
+      expect(hooks.renderChunk(codeWithCommentBeyond500B, { fileName: "bundle.js" })).not.toBeNull();
+    });
   });
 });
 

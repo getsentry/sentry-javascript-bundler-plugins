@@ -269,6 +269,14 @@ export function createRollupDebugIdInjectionHooks(): {
           stripQueryAndHashFromPath(chunk.fileName).endsWith(ending)
         )
       ) {
+        // Check if a debug ID has already been injected to avoid duplicate injection (e.g. by another plugin or Sentry CLI)
+        const chunkStartSnippet = code.slice(0, 2000);
+        const chunkEndSnippet = code.slice(-500);
+
+        if (chunkStartSnippet.includes("_sentryDebugIdIdentifier") || chunkEndSnippet.includes("//# debugId=")) {
+          return null; // Debug ID already present, skip injection
+        }
+
         const debugId = stringToUUID(code); // generate a deterministic debug ID
         const codeToInject = getDebugIdSnippet(debugId);
 
