@@ -1,5 +1,9 @@
 import { Compiler } from "webpack";
-import { getDebugIdSnippet, sentryUnpluginFactory, createRollupDebugIdInjectionHooks } from "../src";
+import {
+  getDebugIdSnippet,
+  sentryUnpluginFactory,
+  createRollupDebugIdInjectionHooks,
+} from "../src";
 
 describe("getDebugIdSnippet", () => {
   it("returns the debugId injection snippet for a passed debugId", () => {
@@ -84,7 +88,9 @@ describe("createRollupDebugIdInjectionHooks", () => {
       const codeWithCommentBeyond500B =
         "//# debugId=f6ccd6f4-7ea0-4854-8384-1c9f8340af81\n" + "a".repeat(600);
 
-      expect(hooks.renderChunk(codeWithCommentBeyond500B, { fileName: "bundle.js" })).not.toBeNull();
+      expect(
+        hooks.renderChunk(codeWithCommentBeyond500B, { fileName: "bundle.js" })
+      ).not.toBeNull();
     });
   });
 });

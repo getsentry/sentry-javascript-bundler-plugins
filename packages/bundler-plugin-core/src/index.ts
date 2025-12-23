@@ -273,7 +273,10 @@ export function createRollupDebugIdInjectionHooks(): {
         const chunkStartSnippet = code.slice(0, 2000);
         const chunkEndSnippet = code.slice(-500);
 
-        if (chunkStartSnippet.includes("_sentryDebugIdIdentifier") || chunkEndSnippet.includes("//# debugId=")) {
+        if (
+          chunkStartSnippet.includes("_sentryDebugIdIdentifier") ||
+          chunkEndSnippet.includes("//# debugId=")
+        ) {
           return null; // Debug ID already present, skip injection
         }
 
