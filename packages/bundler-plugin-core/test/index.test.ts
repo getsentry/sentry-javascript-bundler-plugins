@@ -36,23 +36,24 @@ describe("createRollupDebugIdInjectionHooks", () => {
     });
 
     it.each([
-      ["bundle.js", true],
-      ["bundle.mjs", true],
-      ["bundle.cjs", true],
-      ["bundle.js?foo=bar", true],
-      ["bundle.js#hash", true],
-      ["index.html", false],
-      ["styles.css", false],
-    ])("should process file '%s': %s", (fileName, shouldProcess) => {
+      ["bundle.js"],
+      ["bundle.mjs"],
+      ["bundle.cjs"],
+      ["bundle.js?foo=bar"],
+      ["bundle.js#hash"],
+    ])("should process file '%s': %s", (fileName) => {
       const code = 'console.log("test");';
       const result = hooks.renderChunk(code, { fileName });
 
-      if (shouldProcess) {
-        expect(result).not.toBeNull();
-        expect(result?.code).toContain("_sentryDebugIdIdentifier");
-      } else {
-        expect(result).toBeNull();
-      }
+      expect(result).not.toBeNull();
+      expect(result?.code).toContain("_sentryDebugIdIdentifier");
+    });
+
+    it.each([["index.html"], ["styles.css"]])("should NOT process file '%s': %s", (fileName) => {
+      const code = 'console.log("test");';
+      const result = hooks.renderChunk(code, { fileName });
+
+      expect(result).toBeNull();
     });
 
     it.each([
