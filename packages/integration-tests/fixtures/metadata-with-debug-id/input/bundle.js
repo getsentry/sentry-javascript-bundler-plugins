@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 // Output both debug IDs and metadata to verify both features work together
 // eslint-disable-next-line no-console
 console.log(
