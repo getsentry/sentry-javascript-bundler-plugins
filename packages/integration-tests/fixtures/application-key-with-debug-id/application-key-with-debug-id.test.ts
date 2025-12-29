@@ -55,4 +55,3 @@ describe("applicationKey with debug ID injection", () => {
     checkBundle(path.join(__dirname, "out", "vite", "bundle.js"));
   });
 });
-

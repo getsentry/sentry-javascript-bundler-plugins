@@ -75,10 +75,13 @@ function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
 
           // Check if this import is coming from a metadata proxy module
           // The metadata plugin registers entry points it wraps in the shared Set
+          // We need to strip the query string suffix because esbuild includes the suffix
+          // (e.g., ?sentryMetadataProxyModule=true) in args.importer
+          const importerPath = args.importer?.split("?")[0];
           const isImportFromMetadataProxy =
             args.kind === "import-statement" &&
-            args.importer !== undefined &&
-            metadataProxyEntryPoints.has(args.importer);
+            importerPath !== undefined &&
+            metadataProxyEntryPoints.has(importerPath);
 
           if (!isEntryPoint && !isImportFromMetadataProxy) {
             return;
