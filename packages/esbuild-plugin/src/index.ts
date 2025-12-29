@@ -65,6 +65,10 @@ function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
       setup({ initialOptions, onLoad, onResolve }) {
         // Clear state from previous builds (important for watch mode and test suites)
         debugIdWrappedPaths.clear();
+        // Also clear metadataProxyEntryPoints here because if moduleMetadataInjectionPlugin
+        // is not instantiated in this build (e.g., moduleMetadata was disabled), we don't
+        // want stale entries from a previous build to affect the current one.
+        metadataProxyEntryPoints.clear();
 
         if (!initialOptions.bundle) {
           logger.warn(
