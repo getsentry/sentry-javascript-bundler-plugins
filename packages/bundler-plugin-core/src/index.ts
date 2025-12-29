@@ -270,7 +270,7 @@ export function createRollupDebugIdInjectionHooks(): {
         )
       ) {
         // Check if a debug ID has already been injected to avoid duplicate injection (e.g. by another plugin or Sentry CLI)
-        const chunkStartSnippet = code.slice(0, 2000);
+        const chunkStartSnippet = code.slice(0, 6000);
         const chunkEndSnippet = code.slice(-500);
 
         if (

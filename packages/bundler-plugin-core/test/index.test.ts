@@ -84,12 +84,12 @@ describe("createRollupDebugIdInjectionHooks", () => {
     });
 
     it("should only check boundaries for performance (not entire file)", () => {
-      // Inline format beyond first 2KB boundary
-      const codeWithInlineBeyond2KB =
-        "a".repeat(2100) +
+      // Inline format beyond first 6KB boundary
+      const codeWithInlineBeyond6KB =
+        "a".repeat(6100) +
         ';{try{(function(){var e="undefined"!=typeof window?window:e._sentryDebugIdIdentifier="sentry-dbid-existing-id");})();}catch(e){}};';
 
-      expect(hooks.renderChunk(codeWithInlineBeyond2KB, { fileName: "bundle.js" })).not.toBeNull();
+      expect(hooks.renderChunk(codeWithInlineBeyond6KB, { fileName: "bundle.js" })).not.toBeNull();
 
       // Comment format beyond last 500 bytes boundary
       const codeWithCommentBeyond500B =
