@@ -23,8 +23,9 @@ describe("createRollupDebugIdInjectionHooks", () => {
       const result = hooks.renderChunk(code, { fileName: "bundle.js" });
 
       expect(result).not.toBeNull();
-      expect(result?.code).toContain("_sentryDebugIdIdentifier");
-      expect(result?.code).toContain('console.log("Hello world");');
+      expect(result?.code).toMatchInlineSnapshot(
+        `";{try{(function(){var e=\\"undefined\\"!=typeof window?window:\\"undefined\\"!=typeof global?global:\\"undefined\\"!=typeof globalThis?globalThis:\\"undefined\\"!=typeof self?self:{},n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]=\\"d4309f93-5358-4ae1-bcf0-3813aa590eb5\\",e._sentryDebugIdIdentifier=\\"sentry-dbid-d4309f93-5358-4ae1-bcf0-3813aa590eb5\\");})();}catch(e){}};console.log(\\"Hello world\\");"`
+      );
     });
 
     it("should inject debug ID after 'use strict'", () => {
@@ -32,7 +33,10 @@ describe("createRollupDebugIdInjectionHooks", () => {
       const result = hooks.renderChunk(code, { fileName: "bundle.js" });
 
       expect(result).not.toBeNull();
-      expect(result?.code).toMatch(/^"use strict";.*;{try/);
+      expect(result?.code).toMatchInlineSnapshot(`
+        "\\"use strict\\";;{try{(function(){var e=\\"undefined\\"!=typeof window?window:\\"undefined\\"!=typeof global?global:\\"undefined\\"!=typeof globalThis?globalThis:\\"undefined\\"!=typeof self?self:{},n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]=\\"79a86c07-8ecc-4367-82b0-88cf822f2d41\\",e._sentryDebugIdIdentifier=\\"sentry-dbid-79a86c07-8ecc-4367-82b0-88cf822f2d41\\");})();}catch(e){}};
+        console.log(\\"Hello world\\");"
+      `);
     });
 
     it.each([
@@ -46,7 +50,9 @@ describe("createRollupDebugIdInjectionHooks", () => {
       const result = hooks.renderChunk(code, { fileName });
 
       expect(result).not.toBeNull();
-      expect(result?.code).toContain("_sentryDebugIdIdentifier");
+      expect(result?.code).toMatchInlineSnapshot(
+        `";{try{(function(){var e=\\"undefined\\"!=typeof window?window:\\"undefined\\"!=typeof global?global:\\"undefined\\"!=typeof globalThis?globalThis:\\"undefined\\"!=typeof self?self:{},n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]=\\"b80112c0-6818-486d-96f0-185c023439b4\\",e._sentryDebugIdIdentifier=\\"sentry-dbid-b80112c0-6818-486d-96f0-185c023439b4\\");})();}catch(e){}};console.log(\\"test\\");"`
+      );
     });
 
     it.each([["index.html"], ["styles.css"]])("should NOT process file '%s': %s", (fileName) => {
