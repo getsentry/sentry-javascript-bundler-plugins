@@ -42,6 +42,18 @@ function esbuildReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
   };
 }
 
+/**
+ * Shared set to track entry points that have been wrapped by the metadata plugin
+ * This allows the debug ID plugin to know when an import is coming from a metadata proxy
+ */
+const metadataProxyEntryPoints = new Set<string>();
+
+/**
+ * Set to track which paths have already been wrapped with debug ID injection
+ * This prevents the debug ID plugin from wrapping the same module multiple times
+ */
+const debugIdWrappedPaths = new Set<string>();
+
 function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
   const pluginName = "sentry-esbuild-debug-id-injection-plugin";
   const stubNamespace = "sentry-debug-id-stub";
@@ -51,6 +63,13 @@ function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
 
     esbuild: {
       setup({ initialOptions, onLoad, onResolve }) {
+        // Clear state from previous builds (important for watch mode and test suites)
+        debugIdWrappedPaths.clear();
+        // Also clear metadataProxyEntryPoints here because if moduleMetadataInjectionPlugin
+        // is not instantiated in this build (e.g., moduleMetadata was disabled), we don't
+        // want stale entries from a previous build to affect the current one.
+        metadataProxyEntryPoints.clear();
+
         if (!initialOptions.bundle) {
           logger.warn(
             "The Sentry esbuild plugin only supports esbuild with `bundle: true` being set in the esbuild build options. Esbuild will probably crash now. Sorry about that. If you need to upload sourcemaps without `bundle: true`, it is recommended to use Sentry CLI instead: https://docs.sentry.io/platforms/javascript/sourcemaps/uploading/cli/"
@@ -58,33 +77,56 @@ function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
         }
 
         onResolve({ filter: /.*/ }, (args) => {
-          if (args.kind !== "entry-point") {
-            return;
-          } else {
-            // Injected modules via the esbuild `inject` option do also have `kind == "entry-point"`.
-            // We do not want to inject debug IDs into those files because they are already bundled into the entrypoints
-            if (initialOptions.inject?.includes(args.path)) {
-              return;
-            }
+          // Inject debug IDs into entry points and into imports from metadata proxy modules
+          const isEntryPoint = args.kind === "entry-point";
 
-            return {
-              pluginName,
-              // needs to be an abs path, otherwise esbuild will complain
-              path: path.isAbsolute(args.path) ? args.path : path.join(args.resolveDir, args.path),
-              pluginData: {
-                isProxyResolver: true,
-                originalPath: args.path,
-                originalResolveDir: args.resolveDir,
-              },
-              // We need to add a suffix here, otherwise esbuild will mark the entrypoint as resolved and won't traverse
-              // the module tree any further down past the proxy module because we're essentially creating a dependency
-              // loop back to the proxy module.
-              // By setting a suffix we're telling esbuild that the entrypoint and proxy module are two different things,
-              // making it re-resolve the entrypoint when it is imported from the proxy module.
-              // Super confusing? Yes. Works? Apparently... Let's see.
-              suffix: "?sentryProxyModule=true",
-            };
+          // Check if this import is coming from a metadata proxy module
+          // The metadata plugin registers entry points it wraps in the shared Set
+          // We need to strip the query string suffix because esbuild includes the suffix
+          // (e.g., ?sentryMetadataProxyModule=true) in args.importer
+          const importerPath = args.importer?.split("?")[0];
+          const isImportFromMetadataProxy =
+            args.kind === "import-statement" &&
+            importerPath !== undefined &&
+            metadataProxyEntryPoints.has(importerPath);
+
+          if (!isEntryPoint && !isImportFromMetadataProxy) {
+            return;
           }
+
+          // Skip injecting debug IDs into modules specified in the esbuild `inject` option
+          // since they're already part of the entry points
+          if (initialOptions.inject?.includes(args.path)) {
+            return;
+          }
+
+          const resolvedPath = path.isAbsolute(args.path)
+            ? args.path
+            : path.join(args.resolveDir, args.path);
+
+          // Skip injecting debug IDs into paths that have already been wrapped
+          if (debugIdWrappedPaths.has(resolvedPath)) {
+            return;
+          }
+          debugIdWrappedPaths.add(resolvedPath);
+
+          return {
+            pluginName,
+            // needs to be an abs path, otherwise esbuild will complain
+            path: resolvedPath,
+            pluginData: {
+              isProxyResolver: true,
+              originalPath: args.path,
+              originalResolveDir: args.resolveDir,
+            },
+            // We need to add a suffix here, otherwise esbuild will mark the entrypoint as resolved and won't traverse
+            // the module tree any further down past the proxy module because we're essentially creating a dependency
+            // loop back to the proxy module.
+            // By setting a suffix we're telling esbuild that the entrypoint and proxy module are two different things,
+            // making it re-resolve the entrypoint when it is imported from the proxy module.
+            // Super confusing? Yes. Works? Apparently... Let's see.
+            suffix: "?sentryProxyModule=true",
+          };
         });
 
         onLoad({ filter: /.*/ }, (args) => {
@@ -142,6 +184,9 @@ function esbuildModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
 
     esbuild: {
       setup({ initialOptions, onLoad, onResolve }) {
+        // Clear state from previous builds (important for watch mode and test suites)
+        metadataProxyEntryPoints.clear();
+
         onResolve({ filter: /.*/ }, (args) => {
           if (args.kind !== "entry-point") {
             return;
@@ -152,10 +197,18 @@ function esbuildModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
               return;
             }
 
+            const resolvedPath = path.isAbsolute(args.path)
+              ? args.path
+              : path.join(args.resolveDir, args.path);
+
+            // Register this entry point so the debug ID plugin knows to wrap imports from
+            // this proxy module, this because the debug ID may run after the metadata plugin
+            metadataProxyEntryPoints.add(resolvedPath);
+
             return {
               pluginName,
               // needs to be an abs path, otherwise esbuild will complain
-              path: path.isAbsolute(args.path) ? args.path : path.join(args.resolveDir, args.path),
+              path: resolvedPath,
               pluginData: {
                 isMetadataProxyResolver: true,
                 originalPath: args.path,
