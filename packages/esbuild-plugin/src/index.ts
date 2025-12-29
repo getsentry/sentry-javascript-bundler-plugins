@@ -63,6 +63,9 @@ function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
 
     esbuild: {
       setup({ initialOptions, onLoad, onResolve }) {
+        // Clear state from previous builds (important for watch mode and test suites)
+        debugIdWrappedPaths.clear();
+
         if (!initialOptions.bundle) {
           logger.warn(
             "The Sentry esbuild plugin only supports esbuild with `bundle: true` being set in the esbuild build options. Esbuild will probably crash now. Sorry about that. If you need to upload sourcemaps without `bundle: true`, it is recommended to use Sentry CLI instead: https://docs.sentry.io/platforms/javascript/sourcemaps/uploading/cli/"
@@ -177,6 +180,9 @@ function esbuildModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOp
 
     esbuild: {
       setup({ initialOptions, onLoad, onResolve }) {
+        // Clear state from previous builds (important for watch mode and test suites)
+        metadataProxyEntryPoints.clear();
+
         onResolve({ filter: /.*/ }, (args) => {
           if (args.kind !== "entry-point") {
             return;
