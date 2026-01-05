@@ -206,44 +206,76 @@ type RenderChunkHook = (
   code: string,
   chunk: {
     fileName: string;
+    facadeModuleId?: string | null;
   }
 ) => {
   code: string;
   map: SourceMap;
 } | null;
 
+/**
+ * Checks if a chunk should be skipped for code injection
+ *
+ * This is necessary to handle Vite's MPA (multi-page application) mode where
+ * HTML entry points create "facade" chunks that should not contain injected code.
+ * See: https://github.com/getsentry/sentry-javascript-bundler-plugins/issues/829
+ *
+ * @param code - The chunk's code content
+ * @param facadeModuleId - The facade module ID (if any) - HTML files create facade chunks
+ * @returns true if the chunk should be skipped
+ */
+function shouldSkipCodeInjection(code: string, facadeModuleId: string | null | undefined): boolean {
+  // Skip empty chunks - these are placeholder chunks that should be optimized away
+  if (code.trim().length === 0) {
+    return true;
+  }
+
+  // Skip HTML facade chunks
+  // They only contain import statements and should not have Sentry code injected
+  if (facadeModuleId && stripQueryAndHashFromPath(facadeModuleId).endsWith(".html")) {
+    return true;
+  }
+
+  return false;
+}
+
 export function createRollupReleaseInjectionHooks(injectionCode: string): {
   renderChunk: RenderChunkHook;
 } {
   return {
-    renderChunk(code: string, chunk: { fileName: string }) {
+    renderChunk(code: string, chunk: { fileName: string; facadeModuleId?: string | null }) {
       if (
         // chunks could be any file (html, md, ...)
-        [".js", ".mjs", ".cjs"].some((ending) =>
+        ![".js", ".mjs", ".cjs"].some((ending) =>
           stripQueryAndHashFromPath(chunk.fileName).endsWith(ending)
         )
       ) {
-        const ms = new MagicString(code, { filename: chunk.fileName });
-
-        const match = code.match(COMMENT_USE_STRICT_REGEX)?.[0];
-
-        if (match) {
-          // Add injected code after any comments or "use strict" at the beginning of the bundle.
-          ms.appendLeft(match.length, injectionCode);
-        } else {
-          // ms.replace() doesn't work when there is an empty string match (which happens if
-          // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
-          // need this special case here.
-          ms.prepend(injectionCode);
-        }
-
-        return {
-          code: ms.toString(),
-          map: ms.generateMap({ file: chunk.fileName, hires: "boundary" }),
-        };
-      } else {
         return null; // returning null means not modifying the chunk at all
       }
+
+      // Skip empty chunks and HTML facade chunks (Vite MPA)
+      if (shouldSkipCodeInjection(code, chunk.facadeModuleId)) {
+        return null;
+      }
+
+      const ms = new MagicString(code, { filename: chunk.fileName });
+
+      const match = code.match(COMMENT_USE_STRICT_REGEX)?.[0];
+
+      if (match) {
+        // Add injected code after any comments or "use strict" at the beginning of the bundle.
+        ms.appendLeft(match.length, injectionCode);
+      } else {
+        // ms.replace() doesn't work when there is an empty string match (which happens if
+        // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
+        // need this special case here.
+        ms.prepend(injectionCode);
+      }
+
+      return {
+        code: ms.toString(),
+        map: ms.generateMap({ file: chunk.fileName, hires: "boundary" }),
+      };
     },
   };
 }
@@ -262,48 +294,53 @@ export function createRollupDebugIdInjectionHooks(): {
   renderChunk: RenderChunkHook;
 } {
   return {
-    renderChunk(code: string, chunk: { fileName: string }) {
+    renderChunk(code: string, chunk: { fileName: string; facadeModuleId?: string | null }) {
       if (
         // chunks could be any file (html, md, ...)
-        [".js", ".mjs", ".cjs"].some((ending) =>
+        ![".js", ".mjs", ".cjs"].some((ending) =>
           stripQueryAndHashFromPath(chunk.fileName).endsWith(ending)
         )
       ) {
-        // Check if a debug ID has already been injected to avoid duplicate injection (e.g. by another plugin or Sentry CLI)
-        const chunkStartSnippet = code.slice(0, 6000);
-        const chunkEndSnippet = code.slice(-500);
-
-        if (
-          chunkStartSnippet.includes("_sentryDebugIdIdentifier") ||
-          chunkEndSnippet.includes("//# debugId=")
-        ) {
-          return null; // Debug ID already present, skip injection
-        }
-
-        const debugId = stringToUUID(code); // generate a deterministic debug ID
-        const codeToInject = getDebugIdSnippet(debugId);
-
-        const ms = new MagicString(code, { filename: chunk.fileName });
-
-        const match = code.match(COMMENT_USE_STRICT_REGEX)?.[0];
-
-        if (match) {
-          // Add injected code after any comments or "use strict" at the beginning of the bundle.
-          ms.appendLeft(match.length, codeToInject);
-        } else {
-          // ms.replace() doesn't work when there is an empty string match (which happens if
-          // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
-          // need this special case here.
-          ms.prepend(codeToInject);
-        }
-
-        return {
-          code: ms.toString(),
-          map: ms.generateMap({ file: chunk.fileName, hires: "boundary" }),
-        };
-      } else {
         return null; // returning null means not modifying the chunk at all
       }
+
+      // Skip empty chunks and HTML facade chunks (Vite MPA)
+      if (shouldSkipCodeInjection(code, chunk.facadeModuleId)) {
+        return null;
+      }
+
+      // Check if a debug ID has already been injected to avoid duplicate injection (e.g. by another plugin or Sentry CLI)
+      const chunkStartSnippet = code.slice(0, 6000);
+      const chunkEndSnippet = code.slice(-500);
+
+      if (
+        chunkStartSnippet.includes("_sentryDebugIdIdentifier") ||
+        chunkEndSnippet.includes("//# debugId=")
+      ) {
+        return null; // Debug ID already present, skip injection
+      }
+
+      const debugId = stringToUUID(code); // generate a deterministic debug ID
+      const codeToInject = getDebugIdSnippet(debugId);
+
+      const ms = new MagicString(code, { filename: chunk.fileName });
+
+      const match = code.match(COMMENT_USE_STRICT_REGEX)?.[0];
+
+      if (match) {
+        // Add injected code after any comments or "use strict" at the beginning of the bundle.
+        ms.appendLeft(match.length, codeToInject);
+      } else {
+        // ms.replace() doesn't work when there is an empty string match (which happens if
+        // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
+        // need this special case here.
+        ms.prepend(codeToInject);
+      }
+
+      return {
+        code: ms.toString(),
+        map: ms.generateMap({ file: chunk.fileName, hires: "boundary" }),
+      };
     },
   };
 }
@@ -312,34 +349,39 @@ export function createRollupModuleMetadataInjectionHooks(injectionCode: string):
   renderChunk: RenderChunkHook;
 } {
   return {
-    renderChunk(code: string, chunk: { fileName: string }) {
+    renderChunk(code: string, chunk: { fileName: string; facadeModuleId?: string | null }) {
       if (
         // chunks could be any file (html, md, ...)
-        [".js", ".mjs", ".cjs"].some((ending) =>
+        ![".js", ".mjs", ".cjs"].some((ending) =>
           stripQueryAndHashFromPath(chunk.fileName).endsWith(ending)
         )
       ) {
-        const ms = new MagicString(code, { filename: chunk.fileName });
-
-        const match = code.match(COMMENT_USE_STRICT_REGEX)?.[0];
-
-        if (match) {
-          // Add injected code after any comments or "use strict" at the beginning of the bundle.
-          ms.appendLeft(match.length, injectionCode);
-        } else {
-          // ms.replace() doesn't work when there is an empty string match (which happens if
-          // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
-          // need this special case here.
-          ms.prepend(injectionCode);
-        }
-
-        return {
-          code: ms.toString(),
-          map: ms.generateMap({ file: chunk.fileName, hires: "boundary" }),
-        };
-      } else {
         return null; // returning null means not modifying the chunk at all
       }
+
+      // Skip empty chunks and HTML facade chunks (Vite MPA)
+      if (shouldSkipCodeInjection(code, chunk.facadeModuleId)) {
+        return null;
+      }
+
+      const ms = new MagicString(code, { filename: chunk.fileName });
+
+      const match = code.match(COMMENT_USE_STRICT_REGEX)?.[0];
+
+      if (match) {
+        // Add injected code after any comments or "use strict" at the beginning of the bundle.
+        ms.appendLeft(match.length, injectionCode);
+      } else {
+        // ms.replace() doesn't work when there is an empty string match (which happens if
+        // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
+        // need this special case here.
+        ms.prepend(injectionCode);
+      }
+
+      return {
+        code: ms.toString(),
+        map: ms.generateMap({ file: chunk.fileName, hires: "boundary" }),
+      };
     },
   };
 }
