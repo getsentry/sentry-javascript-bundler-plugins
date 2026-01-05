@@ -214,6 +214,15 @@ type RenderChunkHook = (
 } | null;
 
 /**
+ * Checks if a file is a JavaScript file based on its extension.
+ * Handles query strings and hashes in the filename.
+ */
+function isJsFile(fileName: string): boolean {
+  const cleanFileName = stripQueryAndHashFromPath(fileName);
+  return [".js", ".mjs", ".cjs"].some((ext) => cleanFileName.endsWith(ext));
+}
+
+/**
  * Checks if a chunk should be skipped for code injection
  *
  * This is necessary to handle Vite's MPA (multi-page application) mode where
@@ -244,12 +253,7 @@ export function createRollupReleaseInjectionHooks(injectionCode: string): {
 } {
   return {
     renderChunk(code: string, chunk: { fileName: string; facadeModuleId?: string | null }) {
-      if (
-        // chunks could be any file (html, md, ...)
-        ![".js", ".mjs", ".cjs"].some((ending) =>
-          stripQueryAndHashFromPath(chunk.fileName).endsWith(ending)
-        )
-      ) {
+      if (!isJsFile(chunk.fileName)) {
         return null; // returning null means not modifying the chunk at all
       }
 
@@ -295,12 +299,7 @@ export function createRollupDebugIdInjectionHooks(): {
 } {
   return {
     renderChunk(code: string, chunk: { fileName: string; facadeModuleId?: string | null }) {
-      if (
-        // chunks could be any file (html, md, ...)
-        ![".js", ".mjs", ".cjs"].some((ending) =>
-          stripQueryAndHashFromPath(chunk.fileName).endsWith(ending)
-        )
-      ) {
+      if (!isJsFile(chunk.fileName)) {
         return null; // returning null means not modifying the chunk at all
       }
 
@@ -350,12 +349,7 @@ export function createRollupModuleMetadataInjectionHooks(injectionCode: string):
 } {
   return {
     renderChunk(code: string, chunk: { fileName: string; facadeModuleId?: string | null }) {
-      if (
-        // chunks could be any file (html, md, ...)
-        ![".js", ".mjs", ".cjs"].some((ending) =>
-          stripQueryAndHashFromPath(chunk.fileName).endsWith(ending)
-        )
-      ) {
+      if (!isJsFile(chunk.fileName)) {
         return null; // returning null means not modifying the chunk at all
       }
 
