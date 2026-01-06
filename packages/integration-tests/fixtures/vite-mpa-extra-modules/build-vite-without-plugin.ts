@@ -20,4 +20,3 @@ void vite.build({
   },
   plugins: [],
 });
-
