@@ -12,7 +12,7 @@ jobs:
     name: Build packages
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v2
       - uses: actions/setup-node@v4
         with:
           node-version-file: "package.json"
@@ -39,7 +39,7 @@ jobs:
     name: Typing check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v2
       - uses: actions/setup-node@v4
         with:
           node-version-file: "package.json"
@@ -65,7 +65,7 @@ jobs:
     name: Formatting check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v2
       - uses: actions/setup-node@v4
         with:
           node-version-file: "package.json"
@@ -92,7 +92,7 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v2
       - uses: actions/setup-node@v4
         with:
           node-version-file: "package.json"
@@ -134,7 +134,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v2
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
@@ -169,7 +169,7 @@ jobs:
     env:
       SENTRY_AUTH_TOKEN: ${{ secrets.E2E_TESTS_SENTRY_AUTH_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v2
       - uses: volta-cli/action@v3
       - name: Use dependency cache
         uses: actions/cache@v4
@@ -194,7 +194,7 @@ jobs:
     name: Linter check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v2
       - uses: actions/setup-node@v4
         with:
           node-version-file: "package.json"
@@ -223,7 +223,7 @@ jobs:
     # Build artifacts are only needed for releasing workflow.
     if: startsWith(github.ref, 'refs/heads/release/')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v2
       - uses: actions/setup-node@v4
         with:
           node-version-file: "package.json"
