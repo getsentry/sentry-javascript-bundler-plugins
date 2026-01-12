@@ -32,4 +32,17 @@ describe("sentryVitePlugin", () => {
       ])
     );
   });
+
+  it("returns an array when unplugin returns a single plugin", () => {
+    const plugins = sentryVitePlugin({
+      authToken: "test-token",
+      org: "test-org",
+      project: "test-project",
+      disable: true, // This causes unplugin to return only the noop plugin
+    });
+
+    expect(Array.isArray(plugins)).toBe(true);
+    expect(plugins.length).toBeGreaterThanOrEqual(1);
+    expect(plugins[0]).toHaveProperty("name");
+  });
 });
