@@ -33,7 +33,7 @@ describe("sentryVitePlugin", () => {
     );
   });
 
-  it("returns an array when unplugin returns a single plugin", () => {
+  it("returns an array of Vite pluginswhen unplugin returns a single plugin", () => {
     const plugins = sentryVitePlugin({
       authToken: "test-token",
       org: "test-org",
