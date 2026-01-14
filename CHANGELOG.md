@@ -4,6 +4,13 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 4.6.2
+
+- fix(vite): Ensure sentryVitePlugin always returns an array of plugins ([#832](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/832))
+- fix(vite): Skip code injection for HTML facade chunks ([#830](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/830))
+- fix(rollup): Prevent double-injection of debug ID ([#827](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/827))
+- fix(esbuild): fix debug ID injection when moduleMetadata or applicationKey is set ([#828](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/828))
+
 ## 4.6.1
 
 - chore(deps): Update glob to 10.5.0 ([#823](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/823))
