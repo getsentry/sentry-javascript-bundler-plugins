@@ -434,7 +434,7 @@ describe("createSentryBuildPluginManager", () => {
       await buildPluginManager.injectDebugIds(buildArtifactPaths);
 
       expect(mockCliExecute).toHaveBeenCalledWith(
-        ["sourcemaps", "inject", "/path/to/1", "/path/to/2"],
+        ["sourcemaps", "inject", "--ignore", "node_modules", "/path/to/1", "/path/to/2"],
         false
       );
     });
@@ -459,7 +459,7 @@ describe("createSentryBuildPluginManager", () => {
       await buildPluginManager.injectDebugIds(buildArtifactPaths);
 
       expect(mockCliExecute).toHaveBeenCalledWith(
-        ["sourcemaps", "inject", "/path/to/bundle"],
+        ["sourcemaps", "inject", "--ignore", "node_modules", "/path/to/bundle"],
         true
       );
     });
