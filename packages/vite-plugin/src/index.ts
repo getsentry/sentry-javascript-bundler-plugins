@@ -73,7 +73,11 @@ const sentryUnplugin = sentryUnpluginFactory({
   bundleSizeOptimizationsPlugin: viteBundleSizeOptimizationsPlugin,
 });
 
-export const sentryVitePlugin: (options?: Options) => VitePlugin[] = sentryUnplugin.vite;
+export const sentryVitePlugin = (options?: Options): VitePlugin[] => {
+  const result = sentryUnplugin.vite(options);
+  // unplugin returns a single plugin instead of an array when only one plugin is created, so we normalize this here.
+  return Array.isArray(result) ? result : [result];
+};
 
 export type { Options as SentryVitePluginOptions } from "@sentry/bundler-plugin-core";
 export { sentryCliBinaryExists } from "@sentry/bundler-plugin-core";
