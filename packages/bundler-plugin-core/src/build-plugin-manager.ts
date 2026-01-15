@@ -23,6 +23,7 @@ import {
   arrayify,
   getProjects,
   getTurborepoEnvPassthroughWarning,
+  serializeIgnoreOptions,
   stripQueryAndHashFromPath,
 } from "./utils";
 import { glob } from "glob";
@@ -554,8 +555,13 @@ export function createSentryBuildPluginManager(
           try {
             const cliInstance = createCliInstance(options);
             await cliInstance.execute(
-              ["sourcemaps", "inject", ...buildArtifactPaths],
               options.debug ?? false
+              [
+                "sourcemaps",
+                "inject",
+                ...serializeIgnoreOptions(options.sourcemaps?.ignore),
+                ...buildArtifactPaths,
+              ],
             );
           } catch (e) {
             sentryScope.captureException('Error in "debugIdInjectionPlugin" writeBundle hook');
