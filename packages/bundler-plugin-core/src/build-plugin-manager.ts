@@ -555,13 +555,13 @@ export function createSentryBuildPluginManager(
           try {
             const cliInstance = createCliInstance(options);
             await cliInstance.execute(
-              options.debug ?? false
               [
                 "sourcemaps",
                 "inject",
                 ...serializeIgnoreOptions(options.sourcemaps?.ignore),
                 ...buildArtifactPaths,
               ],
+              options.debug ?? false
             );
           } catch (e) {
             sentryScope.captureException('Error in "debugIdInjectionPlugin" writeBundle hook');
