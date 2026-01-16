@@ -25,9 +25,8 @@ describe("sentryRollupPlugin", () => {
     expect(pluginNames).toEqual(
       expect.arrayContaining([
         "sentry-telemetry-plugin",
-        "sentry-rollup-release-injection-plugin",
         "sentry-release-management-plugin",
-        "sentry-rollup-debug-id-injection-plugin",
+        "sentry-rollup-injection-plugin",
         "sentry-rollup-debug-id-upload-plugin",
         "sentry-file-deletion-plugin",
       ])

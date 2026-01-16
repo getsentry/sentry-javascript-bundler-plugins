@@ -2,7 +2,7 @@ import { Compiler } from "webpack";
 import {
   getDebugIdSnippet,
   sentryUnpluginFactory,
-  createRollupDebugIdInjectionHooks,
+  createRollupInjectionHooks,
 } from "../src";
 
 describe("getDebugIdSnippet", () => {
@@ -14,8 +14,8 @@ describe("getDebugIdSnippet", () => {
   });
 });
 
-describe("createRollupDebugIdInjectionHooks", () => {
-  const hooks = createRollupDebugIdInjectionHooks();
+describe("createRollupInjectionHooks", () => {
+  const hooks = createRollupInjectionHooks('', true);
 
   describe("renderChunk", () => {
     it("should inject debug ID into clean JavaScript files", () => {
@@ -74,9 +74,9 @@ describe("createRollupDebugIdInjectionHooks", () => {
       [
         "inline format with large file",
         '"use strict";\n' +
-          "// comment\n".repeat(10) +
-          ';{try{(function(){var e="undefined"!=typeof window?window:e._sentryDebugIdIdentifier="sentry-dbid-existing-id");})();}catch(e){}};' +
-          '\nconsole.log("line");\n'.repeat(100),
+        "// comment\n".repeat(10) +
+        ';{try{(function(){var e="undefined"!=typeof window?window:e._sentryDebugIdIdentifier="sentry-dbid-existing-id");})();}catch(e){}};' +
+        '\nconsole.log("line");\n'.repeat(100),
       ],
     ])("should NOT inject when debug ID already exists (%s)", (_description, code) => {
       const result = hooks.renderChunk(code, { fileName: "bundle.js" });
@@ -103,20 +103,12 @@ describe("createRollupDebugIdInjectionHooks", () => {
 });
 
 describe("sentryUnpluginFactory sourcemaps.disable behavior", () => {
-  const mockReleaseInjectionPlugin = jest.fn((_injectionCode: string) => ({
-    name: "mock-release-injection-plugin",
-  }));
-
   const mockComponentNameAnnotatePlugin = jest.fn(() => ({
     name: "mock-component-name-annotate-plugin",
   }));
 
-  const mockModuleMetadataInjectionPlugin = jest.fn((_injectionCode: string) => ({
-    name: "mock-module-metadata-injection-plugin",
-  }));
-
-  const mockDebugIdInjectionPlugin = jest.fn(() => ({
-    name: "mock-debug-id-injection-plugin",
+  const mockInjectionPlugin = jest.fn(() => ({
+    name: "mock-injection-plugin",
   }));
 
   const mockDebugIdUploadPlugin = jest.fn(() => ({
@@ -129,10 +121,8 @@ describe("sentryUnpluginFactory sourcemaps.disable behavior", () => {
 
   const createUnpluginInstance = (): ReturnType<typeof sentryUnpluginFactory> => {
     return sentryUnpluginFactory({
-      releaseInjectionPlugin: mockReleaseInjectionPlugin,
+      injectionPlugin: mockInjectionPlugin,
       componentNameAnnotatePlugin: mockComponentNameAnnotatePlugin,
-      moduleMetadataInjectionPlugin: mockModuleMetadataInjectionPlugin,
-      debugIdInjectionPlugin: mockDebugIdInjectionPlugin,
       debugIdUploadPlugin: mockDebugIdUploadPlugin,
       bundleSizeOptimizationsPlugin: mockBundleSizeOptimizationsPlugin,
     });
@@ -190,7 +180,7 @@ describe("sentryUnpluginFactory sourcemaps.disable behavior", () => {
       const pluginNames = plugins.map((plugin) => plugin.name);
 
       // Should include debug ID injection but not upload
-      expect(pluginNames).toContain("mock-debug-id-injection-plugin");
+      expect(pluginNames).toContain("mock-injection-plugin");
       expect(pluginNames).not.toContain("mock-debug-id-upload-plugin");
 
       // Should still include other core plugins
@@ -219,7 +209,7 @@ describe("sentryUnpluginFactory sourcemaps.disable behavior", () => {
       const pluginNames = plugins.map((plugin) => plugin.name);
 
       // Should include both debug ID related plugins
-      expect(pluginNames).toContain("mock-debug-id-injection-plugin");
+      expect(pluginNames).toContain("mock-injection-plugin");
       expect(pluginNames).toContain("mock-debug-id-upload-plugin");
 
       // Should include other core plugins
@@ -246,7 +236,7 @@ describe("sentryUnpluginFactory sourcemaps.disable behavior", () => {
       const pluginNames = plugins.map((plugin) => plugin.name);
 
       // Should include both debug ID related plugins by default
-      expect(pluginNames).toContain("mock-debug-id-injection-plugin");
+      expect(pluginNames).toContain("mock-injection-plugin");
       expect(pluginNames).toContain("mock-debug-id-upload-plugin");
 
       // Should include other core plugins
@@ -273,7 +263,7 @@ describe("sentryUnpluginFactory sourcemaps.disable behavior", () => {
       const pluginNames = plugins.map((plugin) => plugin.name);
 
       // Should include both debug ID related plugins by default
-      expect(pluginNames).toContain("mock-debug-id-injection-plugin");
+      expect(pluginNames).toContain("mock-injection-plugin");
       expect(pluginNames).toContain("mock-debug-id-upload-plugin");
 
       // Should include other core plugins

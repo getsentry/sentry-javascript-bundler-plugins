@@ -24,9 +24,8 @@ describe("sentryVitePlugin", () => {
     expect(pluginNames).toEqual(
       expect.arrayContaining([
         "sentry-telemetry-plugin",
-        "sentry-vite-release-injection-plugin",
         "sentry-release-management-plugin",
-        "sentry-vite-debug-id-injection-plugin",
+        "sentry-vite-injection-plugin",
         "sentry-vite-debug-id-upload-plugin",
         "sentry-file-deletion-plugin",
       ])

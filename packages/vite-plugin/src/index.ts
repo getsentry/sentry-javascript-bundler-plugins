@@ -12,7 +12,7 @@ import { UnpluginOptions, VitePlugin } from "unplugin";
 
 function viteInjectionPlugin(injectionCode: string, debugIds: boolean): UnpluginOptions {
   return {
-    name: "sentry-vite-release-injection-plugin",
+    name: "sentry-vite-injection-plugin",
     // run `post` to avoid tripping up @rollup/plugin-commonjs when cjs is used
     // as we inject an `import` statement
     enforce: "post" as const, // need this so that vite runs the resolveId hook
