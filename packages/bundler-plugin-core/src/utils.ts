@@ -443,11 +443,12 @@ export function serializeIgnoreOptions(ignoreValue: string | string[] | undefine
 export function containsOnlyImports(code: string): boolean {
   const codeWithoutImports = code
     // Remove side effect imports: import '/path'; or import "./path";
-    .replace(/^\s*import\s+(['"`]).*?\1\s*;?\s*$/gm, "")
+    // Using explicit negated character classes to avoid polynomial backtracking
+    .replace(/^\s*import\s+(?:'[^'\n]*'|"[^"\n]*"|`[^`\n]*`)[\s;]*$/gm, "")
     // Remove named/default imports: import x from '/path'; import { x } from '/path';
-    .replace(/^\s*import\s+[\s\S]*?\s+from\s+(['"`]).*?\1\s*;?\s*$/gm, "")
+    .replace(/^\s*import\b[^'"`\n]*\bfrom\s+(?:'[^'\n]*'|"[^"\n]*"|`[^`\n]*`)[\s;]*$/gm, "")
     // Remove re-exports: export * from '/path'; export { x } from '/path';
-    .replace(/^\s*export\s+[\s\S]*?\s+from\s+(['"`]).*?\1\s*;?\s*$/gm, "")
+    .replace(/^\s*export\b[^'"`\n]*\bfrom\s+(?:'[^'\n]*'|"[^"\n]*"|`[^`\n]*`)[\s;]*$/gm, "")
     // Remove block comments
     .replace(/\/\*[\s\S]*?\*\//g, "")
     // Remove line comments
