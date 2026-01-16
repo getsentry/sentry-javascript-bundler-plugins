@@ -12,6 +12,7 @@ import { createDebugIdUploadFunction } from "./debug-id-upload";
 import { Logger } from "./logger";
 import { Options, SentrySDKBuildFlags } from "./types";
 import {
+  containsOnlyImports,
   generateGlobalInjectorCode,
   generateModuleMetadataInjectorCode,
   replaceBooleanFlagsInCode,
@@ -229,6 +230,9 @@ function isJsFile(fileName: string): boolean {
  * HTML entry points create "facade" chunks that should not contain injected code.
  * See: https://github.com/getsentry/sentry-javascript-bundler-plugins/issues/829
  *
+ * However, in SPA mode, the main bundle also has an HTML facade but contains
+ * substantial application code. We should NOT skip injection for these bundles.
+ *
  * @param code - The chunk's code content
  * @param facadeModuleId - The facade module ID (if any) - HTML files create facade chunks
  * @returns true if the chunk should be skipped
@@ -239,10 +243,9 @@ function shouldSkipCodeInjection(code: string, facadeModuleId: string | null | u
     return true;
   }
 
-  // Skip HTML facade chunks
-  // They only contain import statements and should not have Sentry code injected
+  // For HTML facade chunks, only skip if they contain only import statements
   if (facadeModuleId && stripQueryAndHashFromPath(facadeModuleId).endsWith(".html")) {
-    return true;
+    return containsOnlyImports(code);
   }
 
   return false;

@@ -428,3 +428,33 @@ export function serializeIgnoreOptions(ignoreValue: string | string[] | undefine
     [] as string[]
   );
 }
+
+/**
+ * Checks if a chunk contains only import/export statements and no substantial code.
+ *
+ * In Vite MPA (multi-page application) mode, HTML entry points create "facade" chunks
+ * that only contain import statements to load shared modules. These should not have
+ * Sentry code injected. However, in SPA mode, the main bundle also has an HTML facade
+ * but contains substantial application code that SHOULD have debug IDs injected.
+ *
+ * @ref https://github.com/getsentry/sentry-javascript-bundler-plugins/issues/829
+ * @ref https://github.com/getsentry/sentry-javascript-bundler-plugins/issues/839
+ */
+export function containsOnlyImports(code: string): boolean {
+  const codeWithoutImports = code
+    // Remove side effect imports: import '/path'; or import "./path";
+    .replace(/^\s*import\s+(['"`]).*?\1\s*;?\s*$/gm, "")
+    // Remove named/default imports: import x from '/path'; import { x } from '/path';
+    .replace(/^\s*import\s+[\s\S]*?\s+from\s+(['"`]).*?\1\s*;?\s*$/gm, "")
+    // Remove re-exports: export * from '/path'; export { x } from '/path';
+    .replace(/^\s*export\s+[\s\S]*?\s+from\s+(['"`]).*?\1\s*;?\s*$/gm, "")
+    // Remove block comments
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    // Remove line comments
+    .replace(/\/\/.*$/gm, "")
+    // Remove "use strict" directives
+    .replace(/["']use strict["']\s*;?/g, "")
+    .trim();
+
+  return codeWithoutImports.length === 0;
+}
