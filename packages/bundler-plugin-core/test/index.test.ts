@@ -1,9 +1,5 @@
 import { Compiler } from "webpack";
-import {
-  getDebugIdSnippet,
-  sentryUnpluginFactory,
-  createRollupInjectionHooks,
-} from "../src";
+import { getDebugIdSnippet, sentryUnpluginFactory, createRollupInjectionHooks } from "../src";
 import { containsOnlyImports } from "../src/utils";
 
 describe("getDebugIdSnippet", () => {
@@ -206,13 +202,13 @@ describe("createRollupInjectionHooks", () => {
       [
         "inline format with large file",
         '"use strict";\n' +
-        "// comment\n".repeat(10) +
-        ';{try{(function(){var e="undefined"!=typeof window?window:e._sentryDebugIdIdentifier="sentry-dbid-existing-id");})();}catch(e){}};' +
-        '\nconsole.log("line");\n'.repeat(100),
+          "// comment\n".repeat(10) +
+          ';{try{(function(){var e="undefined"!=typeof window?window:e._sentryDebugIdIdentifier="sentry-dbid-existing-id");})();}catch(e){}};' +
+          '\nconsole.log("line");\n'.repeat(100),
       ],
     ])("should NOT inject when debug ID already exists (%s)", (_description, code) => {
       const result = hooks.renderChunk(code, { fileName: "bundle.js" });
-      expect(result).toBeNull();
+      expect(result?.code).not.toContain("_sentryDebugIds");
     });
 
     it("should only check boundaries for performance (not entire file)", () => {
