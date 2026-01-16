@@ -23,6 +23,7 @@ import {
   arrayify,
   getProjects,
   getTurborepoEnvPassthroughWarning,
+  serializeIgnoreOptions,
   stripQueryAndHashFromPath,
 } from "./utils";
 import { glob } from "glob";
@@ -554,7 +555,12 @@ export function createSentryBuildPluginManager(
           try {
             const cliInstance = createCliInstance(options);
             await cliInstance.execute(
-              ["sourcemaps", "inject", ...buildArtifactPaths],
+              [
+                "sourcemaps",
+                "inject",
+                ...serializeIgnoreOptions(options.sourcemaps?.ignore),
+                ...buildArtifactPaths,
+              ],
               options.debug ? "rejectOnError" : false
             );
           } catch (e) {
