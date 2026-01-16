@@ -408,3 +408,54 @@ export function getProjects(project: string | string[] | undefined): string[] | 
 
   return undefined;
 }
+
+/**
+ * Inlined functionality from @sentry/cli helper code to add `--ignore` options.
+ *
+ * Temporary workaround until we expose a function for injecting debug IDs. Currently, we directly call `execute` with CLI args to inject them.
+ */
+export function serializeIgnoreOptions(ignoreValue: string | string[] | undefined): string[] {
+  const DEFAULT_IGNORE = ["node_modules"];
+
+  const ignoreOptions: string[] = Array.isArray(ignoreValue)
+    ? ignoreValue
+    : typeof ignoreValue === "string"
+    ? [ignoreValue]
+    : DEFAULT_IGNORE;
+
+  return ignoreOptions.reduce(
+    (acc, value) => acc.concat(["--ignore", String(value)]),
+    [] as string[]
+  );
+}
+
+/**
+ * Checks if a chunk contains only import/export statements and no substantial code.
+ *
+ * In Vite MPA (multi-page application) mode, HTML entry points create "facade" chunks
+ * that only contain import statements to load shared modules. These should not have
+ * Sentry code injected. However, in SPA mode, the main bundle also has an HTML facade
+ * but contains substantial application code that SHOULD have debug IDs injected.
+ *
+ * @ref https://github.com/getsentry/sentry-javascript-bundler-plugins/issues/829
+ * @ref https://github.com/getsentry/sentry-javascript-bundler-plugins/issues/839
+ */
+export function containsOnlyImports(code: string): boolean {
+  const codeWithoutImports = code
+    // Remove side effect imports: import '/path'; or import "./path";
+    // Using explicit negated character classes to avoid polynomial backtracking
+    .replace(/^\s*import\s+(?:'[^'\n]*'|"[^"\n]*"|`[^`\n]*`)[\s;]*$/gm, "")
+    // Remove named/default imports: import x from '/path'; import { x } from '/path';
+    .replace(/^\s*import\b[^'"`\n]*\bfrom\s+(?:'[^'\n]*'|"[^"\n]*"|`[^`\n]*`)[\s;]*$/gm, "")
+    // Remove re-exports: export * from '/path'; export { x } from '/path';
+    .replace(/^\s*export\b[^'"`\n]*\bfrom\s+(?:'[^'\n]*'|"[^"\n]*"|`[^`\n]*`)[\s;]*$/gm, "")
+    // Remove block comments
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    // Remove line comments
+    .replace(/\/\/.*$/gm, "")
+    // Remove "use strict" directives
+    .replace(/["']use strict["']\s*;?/g, "")
+    .trim();
+
+  return codeWithoutImports.length === 0;
+}
