@@ -1,9 +1,5 @@
 import { Compiler } from "webpack";
-import {
-  getDebugIdSnippet,
-  sentryUnpluginFactory,
-  createRollupInjectionHooks,
-} from "../src";
+import { getDebugIdSnippet, sentryUnpluginFactory, createRollupInjectionHooks } from "../src";
 
 describe("getDebugIdSnippet", () => {
   it("returns the debugId injection snippet for a passed debugId", () => {
@@ -15,7 +11,7 @@ describe("getDebugIdSnippet", () => {
 });
 
 describe("createRollupInjectionHooks", () => {
-  const hooks = createRollupInjectionHooks('', true);
+  const hooks = createRollupInjectionHooks("", true);
 
   describe("renderChunk", () => {
     it("should inject debug ID into clean JavaScript files", () => {
@@ -74,9 +70,9 @@ describe("createRollupInjectionHooks", () => {
       [
         "inline format with large file",
         '"use strict";\n' +
-        "// comment\n".repeat(10) +
-        ';{try{(function(){var e="undefined"!=typeof window?window:e._sentryDebugIdIdentifier="sentry-dbid-existing-id");})();}catch(e){}};' +
-        '\nconsole.log("line");\n'.repeat(100),
+          "// comment\n".repeat(10) +
+          ';{try{(function(){var e="undefined"!=typeof window?window:e._sentryDebugIdIdentifier="sentry-dbid-existing-id");})();}catch(e){}};' +
+          '\nconsole.log("line");\n'.repeat(100),
       ],
     ])("should NOT inject when debug ID already exists (%s)", (_description, code) => {
       const result = hooks.renderChunk(code, { fileName: "bundle.js" });

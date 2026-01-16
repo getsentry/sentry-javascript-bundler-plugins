@@ -307,14 +307,14 @@ export function createRollupInjectionHooks(
         const chunkEndSnippet = code.slice(-500);
 
         if (
-          chunkStartSnippet.includes("_sentryDebugIdIdentifier") ||
-          chunkEndSnippet.includes("//# debugId=")
+          !(
+            chunkStartSnippet.includes("_sentryDebugIdIdentifier") ||
+            chunkEndSnippet.includes("//# debugId=")
+          )
         ) {
-          return null; // Debug ID already present, skip injection
+          const debugId = stringToUUID(code); // generate a deterministic debug ID
+          codeToInject += getDebugIdSnippet(debugId);
         }
-
-        const debugId = stringToUUID(code); // generate a deterministic debug ID
-        codeToInject += getDebugIdSnippet(debugId);
       }
 
       const ms = new MagicString(code, { filename: chunk.fileName });
