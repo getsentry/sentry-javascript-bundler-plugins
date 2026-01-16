@@ -33,10 +33,10 @@ type UnsafeDefinePlugin = {
   new (options: any): unknown;
 };
 
-function webpackReleaseInjectionPlugin(
+function webpackInjectionPlugin(
   UnsafeBannerPlugin: UnsafeBannerPlugin | undefined
-): (injectionCode: string) => UnpluginOptions {
-  return (injectionCode: string): UnpluginOptions => ({
+): (injectionCode: string, debugIds: boolean) => UnpluginOptions {
+  return (injectionCode: string, debugIds: boolean): UnpluginOptions => ({
     name: "sentry-webpack-release-injection-plugin",
     webpack(compiler) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -54,7 +54,15 @@ function webpackReleaseInjectionPlugin(
         new BannerPlugin({
           raw: true,
           include: /\.(js|ts|jsx|tsx|mjs|cjs)(\?[^?]*)?(#[^#]*)?$/,
-          banner: injectionCode,
+          banner: (arg?: BannerPluginCallbackArg) => {
+            let codeToInject = injectionCode;
+            if (debugIds) {
+              const hash = arg?.chunk?.contentHash?.javascript ?? arg?.chunk?.hash;
+              const debugId = hash ? stringToUUID(hash) : uuidv4();
+              codeToInject += getDebugIdSnippet(debugId);
+            }
+            return codeToInject;
+          },
         })
       );
     },
@@ -93,38 +101,6 @@ function webpackBundleSizeOptimizationsPlugin(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
         new DefinePlugin({
           ...replacementValues,
-        })
-      );
-    },
-  });
-}
-
-function webpackDebugIdInjectionPlugin(
-  UnsafeBannerPlugin: UnsafeBannerPlugin | undefined
-): () => UnpluginOptions {
-  return () => ({
-    name: "sentry-webpack-debug-id-injection-plugin",
-    webpack(compiler) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore webpack version compatibility shenanigans
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const BannerPlugin =
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore webpack version compatibility shenanigans
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        compiler?.webpack?.BannerPlugin || UnsafeBannerPlugin;
-
-      compiler.options.plugins = compiler.options.plugins || [];
-      compiler.options.plugins.push(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
-        new BannerPlugin({
-          raw: true,
-          include: /\.(js|ts|jsx|tsx|mjs|cjs)(\?[^?]*)?(#[^#]*)?$/,
-          banner: (arg?: BannerPluginCallbackArg) => {
-            const hash = arg?.chunk?.contentHash?.javascript ?? arg?.chunk?.hash;
-            const debugId = hash ? stringToUUID(hash) : uuidv4();
-            return getDebugIdSnippet(debugId);
-          },
         })
       );
     },
@@ -170,34 +146,6 @@ function webpackDebugIdUploadPlugin(
   };
 }
 
-function webpackModuleMetadataInjectionPlugin(
-  UnsafeBannerPlugin: UnsafeBannerPlugin | undefined
-): (injectionCode: string) => UnpluginOptions {
-  return (injectionCode: string) => ({
-    name: "sentry-webpack-module-metadata-injection-plugin",
-    webpack(compiler) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore webpack version compatibility shenanigans
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const BannerPlugin =
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore webpack version compatibility shenanigans
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        compiler?.webpack?.BannerPlugin || UnsafeBannerPlugin;
-
-      compiler.options.plugins = compiler.options.plugins || [];
-      compiler.options.plugins.push(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
-        new BannerPlugin({
-          raw: true,
-          include: /\.(js|ts|jsx|tsx|mjs|cjs)(\?[^?]*)?(#[^#]*)?$/,
-          banner: injectionCode,
-        })
-      );
-    },
-  });
-}
-
 /**
  * The factory function accepts BannerPlugin and DefinePlugin classes in
  * order to avoid direct dependencies on webpack.
@@ -214,10 +162,8 @@ export function sentryWebpackUnpluginFactory({
   DefinePlugin?: UnsafeDefinePlugin;
 } = {}): ReturnType<typeof sentryUnpluginFactory> {
   return sentryUnpluginFactory({
-    releaseInjectionPlugin: webpackReleaseInjectionPlugin(BannerPlugin),
+    injectionPlugin: webpackInjectionPlugin(BannerPlugin),
     componentNameAnnotatePlugin: webpackComponentNameAnnotatePlugin(),
-    moduleMetadataInjectionPlugin: webpackModuleMetadataInjectionPlugin(BannerPlugin),
-    debugIdInjectionPlugin: webpackDebugIdInjectionPlugin(BannerPlugin),
     debugIdUploadPlugin: webpackDebugIdUploadPlugin,
     bundleSizeOptimizationsPlugin: webpackBundleSizeOptimizationsPlugin(DefinePlugin),
   });
