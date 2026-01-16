@@ -561,7 +561,7 @@ export function createSentryBuildPluginManager(
                 ...serializeIgnoreOptions(options.sourcemaps?.ignore),
                 ...buildArtifactPaths,
               ],
-              options.debug ?? false
+              options.debug ? "rejectOnError" : false
             );
           } catch (e) {
             sentryScope.captureException('Error in "debugIdInjectionPlugin" writeBundle hook');

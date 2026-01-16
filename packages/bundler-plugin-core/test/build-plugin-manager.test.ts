@@ -439,7 +439,7 @@ describe("createSentryBuildPluginManager", () => {
       );
     });
 
-    it("should pass debug flag when options.debug is true", async () => {
+    it('should pass "rejectOnError" flag when options.debug is true', async () => {
       mockCliExecute.mockResolvedValue(undefined);
 
       const buildPluginManager = createSentryBuildPluginManager(
@@ -460,7 +460,7 @@ describe("createSentryBuildPluginManager", () => {
 
       expect(mockCliExecute).toHaveBeenCalledWith(
         ["sourcemaps", "inject", "--ignore", "node_modules", "/path/to/bundle"],
-        true
+        "rejectOnError"
       );
     });
   });
