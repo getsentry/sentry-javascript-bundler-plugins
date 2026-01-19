@@ -1,9 +1,7 @@
 import {
   sentryUnpluginFactory,
   Options,
-  createRollupReleaseInjectionHooks,
-  createRollupModuleMetadataInjectionHooks,
-  createRollupDebugIdInjectionHooks,
+  createRollupInjectionHooks,
   createRollupDebugIdUploadHooks,
   SentrySDKBuildFlags,
   createRollupBundleSizeOptimizationHooks,
@@ -12,13 +10,6 @@ import {
 } from "@sentry/bundler-plugin-core";
 import type { UnpluginOptions } from "unplugin";
 
-function rollupReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
-  return {
-    name: "sentry-rollup-release-injection-plugin",
-    rollup: createRollupReleaseInjectionHooks(injectionCode),
-  };
-}
-
 function rollupComponentNameAnnotatePlugin(ignoredComponents?: string[]): UnpluginOptions {
   return {
     name: "sentry-rollup-component-name-annotate-plugin",
@@ -26,17 +17,10 @@ function rollupComponentNameAnnotatePlugin(ignoredComponents?: string[]): Unplug
   };
 }
 
-function rollupDebugIdInjectionPlugin(): UnpluginOptions {
+function rollupInjectionPlugin(injectionCode: string, debugIds: boolean): UnpluginOptions {
   return {
-    name: "sentry-rollup-debug-id-injection-plugin",
-    rollup: createRollupDebugIdInjectionHooks(),
-  };
-}
-
-function rollupModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOptions {
-  return {
-    name: "sentry-rollup-module-metadata-injection-plugin",
-    rollup: createRollupModuleMetadataInjectionHooks(injectionCode),
+    name: "sentry-rollup-injection-plugin",
+    rollup: createRollupInjectionHooks(injectionCode, debugIds),
   };
 }
 
@@ -61,10 +45,8 @@ function rollupBundleSizeOptimizationsPlugin(
 }
 
 const sentryUnplugin = sentryUnpluginFactory({
-  releaseInjectionPlugin: rollupReleaseInjectionPlugin,
+  injectionPlugin: rollupInjectionPlugin,
   componentNameAnnotatePlugin: rollupComponentNameAnnotatePlugin,
-  debugIdInjectionPlugin: rollupDebugIdInjectionPlugin,
-  moduleMetadataInjectionPlugin: rollupModuleMetadataInjectionPlugin,
   debugIdUploadPlugin: rollupDebugIdUploadPlugin,
   bundleSizeOptimizationsPlugin: rollupBundleSizeOptimizationsPlugin,
 });

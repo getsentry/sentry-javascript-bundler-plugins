@@ -317,9 +317,11 @@ function esbuildBundleSizeOptimizationsPlugin(
 }
 
 const sentryUnplugin = sentryUnpluginFactory({
-  releaseInjectionPlugin: esbuildReleaseInjectionPlugin,
-  debugIdInjectionPlugin: esbuildDebugIdInjectionPlugin,
-  moduleMetadataInjectionPlugin: esbuildModuleMetadataInjectionPlugin,
+  injectionPlugin: {
+    releaseInjectionPlugin: esbuildReleaseInjectionPlugin,
+    debugIdInjectionPlugin: esbuildDebugIdInjectionPlugin,
+    moduleMetadataInjectionPlugin: esbuildModuleMetadataInjectionPlugin,
+  },
   debugIdUploadPlugin: esbuildDebugIdUploadPlugin,
   bundleSizeOptimizationsPlugin: esbuildBundleSizeOptimizationsPlugin,
 });

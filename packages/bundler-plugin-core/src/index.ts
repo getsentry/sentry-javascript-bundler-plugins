@@ -20,11 +20,20 @@ import {
   stripQueryAndHashFromPath,
 } from "./utils";
 
-interface SentryUnpluginFactoryOptions {
+type InjectionPlugin = (
+  injectionCode: string,
+  debugIds: boolean,
+  logger: Logger
+) => UnpluginOptions;
+type LegacyPlugins = {
   releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
-  componentNameAnnotatePlugin?: (ignoredComponents?: string[]) => UnpluginOptions;
   moduleMetadataInjectionPlugin: (injectionCode: string) => UnpluginOptions;
   debugIdInjectionPlugin: (logger: Logger) => UnpluginOptions;
+};
+
+interface SentryUnpluginFactoryOptions {
+  injectionPlugin: InjectionPlugin | LegacyPlugins;
+  componentNameAnnotatePlugin?: (ignoredComponents?: string[]) => UnpluginOptions;
   debugIdUploadPlugin: (
     upload: (buildArtifacts: string[]) => Promise<void>,
     logger: Logger,
@@ -38,10 +47,8 @@ interface SentryUnpluginFactoryOptions {
  * Creates an unplugin instance used to create Sentry plugins for Vite, Rollup, esbuild, and Webpack.
  */
 export function sentryUnpluginFactory({
-  releaseInjectionPlugin,
+  injectionPlugin,
   componentNameAnnotatePlugin,
-  moduleMetadataInjectionPlugin,
-  debugIdInjectionPlugin,
   debugIdUploadPlugin,
   bundleSizeOptimizationsPlugin,
 }: SentryUnpluginFactoryOptions): UnpluginInstance<Options | undefined, true> {
@@ -94,6 +101,8 @@ export function sentryUnpluginFactory({
       plugins.push(bundleSizeOptimizationsPlugin(bundleSizeOptimizationReplacementValues));
     }
 
+    let injectionCode = "";
+
     if (!options.release.inject) {
       logger.debug(
         "Release injection disabled via `release.inject` option. Will not inject release."
@@ -103,18 +112,31 @@ export function sentryUnpluginFactory({
         "No release name provided. Will not inject release. Please set the `release.name` option to identify your release."
       );
     } else {
-      const injectionCode = generateGlobalInjectorCode({
+      const code = generateGlobalInjectorCode({
         release: options.release.name,
         injectBuildInformation: options._experiments.injectBuildInformation || false,
       });
-      plugins.push(releaseInjectionPlugin(injectionCode));
+      if (typeof injectionPlugin !== "function") {
+        plugins.push(injectionPlugin.releaseInjectionPlugin(code));
+      } else {
+        injectionCode += code;
+      }
     }
 
     if (Object.keys(sentryBuildPluginManager.bundleMetadata).length > 0) {
-      const injectionCode = generateModuleMetadataInjectorCode(
-        sentryBuildPluginManager.bundleMetadata
-      );
-      plugins.push(moduleMetadataInjectionPlugin(injectionCode));
+      const code = generateModuleMetadataInjectorCode(sentryBuildPluginManager.bundleMetadata);
+      if (typeof injectionPlugin !== "function") {
+        plugins.push(injectionPlugin.moduleMetadataInjectionPlugin(code));
+      } else {
+        injectionCode += code;
+      }
+    }
+
+    if (
+      typeof injectionPlugin === "function" &&
+      (injectionCode !== "" || options.sourcemaps?.disable !== true)
+    ) {
+      plugins.push(injectionPlugin(injectionCode, options.sourcemaps?.disable !== true, logger));
     }
 
     // Add plugin to create and finalize releases, and also take care of adding commits and legacy sourcemaps
@@ -132,7 +154,9 @@ export function sentryUnpluginFactory({
     });
 
     if (options.sourcemaps?.disable !== true) {
-      plugins.push(debugIdInjectionPlugin(logger));
+      if (typeof injectionPlugin !== "function") {
+        plugins.push(injectionPlugin.debugIdInjectionPlugin(logger));
+      }
 
       if (options.sourcemaps?.disable !== "disable-upload") {
         // This option is only strongly typed for the webpack plugin, where it is used. It has no effect on other plugins
@@ -251,42 +275,6 @@ function shouldSkipCodeInjection(code: string, facadeModuleId: string | null | u
   return false;
 }
 
-export function createRollupReleaseInjectionHooks(injectionCode: string): {
-  renderChunk: RenderChunkHook;
-} {
-  return {
-    renderChunk(code: string, chunk: { fileName: string; facadeModuleId?: string | null }) {
-      if (!isJsFile(chunk.fileName)) {
-        return null; // returning null means not modifying the chunk at all
-      }
-
-      // Skip empty chunks and HTML facade chunks (Vite MPA)
-      if (shouldSkipCodeInjection(code, chunk.facadeModuleId)) {
-        return null;
-      }
-
-      const ms = new MagicString(code, { filename: chunk.fileName });
-
-      const match = code.match(COMMENT_USE_STRICT_REGEX)?.[0];
-
-      if (match) {
-        // Add injected code after any comments or "use strict" at the beginning of the bundle.
-        ms.appendLeft(match.length, injectionCode);
-      } else {
-        // ms.replace() doesn't work when there is an empty string match (which happens if
-        // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
-        // need this special case here.
-        ms.prepend(injectionCode);
-      }
-
-      return {
-        code: ms.toString(),
-        map: ms.generateMap({ file: chunk.fileName, hires: "boundary" }),
-      };
-    },
-  };
-}
-
 export function createRollupBundleSizeOptimizationHooks(replacementValues: SentrySDKBuildFlags): {
   transform: UnpluginOptions["transform"];
 } {
@@ -297,7 +285,10 @@ export function createRollupBundleSizeOptimizationHooks(replacementValues: Sentr
   };
 }
 
-export function createRollupDebugIdInjectionHooks(): {
+export function createRollupInjectionHooks(
+  injectionCode: string,
+  debugIds: boolean
+): {
   renderChunk: RenderChunkHook;
 } {
   return {
@@ -311,22 +302,25 @@ export function createRollupDebugIdInjectionHooks(): {
         return null;
       }
 
-      // Check if a debug ID has already been injected to avoid duplicate injection (e.g. by another plugin or Sentry CLI)
-      const chunkStartSnippet = code.slice(0, 6000);
-      const chunkEndSnippet = code.slice(-500);
+      let codeToInject = injectionCode;
 
-      if (
-        chunkStartSnippet.includes("_sentryDebugIdIdentifier") ||
-        chunkEndSnippet.includes("//# debugId=")
-      ) {
-        return null; // Debug ID already present, skip injection
+      if (debugIds) {
+        // Check if a debug ID has already been injected to avoid duplicate injection (e.g. by another plugin or Sentry CLI)
+        const chunkStartSnippet = code.slice(0, 6000);
+        const chunkEndSnippet = code.slice(-500);
+
+        if (
+          !(
+            chunkStartSnippet.includes("_sentryDebugIdIdentifier") ||
+            chunkEndSnippet.includes("//# debugId=")
+          )
+        ) {
+          const debugId = stringToUUID(code); // generate a deterministic debug ID
+          codeToInject += getDebugIdSnippet(debugId);
+        }
       }
 
-      const debugId = stringToUUID(code); // generate a deterministic debug ID
-      const codeToInject = getDebugIdSnippet(debugId);
-
       const ms = new MagicString(code, { filename: chunk.fileName });
-
       const match = code.match(COMMENT_USE_STRICT_REGEX)?.[0];
 
       if (match) {
@@ -337,42 +331,6 @@ export function createRollupDebugIdInjectionHooks(): {
         // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
         // need this special case here.
         ms.prepend(codeToInject);
-      }
-
-      return {
-        code: ms.toString(),
-        map: ms.generateMap({ file: chunk.fileName, hires: "boundary" }),
-      };
-    },
-  };
-}
-
-export function createRollupModuleMetadataInjectionHooks(injectionCode: string): {
-  renderChunk: RenderChunkHook;
-} {
-  return {
-    renderChunk(code: string, chunk: { fileName: string; facadeModuleId?: string | null }) {
-      if (!isJsFile(chunk.fileName)) {
-        return null; // returning null means not modifying the chunk at all
-      }
-
-      // Skip empty chunks and HTML facade chunks (Vite MPA)
-      if (shouldSkipCodeInjection(code, chunk.facadeModuleId)) {
-        return null;
-      }
-
-      const ms = new MagicString(code, { filename: chunk.fileName });
-
-      const match = code.match(COMMENT_USE_STRICT_REGEX)?.[0];
-
-      if (match) {
-        // Add injected code after any comments or "use strict" at the beginning of the bundle.
-        ms.appendLeft(match.length, injectionCode);
-      } else {
-        // ms.replace() doesn't work when there is an empty string match (which happens if
-        // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
-        // need this special case here.
-        ms.prepend(injectionCode);
       }
 
       return {
