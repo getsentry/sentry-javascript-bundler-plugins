@@ -37,7 +37,7 @@ function webpackInjectionPlugin(
   UnsafeBannerPlugin: UnsafeBannerPlugin | undefined
 ): (injectionCode: string, debugIds: boolean) => UnpluginOptions {
   return (injectionCode: string, debugIds: boolean): UnpluginOptions => ({
-    name: "sentry-webpack-release-injection-plugin",
+    name: "sentry-webpack-injection-plugin",
     webpack(compiler) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore webpack version compatibility shenanigans
