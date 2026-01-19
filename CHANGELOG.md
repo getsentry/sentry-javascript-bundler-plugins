@@ -4,6 +4,22 @@
 
 - "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
 
+## 4.7.0
+
+- docs: Add RELEASE.md to document release process ([#834](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/834))
+- feat: Combine injection plugins ([#844](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/844))
+- fix(plugin-manager): Enable "rejectOnError" in debug ([#837](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/837))
+- fix(plugin-manager): Respect `sourcemap.ignore` values for injecting debugIDs ([#836](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/836))
+- fix(vite): Skip HTML injection for MPA but keep it for SPA ([#843](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/843))
+
+<details>
+  <summary> <strong>Internal Changes</strong> </summary>
+
+- chore: Use pull_request_target for changelog preview ([#842](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/842))
+- ci(release): Switch from action-prepare-release to Craft ([#831](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/831))
+- test: Ensure Debug IDs match ([#840](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/840))
+</details>
+
 ## 4.6.2
 
 - fix(vite): Ensure sentryVitePlugin always returns an array of plugins ([#832](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/832))
