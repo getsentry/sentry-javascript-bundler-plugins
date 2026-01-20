@@ -232,10 +232,12 @@ type RenderChunkHook = (
   chunk: {
     fileName: string;
     facadeModuleId?: string | null;
-  }
+  },
+  outputOptions?: unknown,
+  meta?: { magicString?: MagicString }
 ) => {
   code: string;
-  map: SourceMap;
+  readonly map?: SourceMap;
 } | null;
 
 /**
@@ -292,7 +294,12 @@ export function createRollupInjectionHooks(
   renderChunk: RenderChunkHook;
 } {
   return {
-    renderChunk(code: string, chunk: { fileName: string; facadeModuleId?: string | null }) {
+    renderChunk(
+      code: string,
+      chunk: { fileName: string; facadeModuleId?: string | null },
+      _?: unknown,
+      meta?: { magicString?: MagicString }
+    ) {
       if (!isJsFile(chunk.fileName)) {
         return null; // returning null means not modifying the chunk at all
       }
@@ -320,7 +327,7 @@ export function createRollupInjectionHooks(
         }
       }
 
-      const ms = new MagicString(code, { filename: chunk.fileName });
+      const ms = meta?.magicString || new MagicString(code, { filename: chunk.fileName });
       const match = code.match(COMMENT_USE_STRICT_REGEX)?.[0];
 
       if (match) {
@@ -333,9 +340,20 @@ export function createRollupInjectionHooks(
         ms.prepend(codeToInject);
       }
 
+      // Rolldown can pass a native MagicString instance in meta.magicString
+      if (ms?.constructor?.name === "BindingMagicString") {
+        // Rolldown docs say to return the magic string instance directly in this case
+        return { code: ms as unknown as string };
+      }
+
       return {
         code: ms.toString(),
-        map: ms.generateMap({ file: chunk.fileName, hires: "boundary" }),
+        get map() {
+          return ms.generateMap({
+            file: chunk.fileName,
+            hires: "boundary",
+          });
+        },
       };
     },
   };
