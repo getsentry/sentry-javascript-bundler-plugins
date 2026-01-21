@@ -16,6 +16,9 @@ describe("normalizeUserOptions()", () => {
       project: "my-project",
       debug: false,
       disable: false,
+      reactComponentAnnotation: {
+        injectIntoHtml: false,
+      },
       release: {
         name: "my-release",
         finalize: true,
@@ -66,6 +69,9 @@ describe("normalizeUserOptions()", () => {
       project: "my-project",
       debug: false,
       disable: false,
+      reactComponentAnnotation: {
+        injectIntoHtml: false,
+      },
       release: {
         name: "my-release",
         vcsRemote: "origin",

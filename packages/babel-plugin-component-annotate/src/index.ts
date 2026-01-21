@@ -35,7 +35,11 @@
 import type * as Babel from "@babel/core";
 import type { PluginObj, PluginPass } from "@babel/core";
 
-import { DEFAULT_IGNORED_ELEMENTS, KNOWN_INCOMPATIBLE_PLUGINS } from "./constants";
+import {
+  DEFAULT_IGNORED_ELEMENTS,
+  REACT_NATIVE_ELEMENTS,
+  KNOWN_INCOMPATIBLE_PLUGINS,
+} from "./constants";
 
 const webComponentName = "data-sentry-component";
 const webElementName = "data-sentry-element";
@@ -49,6 +53,7 @@ interface AnnotationOpts {
   native?: boolean;
   "annotate-fragments"?: boolean;
   ignoredComponents?: string[];
+  experimentalInjectIntoHtml?: boolean;
 }
 
 interface FragmentContext {
@@ -79,6 +84,8 @@ interface JSXProcessingContext {
   ignoredComponents: string[];
   /** Fragment context for identifying React fragments */
   fragmentContext?: FragmentContext;
+  /** Whether to experimentally inject attributes into HTML elements */
+  experimentalInjectIntoHtml?: boolean;
 }
 
 // We must export the plugin as default, otherwise the Babel loader will not be able to resolve it when configured using its string identifier
@@ -168,6 +175,7 @@ function createJSXProcessingContext(
     attributeNames: attributeNamesFromState(state),
     ignoredComponents: state.opts.ignoredComponents ?? [],
     fragmentContext: state.sentryFragmentContext,
+    experimentalInjectIntoHtml: state.opts.experimentalInjectIntoHtml === true,
   };
 }
 
@@ -306,6 +314,31 @@ function processJSX(
 }
 
 /**
+ * Checks if an element name represents an HTML element (as opposed to a React component).
+ * HTML elements include standard lowercase HTML tags and React Native elements.
+ */
+function isHtmlElement(elementName: string): boolean {
+  // Unknown elements are not HTML elements
+  if (elementName === UNKNOWN_ELEMENT_NAME) {
+    return false;
+  }
+
+  // Check for lowercase first letter (standard HTML elements)
+  if (elementName.length > 0 && elementName.charAt(0) === elementName.charAt(0).toLowerCase()) {
+    return true;
+  }
+
+  // React Native elements typically start with uppercase but are still "native" elements
+  // We consider them HTML-like elements for annotation purposes
+  if (REACT_NATIVE_ELEMENTS.includes(elementName)) {
+    return true;
+  }
+
+  // Otherwise, assume it's a React component (PascalCase)
+  return false;
+}
+
+/**
  * Applies Sentry tracking attributes to a JSX opening element.
  * Adds component name, element name, and source file attributes while
  * respecting ignore lists and fragment detection.
@@ -315,7 +348,14 @@ function applyAttributes(
   openingElement: Babel.NodePath<Babel.types.JSXOpeningElement>,
   componentName: string
 ): void {
-  const { t, attributeNames, ignoredComponents, fragmentContext, sourceFileName } = context;
+  const {
+    t,
+    attributeNames,
+    ignoredComponents,
+    fragmentContext,
+    sourceFileName,
+    experimentalInjectIntoHtml,
+  } = context;
   const [componentAttributeName, elementAttributeName, sourceFileAttributeName] = attributeNames;
 
   // e.g., Raw JSX text like the `A` in `<h1>a</h1>`
@@ -331,6 +371,12 @@ function applyAttributes(
 
   if (!openingElement.node.attributes) openingElement.node.attributes = [];
   const elementName = getPathName(t, openingElement);
+
+  // When experimentalInjectIntoHtml is true, only inject into HTML elements
+  // Skip React components
+  if (experimentalInjectIntoHtml && !isHtmlElement(elementName)) {
+    return;
+  }
 
   const isAnIgnoredComponent = ignoredComponents.some(
     (ignoredComponent) => ignoredComponent === componentName || ignoredComponent === elementName

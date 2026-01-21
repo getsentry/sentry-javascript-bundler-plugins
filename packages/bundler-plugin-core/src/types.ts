@@ -354,6 +354,13 @@ export interface Options {
      * A list of strings representing the names of components to ignore. The plugin will not apply `data-sentry` annotations on the DOM element for these components.
      */
     ignoredComponents?: string[];
+    /**
+     * If set to true, the plugin will inject attributes into any HTML elements
+     * inside React fragments at the root level.
+     *
+     * Defaults to `false`.
+     */
+    _experimentalInjectIntoHtml?: boolean;
   };
 
   /**

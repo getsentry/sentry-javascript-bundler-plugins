@@ -30,6 +30,29 @@ export const KNOWN_INCOMPATIBLE_PLUGINS = [
   "@react-navigation",
 ];
 
+export const REACT_NATIVE_ELEMENTS: string[] = [
+  "Image",
+  "Text",
+  "View",
+  "ScrollView",
+  "TextInput",
+  "TouchableOpacity",
+  "TouchableHighlight",
+  "TouchableWithoutFeedback",
+  "FlatList",
+  "SectionList",
+  "ActivityIndicator",
+  "Button",
+  "Switch",
+  "Modal",
+  "SafeAreaView",
+  "StatusBar",
+  "KeyboardAvoidingView",
+  "RefreshControl",
+  "Picker",
+  "Slider",
+];
+
 export const DEFAULT_IGNORED_ELEMENTS = [
   "a",
   "abbr",

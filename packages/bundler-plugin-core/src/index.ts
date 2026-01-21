@@ -33,7 +33,10 @@ type LegacyPlugins = {
 
 interface SentryUnpluginFactoryOptions {
   injectionPlugin: InjectionPlugin | LegacyPlugins;
-  componentNameAnnotatePlugin?: (ignoredComponents?: string[]) => UnpluginOptions;
+  componentNameAnnotatePlugin?: (
+    injectIntoHtml: boolean,
+    ignoredComponents?: string[]
+  ) => UnpluginOptions;
   debugIdUploadPlugin: (
     upload: (buildArtifacts: string[]) => Promise<void>,
     logger: Logger,
@@ -190,7 +193,10 @@ export function sentryUnpluginFactory({
       } else {
         componentNameAnnotatePlugin &&
           plugins.push(
-            componentNameAnnotatePlugin(options.reactComponentAnnotation.ignoredComponents)
+            componentNameAnnotatePlugin(
+              options.reactComponentAnnotation.injectIntoHtml,
+              options.reactComponentAnnotation.ignoredComponents
+            )
           );
       }
     }
@@ -391,7 +397,10 @@ export function createRollupDebugIdUploadHooks(
   };
 }
 
-export function createComponentNameAnnotateHooks(ignoredComponents?: string[]): {
+export function createComponentNameAnnotateHooks(
+  injectIntoHtml: boolean,
+  ignoredComponents?: string[]
+): {
   transform: UnpluginOptions["transform"];
 } {
   type ParserPlugins = NonNullable<
@@ -421,7 +430,7 @@ export function createComponentNameAnnotateHooks(ignoredComponents?: string[]): 
 
       try {
         const result = await transformAsync(code, {
-          plugins: [[componentNameAnnotatePlugin, { ignoredComponents }]],
+          plugins: [[componentNameAnnotatePlugin, { injectIntoHtml, ignoredComponents }]],
           filename: id,
           parserOpts: {
             sourceType: "module",

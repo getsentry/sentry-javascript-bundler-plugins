@@ -70,6 +70,7 @@ export type NormalizedOptions = {
     | {
         enabled?: boolean;
         ignoredComponents?: string[];
+        injectIntoHtml: boolean;
       }
     | undefined;
   _metaOptions: {
@@ -116,7 +117,10 @@ export function normalizeUserOptions(userOptions: UserOptions): NormalizedOption
         | undefined,
     },
     bundleSizeOptimizations: userOptions.bundleSizeOptimizations,
-    reactComponentAnnotation: userOptions.reactComponentAnnotation,
+    reactComponentAnnotation: {
+      ...userOptions.reactComponentAnnotation,
+      injectIntoHtml: !!userOptions.reactComponentAnnotation?._experimentalInjectIntoHtml,
+    },
     _metaOptions: {
       telemetry: {
         metaFramework: userOptions._metaOptions?.telemetry?.metaFramework,
