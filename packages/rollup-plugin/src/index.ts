@@ -10,10 +10,13 @@ import {
 } from "@sentry/bundler-plugin-core";
 import type { UnpluginOptions } from "unplugin";
 
-function rollupComponentNameAnnotatePlugin(ignoredComponents?: string[]): UnpluginOptions {
+function rollupComponentNameAnnotatePlugin(
+  ignoredComponents: string[],
+  injectIntoHtml: boolean
+): UnpluginOptions {
   return {
     name: "sentry-rollup-component-name-annotate-plugin",
-    rollup: createComponentNameAnnotateHooks(ignoredComponents),
+    rollup: createComponentNameAnnotateHooks(ignoredComponents, injectIntoHtml),
   };
 }
 

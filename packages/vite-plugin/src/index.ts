@@ -20,11 +20,14 @@ function viteInjectionPlugin(injectionCode: string, debugIds: boolean): Unplugin
   };
 }
 
-function viteComponentNameAnnotatePlugin(ignoredComponents?: string[]): UnpluginOptions {
+function viteComponentNameAnnotatePlugin(
+  ignoredComponents: string[],
+  injectIntoHtml: boolean
+): UnpluginOptions {
   return {
     name: "sentry-vite-component-name-annotate-plugin",
     enforce: "pre" as const,
-    vite: createComponentNameAnnotateHooks(ignoredComponents),
+    vite: createComponentNameAnnotateHooks(ignoredComponents, injectIntoHtml),
   };
 }
 
