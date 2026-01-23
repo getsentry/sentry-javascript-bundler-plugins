@@ -167,7 +167,7 @@ function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
           return {
             loader: "js",
             pluginName,
-            contents: getDebugIdSnippet(uuidv4()),
+            contents: getDebugIdSnippet(uuidv4()).code(),
           };
         });
       },

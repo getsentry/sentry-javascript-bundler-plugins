@@ -12,6 +12,7 @@ import { createDebugIdUploadFunction } from "./debug-id-upload";
 import { Logger } from "./logger";
 import { Options, SentrySDKBuildFlags } from "./types";
 import {
+  CodeInjection,
   containsOnlyImports,
   generateGlobalInjectorCode,
   generateModuleMetadataInjectorCode,
@@ -21,7 +22,7 @@ import {
 } from "./utils";
 
 type InjectionPlugin = (
-  injectionCode: string,
+  injectionCode: CodeInjection,
   debugIds: boolean,
   logger: Logger
 ) => UnpluginOptions;
@@ -101,7 +102,7 @@ export function sentryUnpluginFactory({
       plugins.push(bundleSizeOptimizationsPlugin(bundleSizeOptimizationReplacementValues));
     }
 
-    let injectionCode = "";
+    const injectionCode = new CodeInjection();
 
     if (!options.release.inject) {
       logger.debug(
@@ -117,24 +118,24 @@ export function sentryUnpluginFactory({
         injectBuildInformation: options._experiments.injectBuildInformation || false,
       });
       if (typeof injectionPlugin !== "function") {
-        plugins.push(injectionPlugin.releaseInjectionPlugin(code));
+        plugins.push(injectionPlugin.releaseInjectionPlugin(code.code()));
       } else {
-        injectionCode += code;
+        injectionCode.append(code);
       }
     }
 
     if (Object.keys(sentryBuildPluginManager.bundleMetadata).length > 0) {
       const code = generateModuleMetadataInjectorCode(sentryBuildPluginManager.bundleMetadata);
       if (typeof injectionPlugin !== "function") {
-        plugins.push(injectionPlugin.moduleMetadataInjectionPlugin(code));
+        plugins.push(injectionPlugin.moduleMetadataInjectionPlugin(code.code()));
       } else {
-        injectionCode += code;
+        injectionCode.append(code);
       }
     }
 
     if (
       typeof injectionPlugin === "function" &&
-      (injectionCode !== "" || options.sourcemaps?.disable !== true)
+      (!injectionCode.isEmpty() || options.sourcemaps?.disable !== true)
     ) {
       plugins.push(injectionPlugin(injectionCode, options.sourcemaps?.disable !== true, logger));
     }
@@ -286,7 +287,7 @@ export function createRollupBundleSizeOptimizationHooks(replacementValues: Sentr
 }
 
 export function createRollupInjectionHooks(
-  injectionCode: string,
+  injectionCode: CodeInjection,
   debugIds: boolean
 ): {
   renderChunk: RenderChunkHook;
@@ -302,7 +303,7 @@ export function createRollupInjectionHooks(
         return null;
       }
 
-      let codeToInject = injectionCode;
+      const codeToInject = injectionCode.clone();
 
       if (debugIds) {
         // Check if a debug ID has already been injected to avoid duplicate injection (e.g. by another plugin or Sentry CLI)
@@ -316,7 +317,7 @@ export function createRollupInjectionHooks(
           )
         ) {
           const debugId = stringToUUID(code); // generate a deterministic debug ID
-          codeToInject += getDebugIdSnippet(debugId);
+          codeToInject.append(getDebugIdSnippet(debugId));
         }
       }
 
@@ -325,12 +326,12 @@ export function createRollupInjectionHooks(
 
       if (match) {
         // Add injected code after any comments or "use strict" at the beginning of the bundle.
-        ms.appendLeft(match.length, codeToInject);
+        ms.appendLeft(match.length, codeToInject.code());
       } else {
         // ms.replace() doesn't work when there is an empty string match (which happens if
         // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
         // need this special case here.
-        ms.prepend(codeToInject);
+        ms.prepend(codeToInject.code());
       }
 
       return {
@@ -447,11 +448,13 @@ export function createComponentNameAnnotateHooks(ignoredComponents?: string[]): 
   };
 }
 
-export function getDebugIdSnippet(debugId: string): string {
-  return `;{try{(function(){var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{},n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="${debugId}",e._sentryDebugIdIdentifier="sentry-dbid-${debugId}");})();}catch(e){}};`;
+export function getDebugIdSnippet(debugId: string): CodeInjection {
+  return new CodeInjection(
+    `var n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="${debugId}",e._sentryDebugIdIdentifier="sentry-dbid-${debugId}");`
+  );
 }
 
 export type { Logger } from "./logger";
 export type { Options, SentrySDKBuildFlags } from "./types";
-export { replaceBooleanFlagsInCode, stringToUUID } from "./utils";
+export { CodeInjection, replaceBooleanFlagsInCode, stringToUUID } from "./utils";
 export { createSentryBuildPluginManager } from "./build-plugin-manager";

@@ -1,4 +1,5 @@
 import {
+  CodeInjection,
   sentryUnpluginFactory,
   Options,
   createRollupInjectionHooks,
@@ -10,7 +11,7 @@ import {
 } from "@sentry/bundler-plugin-core";
 import { UnpluginOptions, VitePlugin } from "unplugin";
 
-function viteInjectionPlugin(injectionCode: string, debugIds: boolean): UnpluginOptions {
+function viteInjectionPlugin(injectionCode: CodeInjection, debugIds: boolean): UnpluginOptions {
   return {
     name: "sentry-vite-injection-plugin",
     // run `post` to avoid tripping up @rollup/plugin-commonjs when cjs is used
