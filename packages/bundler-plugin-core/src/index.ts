@@ -341,6 +341,7 @@ export function createRollupInjectionHooks(
       }
 
       // Rolldown can pass a native MagicString instance in meta.magicString
+      // https://rolldown.rs/in-depth/native-magic-string#usage-examples
       if (ms?.constructor?.name === "BindingMagicString") {
         // Rolldown docs say to return the magic string instance directly in this case
         return { code: ms as unknown as string };
