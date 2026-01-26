@@ -18,4 +18,3 @@ targets:
     workspaces: true
     excludeWorkspaces: /^@sentry-internal\//
     includeWorkspaces: /^@sentry\//
-    includeNames: /^sentry-.*.tgz$/
