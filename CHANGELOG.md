@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.8.0
+
+### New Features ✨
+
+- Inject component annotations into HTML elements rather than React components by @timfish in [#851](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/851)
+- Combine injection snippets by @timfish in [#853](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/853)
+- Use Rolldown native `MagicString` by @timfish in [#846](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/846)
+
+### Internal Changes 🔧
+
+- (changelog) Remove ##Unreleased section by @Lms24 in [#856](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/856)
+- (release) Fix changelog-preview permissions by @BYK in [#852](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/852)
+
 ## 4.7.0
 
 - docs: Add RELEASE.md to document release process ([#834](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/834))
