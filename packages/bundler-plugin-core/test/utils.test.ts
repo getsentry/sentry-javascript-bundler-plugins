@@ -228,7 +228,7 @@ describe("generateGlobalInjectorCode", () => {
       injectBuildInformation: false,
     });
 
-    expect(generatedCode).toMatchSnapshot();
+    expect(generatedCode.code()).toMatchSnapshot();
   });
 
   it("generates code with release and build information", () => {
@@ -249,14 +249,14 @@ describe("generateGlobalInjectorCode", () => {
       injectBuildInformation: true,
     });
 
-    expect(generatedCode).toMatchSnapshot();
+    expect(generatedCode.code()).toMatchSnapshot();
   });
 });
 
 describe("generateModuleMetadataInjectorCode", () => {
   it("generates code with empty metadata object", () => {
     const generatedCode = generateModuleMetadataInjectorCode({});
-    expect(generatedCode).toMatchSnapshot();
+    expect(generatedCode.code()).toMatchSnapshot();
   });
 
   it("generates code with metadata object", () => {
@@ -268,7 +268,7 @@ describe("generateModuleMetadataInjectorCode", () => {
         bar: "baz",
       },
     });
-    expect(generatedCode).toMatchSnapshot();
+    expect(generatedCode.code()).toMatchSnapshot();
   });
 });
 

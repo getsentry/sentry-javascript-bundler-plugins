@@ -1,4 +1,5 @@
 import {
+  CodeInjection,
   sentryUnpluginFactory,
   Options,
   createRollupInjectionHooks,
@@ -17,7 +18,7 @@ function rollupComponentNameAnnotatePlugin(ignoredComponents?: string[]): Unplug
   };
 }
 
-function rollupInjectionPlugin(injectionCode: string, debugIds: boolean): UnpluginOptions {
+function rollupInjectionPlugin(injectionCode: CodeInjection, debugIds: boolean): UnpluginOptions {
   return {
     name: "sentry-rollup-injection-plugin",
     rollup: createRollupInjectionHooks(injectionCode, debugIds),

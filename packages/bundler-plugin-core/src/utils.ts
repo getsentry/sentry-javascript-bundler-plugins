@@ -311,12 +311,8 @@ export function generateGlobalInjectorCode({
 }: {
   release: string;
   injectBuildInformation: boolean;
-}): string {
-  // The code below is mostly ternary operators because it saves bundle size.
-  // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
-  let code = `!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{};`;
-
-  code += `e.SENTRY_RELEASE={id:${JSON.stringify(release)}};`;
+}): CodeInjection {
+  let code = `e.SENTRY_RELEASE={id:${JSON.stringify(release)}};`;
 
   if (injectBuildInformation) {
     const buildInfo = getBuildInformation();
@@ -324,20 +320,18 @@ export function generateGlobalInjectorCode({
     code += `e.SENTRY_BUILD_INFO=${JSON.stringify(buildInfo)};`;
   }
 
-  code += "}catch(e){}}();";
-
-  return code;
+  return new CodeInjection(code);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function generateModuleMetadataInjectorCode(metadata: any): string {
-  // The code below is mostly ternary operators because it saves bundle size.
-  // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
+export function generateModuleMetadataInjectorCode(metadata: any): CodeInjection {
   // We are merging the metadata objects in case modules are bundled twice with the plugin
   // Use try-catch to avoid issues when bundlers rename global variables like 'window' to 'k'
-  return `!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{};e._sentryModuleMetadata=e._sentryModuleMetadata||{},e._sentryModuleMetadata[(new e.Error).stack]=function(e){for(var n=1;n<arguments.length;n++){var a=arguments[n];if(null!=a)for(var t in a)a.hasOwnProperty(t)&&(e[t]=a[t])}return e}({},e._sentryModuleMetadata[(new e.Error).stack],${JSON.stringify(
-    metadata
-  )})}catch(e){}}();`;
+  return new CodeInjection(
+    `e._sentryModuleMetadata=e._sentryModuleMetadata||{},e._sentryModuleMetadata[(new e.Error).stack]=function(e){for(var n=1;n<arguments.length;n++){var a=arguments[n];if(null!=a)for(var t in a)a.hasOwnProperty(t)&&(e[t]=a[t])}return e}({},e._sentryModuleMetadata[(new e.Error).stack],${JSON.stringify(
+      metadata
+    )});`
+  );
 }
 
 export function getBuildInformation(): {
@@ -458,4 +452,41 @@ export function containsOnlyImports(code: string): boolean {
     .trim();
 
   return codeWithoutImports.length === 0;
+}
+
+export class CodeInjection {
+  // The code below is mostly ternary operators because it saves bundle size.
+  // The checks are to support as many environments as possible. (Node.js, Browser, webworkers, etc.)
+  private readonly header = `!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{};`;
+  private readonly footer = "}catch(e){}}();";
+
+  constructor(private body: string = "") {}
+
+  public code(): string {
+    if (this.isEmpty()) {
+      return "";
+    }
+
+    return this.header + this.body + this.footer;
+  }
+
+  public isEmpty(): boolean {
+    return this.body.length === 0;
+  }
+
+  public append(code: CodeInjection | string): void {
+    if (code instanceof CodeInjection) {
+      this.body += code.body;
+    } else {
+      this.body += code;
+    }
+  }
+
+  public clear(): void {
+    this.body = "";
+  }
+
+  public clone(): CodeInjection {
+    return new CodeInjection(this.body);
+  }
 }

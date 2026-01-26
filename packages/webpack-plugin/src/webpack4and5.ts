@@ -1,11 +1,12 @@
 import {
-  getDebugIdSnippet,
   Options,
   sentryUnpluginFactory,
   stringToUUID,
   SentrySDKBuildFlags,
   createComponentNameAnnotateHooks,
   Logger,
+  CodeInjection,
+  getDebugIdSnippet,
 } from "@sentry/bundler-plugin-core";
 import * as path from "path";
 import { UnpluginOptions } from "unplugin";
@@ -35,8 +36,8 @@ type UnsafeDefinePlugin = {
 
 function webpackInjectionPlugin(
   UnsafeBannerPlugin: UnsafeBannerPlugin | undefined
-): (injectionCode: string, debugIds: boolean) => UnpluginOptions {
-  return (injectionCode: string, debugIds: boolean): UnpluginOptions => ({
+): (injectionCode: CodeInjection, debugIds: boolean) => UnpluginOptions {
+  return (injectionCode: CodeInjection, debugIds: boolean): UnpluginOptions => ({
     name: "sentry-webpack-injection-plugin",
     webpack(compiler) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -55,13 +56,13 @@ function webpackInjectionPlugin(
           raw: true,
           include: /\.(js|ts|jsx|tsx|mjs|cjs)(\?[^?]*)?(#[^#]*)?$/,
           banner: (arg?: BannerPluginCallbackArg) => {
-            let codeToInject = injectionCode;
+            const codeToInject = injectionCode.clone();
             if (debugIds) {
               const hash = arg?.chunk?.contentHash?.javascript ?? arg?.chunk?.hash;
               const debugId = hash ? stringToUUID(hash) : uuidv4();
-              codeToInject += getDebugIdSnippet(debugId);
+              codeToInject.append(getDebugIdSnippet(debugId));
             }
-            return codeToInject;
+            return codeToInject.code();
           },
         })
       );
