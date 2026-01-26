@@ -70,6 +70,7 @@ export type NormalizedOptions = {
     | {
         enabled?: boolean;
         ignoredComponents?: string[];
+        _experimentalInjectIntoHtml?: boolean;
       }
     | undefined;
   _metaOptions: {

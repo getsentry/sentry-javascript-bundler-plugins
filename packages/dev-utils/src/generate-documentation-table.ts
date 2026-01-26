@@ -421,6 +421,13 @@ type IncludeEntry = {
           "A list of strings representing the names of components to ignore. The plugin will not perform apply `data-sentry` annotations on the DOM element for these components.",
         supportedBundlers: ["webpack", "vite", "rollup"],
       },
+      {
+        name: "_experimentalInjectIntoHtml",
+        type: "boolean",
+        fullDescription:
+          "An experimental component annotation injection mode that injects annotations into HTML rather than React components.",
+        supportedBundlers: ["webpack", "vite", "rollup"],
+      },
     ],
   },
   {

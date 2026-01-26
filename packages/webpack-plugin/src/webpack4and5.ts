@@ -70,15 +70,18 @@ function webpackInjectionPlugin(
   });
 }
 
-function webpackComponentNameAnnotatePlugin(): (ignoredComponents?: string[]) => UnpluginOptions {
-  return (ignoredComponents?: string[]) => ({
+function webpackComponentNameAnnotatePlugin(): (
+  ignoredComponents: string[],
+  injectIntoHtml: boolean
+) => UnpluginOptions {
+  return (ignoredComponents: string[], injectIntoHtml: boolean) => ({
     name: "sentry-webpack-component-name-annotate-plugin",
     enforce: "pre",
     // Webpack needs this hook for loader logic, so the plugin is not run on unsupported file types
     transformInclude(id) {
       return id.endsWith(".tsx") || id.endsWith(".jsx");
     },
-    transform: createComponentNameAnnotateHooks(ignoredComponents).transform,
+    transform: createComponentNameAnnotateHooks(ignoredComponents, injectIntoHtml).transform,
   });
 }
 

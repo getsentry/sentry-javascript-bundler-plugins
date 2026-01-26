@@ -1,5 +1,7 @@
 import { transformAsync } from "@babel/core";
-import componentNameAnnotatePlugin from "@sentry/babel-plugin-component-annotate";
+import componentNameAnnotatePlugin, {
+  experimentalComponentNameAnnotatePlugin,
+} from "@sentry/babel-plugin-component-annotate";
 import SentryCli from "@sentry/cli";
 import { logger } from "@sentry/utils";
 import * as fs from "fs";
@@ -34,7 +36,10 @@ type LegacyPlugins = {
 
 interface SentryUnpluginFactoryOptions {
   injectionPlugin: InjectionPlugin | LegacyPlugins;
-  componentNameAnnotatePlugin?: (ignoredComponents?: string[]) => UnpluginOptions;
+  componentNameAnnotatePlugin?: (
+    ignoredComponents: string[],
+    injectIntoHtml: boolean
+  ) => UnpluginOptions;
   debugIdUploadPlugin: (
     upload: (buildArtifacts: string[]) => Promise<void>,
     logger: Logger,
@@ -191,7 +196,10 @@ export function sentryUnpluginFactory({
       } else {
         componentNameAnnotatePlugin &&
           plugins.push(
-            componentNameAnnotatePlugin(options.reactComponentAnnotation.ignoredComponents)
+            componentNameAnnotatePlugin(
+              options.reactComponentAnnotation.ignoredComponents || [],
+              !!options.reactComponentAnnotation._experimentalInjectIntoHtml
+            )
           );
       }
     }
@@ -411,7 +419,10 @@ export function createRollupDebugIdUploadHooks(
   };
 }
 
-export function createComponentNameAnnotateHooks(ignoredComponents?: string[]): {
+export function createComponentNameAnnotateHooks(
+  ignoredComponents: string[],
+  injectIntoHtml: boolean
+): {
   transform: UnpluginOptions["transform"];
 } {
   type ParserPlugins = NonNullable<
@@ -439,9 +450,13 @@ export function createComponentNameAnnotateHooks(ignoredComponents?: string[]): 
         parserPlugins.push("jsx", "typescript");
       }
 
+      const plugin = injectIntoHtml
+        ? experimentalComponentNameAnnotatePlugin
+        : componentNameAnnotatePlugin;
+
       try {
         const result = await transformAsync(code, {
-          plugins: [[componentNameAnnotatePlugin, { ignoredComponents }]],
+          plugins: [[plugin, { ignoredComponents }]],
           filename: id,
           parserOpts: {
             sourceType: "module",

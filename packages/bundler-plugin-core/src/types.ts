@@ -354,6 +354,11 @@ export interface Options {
      * A list of strings representing the names of components to ignore. The plugin will not apply `data-sentry` annotations on the DOM element for these components.
      */
     ignoredComponents?: string[];
+    /**
+     * An experimental component annotation injection mode that injects
+     * annotations into HTML rather than React components.
+     */
+    _experimentalInjectIntoHtml?: boolean;
   };
 
   /**
