@@ -73,18 +73,7 @@ Our different types of reviews:
 _These steps are only relevant to Sentry employees when preparing and publishing a new SDK release._
 
 1. Determine what version will be released (we use [semver](https://semver.org)).
-2. Update [`CHANGELOG.md`](https://github.com/getsentry/sentry-javascript-bundler-plugins/edit/master/CHANGELOG.md) to add an entry for the next release number and a list of changes since the last release. (See details below.)
-3. Run the [Prepare Release](https://github.com/getsentry/sentry-javascript-bundler-plugins/actions/workflows/release.yml) workflow.
-4. A new issue should appear in https://github.com/getsentry/publish/issues.
-5. Ask a member of the [@getsentry/releases team](https://github.com/orgs/getsentry/teams/releases/members) to approve the release.
-
-### Updating the Changelog
-
-1. Create a new branch.
-2. Run `yarn changelog` and copy all commits in the list.
-3. Create a new section in the changelog, deciding based on the changes whether it should be a minor bump or a patch release.
-4. Paste in the commits you copied earlier.
-5. Delete any which aren't user-facing changes.
-6. Alphabetize the rest.
-7. If any of the PRs are from external contributors, include underneath the commits `Work in this release contributed by <list of external contributors' GitHub usernames>. Thank you for your contributions!`. If there's only one external PR, don't forget to remove the final `s`. If there are three or more, use an Oxford comma. (It's in the Sentry styleguide!)
-8. Commit, push, and open a PR against `main` with the title `meta: Update changelog for <fill in relevant version here>`.
+2. Run the [Prepare Release](https://github.com/getsentry/sentry-javascript-bundler-plugins/actions/workflows/release.yml) workflow.
+3. A new issue should appear in https://github.com/getsentry/publish/issues.
+4. At this point, you can review the new changelog entry on the `relase/<version>` branch and make adjustments if necessary.
+5. Start the release by adding the approval label on the publish issue
