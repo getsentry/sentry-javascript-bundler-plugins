@@ -1,9 +1,5 @@
 # Changelog
 
-## Unreleased
-
-- "You know what they say ‘Fool me once, strike one, but fool me twice… strike three.’" — Michael Scott
-
 ## 4.7.0
 
 - docs: Add RELEASE.md to document release process ([#834](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/834))
