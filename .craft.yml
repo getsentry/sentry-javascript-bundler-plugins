@@ -15,4 +15,6 @@ targets:
   - name: github
     includeNames: /^sentry-.*.tgz$/
   - name: npm
-    includeNames: /^sentry-.*.tgz$/
+    workspaces: true
+    excludeWorkspaces: /^@sentry-internal\//
+    includeWorkspaces: /^@sentry\//
