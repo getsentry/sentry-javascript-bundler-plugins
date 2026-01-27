@@ -418,6 +418,10 @@ export interface Options {
        * The meta framework using the plugin.
        */
       metaFramework?: string;
+      /**
+       * The major version of the bundler (e.g., "4" or "5" for webpack).
+       */
+      bundlerMajorVersion?: string;
     };
   };
 }

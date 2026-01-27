@@ -111,6 +111,8 @@ export function setTelemetryDataOnScope(
     bundler: buildTool,
   });
 
+  scope.setTag("bundler-major-version", options._metaOptions.telemetry.bundlerMajorVersion);
+
   scope.setUser({ id: org });
 }
 
