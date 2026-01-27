@@ -110,7 +110,7 @@ export function setTelemetryDataOnScope(
     project: Array.isArray(project) ? project.join(", ") : project ?? "undefined",
     bundler: buildTool,
   });
-  
+
   scope.setTag("bundler-major-version", options._metaOptions.telemetry.bundlerMajorVersion);
 
   scope.setUser({ id: org });

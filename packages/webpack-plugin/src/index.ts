@@ -11,12 +11,14 @@ const DefinePlugin = webpack4or5?.DefinePlugin || webpack4or5?.default?.DefinePl
 // Detect webpack major version for telemetry (helps differentiate webpack 4 vs 5 usage)
 function getWebpackMajorVersion(): string | undefined {
   try {
-    const webpack = webpack4or5 as unknown as { version?: string; default?: { version?: string } } | undefined;
+    const webpack = webpack4or5 as unknown as
+      | { version?: string; default?: { version?: string } }
+      | undefined;
     const version = webpack?.version ?? webpack?.default?.version;
     const webpackMajorVersion = version?.split(".")[0]; // "4" or "5"
     return webpackMajorVersion;
   } catch (error) {
-    return undefined
+    return undefined;
   }
 }
 
