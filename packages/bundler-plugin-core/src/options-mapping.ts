@@ -76,6 +76,7 @@ export type NormalizedOptions = {
   _metaOptions: {
     telemetry: {
       metaFramework: string | undefined;
+      bundlerMajorVersion: string | undefined;
     };
   };
   applicationKey: string | undefined;
@@ -121,6 +122,7 @@ export function normalizeUserOptions(userOptions: UserOptions): NormalizedOption
     _metaOptions: {
       telemetry: {
         metaFramework: userOptions._metaOptions?.telemetry?.metaFramework,
+        bundlerMajorVersion: userOptions._metaOptions?.telemetry?.bundlerMajorVersion,
       },
     },
     applicationKey: userOptions.applicationKey,
