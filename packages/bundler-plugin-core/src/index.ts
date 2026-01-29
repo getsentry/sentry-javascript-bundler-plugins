@@ -16,7 +16,7 @@ import { Options, SentrySDKBuildFlags } from "./types";
 import {
   CodeInjection,
   containsOnlyImports,
-  generateGlobalInjectorCode,
+  generateReleaseInjectorCode,
   generateModuleMetadataInjectorCode,
   replaceBooleanFlagsInCode,
   stringToUUID,
@@ -118,7 +118,7 @@ export function sentryUnpluginFactory({
         "No release name provided. Will not inject release. Please set the `release.name` option to identify your release."
       );
     } else {
-      const code = generateGlobalInjectorCode({
+      const code = generateReleaseInjectorCode({
         release: options.release.name,
         injectBuildInformation: options._experiments.injectBuildInformation || false,
       });
@@ -227,7 +227,7 @@ export function sentryCliBinaryExists(): boolean {
 
 // We need to be careful not to inject the snippet before any `"use strict";`s.
 // As an additional complication `"use strict";`s may come after any number of comments.
-const COMMENT_USE_STRICT_REGEX =
+export const COMMENT_USE_STRICT_REGEX =
   // Note: CodeQL complains that this regex potentially has n^2 runtime. This likely won't affect realistic files.
   /^(?:\s*|\/\*(?:.|\r|\n)*?\*\/|\/\/.*[\n\r])*(?:"[^"]*";|'[^']*';)?/;
 
@@ -253,7 +253,7 @@ type RenderChunkHook = (
  * Checks if a file is a JavaScript file based on its extension.
  * Handles query strings and hashes in the filename.
  */
-function isJsFile(fileName: string): boolean {
+export function isJsFile(fileName: string): boolean {
   const cleanFileName = stripQueryAndHashFromPath(fileName);
   return [".js", ".mjs", ".cjs"].some((ext) => cleanFileName.endsWith(ext));
 }
@@ -272,7 +272,10 @@ function isJsFile(fileName: string): boolean {
  * @param facadeModuleId - The facade module ID (if any) - HTML files create facade chunks
  * @returns true if the chunk should be skipped
  */
-function shouldSkipCodeInjection(code: string, facadeModuleId: string | null | undefined): boolean {
+export function shouldSkipCodeInjection(
+  code: string,
+  facadeModuleId: string | null | undefined
+): boolean {
   // Skip empty chunks - these are placeholder chunks that should be optimized away
   if (code.trim().length === 0) {
     return true;
@@ -369,6 +372,19 @@ export function createRollupInjectionHooks(
   };
 }
 
+export function globFiles(outputDir: string): Promise<string[]> {
+  return glob(
+    ["/**/*.js", "/**/*.mjs", "/**/*.cjs", "/**/*.js.map", "/**/*.mjs.map", "/**/*.cjs.map"].map(
+      (q) => `${q}?(\\?*)?(#*)`
+    ), // We want to allow query and hashes strings at the end of files
+    {
+      root: outputDir,
+      absolute: true,
+      nodir: true,
+    }
+  );
+}
+
 export function createRollupDebugIdUploadHooks(
   upload: (buildArtifacts: string[]) => Promise<void>,
   _logger: Logger,
@@ -388,21 +404,7 @@ export function createRollupDebugIdUploadHooks(
       try {
         if (outputOptions.dir) {
           const outputDir = outputOptions.dir;
-          const buildArtifacts = await glob(
-            [
-              "/**/*.js",
-              "/**/*.mjs",
-              "/**/*.cjs",
-              "/**/*.js.map",
-              "/**/*.mjs.map",
-              "/**/*.cjs.map",
-            ].map((q) => `${q}?(\\?*)?(#*)`), // We want to allow query and hashes strings at the end of files
-            {
-              root: outputDir,
-              absolute: true,
-              nodir: true,
-            }
-          );
+          const buildArtifacts = await globFiles(outputDir);
           await upload(buildArtifacts);
         } else if (outputOptions.file) {
           await upload([outputOptions.file]);
@@ -492,3 +494,5 @@ export type { Logger } from "./logger";
 export type { Options, SentrySDKBuildFlags } from "./types";
 export { CodeInjection, replaceBooleanFlagsInCode, stringToUUID } from "./utils";
 export { createSentryBuildPluginManager } from "./build-plugin-manager";
+export { generateReleaseInjectorCode, generateModuleMetadataInjectorCode } from "./utils";
+export { createDebugIdUploadFunction } from "./debug-id-upload";
