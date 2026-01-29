@@ -305,7 +305,7 @@ export function determineReleaseName(): string | undefined {
  * Generates code for the global injector which is responsible for setting the global
  * `SENTRY_RELEASE` & `SENTRY_BUILD_INFO` variables.
  */
-export function generateGlobalInjectorCode({
+export function generateReleaseInjectorCode({
   release,
   injectBuildInformation,
 }: {
