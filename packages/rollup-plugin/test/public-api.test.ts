@@ -1,4 +1,3 @@
-import { Plugin } from "rollup";
 import { sentryRollupPlugin } from "../src";
 
 test("Rollup plugin should exist", () => {
@@ -11,25 +10,15 @@ describe("sentryRollupPlugin", () => {
     jest.clearAllMocks();
   });
 
-  it("returns an array of rollup plugins", () => {
-    const plugins = sentryRollupPlugin({
+  it("returns a single rollup plugin", () => {
+    const plugin = sentryRollupPlugin({
       authToken: "test-token",
       org: "test-org",
       project: "test-project",
-    }) as Plugin[];
+    });
 
-    expect(Array.isArray(plugins)).toBe(true);
+    expect(Array.isArray(plugin)).not.toBe(true);
 
-    const pluginNames = plugins.map((plugin) => plugin.name);
-
-    expect(pluginNames).toEqual(
-      expect.arrayContaining([
-        "sentry-telemetry-plugin",
-        "sentry-release-management-plugin",
-        "sentry-rollup-injection-plugin",
-        "sentry-rollup-debug-id-upload-plugin",
-        "sentry-file-deletion-plugin",
-      ])
-    );
+    expect(plugin.name).toBe("sentry-rollup-plugin");
   });
 });
