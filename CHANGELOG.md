@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.9.0
+
+### New Features ✨
+
+- (telemetry) Add `bundler-major-version` tag to webpack by @chargome in [#857](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/857)
+
 ## 4.8.0
 
 ### New Features ✨
