@@ -125,6 +125,10 @@ export function createSentryBuildPluginManager(
      */
     buildTool: string;
     /**
+     * E.g. `5` for webpack v5 or `4` for Rollup v4
+     */
+    buildToolMajorVersion: string | undefined;
+    /**
      * E.g. `[sentry-webpack-plugin]` or `[@sentry/nextjs]`
      */
     loggerPrefix: string;
@@ -195,7 +199,8 @@ export function createSentryBuildPluginManager(
   const { sentryScope, sentryClient } = createSentryInstance(
     options,
     shouldSendTelemetry,
-    bundlerPluginMetaContext.buildTool
+    bundlerPluginMetaContext.buildTool,
+    bundlerPluginMetaContext.buildToolMajorVersion
   );
 
   const { release, environment = DEFAULT_ENVIRONMENT } = sentryClient.getOptions();
