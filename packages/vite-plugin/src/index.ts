@@ -9,6 +9,7 @@ import {
   createComponentNameAnnotateHooks,
   Logger,
 } from "@sentry/bundler-plugin-core";
+import { createRequire } from "node:module";
 import { UnpluginOptions, VitePlugin } from "unplugin";
 
 function viteInjectionPlugin(injectionCode: CodeInjection, debugIds: boolean): UnpluginOptions {
@@ -52,11 +53,26 @@ function viteBundleSizeOptimizationsPlugin(
   };
 }
 
+function getViteMajorVersion(): string | undefined {
+  try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Rollup already transpiles this for us
+    const req = createRequire(import.meta.url);
+    const vite = req("vite") as { version?: string };
+    return vite.version?.split(".")[0];
+  } catch (err) {
+    // do nothing, we'll just not report a version
+  }
+
+  return undefined;
+}
+
 const sentryUnplugin = sentryUnpluginFactory({
   injectionPlugin: viteInjectionPlugin,
   componentNameAnnotatePlugin: viteComponentNameAnnotatePlugin,
   debugIdUploadPlugin: viteDebugIdUploadPlugin,
   bundleSizeOptimizationsPlugin: viteBundleSizeOptimizationsPlugin,
+  getBundlerMajorVersion: getViteMajorVersion,
 });
 
 export const sentryVitePlugin = (options?: Options): VitePlugin[] => {

@@ -76,7 +76,6 @@ export type NormalizedOptions = {
   _metaOptions: {
     telemetry: {
       metaFramework: string | undefined;
-      bundlerMajorVersion: string | undefined;
     };
   };
   applicationKey: string | undefined;

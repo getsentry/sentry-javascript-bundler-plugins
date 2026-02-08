@@ -47,6 +47,7 @@ interface SentryUnpluginFactoryOptions {
     webpack_forceExitOnBuildComplete?: boolean
   ) => UnpluginOptions;
   bundleSizeOptimizationsPlugin: (buildFlags: SentrySDKBuildFlags) => UnpluginOptions;
+  getBundlerMajorVersion?: () => string | undefined;
 }
 
 /**
@@ -57,6 +58,7 @@ export function sentryUnpluginFactory({
   componentNameAnnotatePlugin,
   debugIdUploadPlugin,
   bundleSizeOptimizationsPlugin,
+  getBundlerMajorVersion,
 }: SentryUnpluginFactoryOptions): UnpluginInstance<Options | undefined, true> {
   return createUnplugin<Options | undefined, true>((userOptions = {}, unpluginMetaContext) => {
     const sentryBuildPluginManager = createSentryBuildPluginManager(userOptions, {
@@ -64,6 +66,7 @@ export function sentryUnpluginFactory({
         userOptions._metaOptions?.loggerPrefixOverride ??
         `[sentry-${unpluginMetaContext.framework}-plugin]`,
       buildTool: unpluginMetaContext.framework,
+      buildToolMajorVersion: getBundlerMajorVersion?.(),
     });
 
     const {
