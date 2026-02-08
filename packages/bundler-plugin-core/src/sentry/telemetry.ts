@@ -66,7 +66,7 @@ export function setTelemetryDataOnScope(
   options: NormalizedOptions,
   scope: Scope,
   buildTool: string,
-  buildToolMajorVersion: string | undefined
+  buildToolMajorVersion?: string
 ): void {
   const { org, project, release, errorHandler, sourcemaps, reactComponentAnnotation } = options;
 

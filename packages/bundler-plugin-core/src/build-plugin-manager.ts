@@ -127,7 +127,7 @@ export function createSentryBuildPluginManager(
     /**
      * E.g. `5` for webpack v5 or `4` for Rollup v4
      */
-    buildToolMajorVersion: string | undefined;
+    buildToolMajorVersion?: string;
     /**
      * E.g. `[sentry-webpack-plugin]` or `[@sentry/nextjs]`
      */
