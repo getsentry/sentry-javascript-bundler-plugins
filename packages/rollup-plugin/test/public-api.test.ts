@@ -11,16 +11,17 @@ describe("sentryRollupPlugin", () => {
     jest.clearAllMocks();
   });
 
-  it("returns a single rollup plugin", () => {
-    const [plugin] = sentryRollupPlugin({
+  it("returns an array of rollup plugins (although only one)", () => {
+    const plugins = sentryRollupPlugin({
       authToken: "test-token",
       org: "test-org",
       project: "test-project",
-    });
+    }) as Plugin[];
 
-    expect(Array.isArray(plugin)).not.toBe(true);
+    expect(Array.isArray(plugins)).toBe(true);
+    expect(plugins).toHaveLength(1);
 
-    expect(plugin?.name).toBe("sentry-rollup-plugin");
+    expect(plugins[0]?.name).toBe("sentry-rollup-plugin");
   });
 });
 

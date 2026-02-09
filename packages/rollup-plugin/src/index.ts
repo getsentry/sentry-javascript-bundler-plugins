@@ -34,7 +34,7 @@ function hasExistingDebugID(code: string): boolean {
 }
 
 /**
- * @ignore - this is the internal plugin factory function
+ * @ignore - this is the internal plugin factory function only used for the Vite plugin!
  */
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function _rollupPluginInternal(userOptions: Options = {}, buildTool: string) {
