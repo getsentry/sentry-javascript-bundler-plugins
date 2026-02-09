@@ -21,15 +21,7 @@ describe("sentryVitePlugin", () => {
 
     const pluginNames = plugins.map((plugin) => plugin.name);
 
-    expect(pluginNames).toEqual(
-      expect.arrayContaining([
-        "sentry-telemetry-plugin",
-        "sentry-release-management-plugin",
-        "sentry-vite-injection-plugin",
-        "sentry-vite-debug-id-upload-plugin",
-        "sentry-file-deletion-plugin",
-      ])
-    );
+    expect(pluginNames).toEqual(expect.arrayContaining(["sentry-vite-plugin"]));
   });
 
   it("returns an array of Vite pluginswhen unplugin returns a single plugin", () => {

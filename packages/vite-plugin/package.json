@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@sentry/bundler-plugin-core": "4.9.0",
-    "unplugin": "1.0.1"
+    "@sentry/rollup-plugin": "4.9.0"
   },
   "devDependencies": {
     "@babel/core": "7.18.5",

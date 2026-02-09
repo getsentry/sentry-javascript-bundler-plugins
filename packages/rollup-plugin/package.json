@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "@sentry/bundler-plugin-core": "4.9.0",
-    "unplugin": "1.0.1"
+    "magic-string": "0.30.8"
   },
   "peerDependencies": {
     "rollup": ">=3.2.0"

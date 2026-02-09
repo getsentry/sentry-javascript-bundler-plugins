@@ -33,11 +33,14 @@ function hasExistingDebugID(code: string): boolean {
   return false;
 }
 
+/**
+ * @ignore - this is the internal plugin factory function
+ */
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function sentryRollupPlugin(userOptions: Options = {}) {
+export function _rollupPluginInternal(userOptions: Options = {}, buildTool: string) {
   const sentryBuildPluginManager = createSentryBuildPluginManager(userOptions, {
-    loggerPrefix: userOptions._metaOptions?.loggerPrefixOverride ?? "[sentry-rollup-plugin]",
-    buildTool: "rollup",
+    loggerPrefix: userOptions._metaOptions?.loggerPrefixOverride ?? `[sentry-${buildTool}-plugin]`,
+    buildTool,
   });
 
   const {
@@ -124,10 +127,12 @@ export function sentryRollupPlugin(userOptions: Options = {}) {
 
   function renderChunk(
     code: string,
-    chunk: { fileName: string; facadeModuleId?: string | null }
+    chunk: { fileName: string; facadeModuleId?: string | null },
+    _?: unknown,
+    meta?: { magicString?: MagicString }
   ): {
     code: string;
-    map: SourceMap;
+    map?: SourceMap;
   } | null {
     if (!isJsFile(chunk.fileName)) {
       return null; // returning null means not modifying the chunk at all
@@ -149,8 +154,7 @@ export function sentryRollupPlugin(userOptions: Options = {}) {
       return null;
     }
 
-    const ms = new MagicString(code, { filename: chunk.fileName });
-
+    const ms = meta?.magicString || new MagicString(code, { filename: chunk.fileName });
     const match = code.match(COMMENT_USE_STRICT_REGEX)?.[0];
 
     if (match) {
@@ -161,6 +165,13 @@ export function sentryRollupPlugin(userOptions: Options = {}) {
       // there is neither, a comment, nor a "use strict" at the top of the chunk) so we
       // need this special case here.
       ms.prepend(injectCode.code());
+    }
+
+    // Rolldown can pass a native MagicString instance in meta.magicString
+    // https://rolldown.rs/in-depth/native-magic-string#usage-examples
+    if (ms?.constructor?.name === "BindingMagicString") {
+      // Rolldown docs say to return the magic string instance directly in this case
+      return { code: ms as unknown as string };
     }
 
     return {
@@ -196,9 +207,11 @@ export function sentryRollupPlugin(userOptions: Options = {}) {
     }
   }
 
+  const name = `sentry-${buildTool}-plugin`;
+
   if (shouldTransform) {
     return {
-      name: "sentry-rollup-plugin",
+      name,
       buildStart,
       transform,
       renderChunk,
@@ -207,11 +220,18 @@ export function sentryRollupPlugin(userOptions: Options = {}) {
   }
 
   return {
-    name: "sentry-rollup-plugin",
+    name,
     buildStart,
     renderChunk,
     writeBundle,
   };
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-explicit-any
+export function sentryRollupPlugin(userOptions: Options = {}): any {
+  // We return an array here so we don't break backwards compatibility with what
+  // unplugin used to return
+  return [_rollupPluginInternal(userOptions, "rollup")];
 }
 
 export type { Options as SentryRollupPluginOptions } from "@sentry/bundler-plugin-core";
