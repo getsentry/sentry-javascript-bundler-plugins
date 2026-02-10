@@ -1,28 +1,174 @@
 import {
-  sentryUnpluginFactory,
+  createSentryBuildPluginManager,
+  generateGlobalInjectorCode,
+  generateModuleMetadataInjectorCode,
   Options,
   getDebugIdSnippet,
-  SentrySDKBuildFlags,
+  createDebugIdUploadFunction,
+  CodeInjection,
 } from "@sentry/bundler-plugin-core";
-import type { Logger } from "@sentry/bundler-plugin-core";
-import type { UnpluginOptions } from "unplugin";
-import * as path from "path";
-
+import * as path from "node:path";
+import { createRequire } from "node:module";
 import { v4 as uuidv4 } from "uuid";
 
-function esbuildReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
-  const pluginName = "sentry-esbuild-release-injection-plugin";
-  const virtualReleaseInjectionFilePath = path.resolve("_sentry-release-injection-stub"); // needs to be an absolute path for older eslint versions
+interface EsbuildOnResolveArgs {
+  path: string;
+  kind: string;
+  importer?: string;
+  resolveDir: string;
+  pluginData?: unknown;
+}
+
+interface EsbuildOnResolveResult {
+  path: string;
+  sideEffects?: boolean;
+  pluginName?: string;
+  namespace?: string;
+  suffix?: string;
+  pluginData?: unknown;
+}
+
+interface EsbuildOnLoadArgs {
+  path: string;
+  pluginData?: unknown;
+}
+
+interface EsbuildOnLoadResult {
+  loader: string;
+  pluginName: string;
+  contents: string;
+  resolveDir?: string;
+}
+
+interface EsbuildOnEndArgs {
+  metafile?: {
+    outputs: Record<string, unknown>;
+  };
+}
+
+interface EsbuildInitialOptions {
+  bundle?: boolean;
+  inject?: string[];
+  metafile?: boolean;
+  define?: Record<string, string>;
+}
+
+interface EsbuildPluginBuild {
+  initialOptions: EsbuildInitialOptions;
+  onLoad: (
+    options: { filter: RegExp; namespace?: string },
+    callback: (args: EsbuildOnLoadArgs) => EsbuildOnLoadResult | null
+  ) => void;
+  onResolve: (
+    options: { filter: RegExp },
+    callback: (args: EsbuildOnResolveArgs) => EsbuildOnResolveResult | undefined
+  ) => void;
+  onEnd: (callback: (result: EsbuildOnEndArgs) => void | Promise<void>) => void;
+}
+
+interface EsbuildPlugin {
+  name: string;
+  setup: (build: EsbuildPluginBuild) => void;
+}
+
+function getEsbuildMajorVersion(): string | undefined {
+  try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - esbuild transpiles this for us
+    const req = createRequire(import.meta.url);
+    const esbuild = req("esbuild") as { version?: string };
+    // esbuild hasn't released a v1 yet, so we'll return the minor version as the major version
+    return esbuild.version?.split(".")[1];
+  } catch (err) {
+    // do nothing, we'll just not report a version
+  }
+
+  return undefined;
+}
+
+const pluginName = "sentry-esbuild-plugin";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function sentryEsbuildPlugin(userOptions: Options = {}): any {
+  const sentryBuildPluginManager = createSentryBuildPluginManager(userOptions, {
+    loggerPrefix: userOptions._metaOptions?.loggerPrefixOverride ?? `[${pluginName}]`,
+    buildTool: "esbuild",
+    buildToolMajorVersion: getEsbuildMajorVersion(),
+  });
+
+  const {
+    logger,
+    normalizedOptions: options,
+    bundleSizeOptimizationReplacementValues: replacementValues,
+    bundleMetadata,
+    createDependencyOnBuildArtifacts,
+  } = sentryBuildPluginManager;
+
+  if (options.disable) {
+    return {
+      name: "sentry-esbuild-noop-plugin",
+      setup() {
+        // noop plugin
+      },
+    };
+  }
+
+  if (process.cwd().match(/\\node_modules\\|\/node_modules\//)) {
+    logger.warn(
+      "Running Sentry plugin from within a `node_modules` folder. Some features may not work."
+    );
+  }
+
+  const sourcemapsEnabled = options.sourcemaps?.disable !== true;
+  const staticInjectionCode = new CodeInjection();
+
+  if (!options.release.inject) {
+    logger.debug(
+      "Release injection disabled via `release.inject` option. Will not inject release."
+    );
+  } else if (!options.release.name) {
+    logger.debug(
+      "No release name provided. Will not inject release. Please set the `release.name` option to identify your release."
+    );
+  } else {
+    staticInjectionCode.append(
+      generateGlobalInjectorCode({
+        release: options.release.name,
+        injectBuildInformation: options._experiments.injectBuildInformation || false,
+      })
+    );
+  }
+
+  if (Object.keys(bundleMetadata).length > 0) {
+    staticInjectionCode.append(generateModuleMetadataInjectorCode(bundleMetadata));
+  }
+
+  // Component annotation warning
+  if (options.reactComponentAnnotation?.enabled) {
+    logger.warn(
+      "Component name annotation is not supported in esbuild. Please use a separate transform step or consider using a different bundler."
+    );
+  }
+
+  const transformReplace = Object.keys(replacementValues).length > 0;
+
+  // Track entry points wrapped for debug ID injection
+  const debugIdWrappedPaths = new Set<string>();
+
+  void sentryBuildPluginManager.telemetry.emitBundlerPluginExecutionSignal().catch(() => {
+    // Telemetry failures are acceptable
+  });
 
   return {
     name: pluginName,
-
-    esbuild: {
-      setup({ initialOptions, onLoad, onResolve }) {
+    setup({ initialOptions, onLoad, onResolve, onEnd }: EsbuildPluginBuild) {
+      // Release and/or metadata injection
+      if (!staticInjectionCode.isEmpty()) {
+        const virtualInjectionFilePath = path.resolve("_sentry-injection-stub");
         initialOptions.inject = initialOptions.inject || [];
-        initialOptions.inject.push(virtualReleaseInjectionFilePath);
+        initialOptions.inject.push(virtualInjectionFilePath);
 
-        onResolve({ filter: /_sentry-release-injection-stub/ }, (args) => {
+        onResolve({ filter: /_sentry-injection-stub/ }, (args) => {
           return {
             path: args.path,
             sideEffects: true,
@@ -30,45 +176,29 @@ function esbuildReleaseInjectionPlugin(injectionCode: string): UnpluginOptions {
           };
         });
 
-        onLoad({ filter: /_sentry-release-injection-stub/ }, () => {
+        onLoad({ filter: /_sentry-injection-stub/ }, () => {
           return {
             loader: "js",
             pluginName,
-            contents: injectionCode,
+            contents: staticInjectionCode.code(),
           };
         });
-      },
-    },
-  };
-}
+      }
 
-/**
- * Shared set to track entry points that have been wrapped by the metadata plugin
- * This allows the debug ID plugin to know when an import is coming from a metadata proxy
- */
-const metadataProxyEntryPoints = new Set<string>();
+      // Bundle size optimizations
+      if (transformReplace) {
+        const replacementStringValues: Record<string, string> = {};
+        Object.entries(replacementValues).forEach(([key, value]) => {
+          replacementStringValues[key] = JSON.stringify(value);
+        });
 
-/**
- * Set to track which paths have already been wrapped with debug ID injection
- * This prevents the debug ID plugin from wrapping the same module multiple times
- */
-const debugIdWrappedPaths = new Set<string>();
+        initialOptions.define = { ...initialOptions.define, ...replacementStringValues };
+      }
 
-function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
-  const pluginName = "sentry-esbuild-debug-id-injection-plugin";
-  const stubNamespace = "sentry-debug-id-stub";
-
-  return {
-    name: pluginName,
-
-    esbuild: {
-      setup({ initialOptions, onLoad, onResolve }) {
+      // Debug ID injection - requires per-entry-point unique IDs
+      if (sourcemapsEnabled) {
         // Clear state from previous builds (important for watch mode and test suites)
         debugIdWrappedPaths.clear();
-        // Also clear metadataProxyEntryPoints here because if moduleMetadataInjectionPlugin
-        // is not instantiated in this build (e.g., moduleMetadata was disabled), we don't
-        // want stale entries from a previous build to affect the current one.
-        metadataProxyEntryPoints.clear();
 
         if (!initialOptions.bundle) {
           logger.warn(
@@ -76,21 +206,9 @@ function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
           );
         }
 
+        // Wrap entry points to inject debug IDs
         onResolve({ filter: /.*/ }, (args) => {
-          // Inject debug IDs into entry points and into imports from metadata proxy modules
-          const isEntryPoint = args.kind === "entry-point";
-
-          // Check if this import is coming from a metadata proxy module
-          // The metadata plugin registers entry points it wraps in the shared Set
-          // We need to strip the query string suffix because esbuild includes the suffix
-          // (e.g., ?sentryMetadataProxyModule=true) in args.importer
-          const importerPath = args.importer?.split("?")[0];
-          const isImportFromMetadataProxy =
-            args.kind === "import-statement" &&
-            importerPath !== undefined &&
-            metadataProxyEntryPoints.has(importerPath);
-
-          if (!isEntryPoint && !isImportFromMetadataProxy) {
+          if (args.kind !== "entry-point") {
             return;
           }
 
@@ -112,10 +230,9 @@ function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
 
           return {
             pluginName,
-            // needs to be an abs path, otherwise esbuild will complain
             path: resolvedPath,
             pluginData: {
-              isProxyResolver: true,
+              isDebugIdProxy: true,
               originalPath: args.path,
               originalResolveDir: args.resolveDir,
             },
@@ -125,25 +242,22 @@ function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
             // By setting a suffix we're telling esbuild that the entrypoint and proxy module are two different things,
             // making it re-resolve the entrypoint when it is imported from the proxy module.
             // Super confusing? Yes. Works? Apparently... Let's see.
-            suffix: "?sentryProxyModule=true",
+            suffix: "?sentryDebugIdProxy=true",
           };
         });
 
         onLoad({ filter: /.*/ }, (args) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          if (!(args.pluginData?.isProxyResolver as undefined | boolean)) {
+          if (!(args.pluginData as { isDebugIdProxy?: boolean })?.isDebugIdProxy) {
             return null;
           }
 
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const originalPath = args.pluginData.originalPath as string;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const originalResolveDir = args.pluginData.originalResolveDir as string;
+          const originalPath = (args.pluginData as { originalPath: string }).originalPath;
+          const originalResolveDir = (args.pluginData as { originalResolveDir: string })
+            .originalResolveDir;
 
           return {
             loader: "js",
             pluginName,
-            // We need to use JSON.stringify below so that any escape backslashes stay escape backslashes, in order not to break paths on windows
             contents: `
               import "_sentry-debug-id-injection-stub";
               import * as OriginalModule from ${JSON.stringify(originalPath)};
@@ -158,179 +272,43 @@ function esbuildDebugIdInjectionPlugin(logger: Logger): UnpluginOptions {
             path: args.path,
             sideEffects: true,
             pluginName,
-            namespace: stubNamespace,
-            suffix: "?sentry-module-id=" + uuidv4(), // create different module, each time this is resolved
-          };
-        });
-
-        onLoad({ filter: /_sentry-debug-id-injection-stub/, namespace: stubNamespace }, () => {
-          return {
-            loader: "js",
-            pluginName,
-            contents: getDebugIdSnippet(uuidv4()).code(),
-          };
-        });
-      },
-    },
-  };
-}
-
-function esbuildModuleMetadataInjectionPlugin(injectionCode: string): UnpluginOptions {
-  const pluginName = "sentry-esbuild-module-metadata-injection-plugin";
-  const stubNamespace = "sentry-module-metadata-stub";
-
-  return {
-    name: pluginName,
-
-    esbuild: {
-      setup({ initialOptions, onLoad, onResolve }) {
-        // Clear state from previous builds (important for watch mode and test suites)
-        metadataProxyEntryPoints.clear();
-
-        onResolve({ filter: /.*/ }, (args) => {
-          if (args.kind !== "entry-point") {
-            return;
-          } else {
-            // Injected modules via the esbuild `inject` option do also have `kind == "entry-point"`.
-            // We do not want to inject debug IDs into those files because they are already bundled into the entrypoints
-            if (initialOptions.inject?.includes(args.path)) {
-              return;
-            }
-
-            const resolvedPath = path.isAbsolute(args.path)
-              ? args.path
-              : path.join(args.resolveDir, args.path);
-
-            // Register this entry point so the debug ID plugin knows to wrap imports from
-            // this proxy module, this because the debug ID may run after the metadata plugin
-            metadataProxyEntryPoints.add(resolvedPath);
-
-            return {
-              pluginName,
-              // needs to be an abs path, otherwise esbuild will complain
-              path: resolvedPath,
-              pluginData: {
-                isMetadataProxyResolver: true,
-                originalPath: args.path,
-                originalResolveDir: args.resolveDir,
-              },
-              // We need to add a suffix here, otherwise esbuild will mark the entrypoint as resolved and won't traverse
-              // the module tree any further down past the proxy module because we're essentially creating a dependency
-              // loop back to the proxy module.
-              // By setting a suffix we're telling esbuild that the entrypoint and proxy module are two different things,
-              // making it re-resolve the entrypoint when it is imported from the proxy module.
-              // Super confusing? Yes. Works? Apparently... Let's see.
-              suffix: "?sentryMetadataProxyModule=true",
-            };
-          }
-        });
-
-        onLoad({ filter: /.*/ }, (args) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          if (!(args.pluginData?.isMetadataProxyResolver as undefined | boolean)) {
-            return null;
-          }
-
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const originalPath = args.pluginData.originalPath as string;
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const originalResolveDir = args.pluginData.originalResolveDir as string;
-
-          return {
-            loader: "js",
-            pluginName,
-            // We need to use JSON.stringify below so that any escape backslashes stay escape backslashes, in order not to break paths on windows
-            contents: `
-              import "_sentry-module-metadata-injection-stub";
-              import * as OriginalModule from ${JSON.stringify(originalPath)};
-              export default OriginalModule.default;
-              export * from ${JSON.stringify(originalPath)};`,
-            resolveDir: originalResolveDir,
-          };
-        });
-
-        onResolve({ filter: /_sentry-module-metadata-injection-stub/ }, (args) => {
-          return {
-            path: args.path,
-            sideEffects: true,
-            pluginName,
-            namespace: stubNamespace,
-            suffix: "?sentry-module-id=" + uuidv4(), // create different module, each time this is resolved
+            namespace: "sentry-debug-id-stub",
+            suffix: "?sentry-module-id=" + uuidv4(),
           };
         });
 
         onLoad(
-          { filter: /_sentry-module-metadata-injection-stub/, namespace: stubNamespace },
+          { filter: /_sentry-debug-id-injection-stub/, namespace: "sentry-debug-id-stub" },
           () => {
             return {
               loader: "js",
               pluginName,
-              contents: injectionCode,
+              contents: getDebugIdSnippet(uuidv4()).code(),
             };
           }
         );
-      },
-    },
-  };
-}
 
-function esbuildDebugIdUploadPlugin(
-  upload: (buildArtifacts: string[]) => Promise<void>,
-  _logger: Logger,
-  createDependencyOnBuildArtifacts: () => () => void
-): UnpluginOptions {
-  const freeGlobalDependencyOnDebugIdSourcemapArtifacts = createDependencyOnBuildArtifacts();
-  return {
-    name: "sentry-esbuild-debug-id-upload-plugin",
-    esbuild: {
-      setup({ initialOptions, onEnd }) {
+        // Upload
+        const freeGlobalDependencyOnBuildArtifacts = createDependencyOnBuildArtifacts();
+        const upload = createDebugIdUploadFunction({ sentryBuildPluginManager });
+
         initialOptions.metafile = true;
         onEnd(async (result) => {
           try {
+            await sentryBuildPluginManager.createRelease();
             const buildArtifacts = result.metafile ? Object.keys(result.metafile.outputs) : [];
             await upload(buildArtifacts);
           } finally {
-            freeGlobalDependencyOnDebugIdSourcemapArtifacts();
+            freeGlobalDependencyOnBuildArtifacts();
+            await sentryBuildPluginManager.deleteArtifacts();
           }
         });
-      },
+      }
     },
   };
 }
 
-function esbuildBundleSizeOptimizationsPlugin(
-  replacementValues: SentrySDKBuildFlags
-): UnpluginOptions {
-  return {
-    name: "sentry-esbuild-bundle-size-optimizations-plugin",
-    esbuild: {
-      setup({ initialOptions }) {
-        const replacementStringValues: Record<string, string> = {};
-        Object.entries(replacementValues).forEach(([key, value]) => {
-          replacementStringValues[key] = JSON.stringify(value);
-        });
-
-        initialOptions.define = { ...initialOptions.define, ...replacementStringValues };
-      },
-    },
-  };
-}
-
-const sentryUnplugin = sentryUnpluginFactory({
-  injectionPlugin: {
-    releaseInjectionPlugin: esbuildReleaseInjectionPlugin,
-    debugIdInjectionPlugin: esbuildDebugIdInjectionPlugin,
-    moduleMetadataInjectionPlugin: esbuildModuleMetadataInjectionPlugin,
-  },
-  debugIdUploadPlugin: esbuildDebugIdUploadPlugin,
-  bundleSizeOptimizationsPlugin: esbuildBundleSizeOptimizationsPlugin,
-});
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const sentryEsbuildPlugin: (options?: Options) => any = sentryUnplugin.esbuild;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default sentryUnplugin.esbuild as (options?: Options) => any;
-
+export default sentryEsbuildPlugin as (options?: Options) => EsbuildPlugin;
 export type { Options as SentryEsbuildPluginOptions } from "@sentry/bundler-plugin-core";
 export { sentryCliBinaryExists } from "@sentry/bundler-plugin-core";

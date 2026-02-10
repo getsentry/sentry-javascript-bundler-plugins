@@ -493,5 +493,12 @@ export function getDebugIdSnippet(debugId: string): CodeInjection {
 
 export type { Logger } from "./logger";
 export type { Options, SentrySDKBuildFlags } from "./types";
-export { CodeInjection, replaceBooleanFlagsInCode, stringToUUID } from "./utils";
+export {
+  CodeInjection,
+  replaceBooleanFlagsInCode,
+  stringToUUID,
+  generateGlobalInjectorCode,
+  generateModuleMetadataInjectorCode,
+} from "./utils";
 export { createSentryBuildPluginManager } from "./build-plugin-manager";
+export { createDebugIdUploadFunction } from "./debug-id-upload";
