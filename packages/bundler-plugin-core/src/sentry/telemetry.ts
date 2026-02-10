@@ -14,7 +14,8 @@ const stackParser = createStackParser(nodeStackLineParser());
 export function createSentryInstance(
   options: NormalizedOptions,
   shouldSendTelemetry: Promise<boolean>,
-  buildTool: string
+  buildTool: string,
+  buildToolMajorVersion: string | undefined
 ): { sentryScope: Scope; sentryClient: Client } {
   const clientOptions: ServerRuntimeClientOptions = {
     platform: "node",
@@ -56,7 +57,7 @@ export function createSentryInstance(
   const scope = new Scope();
   scope.setClient(client);
 
-  setTelemetryDataOnScope(options, scope, buildTool);
+  setTelemetryDataOnScope(options, scope, buildTool, buildToolMajorVersion);
 
   return { sentryScope: scope, sentryClient: client };
 }
@@ -64,7 +65,8 @@ export function createSentryInstance(
 export function setTelemetryDataOnScope(
   options: NormalizedOptions,
   scope: Scope,
-  buildTool: string
+  buildTool: string,
+  buildToolMajorVersion?: string
 ): void {
   const { org, project, release, errorHandler, sourcemaps, reactComponentAnnotation } = options;
 
@@ -111,7 +113,9 @@ export function setTelemetryDataOnScope(
     bundler: buildTool,
   });
 
-  scope.setTag("bundler-major-version", options._metaOptions.telemetry.bundlerMajorVersion);
+  if (buildToolMajorVersion) {
+    scope.setTag("bundler-major-version", buildToolMajorVersion);
+  }
 
   scope.setUser({ id: org });
 }
