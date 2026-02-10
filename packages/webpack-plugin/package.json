@@ -54,7 +54,6 @@
   },
   "dependencies": {
     "@sentry/bundler-plugin-core": "4.9.0",
-    "unplugin": "1.0.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

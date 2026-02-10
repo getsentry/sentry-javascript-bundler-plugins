@@ -492,3 +492,5 @@ export type { Logger } from "./logger";
 export type { Options, SentrySDKBuildFlags } from "./types";
 export { CodeInjection, replaceBooleanFlagsInCode, stringToUUID } from "./utils";
 export { createSentryBuildPluginManager } from "./build-plugin-manager";
+export { generateGlobalInjectorCode, generateModuleMetadataInjectorCode } from "./utils";
+export { createDebugIdUploadFunction } from "./debug-id-upload";

@@ -1,10 +1,10 @@
-import { SentryWebpackPluginOptions, sentryWebpackUnpluginFactory } from "./webpack4and5";
+import { SentryWebpackPluginOptions, sentryWebpackPluginFactory } from "./webpack4and5";
 
-const sentryUnplugin = sentryWebpackUnpluginFactory();
+const createSentryWebpackPlugin = sentryWebpackPluginFactory();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sentryWebpackPlugin: (options?: SentryWebpackPluginOptions) => any =
-  sentryUnplugin.webpack;
+  createSentryWebpackPlugin;
 
 export { sentryCliBinaryExists } from "@sentry/bundler-plugin-core";
 

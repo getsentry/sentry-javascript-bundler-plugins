@@ -1,16 +1,28 @@
 import {
   Options,
-  sentryUnpluginFactory,
+  createSentryBuildPluginManager,
+  generateGlobalInjectorCode,
+  generateModuleMetadataInjectorCode,
   stringToUUID,
-  SentrySDKBuildFlags,
   createComponentNameAnnotateHooks,
-  Logger,
   CodeInjection,
   getDebugIdSnippet,
+  createDebugIdUploadFunction,
 } from "@sentry/bundler-plugin-core";
-import * as path from "path";
-import { UnpluginOptions } from "unplugin";
+import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 import { v4 as uuidv4 } from "uuid";
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore Rollup transpiles import.meta for us for CJS
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const COMPONENT_ANNOTATION_LOADER = path.resolve(
+  dirname,
+  typeof __dirname !== "undefined"
+    ? "component-annotation-transform.js" // CJS
+    : "component-annotation-transform.mjs" // ESM
+);
 
 // since webpack 5.1 compiler contains webpack module so plugins always use correct webpack version
 // https://github.com/webpack/webpack/commit/65eca2e529ce1d79b79200d4bdb1ce1b81141459
@@ -34,121 +46,80 @@ type UnsafeDefinePlugin = {
   new (options: any): unknown;
 };
 
-function webpackInjectionPlugin(
-  UnsafeBannerPlugin: UnsafeBannerPlugin | undefined
-): (injectionCode: CodeInjection, debugIds: boolean) => UnpluginOptions {
-  return (injectionCode: CodeInjection, debugIds: boolean): UnpluginOptions => ({
-    name: "sentry-webpack-injection-plugin",
-    webpack(compiler) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore webpack version compatibility shenanigans
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const BannerPlugin =
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore webpack version compatibility shenanigans
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        compiler?.webpack?.BannerPlugin || UnsafeBannerPlugin;
+type WebpackModule = {
+  resource?: string;
+};
 
-      compiler.options.plugins = compiler.options.plugins || [];
-      compiler.options.plugins.push(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
-        new BannerPlugin({
-          raw: true,
-          include: /\.(js|ts|jsx|tsx|mjs|cjs)(\?[^?]*)?(#[^#]*)?$/,
-          banner: (arg?: BannerPluginCallbackArg) => {
-            const codeToInject = injectionCode.clone();
-            if (debugIds) {
-              const hash = arg?.chunk?.contentHash?.javascript ?? arg?.chunk?.hash;
-              const debugId = hash ? stringToUUID(hash) : uuidv4();
-              codeToInject.append(getDebugIdSnippet(debugId));
-            }
-            return codeToInject.code();
-          },
-        })
-      );
-    },
-  });
-}
+type WebpackLoaderCallback = (err: Error | null, content?: string, sourceMap?: unknown) => void;
 
-function webpackComponentNameAnnotatePlugin(): (
-  ignoredComponents: string[],
-  injectIntoHtml: boolean
-) => UnpluginOptions {
-  return (ignoredComponents: string[], injectIntoHtml: boolean) => ({
-    name: "sentry-webpack-component-name-annotate-plugin",
-    enforce: "pre",
-    // Webpack needs this hook for loader logic, so the plugin is not run on unsupported file types
-    transformInclude(id) {
-      return id.endsWith(".tsx") || id.endsWith(".jsx");
-    },
-    transform: createComponentNameAnnotateHooks(ignoredComponents, injectIntoHtml).transform,
-  });
-}
+type WebpackLoaderContext = {
+  callback: WebpackLoaderCallback;
+};
 
-function webpackBundleSizeOptimizationsPlugin(
-  UnsafeDefinePlugin: UnsafeDefinePlugin | undefined
-): (replacementValues: SentrySDKBuildFlags) => UnpluginOptions {
-  return (replacementValues: SentrySDKBuildFlags) => ({
-    name: "sentry-webpack-bundle-size-optimizations-plugin",
-    webpack(compiler) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore webpack version compatibility shenanigans
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      const DefinePlugin =
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore webpack version compatibility shenanigans
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        compiler?.webpack?.DefinePlugin || UnsafeDefinePlugin;
-
-      compiler.options.plugins = compiler.options.plugins || [];
-      compiler.options.plugins.push(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call
-        new DefinePlugin({
-          ...replacementValues,
-        })
-      );
-    },
-  });
-}
-
-function webpackDebugIdUploadPlugin(
-  upload: (buildArtifacts: string[]) => Promise<void>,
-  logger: Logger,
-  createDependencyOnBuildArtifacts: () => () => void,
-  forceExitOnBuildCompletion?: boolean
-): UnpluginOptions {
-  const pluginName = "sentry-webpack-debug-id-upload-plugin";
-  return {
-    name: pluginName,
-    webpack(compiler) {
-      const freeGlobalDependencyOnDebugIdSourcemapArtifacts = createDependencyOnBuildArtifacts();
-
-      compiler.hooks.afterEmit.tapAsync(pluginName, (compilation, callback: () => void) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const outputPath = (compilation.outputOptions.path as string | undefined) ?? path.resolve();
-        const buildArtifacts = Object.keys(compilation.assets as Record<string, unknown>).map(
-          (asset) => path.join(outputPath, asset)
-        );
-        void upload(buildArtifacts)
-          .then(() => {
-            callback();
-          })
-          .finally(() => {
-            freeGlobalDependencyOnDebugIdSourcemapArtifacts();
-          });
-      });
-
-      if (forceExitOnBuildCompletion && compiler.options.mode === "production") {
-        compiler.hooks.done.tap(pluginName, () => {
-          setTimeout(() => {
-            logger.debug("Exiting process after debug file upload");
-            process.exit(0);
-          });
-        });
-      }
-    },
+type WebpackCompilationContext = {
+  compiler: {
+    webpack?: {
+      NormalModule?: {
+        getCompilationHooks: (compilation: WebpackCompilationContext) => {
+          loader: {
+            tap: (
+              name: string,
+              callback: (loaderContext: WebpackLoaderContext, module: WebpackModule) => void
+            ) => void;
+          };
+        };
+      };
+    };
   };
-}
+  hooks: {
+    normalModuleLoader?: {
+      tap: (
+        name: string,
+        callback: (loaderContext: WebpackLoaderContext, module: WebpackModule) => void
+      ) => void;
+    };
+  };
+};
+
+type WebpackCompiler = {
+  options: {
+    plugins?: unknown[];
+    mode?: string;
+    module?: {
+      rules?: unknown[];
+    };
+  };
+  hooks: {
+    thisCompilation: {
+      tap: (name: string, callback: (compilation: WebpackCompilationContext) => void) => void;
+    };
+    afterEmit: {
+      tapAsync: (
+        name: string,
+        callback: (compilation: WebpackCompilation, cb: () => void) => void
+      ) => void;
+    };
+    done: {
+      tap: (name: string, callback: () => void) => void;
+    };
+  };
+  webpack?: {
+    BannerPlugin?: UnsafeBannerPlugin;
+    DefinePlugin?: UnsafeDefinePlugin;
+  };
+};
+
+type WebpackCompilation = {
+  outputOptions: {
+    path?: string;
+  };
+  assets: Record<string, unknown>;
+  hooks: {
+    processAssets: {
+      tap: (options: { name: string; stage: number }, callback: () => void) => void;
+    };
+  };
+};
 
 /**
  * The factory function accepts BannerPlugin and DefinePlugin classes in
@@ -158,19 +129,175 @@ function webpackDebugIdUploadPlugin(
  *
  * Since webpack 5.1 compiler contains webpack module so plugins always use correct webpack version.
  */
-export function sentryWebpackUnpluginFactory({
-  BannerPlugin,
-  DefinePlugin,
+export function sentryWebpackPluginFactory({
+  BannerPlugin: UnsafeBannerPlugin,
+  DefinePlugin: UnsafeDefinePlugin,
 }: {
   BannerPlugin?: UnsafeBannerPlugin;
   DefinePlugin?: UnsafeDefinePlugin;
-} = {}): ReturnType<typeof sentryUnpluginFactory> {
-  return sentryUnpluginFactory({
-    injectionPlugin: webpackInjectionPlugin(BannerPlugin),
-    componentNameAnnotatePlugin: webpackComponentNameAnnotatePlugin(),
-    debugIdUploadPlugin: webpackDebugIdUploadPlugin,
-    bundleSizeOptimizationsPlugin: webpackBundleSizeOptimizationsPlugin(DefinePlugin),
-  });
+} = {}) {
+  return function sentryWebpackPlugin(userOptions: SentryWebpackPluginOptions = {}) {
+    const sentryBuildPluginManager = createSentryBuildPluginManager(userOptions, {
+      loggerPrefix: userOptions._metaOptions?.loggerPrefixOverride ?? "[sentry-webpack-plugin]",
+      buildTool: "webpack",
+    });
+
+    const {
+      logger,
+      normalizedOptions: options,
+      bundleSizeOptimizationReplacementValues: replacementValues,
+      bundleMetadata,
+      createDependencyOnBuildArtifacts,
+    } = sentryBuildPluginManager;
+
+    if (options.disable) {
+      return {
+        apply() {
+          // noop plugin
+        },
+      };
+    }
+
+    if (process.cwd().match(/\\node_modules\\|\/node_modules\//)) {
+      logger.warn(
+        "Running Sentry plugin from within a `node_modules` folder. Some features may not work."
+      );
+    }
+
+    const sourcemapsEnabled = options.sourcemaps?.disable !== true;
+    const staticInjectionCode = new CodeInjection();
+
+    if (!options.release.inject) {
+      logger.debug(
+        "Release injection disabled via `release.inject` option. Will not inject release."
+      );
+    } else if (!options.release.name) {
+      logger.debug(
+        "No release name provided. Will not inject release. Please set the `release.name` option to identify your release."
+      );
+    } else {
+      staticInjectionCode.append(
+        generateGlobalInjectorCode({
+          release: options.release.name,
+          injectBuildInformation: options._experiments.injectBuildInformation || false,
+        })
+      );
+    }
+
+    if (Object.keys(bundleMetadata).length > 0) {
+      staticInjectionCode.append(generateModuleMetadataInjectorCode(bundleMetadata));
+    }
+
+    const transformAnnotations = options.reactComponentAnnotation?.enabled
+      ? createComponentNameAnnotateHooks(
+          options.reactComponentAnnotation?.ignoredComponents || [],
+          !!options.reactComponentAnnotation?._experimentalInjectIntoHtml
+        )
+      : undefined;
+
+    const transformReplace = Object.keys(replacementValues).length > 0;
+
+    return {
+      apply(compiler: WebpackCompiler) {
+        void sentryBuildPluginManager.telemetry.emitBundlerPluginExecutionSignal().catch(() => {
+          // Telemetry failures are acceptable
+        });
+
+        // Get the correct plugin classes (webpack 5.1+ vs older versions)
+        const BannerPlugin = compiler?.webpack?.BannerPlugin || UnsafeBannerPlugin;
+        const DefinePlugin = compiler?.webpack?.DefinePlugin || UnsafeDefinePlugin;
+
+        // Add BannerPlugin for code injection (release, metadata, debug IDs)
+        if (!staticInjectionCode.isEmpty() || sourcemapsEnabled) {
+          if (!BannerPlugin) {
+            logger.warn(
+              "BannerPlugin is not available. Skipping code injection. This usually means webpack is not properly configured."
+            );
+          } else {
+            compiler.options.plugins = compiler.options.plugins || [];
+            compiler.options.plugins.push(
+              new BannerPlugin({
+                raw: true,
+                include: /\.(js|ts|jsx|tsx|mjs|cjs)(\?[^?]*)?(#[^#]*)?$/,
+                banner: (arg?: BannerPluginCallbackArg) => {
+                  const codeToInject = staticInjectionCode.clone();
+                  if (sourcemapsEnabled) {
+                    const hash = arg?.chunk?.contentHash?.javascript ?? arg?.chunk?.hash;
+                    const debugId = hash ? stringToUUID(hash) : uuidv4();
+                    codeToInject.append(getDebugIdSnippet(debugId));
+                  }
+                  return codeToInject.code();
+                },
+              })
+            );
+          }
+        }
+
+        // Add DefinePlugin for bundle size optimizations
+        if (transformReplace && DefinePlugin) {
+          compiler.options.plugins = compiler.options.plugins || [];
+          compiler.options.plugins.push(new DefinePlugin({ ...replacementValues }));
+        }
+
+        // Add component name annotation transform
+        if (transformAnnotations?.transform) {
+          compiler.options.module = compiler.options.module || {};
+          compiler.options.module.rules = compiler.options.module.rules || [];
+          compiler.options.module.rules.unshift({
+            test: /\.[jt]sx$/,
+            exclude: /node_modules/,
+            enforce: "pre",
+            use: [
+              {
+                loader: COMPONENT_ANNOTATION_LOADER,
+                options: {
+                  transform: transformAnnotations.transform,
+                },
+              },
+            ],
+          });
+        }
+
+        if (sourcemapsEnabled) {
+          compiler.hooks.afterEmit.tapAsync(
+            "sentry-webpack-plugin",
+            (compilation: WebpackCompilation, callback: () => void) => {
+              const freeGlobalDependencyOnBuildArtifacts = createDependencyOnBuildArtifacts();
+              const upload = createDebugIdUploadFunction({ sentryBuildPluginManager });
+
+              const outputPath = compilation.outputOptions.path ?? path.resolve();
+              const buildArtifacts = Object.keys(compilation.assets).map((asset) =>
+                path.join(outputPath, asset)
+              );
+
+              void sentryBuildPluginManager
+                .createRelease()
+                .then(() => upload(buildArtifacts))
+                .then(() => {
+                  callback();
+                })
+                .finally(() => {
+                  freeGlobalDependencyOnBuildArtifacts();
+                  void sentryBuildPluginManager.deleteArtifacts();
+                });
+            }
+          );
+
+          if (
+            userOptions._experiments?.forceExitOnBuildCompletion &&
+            compiler.options.mode === "production"
+          ) {
+            compiler.hooks.done.tap("sentry-webpack-plugin", () => {
+              setTimeout(() => {
+                logger.debug("Exiting process after debug file upload");
+                process.exit(0);
+              });
+            });
+          }
+        }
+      },
+    };
+  };
 }
 
 export type SentryWebpackPluginOptions = Options & {

@@ -1,4 +1,4 @@
-import { SentryWebpackPluginOptions, sentryWebpackUnpluginFactory } from "./webpack4and5";
+import { SentryWebpackPluginOptions, sentryWebpackPluginFactory } from "./webpack4and5";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore webpack is a peer dep
@@ -24,7 +24,7 @@ function getWebpackMajorVersion(): string | undefined {
 
 const webpackMajorVersion = getWebpackMajorVersion();
 
-const sentryUnplugin = sentryWebpackUnpluginFactory({
+const createSentryWebpackPlugin = sentryWebpackPluginFactory({
   BannerPlugin,
   DefinePlugin,
 });
@@ -42,7 +42,7 @@ export const sentryWebpackPlugin: (options?: SentryWebpackPluginOptions) => any 
       },
     },
   };
-  return sentryUnplugin.webpack(enhancedOptions);
+  return createSentryWebpackPlugin(enhancedOptions);
 };
 
 export { sentryCliBinaryExists } from "@sentry/bundler-plugin-core";
