@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.9.1
+
+### New Features ✨
+
+- Track major version for Vite and Rollup by @timfish in [#867](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/867)
+
+### Internal Changes 🔧
+
+- Bump craft for release workflow by @chargome in [#859](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/859)
+
 ## 4.9.0
 
 ### New Features ✨

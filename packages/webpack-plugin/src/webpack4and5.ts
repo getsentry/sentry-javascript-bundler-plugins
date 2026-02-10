@@ -8,6 +8,7 @@ import {
   CodeInjection,
   getDebugIdSnippet,
 } from "@sentry/bundler-plugin-core";
+import { createRequire } from "node:module";
 import * as path from "path";
 import { UnpluginOptions } from "unplugin";
 import { v4 as uuidv4 } from "uuid";
@@ -150,6 +151,21 @@ function webpackDebugIdUploadPlugin(
   };
 }
 
+// Detect webpack major version for telemetry (helps differentiate webpack 4 vs 5 usage)
+function getWebpackMajorVersion(): string | undefined {
+  try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Rollup already transpiles this for us
+    const req = createRequire(import.meta.url);
+    const webpack = req("webpack") as { version?: string; default?: { version?: string } };
+    const version = webpack?.version ?? webpack?.default?.version;
+    const webpackMajorVersion = version?.split(".")[0]; // "4" or "5"
+    return webpackMajorVersion;
+  } catch (error) {
+    return undefined;
+  }
+}
+
 /**
  * The factory function accepts BannerPlugin and DefinePlugin classes in
  * order to avoid direct dependencies on webpack.
@@ -170,6 +186,7 @@ export function sentryWebpackUnpluginFactory({
     componentNameAnnotatePlugin: webpackComponentNameAnnotatePlugin(),
     debugIdUploadPlugin: webpackDebugIdUploadPlugin,
     bundleSizeOptimizationsPlugin: webpackBundleSizeOptimizationsPlugin(DefinePlugin),
+    getBundlerMajorVersion: getWebpackMajorVersion,
   });
 }
 

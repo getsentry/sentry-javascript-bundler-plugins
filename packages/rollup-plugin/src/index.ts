@@ -16,7 +16,8 @@ import {
 } from "@sentry/bundler-plugin-core";
 import MagicString, { SourceMap } from "magic-string";
 import type { TransformHook } from "rollup";
-import * as path from "path";
+import * as path from "node:path";
+import { createRequire } from "node:module";
 
 function hasExistingDebugID(code: string): boolean {
   // Check if a debug ID has already been injected to avoid duplicate injection (e.g. by another plugin or Sentry CLI)
@@ -33,14 +34,33 @@ function hasExistingDebugID(code: string): boolean {
   return false;
 }
 
+function getRollupMajorVersion(): string | undefined {
+  try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - Rollup already transpiles this for us
+    const req = createRequire(import.meta.url);
+    const rollup = req("rollup") as { VERSION?: string };
+    return rollup.VERSION?.split(".")[0];
+  } catch (err) {
+    // do nothing, we'll just not report a version
+  }
+
+  return undefined;
+}
+
 /**
  * @ignore - this is the internal plugin factory function only used for the Vite plugin!
  */
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function _rollupPluginInternal(userOptions: Options = {}, buildTool: string) {
+export function _rollupPluginInternal(
+  userOptions: Options = {},
+  buildTool: string,
+  buildToolMajorVersion?: string
+) {
   const sentryBuildPluginManager = createSentryBuildPluginManager(userOptions, {
     loggerPrefix: userOptions._metaOptions?.loggerPrefixOverride ?? `[sentry-${buildTool}-plugin]`,
     buildTool,
+    buildToolMajorVersion: buildToolMajorVersion || getRollupMajorVersion(),
   });
 
   const {
