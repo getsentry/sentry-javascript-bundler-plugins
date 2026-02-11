@@ -25,7 +25,10 @@ function rollupComponentNameAnnotatePlugin(
 function rollupInjectionPlugin(injectionCode: CodeInjection, debugIds: boolean): UnpluginOptions {
   return {
     name: "sentry-rollup-injection-plugin",
-    rollup: createRollupInjectionHooks(injectionCode, debugIds),
+    rollup: createRollupInjectionHooks(
+      injectionCode,
+      debugIds
+    ) as unknown as UnpluginOptions["rollup"],
   };
 }
 

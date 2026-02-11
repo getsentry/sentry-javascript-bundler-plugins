@@ -33,10 +33,11 @@
   "module": "dist/esm/index.mjs",
   "types": "dist/types/index.d.ts",
   "scripts": {
+    "prebuild": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
     "build": "premove ./out && run-p build:rollup build:types",
     "build:watch": "run-p build:rollup:watch build:types:watch",
-    "build:rollup": "rollup --config rollup.config.js",
-    "build:rollup:watch": "rollup --config rollup.config.js --watch --no-watch.clearScreen",
+    "build:rollup": "rolldown --config rollup.config.mjs",
+    "build:rollup:watch": "rolldown --config rollup.config.mjs --watch --no-watch.clearScreen",
     "build:types": "tsc --project types.tsconfig.json",
     "build:types:watch": "tsc --project types.tsconfig.json --watch --preserveWatchOutput",
     "build:npm": "npm pack",
@@ -47,6 +48,7 @@
     "clean:all": "run-p clean clean:deps",
     "clean:build": "premove ./dist *.tgz",
     "clean:deps": "premove node_modules",
+    "pretest": "yarn prebuild",
     "test": "jest",
     "lint": "eslint ./src ./test",
     "fix": "eslint ./src ./test --format stylish --fix"
@@ -62,12 +64,6 @@
     "unplugin": "1.0.1"
   },
   "devDependencies": {
-    "@babel/preset-env": "7.18.2",
-    "@babel/preset-typescript": "7.17.12",
-    "@rollup/plugin-babel": "5.3.1",
-    "@rollup/plugin-json": "4.1.0",
-    "@rollup/plugin-node-resolve": "13.3.0",
-    "@rollup/plugin-replace": "^4.0.0",
     "@sentry-internal/eslint-config": "4.9.1",
     "@sentry-internal/sentry-bundler-plugin-tsconfig": "4.9.1",
     "@sentry/core": "8.30.0",
@@ -80,7 +76,7 @@
     "eslint": "^8.18.0",
     "jest": "^28.1.1",
     "premove": "^4.0.0",
-    "rollup": "2.75.7",
+    "rolldown": "^1.0.0-rc.4",
     "typescript": "^4.7.4"
   },
   "volta": {
