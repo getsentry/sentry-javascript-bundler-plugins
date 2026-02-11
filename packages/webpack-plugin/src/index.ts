@@ -1,4 +1,4 @@
-import { SentryWebpackPluginOptions, sentryWebpackUnpluginFactory } from "./webpack4and5";
+import { SentryWebpackPluginOptions, sentryWebpackPluginFactory } from "./webpack4and5";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore webpack is a peer dep
@@ -8,14 +8,12 @@ const BannerPlugin = webpack4or5?.BannerPlugin || webpack4or5?.default?.BannerPl
 
 const DefinePlugin = webpack4or5?.DefinePlugin || webpack4or5?.default?.DefinePlugin;
 
-const sentryUnplugin = sentryWebpackUnpluginFactory({
-  BannerPlugin,
-  DefinePlugin,
-});
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sentryWebpackPlugin: (options?: SentryWebpackPluginOptions) => any =
-  sentryUnplugin.webpack;
+  sentryWebpackPluginFactory({
+    BannerPlugin,
+    DefinePlugin,
+  });
 
 export { sentryCliBinaryExists } from "@sentry/bundler-plugin-core";
 
