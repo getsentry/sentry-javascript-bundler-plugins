@@ -204,22 +204,22 @@ export function _rollupPluginInternal(
     outputOptions: { dir?: string; file?: string },
     bundle: { [fileName: string]: unknown }
   ): Promise<void> {
-    if (!sourcemapsEnabled) {
-      return;
-    }
-
     try {
       await sentryBuildPluginManager.createRelease();
 
-      if (outputOptions.dir) {
-        const outputDir = outputOptions.dir;
-        const buildArtifacts = await globFiles(outputDir);
-        await upload(buildArtifacts);
-      } else if (outputOptions.file) {
-        await upload([outputOptions.file]);
-      } else {
-        const buildArtifacts = Object.keys(bundle).map((asset) => path.join(path.resolve(), asset));
-        await upload(buildArtifacts);
+      if (sourcemapsEnabled && options.sourcemaps?.disable !== "disable-upload") {
+        if (outputOptions.dir) {
+          const outputDir = outputOptions.dir;
+          const buildArtifacts = await globFiles(outputDir);
+          await upload(buildArtifacts);
+        } else if (outputOptions.file) {
+          await upload([outputOptions.file]);
+        } else {
+          const buildArtifacts = Object.keys(bundle).map((asset) =>
+            path.join(path.resolve(), asset)
+          );
+          await upload(buildArtifacts);
+        }
       }
     } finally {
       freeGlobalDependencyOnBuildArtifacts();
