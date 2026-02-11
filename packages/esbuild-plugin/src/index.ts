@@ -287,23 +287,26 @@ export function sentryEsbuildPlugin(userOptions: Options = {}): any {
             };
           }
         );
+      }
 
-        // Upload
-        const freeGlobalDependencyOnBuildArtifacts = createDependencyOnBuildArtifacts();
-        const upload = createDebugIdUploadFunction({ sentryBuildPluginManager });
+      // Create release and optionally upload
+      const freeGlobalDependencyOnBuildArtifacts = createDependencyOnBuildArtifacts();
+      const upload = createDebugIdUploadFunction({ sentryBuildPluginManager });
 
-        initialOptions.metafile = true;
-        onEnd(async (result) => {
-          try {
-            await sentryBuildPluginManager.createRelease();
+      initialOptions.metafile = true;
+      onEnd(async (result) => {
+        try {
+          await sentryBuildPluginManager.createRelease();
+
+          if (sourcemapsEnabled && options.sourcemaps?.disable !== "disable-upload") {
             const buildArtifacts = result.metafile ? Object.keys(result.metafile.outputs) : [];
             await upload(buildArtifacts);
-          } finally {
-            freeGlobalDependencyOnBuildArtifacts();
-            await sentryBuildPluginManager.deleteArtifacts();
           }
-        });
-      }
+        } finally {
+          freeGlobalDependencyOnBuildArtifacts();
+          await sentryBuildPluginManager.deleteArtifacts();
+        }
+      });
     },
   };
 }
