@@ -3,7 +3,7 @@ import babel from "@rollup/plugin-babel";
 import packageJson from "./package.json";
 import modulePackage from "module";
 
-const input = ["src/index.ts", "src/webpack5.ts"];
+const input = ["src/index.ts", "src/webpack5.ts", "src/component-annotation-transform.ts"];
 
 const extensions = [".ts"];
 
