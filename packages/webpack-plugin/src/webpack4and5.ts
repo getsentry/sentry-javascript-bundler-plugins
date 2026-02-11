@@ -253,7 +253,7 @@ export function sentryWebpackPluginFactory({
         // Add DefinePlugin for bundle size optimizations
         if (transformReplace && DefinePlugin) {
           compiler.options.plugins = compiler.options.plugins || [];
-          compiler.options.plugins.push(new DefinePlugin({ ...replacementValues }));
+          compiler.options.plugins.push(new DefinePlugin(replacementValues));
         }
 
         // Add component name annotation transform
@@ -275,42 +275,43 @@ export function sentryWebpackPluginFactory({
           });
         }
 
-        if (sourcemapsEnabled) {
-          compiler.hooks.afterEmit.tapAsync(
-            "sentry-webpack-plugin",
-            (compilation: WebpackCompilation, callback: () => void) => {
-              const freeGlobalDependencyOnBuildArtifacts = createDependencyOnBuildArtifacts();
-              const upload = createDebugIdUploadFunction({ sentryBuildPluginManager });
+        compiler.hooks.afterEmit.tapAsync(
+          "sentry-webpack-plugin",
+          (compilation: WebpackCompilation, callback: () => void) => {
+            const freeGlobalDependencyOnBuildArtifacts = createDependencyOnBuildArtifacts();
+            const upload = createDebugIdUploadFunction({ sentryBuildPluginManager });
 
-              const outputPath = compilation.outputOptions.path ?? path.resolve();
-              const buildArtifacts = Object.keys(compilation.assets).map((asset) =>
-                path.join(outputPath, asset)
-              );
-
-              void sentryBuildPluginManager
-                .createRelease()
-                .then(() => upload(buildArtifacts))
-                .then(() => {
-                  callback();
-                })
-                .finally(() => {
-                  freeGlobalDependencyOnBuildArtifacts();
-                  void sentryBuildPluginManager.deleteArtifacts();
-                });
-            }
-          );
-
-          if (
-            userOptions._experiments?.forceExitOnBuildCompletion &&
-            compiler.options.mode === "production"
-          ) {
-            compiler.hooks.done.tap("sentry-webpack-plugin", () => {
-              setTimeout(() => {
-                logger.debug("Exiting process after debug file upload");
-                process.exit(0);
+            void sentryBuildPluginManager
+              .createRelease()
+              .then(async () => {
+                if (sourcemapsEnabled && options.sourcemaps?.disable !== "disable-upload") {
+                  const outputPath = compilation.outputOptions.path ?? path.resolve();
+                  const buildArtifacts = Object.keys(compilation.assets).map((asset) =>
+                    path.join(outputPath, asset)
+                  );
+                  await upload(buildArtifacts);
+                }
+              })
+              .then(() => {
+                callback();
+              })
+              .finally(() => {
+                freeGlobalDependencyOnBuildArtifacts();
+                void sentryBuildPluginManager.deleteArtifacts();
               });
-            });
           }
+        );
+
+        if (
+          userOptions._experiments?.forceExitOnBuildCompletion &&
+          compiler.options.mode === "production"
+        ) {
+          compiler.hooks.done.tap("sentry-webpack-plugin", () => {
+            setTimeout(() => {
+              logger.debug("Exiting process after debug file upload");
+              process.exit(0);
+            });
+          });
         }
       },
     };
