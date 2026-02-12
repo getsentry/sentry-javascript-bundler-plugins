@@ -66,11 +66,6 @@ interface EsbuildPluginBuild {
   onEnd: (callback: (result: EsbuildOnEndArgs) => void | Promise<void>) => void;
 }
 
-interface EsbuildPlugin {
-  name: string;
-  setup: (build: EsbuildPluginBuild) => void;
-}
-
 function getEsbuildMajorVersion(): string | undefined {
   try {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -312,6 +307,6 @@ export function sentryEsbuildPlugin(userOptions: Options = {}): any {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default sentryEsbuildPlugin as (options?: Options) => EsbuildPlugin;
+export default sentryEsbuildPlugin;
 export type { Options as SentryEsbuildPluginOptions } from "@sentry/bundler-plugin-core";
 export { sentryCliBinaryExists } from "@sentry/bundler-plugin-core";
