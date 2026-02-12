@@ -33,6 +33,12 @@ jobs:
         run: yarn --frozen-lockfile --ignore-engines
         if: steps.dependency-cache.outputs.cache-hit != 'true'
       - run: yarn build
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-artifacts-${{ github.run_id }}
+          path: packages/*/dist
+          retention-days: 1
 
   type-check:
     needs: build
@@ -112,6 +118,11 @@ jobs:
       - name: Install dependencies
         run: yarn --frozen-lockfile --ignore-engines
         if: steps.dependency-cache.outputs.cache-hit != 'true'
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifacts-${{ github.run_id }}
+          path: packages
       - run: yarn test:unit
 
   test-integration:
@@ -154,6 +165,11 @@ jobs:
       - name: Install dependencies
         run: yarn --frozen-lockfile --ignore-engines
         if: steps.dependency-cache.outputs.cache-hit != 'true'
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifacts-${{ github.run_id }}
+          path: packages
       - run: yarn test:integration
 
   test-e2e:
@@ -187,6 +203,11 @@ jobs:
       - name: Install dependencies
         run: yarn --frozen-lockfile --ignore-engines
         if: steps.dependency-cache.outputs.cache-hit != 'true'
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifacts-${{ github.run_id }}
+          path: packages
       - run: yarn test:e2e
 
   lint:
