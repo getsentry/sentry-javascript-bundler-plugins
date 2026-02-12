@@ -15,6 +15,6 @@ describe("sentryEsbuildPlugin", () => {
     }) as EsbuildPlugin;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    expect(plugins).toEqual({ name: "unplugin-host-0", setup: expect.any(Function) });
+    expect(plugins).toEqual({ name: "sentry-esbuild-plugin", setup: expect.any(Function) });
   });
 });
