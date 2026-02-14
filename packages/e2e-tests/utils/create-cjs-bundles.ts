@@ -14,9 +14,9 @@ import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
   outFolder: string,
-  sentryUnpluginOptions: Options
+  sentryPluginOptions: Options
 ): void {
-  if (!sentryUnpluginOptions.release) {
+  if (!sentryPluginOptions.release) {
     console.error("Config has no release set, aborting");
     return;
   }
@@ -36,11 +36,11 @@ export function createCjsBundles(
     },
     plugins: [
       sentryVitePlugin({
-        ...sentryUnpluginOptions,
+        ...sentryPluginOptions,
         release: {
-          name: `${sentryUnpluginOptions.release.name!}-vite`,
+          name: `${sentryPluginOptions.release.name!}-vite`,
           uploadLegacySourcemaps: `${
-            sentryUnpluginOptions.release.uploadLegacySourcemaps as string
+            sentryPluginOptions.release.uploadLegacySourcemaps as string
           }/vite`,
         },
       }),
@@ -52,11 +52,11 @@ export function createCjsBundles(
       input: entrypoints,
       plugins: [
         sentryRollupPlugin({
-          ...sentryUnpluginOptions,
+          ...sentryPluginOptions,
           release: {
-            name: `${sentryUnpluginOptions.release.name!}-rollup`,
+            name: `${sentryPluginOptions.release.name!}-rollup`,
             uploadLegacySourcemaps: `${
-              sentryUnpluginOptions.release.uploadLegacySourcemaps as string
+              sentryPluginOptions.release.uploadLegacySourcemaps as string
             }/rollup`,
           },
         }),
@@ -77,11 +77,11 @@ export function createCjsBundles(
     sourcemap: true,
     plugins: [
       sentryEsbuildPlugin({
-        ...sentryUnpluginOptions,
+        ...sentryPluginOptions,
         release: {
-          name: `${sentryUnpluginOptions.release.name!}-esbuild`,
+          name: `${sentryPluginOptions.release.name!}-esbuild`,
           uploadLegacySourcemaps: `${
-            sentryUnpluginOptions.release.uploadLegacySourcemaps as string
+            sentryPluginOptions.release.uploadLegacySourcemaps as string
           }/esbuild`,
         },
       }),
@@ -104,11 +104,11 @@ export function createCjsBundles(
       target: "node", // needed for webpack 4 so we can access node api
       plugins: [
         sentryWebpackPlugin({
-          ...sentryUnpluginOptions,
+          ...sentryPluginOptions,
           release: {
-            name: `${sentryUnpluginOptions.release.name!}-webpack4`,
+            name: `${sentryPluginOptions.release.name!}-webpack4`,
             uploadLegacySourcemaps: `${
-              sentryUnpluginOptions.release.uploadLegacySourcemaps as string
+              sentryPluginOptions.release.uploadLegacySourcemaps as string
             }/webpack4`,
           },
         }),
@@ -135,11 +135,11 @@ export function createCjsBundles(
       mode: "production",
       plugins: [
         sentryWebpackPlugin({
-          ...sentryUnpluginOptions,
+          ...sentryPluginOptions,
           release: {
-            name: `${sentryUnpluginOptions.release.name!}-webpack5`,
+            name: `${sentryPluginOptions.release.name!}-webpack5`,
             uploadLegacySourcemaps: `${
-              sentryUnpluginOptions.release.uploadLegacySourcemaps as string
+              sentryPluginOptions.release.uploadLegacySourcemaps as string
             }/webpack5`,
           },
         }),

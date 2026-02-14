@@ -1,5 +1,5 @@
-import { EsbuildPlugin } from "unplugin";
 import { sentryEsbuildPlugin } from "../src";
+import { Plugin } from "esbuild";
 
 test("Esbuild plugin should exist", () => {
   expect(sentryEsbuildPlugin).toBeDefined();
@@ -8,13 +8,13 @@ test("Esbuild plugin should exist", () => {
 
 describe("sentryEsbuildPlugin", () => {
   it("returns an esbuild plugin", () => {
-    const plugins = sentryEsbuildPlugin({
+    const plugin = sentryEsbuildPlugin({
       authToken: "test-token",
       org: "test-org",
       project: "test-project",
-    }) as EsbuildPlugin;
+    }) as Plugin;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    expect(plugins).toEqual({ name: "sentry-esbuild-plugin", setup: expect.any(Function) });
+    expect(plugin).toEqual({ name: "sentry-esbuild-plugin", setup: expect.any(Function) });
   });
 });

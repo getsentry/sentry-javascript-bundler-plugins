@@ -22,7 +22,7 @@ const nodejsMajorversion = process.version.split(".")[0]!.slice(1);
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
   outFolder: string,
-  sentryUnpluginOptions: Options,
+  sentryPluginOptions: Options,
   plugins: string[] = []
 ): void {
   if (plugins.length === 0 || plugins.includes("vite")) {
@@ -38,7 +38,7 @@ export function createCjsBundles(
           },
         },
       },
-      plugins: [react({ jsxRuntime: "automatic" }), sentryVitePlugin(sentryUnpluginOptions)],
+      plugins: [react({ jsxRuntime: "automatic" }), sentryVitePlugin(sentryPluginOptions)],
     });
   }
   if (plugins.length === 0 || plugins.includes("rollup")) {
@@ -50,7 +50,7 @@ export function createCjsBundles(
             extensions: RESOLVABLE_EXTENSIONS,
           }),
           commonjs(),
-          sentryRollupPlugin(sentryUnpluginOptions),
+          sentryRollupPlugin(sentryPluginOptions),
           babelPlugin({
             babelHelpers: "bundled",
             presets: [["@babel/preset-react", { runtime: "automatic" }]],
@@ -71,7 +71,7 @@ export function createCjsBundles(
     void esbuild.build({
       entryPoints: entrypoints,
       outdir: path.join(outFolder, "esbuild"),
-      plugins: [sentryEsbuildPlugin(sentryUnpluginOptions)],
+      plugins: [sentryEsbuildPlugin(sentryPluginOptions)],
       minify: true,
       bundle: true,
       jsx: "automatic",
@@ -111,7 +111,7 @@ export function createCjsBundles(
           ],
         },
         target: "node", // needed for webpack 4 so we can access node api
-        plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
+        plugins: [sentryWebpackPlugin(sentryPluginOptions)],
       },
       handleWebpack
     );
@@ -149,7 +149,7 @@ export function createCjsBundles(
             },
           ],
         },
-        plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
+        plugins: [sentryWebpackPlugin(sentryPluginOptions)],
       },
       handleWebpack
     );

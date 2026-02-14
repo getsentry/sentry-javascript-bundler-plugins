@@ -14,7 +14,7 @@ const nodejsMajorVersion = process.version.split(".")[0]!.slice(1);
 export function createCjsBundlesWithQueryParam(
   entrypoints: { [name: string]: string },
   outFolder: string,
-  sentryUnpluginOptions: Options,
+  sentryPluginOptions: Options,
   plugins: string[] = []
 ): void {
   if (plugins.length === 0 || plugins.includes("vite")) {
@@ -31,14 +31,14 @@ export function createCjsBundlesWithQueryParam(
           },
         },
       },
-      plugins: [sentryVitePlugin(sentryUnpluginOptions)],
+      plugins: [sentryVitePlugin(sentryPluginOptions)],
     });
   }
   if (plugins.length === 0 || plugins.includes("rollup")) {
     void rollup
       .rollup({
         input: entrypoints,
-        plugins: [sentryRollupPlugin(sentryUnpluginOptions)],
+        plugins: [sentryRollupPlugin(sentryPluginOptions)],
       })
       .then((bundle) =>
         bundle.write({
@@ -69,7 +69,7 @@ export function createCjsBundlesWithQueryParam(
           libraryTarget: "commonjs",
         },
         target: "node", // needed for webpack 4 so we can access node api
-        plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
+        plugins: [sentryWebpackPlugin(sentryPluginOptions)],
       },
       (err) => {
         if (err) {
@@ -93,7 +93,7 @@ export function createCjsBundlesWithQueryParam(
           },
         },
         mode: "production",
-        plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
+        plugins: [sentryWebpackPlugin(sentryPluginOptions)],
       },
       (err) => {
         if (err) {

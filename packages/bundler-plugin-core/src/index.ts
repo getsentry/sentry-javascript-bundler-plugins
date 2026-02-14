@@ -6,214 +6,7 @@ import SentryCli from "@sentry/cli";
 import { logger } from "@sentry/utils";
 import * as fs from "fs";
 import { glob } from "glob";
-import { createUnplugin, TransformResult, UnpluginInstance, UnpluginOptions } from "unplugin";
-import { createSentryBuildPluginManager } from "./build-plugin-manager";
-import { createDebugIdUploadFunction } from "./debug-id-upload";
-import { Logger } from "./logger";
-import { Options, SentrySDKBuildFlags } from "./types";
-import {
-  CodeInjection,
-  containsOnlyImports,
-  generateReleaseInjectorCode,
-  generateModuleMetadataInjectorCode,
-  stripQueryAndHashFromPath,
-} from "./utils";
-
-type InjectionPlugin = (
-  injectionCode: CodeInjection,
-  debugIds: boolean,
-  logger: Logger
-) => UnpluginOptions;
-type LegacyPlugins = {
-  releaseInjectionPlugin: (injectionCode: string) => UnpluginOptions;
-  moduleMetadataInjectionPlugin: (injectionCode: string) => UnpluginOptions;
-  debugIdInjectionPlugin: (logger: Logger) => UnpluginOptions;
-};
-
-interface SentryUnpluginFactoryOptions {
-  injectionPlugin: InjectionPlugin | LegacyPlugins;
-  componentNameAnnotatePlugin?: (
-    ignoredComponents: string[],
-    injectIntoHtml: boolean
-  ) => UnpluginOptions;
-  debugIdUploadPlugin: (
-    upload: (buildArtifacts: string[]) => Promise<void>,
-    logger: Logger,
-    createDependencyOnBuildArtifacts: () => () => void,
-    webpack_forceExitOnBuildComplete?: boolean
-  ) => UnpluginOptions;
-  bundleSizeOptimizationsPlugin: (buildFlags: SentrySDKBuildFlags) => UnpluginOptions;
-  getBundlerMajorVersion?: () => string | undefined;
-}
-
-/**
- * Creates an unplugin instance used to create Sentry plugins for Vite, Rollup, esbuild, and Webpack.
- */
-export function sentryUnpluginFactory({
-  injectionPlugin,
-  componentNameAnnotatePlugin,
-  debugIdUploadPlugin,
-  bundleSizeOptimizationsPlugin,
-  getBundlerMajorVersion,
-}: SentryUnpluginFactoryOptions): UnpluginInstance<Options | undefined, true> {
-  return createUnplugin<Options | undefined, true>((userOptions = {}, unpluginMetaContext) => {
-    const sentryBuildPluginManager = createSentryBuildPluginManager(userOptions, {
-      loggerPrefix:
-        userOptions._metaOptions?.loggerPrefixOverride ??
-        `[sentry-${unpluginMetaContext.framework}-plugin]`,
-      buildTool: unpluginMetaContext.framework,
-      buildToolMajorVersion: getBundlerMajorVersion?.(),
-    });
-
-    const {
-      logger,
-      normalizedOptions: options,
-      bundleSizeOptimizationReplacementValues,
-    } = sentryBuildPluginManager;
-
-    if (options.disable) {
-      return [
-        {
-          name: "sentry-noop-plugin",
-        },
-      ];
-    }
-
-    if (process.cwd().match(/\\node_modules\\|\/node_modules\//)) {
-      logger.warn(
-        "Running Sentry plugin from within a `node_modules` folder. Some features may not work."
-      );
-    }
-
-    const plugins: UnpluginOptions[] = [];
-
-    // Add plugin to emit a telemetry signal when the build starts
-    plugins.push({
-      name: "sentry-telemetry-plugin",
-      buildStart() {
-        // Technically, for very fast builds we might miss the telemetry signal
-        // but it's okay because telemetry is not critical for us.
-        // We cannot await the flush here because it would block the build start
-        // which in turn would break module federation builds, see
-        // https://github.com/getsentry/sentry-javascript-bundler-plugins/issues/816
-        void sentryBuildPluginManager.telemetry.emitBundlerPluginExecutionSignal().catch(() => {
-          // Nothing for the users to do here. If telemetry fails it's acceptable.
-        });
-      },
-    });
-
-    if (Object.keys(bundleSizeOptimizationReplacementValues).length > 0) {
-      plugins.push(bundleSizeOptimizationsPlugin(bundleSizeOptimizationReplacementValues));
-    }
-
-    const injectionCode = new CodeInjection();
-
-    if (!options.release.inject) {
-      logger.debug(
-        "Release injection disabled via `release.inject` option. Will not inject release."
-      );
-    } else if (!options.release.name) {
-      logger.debug(
-        "No release name provided. Will not inject release. Please set the `release.name` option to identify your release."
-      );
-    } else {
-      const code = generateReleaseInjectorCode({
-        release: options.release.name,
-        injectBuildInformation: options._experiments.injectBuildInformation || false,
-      });
-      if (typeof injectionPlugin !== "function") {
-        plugins.push(injectionPlugin.releaseInjectionPlugin(code.code()));
-      } else {
-        injectionCode.append(code);
-      }
-    }
-
-    if (Object.keys(sentryBuildPluginManager.bundleMetadata).length > 0) {
-      const code = generateModuleMetadataInjectorCode(sentryBuildPluginManager.bundleMetadata);
-      if (typeof injectionPlugin !== "function") {
-        plugins.push(injectionPlugin.moduleMetadataInjectionPlugin(code.code()));
-      } else {
-        injectionCode.append(code);
-      }
-    }
-
-    if (
-      typeof injectionPlugin === "function" &&
-      (!injectionCode.isEmpty() || options.sourcemaps?.disable !== true)
-    ) {
-      plugins.push(injectionPlugin(injectionCode, options.sourcemaps?.disable !== true, logger));
-    }
-
-    // Add plugin to create and finalize releases, and also take care of adding commits and legacy sourcemaps
-    const freeGlobalDependencyOnBuildArtifacts =
-      sentryBuildPluginManager.createDependencyOnBuildArtifacts();
-    plugins.push({
-      name: "sentry-release-management-plugin",
-      async writeBundle() {
-        try {
-          await sentryBuildPluginManager.createRelease();
-        } finally {
-          freeGlobalDependencyOnBuildArtifacts();
-        }
-      },
-    });
-
-    if (options.sourcemaps?.disable !== true) {
-      if (typeof injectionPlugin !== "function") {
-        plugins.push(injectionPlugin.debugIdInjectionPlugin(logger));
-      }
-
-      if (options.sourcemaps?.disable !== "disable-upload") {
-        // This option is only strongly typed for the webpack plugin, where it is used. It has no effect on other plugins
-        const webpack_forceExitOnBuildComplete =
-          typeof options._experiments["forceExitOnBuildCompletion"] === "boolean"
-            ? options._experiments["forceExitOnBuildCompletion"]
-            : undefined;
-
-        plugins.push(
-          debugIdUploadPlugin(
-            createDebugIdUploadFunction({
-              sentryBuildPluginManager,
-            }),
-            logger,
-            sentryBuildPluginManager.createDependencyOnBuildArtifacts,
-            webpack_forceExitOnBuildComplete
-          )
-        );
-      }
-    }
-
-    if (options.reactComponentAnnotation) {
-      if (!options.reactComponentAnnotation.enabled) {
-        logger.debug(
-          "The component name annotate plugin is currently disabled. Skipping component name annotations."
-        );
-      } else if (options.reactComponentAnnotation.enabled && !componentNameAnnotatePlugin) {
-        logger.warn(
-          "The component name annotate plugin is currently not supported by '@sentry/esbuild-plugin'"
-        );
-      } else {
-        componentNameAnnotatePlugin &&
-          plugins.push(
-            componentNameAnnotatePlugin(
-              options.reactComponentAnnotation.ignoredComponents || [],
-              !!options.reactComponentAnnotation._experimentalInjectIntoHtml
-            )
-          );
-      }
-    }
-
-    // Add plugin to delete unwanted artifacts like source maps after the uploads have completed
-    plugins.push({
-      name: "sentry-file-deletion-plugin",
-      async writeBundle() {
-        await sentryBuildPluginManager.deleteArtifacts();
-      },
-    });
-
-    return plugins;
-  });
-}
+import { CodeInjection, containsOnlyImports, stripQueryAndHashFromPath } from "./utils";
 
 /**
  * Determines whether the Sentry CLI binary is in its expected location.
@@ -283,18 +76,17 @@ export function globFiles(outputDir: string): Promise<string[]> {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function createComponentNameAnnotateHooks(
   ignoredComponents: string[],
   injectIntoHtml: boolean
-): {
-  transform: UnpluginOptions["transform"];
-} {
+) {
   type ParserPlugins = NonNullable<
     NonNullable<Parameters<typeof transformAsync>[1]>["parserOpts"]
   >["plugins"];
 
   return {
-    async transform(this: void, code: string, id: string): Promise<TransformResult> {
+    async transform(this: void, code: string, id: string) {
       // id may contain query and hash which will trip up our file extension logic below
       const idWithoutQueryAndHash = stripQueryAndHashFromPath(id);
 
