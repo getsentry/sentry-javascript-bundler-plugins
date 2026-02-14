@@ -54,7 +54,7 @@ function getRollupMajorVersion(): string | undefined {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function _rollupPluginInternal(
   userOptions: Options = {},
-  buildTool: string,
+  buildTool: "rollup" | "vite",
   buildToolMajorVersion?: string
 ) {
   const sentryBuildPluginManager = createSentryBuildPluginManager(userOptions, {
