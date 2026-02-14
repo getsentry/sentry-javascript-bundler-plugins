@@ -1,5 +1,5 @@
 import {
-  generateGlobalInjectorCode,
+  generateReleaseInjectorCode,
   generateModuleMetadataInjectorCode,
   getDependencies,
   getPackageJson,
@@ -221,9 +221,9 @@ if (false && true) {
   });
 });
 
-describe("generateGlobalInjectorCode", () => {
+describe("generateReleaseInjectorCode", () => {
   it("generates code with release", () => {
-    const generatedCode = generateGlobalInjectorCode({
+    const generatedCode = generateReleaseInjectorCode({
       release: "1.2.3",
       injectBuildInformation: false,
     });
@@ -244,7 +244,7 @@ describe("generateGlobalInjectorCode", () => {
       })
     );
 
-    const generatedCode = generateGlobalInjectorCode({
+    const generatedCode = generateReleaseInjectorCode({
       release: "1.2.3",
       injectBuildInformation: true,
     });

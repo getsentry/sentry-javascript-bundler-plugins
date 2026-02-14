@@ -1,6 +1,6 @@
 import {
   createSentryBuildPluginManager,
-  generateGlobalInjectorCode,
+  generateReleaseInjectorCode,
   generateModuleMetadataInjectorCode,
   Options,
   getDebugIdSnippet,
@@ -127,7 +127,7 @@ export function sentryEsbuildPlugin(userOptions: Options = {}): any {
     );
   } else {
     staticInjectionCode.append(
-      generateGlobalInjectorCode({
+      generateReleaseInjectorCode({
         release: options.release.name,
         injectBuildInformation: options._experiments.injectBuildInformation || false,
       })

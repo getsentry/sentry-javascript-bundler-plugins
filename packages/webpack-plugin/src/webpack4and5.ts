@@ -1,7 +1,7 @@
 import {
   Options,
   createSentryBuildPluginManager,
-  generateGlobalInjectorCode,
+  generateReleaseInjectorCode,
   generateModuleMetadataInjectorCode,
   stringToUUID,
   createComponentNameAnnotateHooks,
@@ -194,7 +194,7 @@ export function sentryWebpackPluginFactory({
       );
     } else {
       staticInjectionCode.append(
-        generateGlobalInjectorCode({
+        generateReleaseInjectorCode({
           release: options.release.name,
           injectBuildInformation: options._experiments.injectBuildInformation || false,
         })
