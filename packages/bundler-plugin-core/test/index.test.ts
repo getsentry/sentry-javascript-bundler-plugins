@@ -1,4 +1,3 @@
-import { Compiler } from "webpack";
 import { getDebugIdSnippet } from "../src";
 import { containsOnlyImports } from "../src/utils";
 
