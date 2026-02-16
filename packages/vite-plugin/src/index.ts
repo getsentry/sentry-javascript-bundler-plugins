@@ -1,10 +1,11 @@
 import { SentryRollupPluginOptions } from "@sentry/rollup-plugin";
 import { _rollupPluginInternal } from "@sentry/rollup-plugin";
-import { Plugin, version } from "vite";
+import vite, { Plugin } from "vite";
 
 function getViteMajorVersion(): string | undefined {
   try {
-    return version?.split(".")[0];
+    // The version export was only added in Vite v3?
+    return vite?.version?.split(".")[0];
   } catch (err) {
     // do nothing, we'll just not report a version
   }
