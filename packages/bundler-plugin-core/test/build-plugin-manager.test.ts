@@ -1,10 +1,14 @@
-import { createSentryBuildPluginManager } from "../src/build-plugin-manager";
+import {
+  createSentryBuildPluginManager,
+  _resetDeployedReleasesForTesting,
+} from "../src/build-plugin-manager";
 import fs from "fs";
 import { glob } from "glob";
 import { prepareBundleForDebugIdUpload } from "../src/debug-id-upload";
 
 const mockCliExecute = jest.fn();
 const mockCliUploadSourceMaps = jest.fn();
+const mockCliNewDeploy = jest.fn();
 
 jest.mock("@sentry/cli", () => {
   return jest.fn().mockImplementation(() => ({
@@ -14,7 +18,7 @@ jest.mock("@sentry/cli", () => {
       new: jest.fn(),
       finalize: jest.fn(),
       setCommits: jest.fn(),
-      newDeploy: jest.fn(),
+      newDeploy: mockCliNewDeploy,
     },
   }));
 });
@@ -631,6 +635,138 @@ describe("createSentryBuildPluginManager", () => {
         projects: undefined,
         release: "test-release",
       });
+    });
+  });
+
+  describe("createRelease deploy deduplication", () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      _resetDeployedReleasesForTesting();
+    });
+
+    it("should create a deploy record on the first call", async () => {
+      const manager = createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+          release: {
+            name: "test-release",
+            deploy: { env: "production" },
+          },
+        },
+        { buildTool: "webpack", loggerPrefix: "[sentry-webpack-plugin]" }
+      );
+
+      await manager.createRelease();
+
+      expect(mockCliNewDeploy).toHaveBeenCalledTimes(1);
+      expect(mockCliNewDeploy).toHaveBeenCalledWith("test-release", { env: "production" });
+    });
+
+    it("should not create duplicate deploy records when createRelease is called multiple times on the same instance", async () => {
+      const manager = createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+          release: {
+            name: "test-release",
+            deploy: { env: "production" },
+          },
+        },
+        { buildTool: "webpack", loggerPrefix: "[sentry-webpack-plugin]" }
+      );
+
+      await manager.createRelease();
+      await manager.createRelease();
+      await manager.createRelease();
+
+      expect(mockCliNewDeploy).toHaveBeenCalledTimes(1);
+    });
+
+    it("should not create duplicate deploy records across separate plugin instances with the same release name", async () => {
+      const managerA = createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+          release: {
+            name: "test-release",
+            deploy: { env: "production" },
+          },
+        },
+        { buildTool: "webpack", loggerPrefix: "[sentry-webpack-plugin]" }
+      );
+
+      const managerB = createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+          release: {
+            name: "test-release",
+            deploy: { env: "production" },
+          },
+        },
+        { buildTool: "webpack", loggerPrefix: "[sentry-webpack-plugin]" }
+      );
+
+      await managerA.createRelease();
+      await managerB.createRelease();
+
+      expect(mockCliNewDeploy).toHaveBeenCalledTimes(1);
+    });
+
+    it("should allow deploys for different release names", async () => {
+      const managerA = createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+          release: {
+            name: "release-1",
+            deploy: { env: "production" },
+          },
+        },
+        { buildTool: "webpack", loggerPrefix: "[sentry-webpack-plugin]" }
+      );
+
+      const managerB = createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+          release: {
+            name: "release-2",
+            deploy: { env: "production" },
+          },
+        },
+        { buildTool: "webpack", loggerPrefix: "[sentry-webpack-plugin]" }
+      );
+
+      await managerA.createRelease();
+      await managerB.createRelease();
+
+      expect(mockCliNewDeploy).toHaveBeenCalledTimes(2);
+      expect(mockCliNewDeploy).toHaveBeenCalledWith("release-1", { env: "production" });
+      expect(mockCliNewDeploy).toHaveBeenCalledWith("release-2", { env: "production" });
+    });
+
+    it("should not create a deploy when deploy option is not set", async () => {
+      const manager = createSentryBuildPluginManager(
+        {
+          authToken: "test-token",
+          org: "test-org",
+          project: "test-project",
+          release: { name: "test-release" },
+        },
+        { buildTool: "webpack", loggerPrefix: "[sentry-webpack-plugin]" }
+      );
+
+      await manager.createRelease();
+
+      expect(mockCliNewDeploy).not.toHaveBeenCalled();
     });
   });
 });

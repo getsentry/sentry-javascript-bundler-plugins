@@ -29,6 +29,16 @@ import {
 import { glob } from "glob";
 import { defaultRewriteSourcesHook, prepareBundleForDebugIdUpload } from "./debug-id-upload";
 
+// Module-level guard to prevent duplicate deploy records when multiple bundler plugin
+// instances run in the same process (e.g. Next.js creates separate webpack compilers
+// for client, server, and edge). Keyed by release name.
+const _deployedReleases = new Set<string>();
+
+/** @internal Exported for testing only. */
+export function _resetDeployedReleasesForTesting(): void {
+  _deployedReleases.clear();
+}
+
 export type SentryBuildPluginManager = {
   /**
    * A logger instance that takes the options passed to the build plugin manager into account. (for silencing and log level etc.)
@@ -534,8 +544,9 @@ export function createSentryBuildPluginManager(
           await cliInstance.releases.finalize(options.release.name);
         }
 
-        if (options.release.deploy) {
+        if (options.release.deploy && !_deployedReleases.has(options.release.name)) {
           await cliInstance.releases.newDeploy(options.release.name, options.release.deploy);
+          _deployedReleases.add(options.release.name);
         }
       } catch (e) {
         sentryScope.captureException('Error in "releaseManagementPlugin" writeBundle hook');
