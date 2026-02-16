@@ -1,15 +1,10 @@
 import { SentryRollupPluginOptions } from "@sentry/rollup-plugin";
 import { _rollupPluginInternal } from "@sentry/rollup-plugin";
-import { createRequire } from "node:module";
-import { Plugin } from "vite";
+import { Plugin, version } from "vite";
 
 function getViteMajorVersion(): string | undefined {
   try {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore - Rollup already transpiles this for us
-    const req = createRequire(import.meta.url);
-    const vite = req("vite") as { version?: string };
-    return vite.version?.split(".")[0];
+    return version?.split(".")[0];
   } catch (err) {
     // do nothing, we'll just not report a version
   }
