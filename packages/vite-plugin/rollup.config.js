@@ -9,7 +9,7 @@ const extensions = [".ts"];
 
 export default {
   input,
-  external: [...Object.keys(packageJson.dependencies), ...modulePackage.builtinModules],
+  external: [...Object.keys(packageJson.dependencies), ...modulePackage.builtinModules, "vite"],
   onwarn: (warning) => {
     if (warning.code === "CIRCULAR_DEPENDENCY") {
       // Circular dependencies are usually not a big deal for us so let's just warn about them
