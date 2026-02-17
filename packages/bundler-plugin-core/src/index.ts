@@ -5,7 +5,6 @@ import componentNameAnnotatePlugin, {
 import SentryCli from "@sentry/cli";
 import { logger } from "@sentry/utils";
 import * as fs from "fs";
-import { glob } from "glob";
 import { CodeInjection, containsOnlyImports, stripQueryAndHashFromPath } from "./utils";
 
 /**
@@ -61,19 +60,6 @@ export function shouldSkipCodeInjection(
   }
 
   return false;
-}
-
-export function globFiles(outputDir: string): Promise<string[]> {
-  return glob(
-    ["/**/*.js", "/**/*.mjs", "/**/*.cjs", "/**/*.js.map", "/**/*.mjs.map", "/**/*.cjs.map"].map(
-      (q) => `${q}?(\\?*)?(#*)`
-    ), // We want to allow query and hashes strings at the end of files
-    {
-      root: outputDir,
-      absolute: true,
-      nodir: true,
-    }
-  );
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

@@ -9,7 +9,6 @@ import {
   stringToUUID,
   COMMENT_USE_STRICT_REGEX,
   createDebugIdUploadFunction,
-  globFiles,
   createComponentNameAnnotateHooks,
   replaceBooleanFlagsInCode,
   CodeInjection,
@@ -206,18 +205,8 @@ export function _rollupPluginInternal(
       await sentryBuildPluginManager.createRelease();
 
       if (sourcemapsEnabled && options.sourcemaps?.disable !== "disable-upload") {
-        if (outputOptions.dir) {
-          const outputDir = outputOptions.dir;
-          const buildArtifacts = await globFiles(outputDir);
-          await upload(buildArtifacts);
-        } else if (outputOptions.file) {
-          await upload([outputOptions.file]);
-        } else {
-          const buildArtifacts = Object.keys(bundle).map((asset) =>
-            path.join(path.resolve(), asset)
-          );
-          await upload(buildArtifacts);
-        }
+        const buildArtifacts = Object.keys(bundle).map((asset) => path.join(path.resolve(), asset));
+        await upload(buildArtifacts);
       }
     } finally {
       freeGlobalDependencyOnBuildArtifacts();
