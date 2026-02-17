@@ -6,6 +6,7 @@ import { Scope } from "@sentry/core";
 import { createStackParser, nodeStackLineParser } from "@sentry/utils";
 import { makeOptionallyEnabledNodeTransport } from "./transports";
 import { getProjects } from "../utils";
+import { LIB_VERSION } from "../version";
 
 const SENTRY_SAAS_HOSTNAME = "sentry.io";
 
@@ -26,7 +27,7 @@ export function createSentryInstance(
     tracesSampleRate: 1,
     sampleRate: 1,
 
-    release: __PACKAGE_VERSION__,
+    release: LIB_VERSION,
     integrations: [],
     tracePropagationTargets: ["sentry.io/api"],
 

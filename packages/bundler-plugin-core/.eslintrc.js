@@ -8,7 +8,7 @@ module.exports = {
     ".eslintrc.js",
     "dist",
     "jest.config.js",
-    "rollup.config.js",
+    "rollup.config.mjs",
     "test/fixtures/**/*",
     "sentry-release-injection-file.js",
     "sentry-esbuild-debugid-injection-file.js",
@@ -16,9 +16,6 @@ module.exports = {
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ["./src/tsconfig.json", "./test/tsconfig.json"],
-  },
-  globals: {
-    __PACKAGE_VERSION__: "readonly",
   },
   env: {
     node: true,

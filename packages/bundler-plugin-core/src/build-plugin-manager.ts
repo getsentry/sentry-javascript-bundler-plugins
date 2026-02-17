@@ -28,6 +28,7 @@ import {
 } from "./utils";
 import { glob } from "glob";
 import { defaultRewriteSourcesHook, prepareBundleForDebugIdUpload } from "./debug-id-upload";
+import { LIB_VERSION } from "./version";
 
 // Module-level guard to prevent duplicate deploy records when multiple bundler plugin
 // instances run in the same process (e.g. Next.js creates separate webpack compilers
@@ -238,9 +239,7 @@ export function createSentryBuildPluginManager(
   });
 
   // Set the User-Agent that Sentry CLI will use when interacting with Sentry
-  process.env[
-    "SENTRY_PIPELINE"
-  ] = `${bundlerPluginMetaContext.buildTool}-plugin/${__PACKAGE_VERSION__}`;
+  process.env["SENTRY_PIPELINE"] = `${bundlerPluginMetaContext.buildTool}-plugin/${LIB_VERSION}`;
 
   // Propagate debug flag to Sentry CLI via environment variable
   // Only set if not already defined to respect user's explicit configuration

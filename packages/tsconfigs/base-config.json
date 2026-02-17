@@ -2,12 +2,10 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "moduleResolution": "node",
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
-
     "strict": true,
-
     "noImplicitReturns": true,
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
