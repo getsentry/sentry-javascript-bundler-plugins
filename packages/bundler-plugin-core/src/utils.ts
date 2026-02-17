@@ -120,16 +120,19 @@ export function getDependencies(packageJson: PackageJson): {
 
   const deps = Object.keys(dependencies).sort();
 
-  const depsVersions: Record<string, number> = deps.reduce((depsVersions, depName) => {
-    if (PACKAGES_TO_INCLUDE_VERSION.includes(depName)) {
-      const version = dependencies[depName] as string;
-      const majorVersion = parseMajorVersion(version);
-      if (majorVersion) {
-        depsVersions[depName] = majorVersion;
+  const depsVersions: Record<string, number> = deps.reduce(
+    (depsVersions, depName) => {
+      if (PACKAGES_TO_INCLUDE_VERSION.includes(depName)) {
+        const version = dependencies[depName] as string;
+        const majorVersion = parseMajorVersion(version);
+        if (majorVersion) {
+          depsVersions[depName] = majorVersion;
+        }
       }
-    }
-    return depsVersions;
-  }, {} as Record<string, number>);
+      return depsVersions;
+    },
+    {} as Record<string, number>
+  );
 
   return { deps, depsVersions };
 }
@@ -414,8 +417,8 @@ export function serializeIgnoreOptions(ignoreValue: string | string[] | undefine
   const ignoreOptions: string[] = Array.isArray(ignoreValue)
     ? ignoreValue
     : typeof ignoreValue === "string"
-    ? [ignoreValue]
-    : DEFAULT_IGNORE;
+      ? [ignoreValue]
+      : DEFAULT_IGNORE;
 
   return ignoreOptions.reduce(
     (acc, value) => acc.concat(["--ignore", String(value)]),

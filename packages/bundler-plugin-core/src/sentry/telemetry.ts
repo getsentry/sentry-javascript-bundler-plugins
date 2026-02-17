@@ -110,7 +110,7 @@ export function setTelemetryDataOnScope(
 
   scope.setTags({
     organization: org,
-    project: Array.isArray(project) ? project.join(", ") : project ?? "undefined",
+    project: Array.isArray(project) ? project.join(", ") : (project ?? "undefined"),
     bundler: buildTool,
   });
 

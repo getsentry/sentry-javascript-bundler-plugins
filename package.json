@@ -22,15 +22,15 @@
     "test:integration": "nx run @sentry-internal/integration-tests:test",
     "test:e2e": "nx run @sentry-internal/bundler-plugin-e2e-tests:test",
     "lint": "nx run-many --target=lint --all",
-    "check:formatting": "prettier --check .",
-    "fix:formatting": "prettier --write ."
+    "check:formatting": "oxfmt --check .",
+    "fix:formatting": "oxfmt ."
   },
   "devDependencies": {
     "@nrwl/cli": "14.5.10",
     "@nrwl/workspace": "14.5.10",
     "lerna": "^6.6.2",
     "nx": "14.5.10",
-    "prettier": "^2.7.1",
+    "oxfmt": "^0.33.0",
     "pretty-quick": "^3.1.3",
     "npm-run-all": "^4.1.5",
     "ts-node": "^10.9.2"
