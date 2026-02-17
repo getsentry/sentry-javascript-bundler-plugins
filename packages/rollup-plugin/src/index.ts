@@ -15,7 +15,7 @@ import {
   CodeInjection,
 } from "@sentry/bundler-plugin-core";
 import MagicString, { SourceMap } from "magic-string";
-import type { TransformHook } from "rollup";
+import type { TransformResult } from "rollup";
 import * as path from "node:path";
 import { createRequire } from "node:module";
 
@@ -125,14 +125,12 @@ export function _rollupPluginInternal(
     });
   }
 
-  function transform(code: string, id: string): ReturnType<TransformHook> {
+  async function transform(code: string, id: string): Promise<TransformResult> {
     // Component annotations are only in user code and boolean flag replacements are
     // only in Sentry code. If we successfully add annotations, we can return early.
 
     if (transformAnnotations?.transform) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore TS complains about 'this'
-      const result = transformAnnotations.transform(code, id);
+      const result = await transformAnnotations.transform(code, id);
       if (result) {
         return result;
       }

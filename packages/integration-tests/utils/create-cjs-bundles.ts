@@ -17,7 +17,7 @@ type Bundlers = "webpack4" | "webpack5" | "esbuild" | "rollup" | "vite" | string
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
   outFolder: string,
-  sentryUnpluginOptions: Options,
+  sentryPluginOptions: Options,
   plugins: Bundlers[] = []
 ): void {
   if (plugins.length === 0 || plugins.includes("vite")) {
@@ -34,7 +34,7 @@ export function createCjsBundles(
           },
         },
       },
-      plugins: [sentryVitePlugin(sentryUnpluginOptions)],
+      plugins: [sentryVitePlugin(sentryPluginOptions)],
     });
   }
 
@@ -42,7 +42,7 @@ export function createCjsBundles(
     void rollup
       .rollup({
         input: entrypoints,
-        plugins: [sentryRollupPlugin(sentryUnpluginOptions)],
+        plugins: [sentryRollupPlugin(sentryPluginOptions)],
       })
       .then((bundle) =>
         bundle.write({
@@ -59,7 +59,7 @@ export function createCjsBundles(
       sourcemap: true,
       entryPoints: entrypoints,
       outdir: path.join(outFolder, "esbuild"),
-      plugins: [sentryEsbuildPlugin(sentryUnpluginOptions)],
+      plugins: [sentryEsbuildPlugin(sentryPluginOptions)],
       minify: true,
       bundle: true,
       format: "cjs",
@@ -80,7 +80,7 @@ export function createCjsBundles(
           filename: "[name].js?[contenthash]",
         },
         target: "node", // needed for webpack 4 so we can access node api
-        plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
+        plugins: [sentryWebpackPlugin(sentryPluginOptions)],
       },
       (err) => {
         if (err) {
@@ -103,7 +103,7 @@ export function createCjsBundles(
           },
         },
         mode: "production",
-        plugins: [sentryWebpackPlugin(sentryUnpluginOptions)],
+        plugins: [sentryWebpackPlugin(sentryPluginOptions)],
       },
       (err) => {
         if (err) {
