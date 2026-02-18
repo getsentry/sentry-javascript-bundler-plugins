@@ -30,7 +30,7 @@
   },
   "customizations": {
     "vscode": {
-      "extensions": ["esbenp.prettier-vscode", "SonarSource.sonarlint-vscode"]
+      "extensions": ["oxc.oxc-vscode", "SonarSource.sonarlint-vscode"]
     }
   }
 }

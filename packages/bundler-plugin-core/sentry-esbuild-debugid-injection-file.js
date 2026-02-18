@@ -3,12 +3,12 @@ try {
     "undefined" != typeof window
       ? window
       : "undefined" != typeof global
-      ? global
-      : "undefined" != typeof globalThis
-      ? global
-      : "undefined" != typeof self
-      ? self
-      : {};
+        ? global
+        : "undefined" != typeof globalThis
+          ? global
+          : "undefined" != typeof self
+            ? self
+            : {};
 
   let stack = new globalObject.Error().stack;
 

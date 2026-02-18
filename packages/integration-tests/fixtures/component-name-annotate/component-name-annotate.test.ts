@@ -2,8 +2,7 @@ import childProcess from "child_process";
 import path from "path";
 import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
-// prettier-ignore
-const SNAPSHOT = `"<div><span data-sentry-component=\\"ComponentA\\" data-sentry-source-file=\\"component-a.jsx\\">Component A</span></div>"`
+const SNAPSHOT = `"<div><span data-sentry-component=\\"ComponentA\\" data-sentry-source-file=\\"component-a.jsx\\">Component A</span></div>"`;
 const ESBUILD_SNAPSHOT = `"<div><span>Component A</span></div>"`;
 
 function checkBundle(bundlePath: string, snapshot = SNAPSHOT): void {
