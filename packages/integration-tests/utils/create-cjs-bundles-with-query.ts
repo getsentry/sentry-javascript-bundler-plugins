@@ -31,7 +31,7 @@ export function createCjsBundlesWithQueryParam(
           },
         },
       },
-      plugins: [sentryVitePlugin(sentryPluginOptions)],
+      plugins: [sentryVitePlugin(sentryPluginOptions) as unknown as vite.Plugin],
     });
   }
   if (plugins.length === 0 || plugins.includes("rollup")) {

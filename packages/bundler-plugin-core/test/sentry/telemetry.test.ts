@@ -1,19 +1,21 @@
 import { Scope } from "@sentry/core";
 import { NormalizedOptions, normalizeUserOptions } from "../../src/options-mapping";
 import { allowedToSendTelemetry, setTelemetryDataOnScope } from "../../src/sentry/telemetry";
+import { describe, it, expect, afterEach, beforeEach, vi } from "vitest";
 
-const mockCliExecute = jest.fn();
-jest.mock(
-  "@sentry/cli",
-  () =>
-    class {
-      execute = mockCliExecute;
-    }
-);
+const { mockCliExecute } = vi.hoisted(() => ({
+  mockCliExecute: vi.fn(),
+}));
+
+vi.mock("@sentry/cli", () => ({
+  default: class {
+    execute = mockCliExecute;
+  },
+}));
 
 describe("shouldSendTelemetry", () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it("should return false if CLI returns a URL other than sentry.io", async () => {
@@ -33,9 +35,9 @@ describe("shouldSendTelemetry", () => {
 
 describe("addPluginOptionTagsToScope", () => {
   const mockedScope = {
-    setTag: jest.fn(),
-    setTags: jest.fn(),
-    setUser: jest.fn(),
+    setTag: vi.fn(),
+    setTags: vi.fn(),
+    setUser: vi.fn(),
   };
 
   const defaultOptions = {
@@ -43,7 +45,7 @@ describe("addPluginOptionTagsToScope", () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it("should set include tag according to number of entries (single entry)", () => {

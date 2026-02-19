@@ -1,5 +1,3 @@
-const jestPackageJson = require("jest/package.json");
-
 /** @type {import('eslint').ESLint.Options} */
 module.exports = {
   root: true,
@@ -7,7 +5,6 @@ module.exports = {
   ignorePatterns: [
     ".eslintrc.js",
     "dist",
-    "jest.config.js",
     "rollup.config.mjs",
     "test/fixtures/**/*",
     "sentry-release-injection-file.js",
@@ -19,10 +16,5 @@ module.exports = {
   },
   env: {
     node: true,
-  },
-  settings: {
-    jest: {
-      version: jestPackageJson.version,
-    },
   },
 };

@@ -18,7 +18,7 @@ vite
         },
       },
     },
-    plugins: [sentryVitePlugin(pluginOptions)],
+    plugins: [sentryVitePlugin(pluginOptions) as unknown as vite.Plugin],
   })
   .catch((e) => {
     // eslint-disable-next-line no-console

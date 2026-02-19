@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as url from "url";
 import { determineSourceMapPathFromBundle } from "../../src/debug-id-upload";
 import { createLogger } from "../../src/logger";
+import { describe, it, expect, vi } from "vitest";
 
 const logger = createLogger({ prefix: "[resolve-source-maps-test]", silent: false, debug: false });
 const fixtureDir = path.resolve(__dirname, "../fixtures/resolve-source-maps");
@@ -104,7 +105,7 @@ describe("Resolve source maps", () => {
     });
 
     it("should pass the correct values to the resolveSourceMap hook", async () => {
-      const hook = jest.fn(() => separateSourceMapPath);
+      const hook = vi.fn(() => separateSourceMapPath);
       expect(
         await determineSourceMapPathFromBundle(
           separateBundlePath,
@@ -117,7 +118,7 @@ describe("Resolve source maps", () => {
     });
 
     it("should pass the correct values to the resolveSourceMap hook when no sourceMappingURL is present", async () => {
-      const hook = jest.fn(() => separateSourceMapPath);
+      const hook = vi.fn(() => separateSourceMapPath);
       expect(
         await determineSourceMapPathFromBundle(
           separateBundlePath,

@@ -1,6 +1,7 @@
 import { pluginConfig } from "./config";
 import { BUNDLERS } from "../../utils/bundlers";
 import { getSentryReleaseFiles } from "../../utils/releases";
+import { describe, expect, it } from "vitest";
 
 describe("Simple Sourcemaps Upload (one string include + default options)", () => {
   it.each(BUNDLERS)("uploads the correct files using %s", async (bundler) => {
