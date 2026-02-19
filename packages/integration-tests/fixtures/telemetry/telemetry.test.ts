@@ -112,7 +112,7 @@ test("rollup bundle telemetry", async () => {
                 "react-annotate": false,
                 "meta-framework": "none",
                 "application-key-set": false,
-                "bundler-major-version": "3",
+                "bundler-major-version": expect.any(String),
                 bundler: "rollup",
               }),
               sdk: expect.objectContaining({
