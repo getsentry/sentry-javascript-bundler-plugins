@@ -9,7 +9,6 @@ import {
   stringToUUID,
   COMMENT_USE_STRICT_REGEX,
   createDebugIdUploadFunction,
-  globFiles,
   createComponentNameAnnotateHooks,
   replaceBooleanFlagsInCode,
   CodeInjection,
@@ -208,15 +207,13 @@ export function _rollupPluginInternal(
       if (sourcemapsEnabled && options.sourcemaps?.disable !== "disable-upload") {
         if (outputOptions.dir) {
           const outputDir = outputOptions.dir;
-          const buildArtifacts = await globFiles(outputDir);
+          const buildArtifacts = Object.keys(bundle).map((asset) => path.join(outputDir, asset));
           await upload(buildArtifacts);
         } else if (outputOptions.file) {
           await upload([outputOptions.file]);
         } else {
-          const buildArtifacts = Object.keys(bundle).map((asset) =>
-            path.join(path.resolve(), asset)
-          );
-          await upload(buildArtifacts);
+          // The Rollup options say that either "dir" or "file" must be specified
+          logger.warn('Either "dir" or "file" output option must be specified. Skipping upload.');
         }
       }
     } finally {
