@@ -38,7 +38,10 @@ export function createCjsBundles(
           },
         },
       },
-      plugins: [react({ jsxRuntime: "automatic" }), sentryVitePlugin(sentryPluginOptions)],
+      plugins: [
+        react({ jsxRuntime: "automatic" }),
+        sentryVitePlugin(sentryPluginOptions) as unknown as vite.Plugin,
+      ],
     });
   }
   if (plugins.length === 0 || plugins.includes("rollup")) {

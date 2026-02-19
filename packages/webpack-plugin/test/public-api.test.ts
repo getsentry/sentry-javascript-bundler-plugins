@@ -1,5 +1,6 @@
 import { Plugin } from "webpack";
 import { sentryWebpackPlugin } from "../src";
+import { describe, it, expect, test } from "vitest";
 
 test("Webpack plugin should exist", () => {
   expect(sentryWebpackPlugin).toBeDefined();

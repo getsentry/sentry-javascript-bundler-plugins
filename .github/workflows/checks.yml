@@ -21,7 +21,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:
@@ -54,7 +54,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:
@@ -80,7 +80,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:
@@ -107,7 +107,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:
@@ -154,7 +154,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:
@@ -192,7 +192,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:
@@ -224,7 +224,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:

@@ -1,7 +1,8 @@
 import { Plugin } from "webpack";
 import { sentryWebpackPlugin } from "../src/webpack5";
+import { describe, it, expect, test, vi } from "vitest";
 
-jest.mock("webpack", () => {
+vi.mock("webpack", () => {
   throw new Error("Webpack 5 version of the plugin should use module from compiler.");
 });
 

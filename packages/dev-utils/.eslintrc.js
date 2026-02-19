@@ -1,5 +1,3 @@
-const jestPackageJson = require("jest/package.json");
-
 /** @type {import('eslint').ESLint.Options} */
 module.exports = {
   root: true,
@@ -11,10 +9,5 @@ module.exports = {
   },
   env: {
     node: true,
-  },
-  settings: {
-    jest: {
-      version: jestPackageJson.version,
-    },
   },
 };

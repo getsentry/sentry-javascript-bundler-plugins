@@ -1,4 +1,5 @@
 import { sentryVitePlugin } from "../src";
+import { describe, it, expect, test, beforeEach, vi } from "vitest";
 
 test("Vite plugin should exist", () => {
   expect(sentryVitePlugin).toBeDefined();
@@ -7,7 +8,7 @@ test("Vite plugin should exist", () => {
 
 describe("sentryVitePlugin", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("returns an array of Vite plugins", () => {

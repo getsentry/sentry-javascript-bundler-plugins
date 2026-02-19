@@ -23,6 +23,6 @@ void vite.build({
     sentryVitePlugin({
       telemetry: false,
       // Empty options - the issue says options don't affect the results
-    }),
+    }) as unknown as vite.Plugin,
   ],
 });
