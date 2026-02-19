@@ -208,7 +208,15 @@ export function _rollupPluginInternal(
       if (sourcemapsEnabled && options.sourcemaps?.disable !== "disable-upload") {
         if (outputOptions.dir) {
           const outputDir = outputOptions.dir;
-          const buildArtifacts = await globFiles(outputDir);
+          const JS_AND_MAP_PATTERNS = [
+            "/**/*.js",
+            "/**/*.mjs",
+            "/**/*.cjs",
+            "/**/*.js.map",
+            "/**/*.mjs.map",
+            "/**/*.cjs.map",
+          ].map((q) => `${q}?(\\?*)?(#*)`); // We want to allow query and hash strings at the end of files
+          const buildArtifacts = await globFiles(JS_AND_MAP_PATTERNS, { root: outputDir });
           await upload(buildArtifacts);
         } else if (outputOptions.file) {
           await upload([outputOptions.file]);

@@ -3,7 +3,7 @@ import {
   _resetDeployedReleasesForTesting,
 } from "../src/build-plugin-manager";
 import fs from "fs";
-import { glob } from "glob";
+import { globFiles } from "../src/glob";
 import { prepareBundleForDebugIdUpload } from "../src/debug-id-upload";
 
 const mockCliExecute = jest.fn();
@@ -37,10 +37,10 @@ jest.mock("@sentry/core", () => ({
   startSpan: jest.fn((options: unknown, callback: () => unknown) => callback()),
 }));
 
-jest.mock("glob");
+jest.mock("../src/glob");
 jest.mock("../src/debug-id-upload");
 
-const mockGlob = glob as jest.MockedFunction<typeof glob>;
+const mockGlobFiles = globFiles as jest.MockedFunction<typeof globFiles>;
 const mockPrepareBundleForDebugIdUpload = prepareBundleForDebugIdUpload as jest.MockedFunction<
   typeof prepareBundleForDebugIdUpload
 >;
@@ -302,7 +302,7 @@ describe("createSentryBuildPluginManager", () => {
         })
       );
       // Should not glob when prepareArtifacts is false
-      expect(mockGlob).not.toHaveBeenCalled();
+      expect(mockGlobFiles).not.toHaveBeenCalled();
       expect(mockPrepareBundleForDebugIdUpload).not.toHaveBeenCalled();
     });
 
@@ -340,7 +340,7 @@ describe("createSentryBuildPluginManager", () => {
           live: "rejectOnError",
         })
       );
-      expect(mockGlob).not.toHaveBeenCalled();
+      expect(mockGlobFiles).not.toHaveBeenCalled();
       expect(mockPrepareBundleForDebugIdUpload).not.toHaveBeenCalled();
     });
 
@@ -359,7 +359,7 @@ describe("createSentryBuildPluginManager", () => {
       await manager.uploadSourcemaps([".next"], { prepareArtifacts: false });
 
       expect(mockCliUploadSourceMaps).not.toHaveBeenCalled();
-      expect(mockGlob).not.toHaveBeenCalled();
+      expect(mockGlobFiles).not.toHaveBeenCalled();
       expect(mockPrepareBundleForDebugIdUpload).not.toHaveBeenCalled();
     });
 
@@ -378,14 +378,18 @@ describe("createSentryBuildPluginManager", () => {
       await manager.uploadSourcemaps([".next"]);
 
       expect(mockCliUploadSourceMaps).not.toHaveBeenCalled();
-      expect(mockGlob).not.toHaveBeenCalled();
+      expect(mockGlobFiles).not.toHaveBeenCalled();
       expect(mockPrepareBundleForDebugIdUpload).not.toHaveBeenCalled();
     });
 
     it("prepares into temp folder and uploads when prepareArtifacts is true (default)", async () => {
       mockCliUploadSourceMaps.mockResolvedValue(undefined);
 
-      mockGlob.mockResolvedValue(["/app/dist/a.js", "/app/dist/a.js.map", "/app/dist/other.txt"]);
+      mockGlobFiles.mockResolvedValue([
+        "/app/dist/a.js",
+        "/app/dist/a.js.map",
+        "/app/dist/other.txt",
+      ]);
 
       jest.spyOn(fs.promises, "mkdtemp").mockResolvedValue("/tmp/sentry-upload-xyz");
       jest.spyOn(fs.promises, "readdir").mockResolvedValue(["a.js", "a.js.map"] as never);
@@ -472,7 +476,7 @@ describe("createSentryBuildPluginManager", () => {
   describe("uploadSourcemaps with multiple projects", () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      mockGlob.mockResolvedValue(["/path/to/bundle.js"]);
+      mockGlobFiles.mockResolvedValue(["/path/to/bundle.js"]);
       mockPrepareBundleForDebugIdUpload.mockResolvedValue(undefined);
       mockCliUploadSourceMaps.mockResolvedValue(undefined);
 
