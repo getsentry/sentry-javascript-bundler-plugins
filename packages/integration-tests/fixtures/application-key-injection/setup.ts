@@ -11,5 +11,5 @@ createCjsBundles(
   {
     applicationKey: "my-app",
   },
-  ["webpack4", "webpack5", "esbuild", "rollup", "vite"]
+  ["webpack", "esbuild", "rollup", "vite"]
 );

@@ -3,7 +3,7 @@ import { createCjsBundles } from "../../utils/create-cjs-bundles";
 
 const outputDir = path.resolve(__dirname, "out");
 
-["webpack4", "webpack5", "esbuild", "rollup", "vite"].forEach((bundler) => {
+["webpack", "esbuild", "rollup", "vite"].forEach((bundler) => {
   const fileDeletionGlobPromise = new Promise<string[]>((resolve) => {
     setTimeout(() => {
       resolve([path.join(__dirname, "out", bundler, "bundle.js.map")]);

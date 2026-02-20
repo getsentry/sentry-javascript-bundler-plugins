@@ -1,6 +1,5 @@
 import childProcess from "child_process";
 import path from "path";
-import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 const SNAPSHOT = `"<div><span data-sentry-component=\\"ComponentA\\">Component A</span></div>"`;
 const ESBUILD_SNAPSHOT = `"<div><span>Component A</span></div>"`;
@@ -25,12 +24,7 @@ test("vite bundle", () => {
   checkBundle(path.join(__dirname, "./out/vite/index.js"));
 });
 
-testIfNodeMajorVersionIsLessThan18("webpack 4 bundle if node is < 18", () => {
-  expect.assertions(1);
-  checkBundle(path.join(__dirname, "./out/webpack4/index.js"));
-});
-
 test("webpack 5 bundle", () => {
   expect.assertions(1);
-  checkBundle(path.join(__dirname, "./out/webpack5/index.js"));
+  checkBundle(path.join(__dirname, "./out/webpack/index.js"));
 });
