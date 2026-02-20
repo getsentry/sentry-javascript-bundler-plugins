@@ -2,7 +2,6 @@
 /* eslint-disable jest/expect-expect */
 import childProcess from "child_process";
 import path from "path";
-import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 function checkBundleForDebugIds(bundlePath1: string, bundlePath2: string): string[] {
   const process1Output = childProcess.execSync(`node ${bundlePath1}`, { encoding: "utf-8" });
@@ -56,19 +55,11 @@ function checkBundleForRelease(bundlePath: string): void {
     checkBundleForRelease(path.join(__dirname, "out", "rollup", "bundle1.js?foo=bar#baz"));
   });
 
-  testIfNodeMajorVersionIsLessThan18("webpack 4 bundle", () => {
-    checkBundleForDebugIds(
-      path.join(__dirname, "out", "webpack4", "bundle1.js"),
-      path.join(__dirname, "out", "webpack4", "bundle2.js")
-    );
-    checkBundleForRelease(path.join(__dirname, "out", "webpack4", "bundle1.js"));
-  });
-
   test("webpack 5 bundle", () => {
     checkBundleForDebugIds(
-      path.join(__dirname, "out", "webpack5", "bundle1.js"),
-      path.join(__dirname, "out", "webpack5", "bundle2.js")
+      path.join(__dirname, "out", "webpack", "bundle1.js"),
+      path.join(__dirname, "out", "webpack", "bundle2.js")
     );
-    checkBundleForRelease(path.join(__dirname, "out", "webpack5", "bundle1.js"));
+    checkBundleForRelease(path.join(__dirname, "out", "webpack", "bundle1.js"));
   });
 });

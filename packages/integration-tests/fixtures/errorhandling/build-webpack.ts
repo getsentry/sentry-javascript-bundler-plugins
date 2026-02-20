@@ -1,9 +1,9 @@
 import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
 import * as path from "path";
-import { default as webpack4 } from "webpack4";
+import { webpack } from "webpack";
 import pluginOptions from "./plugin-options";
 
-webpack4(
+webpack(
   {
     devtool: "source-map",
     cache: false,
@@ -11,11 +11,12 @@ webpack4(
       index: path.join(__dirname, "input", "bundle.js"),
     },
     output: {
-      path: path.join(__dirname, "out", "webpack4"),
-      libraryTarget: "commonjs",
+      path: path.join(__dirname, "out", "webpack"),
+      library: {
+        type: "commonjs",
+      },
     },
     mode: "production",
-    target: "node", // needed for webpack 4 so we can access node api
     plugins: [sentryWebpackPlugin(pluginOptions)],
   },
   (err) => {

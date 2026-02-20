@@ -14,5 +14,5 @@ createCjsBundles(
     telemetry: false,
     release: { name: "test-release", create: false },
   },
-  ["webpack4", "webpack5", "esbuild", "rollup", "vite"]
+  ["webpack", "esbuild", "rollup", "vite"]
 );

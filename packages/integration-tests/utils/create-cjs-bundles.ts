@@ -1,8 +1,7 @@
 import * as vite from "vite";
 import * as path from "path";
 import * as rollup from "rollup";
-import { default as webpack4 } from "webpack4";
-import { webpack as webpack5 } from "webpack5";
+import { webpack } from "webpack";
 import * as esbuild from "esbuild";
 import { Options } from "@sentry/bundler-plugin-core";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
@@ -10,9 +9,7 @@ import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
 import { sentryEsbuildPlugin } from "@sentry/esbuild-plugin";
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 
-const [NODE_MAJOR_VERSION] = process.version.replace("v", "").split(".").map(Number) as [number];
-
-type Bundlers = "webpack4" | "webpack5" | "esbuild" | "rollup" | "vite" | string;
+type Bundlers = "webpack" | "esbuild" | "rollup" | "vite" | string;
 
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
@@ -66,38 +63,14 @@ export function createCjsBundles(
     });
   }
 
-  // Webpack 4 doesn't work on Node.js versions >= 18
-  if (NODE_MAJOR_VERSION < 18 && (plugins.length === 0 || plugins.includes("webpack4"))) {
-    webpack4(
-      {
-        devtool: "source-map",
-        mode: "production",
-        entry: entrypoints,
-        cache: false,
-        output: {
-          path: path.join(outFolder, "webpack4"),
-          libraryTarget: "commonjs",
-          filename: "[name].js?[contenthash]",
-        },
-        target: "node", // needed for webpack 4 so we can access node api
-        plugins: [sentryWebpackPlugin(sentryPluginOptions)],
-      },
-      (err) => {
-        if (err) {
-          throw err;
-        }
-      }
-    );
-  }
-
-  if (plugins.length === 0 || plugins.includes("webpack5")) {
-    webpack5(
+  if (plugins.length === 0 || plugins.includes("webpack")) {
+    webpack(
       {
         devtool: "source-map",
         cache: false,
         entry: entrypoints,
         output: {
-          path: path.join(outFolder, "webpack5"),
+          path: path.join(outFolder, "webpack"),
           library: {
             type: "commonjs",
           },

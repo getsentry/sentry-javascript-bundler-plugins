@@ -1,8 +1,7 @@
 import * as vite from "vite";
 import * as path from "path";
 import * as rollup from "rollup";
-import { default as webpack4 } from "webpack4";
-import { webpack as webpack5 } from "webpack5";
+import { webpack } from "webpack";
 import * as esbuild from "esbuild";
 
 import type { Options } from "@sentry/bundler-plugin-core";
@@ -91,43 +90,13 @@ export function createCjsBundles(
     format: "cjs",
   });
 
-  webpack4(
-    {
-      devtool: "source-map",
-      mode: "production",
-      entry: entrypoints,
-      cache: false,
-      output: {
-        path: path.join(outFolder, "webpack4"),
-        libraryTarget: "commonjs",
-      },
-      target: "node", // needed for webpack 4 so we can access node api
-      plugins: [
-        sentryWebpackPlugin({
-          ...sentryPluginOptions,
-          release: {
-            name: `${sentryPluginOptions.release.name!}-webpack4`,
-            uploadLegacySourcemaps: `${
-              sentryPluginOptions.release.uploadLegacySourcemaps as string
-            }/webpack4`,
-          },
-        }),
-      ],
-    },
-    (err) => {
-      if (err) {
-        throw err;
-      }
-    }
-  );
-
-  webpack5(
+  webpack(
     {
       devtool: "source-map",
       cache: false,
       entry: entrypoints,
       output: {
-        path: path.join(outFolder, "webpack5"),
+        path: path.join(outFolder, "webpack"),
         library: {
           type: "commonjs",
         },
@@ -137,10 +106,10 @@ export function createCjsBundles(
         sentryWebpackPlugin({
           ...sentryPluginOptions,
           release: {
-            name: `${sentryPluginOptions.release.name!}-webpack5`,
+            name: `${sentryPluginOptions.release.name!}-webpack`,
             uploadLegacySourcemaps: `${
               sentryPluginOptions.release.uploadLegacySourcemaps as string
-            }/webpack5`,
+            }/webpack`,
           },
         }),
       ],
