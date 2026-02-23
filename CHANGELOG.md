@@ -1,5 +1,26 @@
 # Changelog
 
+## 5.0.0
+
+### Breaking Changes 🛠
+
+- Updating minimatch by @isaacs in [#885](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/885)
+- Remove support for Node < v18 and webpack v4 by @timfish in [#886](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/886)
+
+### Bug Fixes 🐛
+
+- (webpack) Deduplicate webpack deploys by @chargome in [#875](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/875)
+
+### Internal Changes 🔧
+
+- Avoid direct usage of glob, extract into `globFiles` helper by @andreiborza in [#883](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/883)
+- Migrate to oxfmt by @timfish in [#880](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/880)
+- Build with Rolldown by @timfish in [#872](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/872)
+- Remove unplugin by @timfish in [#876](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/876)
+- Rollup/Vite no longer uses unplugin by @timfish in [#858](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/858)
+- Esbuild no longer uses unplugin by @timfish in [#871](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/871)
+- Webpack no longer uses unplugin by @timfish in [#870](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/870)
+
 ## 4.9.1
 
 ### New Features ✨
