@@ -2,17 +2,22 @@ import * as vite from "vite";
 import react from "@vitejs/plugin-react";
 import * as path from "path";
 import * as rollup from "rollup";
-import { webpack } from "webpack";
+import { default as webpack4 } from "webpack4";
+import { webpack as webpack5 } from "webpack5";
 import esbuild from "esbuild019";
 import { babel as babelPlugin } from "@rollup/plugin-babel";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
-import type { Stats } from "webpack";
+import type { Stats as Webpack5Stats } from "webpack5";
+import type { Stats as Webpack4Stats } from "webpack4";
 import { Options } from "@sentry/bundler-plugin-core";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
 import { sentryEsbuildPlugin } from "@sentry/esbuild-plugin";
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
+
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const nodejsMajorversion = process.version.split(".")[0]!.slice(1);
 
 export function createCjsBundles(
   entrypoints: { [name: string]: string },
@@ -74,13 +79,51 @@ export function createCjsBundles(
     });
   }
 
-  if (plugins.length === 0 || plugins.includes("webpack")) {
-    webpack(
+  // Webpack 4 doesn't work on Node.js versions >= 18
+  if (parseInt(nodejsMajorversion) < 18 && (plugins.length === 0 || plugins.includes("webpack4"))) {
+    webpack4(
+      {
+        mode: "production",
+        entry: entrypoints,
+        cache: false,
+        optimization: {
+          minimize: false,
+        },
+        resolve: {
+          extensions: RESOLVABLE_EXTENSIONS,
+        },
+        output: {
+          path: path.join(outFolder, "webpack4"),
+          libraryTarget: "commonjs",
+        },
+        module: {
+          rules: [
+            {
+              test: RESOLVABLE_JSX_EXTENSIONS_REGEX,
+              exclude: /node_modules/,
+              use: {
+                loader: "babel-loader",
+                options: {
+                  presets: [["@babel/preset-react", { runtime: "automatic" }]],
+                },
+              },
+            },
+          ],
+        },
+        target: "node", // needed for webpack 4 so we can access node api
+        plugins: [sentryWebpackPlugin(sentryPluginOptions)],
+      },
+      handleWebpack
+    );
+  }
+
+  if (plugins.length === 0 || plugins.includes("webpack5")) {
+    webpack5(
       {
         cache: false,
         entry: entrypoints,
         output: {
-          path: path.join(outFolder, "webpack"),
+          path: path.join(outFolder, "webpack5"),
           library: {
             type: "commonjs",
           },
@@ -116,7 +159,7 @@ export function createCjsBundles(
 const RESOLVABLE_EXTENSIONS = [".js", ".jsx", ".ts", ".tsx"];
 const RESOLVABLE_JSX_EXTENSIONS_REGEX = /\.?(j|t)sx$/;
 
-function handleWebpack(err: Error | undefined, stats: Stats | undefined) {
+function handleWebpack(err: Error | undefined, stats: Webpack4Stats | Webpack5Stats | undefined) {
   if (err) {
     throw err;
   }

@@ -2,6 +2,7 @@
 /* eslint-disable jest/expect-expect */
 import { execSync } from "child_process";
 import path from "path";
+import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 interface BundleOutput {
   debugIds: Record<string, string> | undefined;
@@ -33,8 +34,12 @@ function checkBundle(bundlePath: string): void {
 }
 
 describe("metadata with debug ID injection", () => {
-  test("webpack bundle", () => {
-    checkBundle(path.join(__dirname, "out", "webpack", "bundle.js"));
+  testIfNodeMajorVersionIsLessThan18("webpack 4 bundle", () => {
+    checkBundle(path.join(__dirname, "out", "webpack4", "bundle.js"));
+  });
+
+  test("webpack 5 bundle", () => {
+    checkBundle(path.join(__dirname, "out", "webpack5", "bundle.js"));
   });
 
   test("esbuild bundle", () => {

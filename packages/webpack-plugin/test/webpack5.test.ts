@@ -1,4 +1,4 @@
-import { WebpackPluginInstance } from "webpack";
+import { Plugin } from "webpack";
 import { sentryWebpackPlugin } from "../src/webpack5";
 
 jest.mock("webpack", () => {
@@ -16,7 +16,7 @@ describe("sentryWebpackPlugin", () => {
       authToken: "test-token",
       org: "test-org",
       project: "test-project",
-    }) as WebpackPluginInstance;
+    }) as Plugin;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     expect(plugin).toEqual({ apply: expect.any(Function) });

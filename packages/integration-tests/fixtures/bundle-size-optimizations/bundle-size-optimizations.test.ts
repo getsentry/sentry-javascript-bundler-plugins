@@ -2,6 +2,7 @@
 /* eslint-disable jest/expect-expect */
 import path from "path";
 import fs from "fs";
+import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 const expectedOutputs: Record<string, Record<string, string>> = {
   esbuild: {
@@ -23,7 +24,11 @@ const expectedOutputs: Record<string, Record<string, string>> = {
     "bundle1.js": `console.log(1);`,
     "bundle2.js": `console.log({debug:"b",trace:"b",replayCanvas:"a",replayIframe:"a",replayShadowDom:"a",replayWorker:"a"})`,
   },
-  webpack: {
+  webpack4: {
+    "bundle1.js": `console.log(1)`,
+    "bundle2.js": `console.log({debug:"b",trace:"b",replayCanvas:"a",replayIframe:"a",replayShadowDom:"a",replayWorker:"a"})`,
+  },
+  webpack5: {
     "bundle1.js": `console.log(1)`,
     "bundle2.js": `console.log({debug:"b",trace:"b",replayCanvas:"a",replayIframe:"a",replayShadowDom:"a",replayWorker:"a"})`,
   },
@@ -54,7 +59,12 @@ test("vite bundle", () => {
   checkBundle("vite", "bundle2.js");
 });
 
+testIfNodeMajorVersionIsLessThan18("webpack 4 bundle", () => {
+  checkBundle("webpack4", "bundle1.js");
+  checkBundle("webpack4", "bundle2.js");
+});
+
 test("webpack 5 bundle", () => {
-  checkBundle("webpack", "bundle1.js");
-  checkBundle("webpack", "bundle2.js");
+  checkBundle("webpack5", "bundle1.js");
+  checkBundle("webpack5", "bundle2.js");
 });

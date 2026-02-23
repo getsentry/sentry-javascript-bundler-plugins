@@ -1,16 +1,16 @@
 import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
 import * as path from "path";
-import { webpack } from "webpack";
+import { webpack as webpack5 } from "webpack5";
 import pluginOptions from "./plugin-options";
 
-webpack(
+webpack5(
   {
     cache: false,
     entry: {
       index: path.join(__dirname, "input", "index.js"),
     },
     output: {
-      path: path.join(__dirname, "out", "webpack"),
+      path: path.join(__dirname, "out", "webpack5"),
       library: {
         type: "commonjs",
       },

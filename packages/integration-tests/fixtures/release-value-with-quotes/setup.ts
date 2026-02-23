@@ -11,5 +11,5 @@ createCjsBundles(
   {
     release: { name: 'i am a dangerous release value because I contain a "' },
   },
-  ["webpack", "esbuild", "rollup", "vite"]
+  ["webpack4", "webpack5", "esbuild", "rollup", "vite"]
 );

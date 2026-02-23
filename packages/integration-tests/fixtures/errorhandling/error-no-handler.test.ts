@@ -27,7 +27,11 @@ describe("Error throwing by default (no errorHandler)", () => {
     sentryServer.kill();
   });
 
-  const bundlersToTest = ["vite", "rollup", "webpack", "esbuild"];
+  const bundlersToTest = ["vite", "rollup", "webpack5", "esbuild"];
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  if (parseInt(process.version.split(".")[0]!.slice(1)) < 18) {
+    bundlersToTest.push("webpack4");
+  }
 
   test.each(bundlersToTest)(
     "doesn't throw when Sentry server responds with error code for %s",

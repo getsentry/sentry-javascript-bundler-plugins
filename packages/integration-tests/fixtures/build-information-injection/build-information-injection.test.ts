@@ -1,5 +1,6 @@
 import childProcess from "child_process";
 import path from "path";
+import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 /**
  * Runs a node file in a seprate process.
@@ -14,8 +15,14 @@ function checkBundle(bundlePath: string): void {
 
   expect(JSON.parse(processOutput)).toEqual(
     expect.objectContaining({
-      deps: expect.arrayContaining<string>(["esbuild", "rollup", "vite", "webpack"]) as string[],
-      depsVersions: { rollup: 3, vite: 3, react: 18, webpack: 5 },
+      deps: expect.arrayContaining<string>([
+        "esbuild",
+        "rollup",
+        "vite",
+        "webpack4",
+        "webpack5",
+      ]) as string[],
+      depsVersions: { rollup: 3, vite: 3, react: 18 },
       // This will differ based on what env this is run on
       nodeVersion: expectedNodeVersion,
     })
@@ -37,7 +44,12 @@ test("vite bundle", () => {
   checkBundle(path.join(__dirname, "out", "vite", "index.js"));
 });
 
-test("webpack bundle", () => {
+testIfNodeMajorVersionIsLessThan18("webpack 4 bundle", () => {
   expect.assertions(1);
-  checkBundle(path.join(__dirname, "out", "webpack", "index.js"));
+  checkBundle(path.join(__dirname, "out", "webpack4", "index.js"));
+});
+
+test("webpack 5 bundle", () => {
+  expect.assertions(1);
+  checkBundle(path.join(__dirname, "out", "webpack5", "index.js"));
 });

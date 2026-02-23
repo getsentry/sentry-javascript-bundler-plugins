@@ -9,7 +9,7 @@ export default {
   cache: false,
   entry: { index: join(__dirname, "..", "bundle.js") },
   output: {
-    path: join(__dirname, "..", "..", "out", "webpack"),
+    path: join(__dirname, "..", "..", "out", "webpack5"),
     library: {
       type: "commonjs",
     },

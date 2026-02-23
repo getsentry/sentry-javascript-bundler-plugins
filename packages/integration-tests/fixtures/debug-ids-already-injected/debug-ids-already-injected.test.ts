@@ -2,6 +2,7 @@
 import * as path from "path";
 import * as fs from "fs";
 import * as os from "os";
+import { describeNode18Plus } from "../../utils/testIf";
 import { execSync } from "child_process";
 
 function createTempDir() {
@@ -42,7 +43,7 @@ function expected(tempDir: string) {
   expect(source).toContain(`="${debugId || "fail"}"`);
 }
 
-describe("vite 6 bundle", () => {
+describeNode18Plus("vite 6 bundle", () => {
   const viteRoot = path.join(__dirname, "input", "vite6");
   const tempDir = createTempDir();
 
@@ -64,7 +65,7 @@ describe("vite 6 bundle", () => {
   });
 });
 
-describe("webpack 5 bundle", () => {
+describeNode18Plus("webpack 5 bundle", () => {
   const webpackRoot = path.join(__dirname, "input", "webpack5");
   const tempDir = createTempDir();
 
@@ -86,7 +87,7 @@ describe("webpack 5 bundle", () => {
   });
 });
 
-describe("rollup bundle", () => {
+describeNode18Plus("rollup bundle", () => {
   const rollupRoot = path.join(__dirname, "input", "rollup4");
   const tempDir = createTempDir();
 
