@@ -2,15 +2,10 @@
 /* eslint-disable jest/expect-expect */
 import path from "path";
 import fs from "fs";
-import { testIfNodeMajorVersionIsLessThan18 } from "../../utils/testIf";
 
 describe("Deletes files with `filesToDeleteAfterUpload` set to a promise", () => {
-  testIfNodeMajorVersionIsLessThan18("webpack 4 bundle", () => {
-    expect(fs.existsSync(path.join(__dirname, "out", "webpack4", "bundle.js.map"))).toBe(false);
-  });
-
   test("webpack 5 bundle", () => {
-    expect(fs.existsSync(path.join(__dirname, "out", "webpack5", "bundle.js.map"))).toBe(false);
+    expect(fs.existsSync(path.join(__dirname, "out", "webpack", "bundle.js.map"))).toBe(false);
   });
 
   test("esbuild bundle", () => {

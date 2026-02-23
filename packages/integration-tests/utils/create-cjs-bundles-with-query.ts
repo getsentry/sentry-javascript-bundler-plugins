@@ -1,15 +1,11 @@
 import * as vite from "vite";
 import * as path from "path";
 import * as rollup from "rollup";
-import { default as webpack4 } from "webpack4";
-import { webpack as webpack5 } from "webpack5";
+import { webpack } from "webpack";
 import { Options } from "@sentry/bundler-plugin-core";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { sentryWebpackPlugin } from "@sentry/webpack-plugin";
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
-
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const nodejsMajorVersion = process.version.split(".")[0]!.slice(1);
 
 export function createCjsBundlesWithQueryParam(
   entrypoints: { [name: string]: string },
@@ -55,38 +51,14 @@ export function createCjsBundlesWithQueryParam(
     // esbuild doesn't have an option to add a query param
   }
 
-  // Webpack 4 doesn't work on Node.js versions >= 18
-  if (parseInt(nodejsMajorVersion) < 18 && (plugins.length === 0 || plugins.includes("webpack4"))) {
-    webpack4(
-      {
-        devtool: "source-map",
-        mode: "production",
-        entry: entrypoints,
-        cache: false,
-        output: {
-          path: path.join(outFolder, "webpack4"),
-          filename: "[name].js?foo=bar#baz", // For some weird reason, the query param is not actually put to disk but the "virtual" behaviour we want to test still applies
-          libraryTarget: "commonjs",
-        },
-        target: "node", // needed for webpack 4 so we can access node api
-        plugins: [sentryWebpackPlugin(sentryPluginOptions)],
-      },
-      (err) => {
-        if (err) {
-          throw err;
-        }
-      }
-    );
-  }
-
-  if (plugins.length === 0 || plugins.includes("webpack5")) {
-    webpack5(
+  if (plugins.length === 0 || plugins.includes("webpack")) {
+    webpack(
       {
         devtool: "source-map",
         cache: false,
         entry: entrypoints,
         output: {
-          path: path.join(outFolder, "webpack5"),
+          path: path.join(outFolder, "webpack"),
           filename: "[name].js?foo=bar#baz", // For some weird reason, the query param is not actually put to disk but the "virtual" behaviour we want to test still applies
           library: {
             type: "commonjs",

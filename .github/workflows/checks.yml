@@ -131,17 +131,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [
-            # nx uses a `yargs-parser` versision which isn't compatible with node 10
-            # "10.24.1",
-            # vite uses optional chaining which isn't compatible with node 12
-            # "12.22.12",
-            "14",
-            "16",
-            "18",
-            "20",
-            "22",
-          ]
+        node-version: ["18", "20", "22"]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:

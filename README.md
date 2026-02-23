@@ -6,7 +6,7 @@
 
 # Sentry Bundler Plugins
 
-Sentry plugins for various JavaScript bundlers. Currently supporting Rollup, Vite, esbuild, Webpack 4 and Webpack 5.
+Sentry plugins for various JavaScript bundlers. Currently supporting Rollup, Vite, esbuild, Webpack 5.
 
 Check out the individual packages for more information and examples:
 

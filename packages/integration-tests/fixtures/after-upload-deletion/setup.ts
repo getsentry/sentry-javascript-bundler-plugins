@@ -3,7 +3,7 @@ import { createCjsBundles } from "../../utils/create-cjs-bundles";
 
 const outputDir = path.resolve(__dirname, "out");
 
-["webpack4", "webpack5", "esbuild", "rollup", "vite"].forEach((bundler) => {
+["webpack", "esbuild", "rollup", "vite"].forEach((bundler) => {
   createCjsBundles(
     {
       bundle: path.resolve(__dirname, "input", "bundle.js"),
