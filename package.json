@@ -29,10 +29,11 @@
     "@nrwl/cli": "14.5.10",
     "@nrwl/workspace": "14.5.10",
     "lerna": "^6.6.2",
+    "minimatch": "^10.2.2",
+    "npm-run-all": "^4.1.5",
     "nx": "14.5.10",
     "oxfmt": "^0.33.0",
     "pretty-quick": "^3.1.3",
-    "npm-run-all": "^4.1.5",
     "ts-node": "^10.9.2"
   },
   "volta": {
