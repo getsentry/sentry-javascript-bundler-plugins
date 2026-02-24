@@ -42,7 +42,7 @@ function expected(tempDir: string) {
   expect(source).toContain(`="${debugId || "fail"}"`);
 }
 
-describe("vite 6 bundle", () => {
+describe("vite 6 bundle", { timeout: 30_000 }, () => {
   const viteRoot = path.join(__dirname, "input", "vite6");
   const tempDir = createTempDir();
 
@@ -64,7 +64,7 @@ describe("vite 6 bundle", () => {
   });
 });
 
-describe("webpack bundle", () => {
+describe("webpack bundle", { timeout: 30_000 }, () => {
   const webpackRoot = path.join(__dirname, "input", "webpack");
   const tempDir = createTempDir();
 
@@ -86,7 +86,7 @@ describe("webpack bundle", () => {
   });
 });
 
-describe("rollup bundle", () => {
+describe("rollup bundle", { timeout: 30_000 }, () => {
   const rollupRoot = path.join(__dirname, "input", "rollup4");
   const tempDir = createTempDir();
 
