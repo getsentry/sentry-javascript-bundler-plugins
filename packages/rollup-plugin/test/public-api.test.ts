@@ -65,7 +65,7 @@ describe("Hooks", () => {
       ["bundle.cjs"],
       ["bundle.js?foo=bar"],
       ["bundle.js#hash"],
-    ])("should process file '%s': %s", (fileName) => {
+    ])("should process file '%s'", (fileName) => {
       const code = 'console.log("test");';
       const result = renderChunk(code, { fileName });
 
