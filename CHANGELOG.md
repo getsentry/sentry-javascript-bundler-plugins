@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.1.0
+
+### New Features ✨
+
+- Bump @sentry/cli from 2.57.0 to 2.58.5 by @andreiborza in [#890](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/890)
+
 ## 5.0.0
 
 ### Breaking Changes 🛠
