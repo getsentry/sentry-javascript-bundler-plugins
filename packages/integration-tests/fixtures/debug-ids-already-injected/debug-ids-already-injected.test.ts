@@ -53,7 +53,7 @@ describe("vite 6 bundle", { timeout: 30_000 }, () => {
       stdio: "inherit",
       env: { ...process.env, SENTRY_TEST_OVERRIDE_TEMP_DIR: tempDir },
     });
-  });
+  }, 30_000);
 
   test("check vite 6 bundle", () => {
     expected(tempDir);
@@ -75,7 +75,7 @@ describe("webpack bundle", { timeout: 30_000 }, () => {
       stdio: "inherit",
       env: { ...process.env, SENTRY_TEST_OVERRIDE_TEMP_DIR: tempDir },
     });
-  });
+  }, 30_000);
 
   test("check webpack bundle", () => {
     expected(tempDir);
@@ -97,7 +97,7 @@ describe("rollup bundle", { timeout: 30_000 }, () => {
       stdio: "inherit",
       env: { ...process.env, SENTRY_TEST_OVERRIDE_TEMP_DIR: tempDir },
     });
-  });
+  }, 30_000);
 
   test("check rollup bundle", () => {
     expected(tempDir);
