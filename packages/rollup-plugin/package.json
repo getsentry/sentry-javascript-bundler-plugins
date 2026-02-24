@@ -1,6 +1,6 @@
 {
   "name": "@sentry/rollup-plugin",
-  "version": "4.9.1",
+  "version": "5.0.0",
   "description": "Official Sentry Rollup plugin",
   "repository": "git://github.com/getsentry/sentry-javascript-bundler-plugins.git",
   "homepage": "https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/rollup-plugin",
@@ -49,15 +49,15 @@
     "prepack": "ts-node ./src/prepack.ts"
   },
   "dependencies": {
-    "@sentry/bundler-plugin-core": "4.9.1",
+    "@sentry/bundler-plugin-core": "5.0.0",
     "magic-string": "0.30.8"
   },
   "peerDependencies": {
     "rollup": ">=3.2.0"
   },
   "devDependencies": {
-    "@sentry-internal/eslint-config": "4.9.1",
-    "@sentry-internal/sentry-bundler-plugin-tsconfig": "4.9.1",
+    "@sentry-internal/eslint-config": "5.0.0",
+    "@sentry-internal/sentry-bundler-plugin-tsconfig": "5.0.0",
     "@swc/core": "^1.2.205",
     "@types/node": "^18.6.3",
     "eslint": "^8.18.0",

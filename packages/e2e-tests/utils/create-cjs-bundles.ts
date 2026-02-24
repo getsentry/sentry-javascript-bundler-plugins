@@ -96,7 +96,7 @@ export function createCjsBundles(
       cache: false,
       entry: entrypoints,
       output: {
-        path: path.join(outFolder, "webpack5"),
+        path: path.join(outFolder, "webpack"),
         library: {
           type: "commonjs",
         },
@@ -106,10 +106,10 @@ export function createCjsBundles(
         sentryWebpackPlugin({
           ...sentryPluginOptions,
           release: {
-            name: `${sentryPluginOptions.release.name!}-webpack5`,
+            name: `${sentryPluginOptions.release.name!}-webpack`,
             uploadLegacySourcemaps: `${
               sentryPluginOptions.release.uploadLegacySourcemaps as string
-            }/webpack5`,
+            }/webpack`,
           },
         }),
       ],

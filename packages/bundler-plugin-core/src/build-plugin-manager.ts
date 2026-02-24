@@ -26,8 +26,8 @@ import {
   serializeIgnoreOptions,
   stripQueryAndHashFromPath,
 } from "./utils";
-import { glob } from "glob";
 import { defaultRewriteSourcesHook, prepareBundleForDebugIdUpload } from "./debug-id-upload";
+import { globFiles } from "./glob";
 import { LIB_VERSION } from "./version";
 
 // Module-level guard to prevent duplicate deploy records when multiple bundler plugin
@@ -678,12 +678,7 @@ export function createSentryBuildPluginManager(
 
               const globResult = await startSpan(
                 { name: "glob", scope: sentryScope },
-                async () =>
-                  await glob(globAssets, {
-                    absolute: true,
-                    nodir: true, // We need individual files for preparation
-                    ignore: options.sourcemaps?.ignore,
-                  })
+                async () => await globFiles(globAssets, { ignore: options.sourcemaps?.ignore })
               );
 
               const debugIdChunkFilePaths = globResult.filter((debugIdChunkFilePath) => {
@@ -810,10 +805,7 @@ export function createSentryBuildPluginManager(
       try {
         const filesToDelete = await options.sourcemaps?.filesToDeleteAfterUpload;
         if (filesToDelete !== undefined) {
-          const filePathsToDelete = await glob(filesToDelete, {
-            absolute: true,
-            nodir: true,
-          });
+          const filePathsToDelete = await globFiles(filesToDelete);
 
           logger.debug(
             "Waiting for dependencies on generated files to be freed before deleting..."

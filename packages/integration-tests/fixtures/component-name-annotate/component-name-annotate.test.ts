@@ -27,7 +27,7 @@ test("vite bundle", () => {
   expect(runBundle(path.join(__dirname, "./out/vite/index.js"))).toMatchInlineSnapshot(SNAPSHOT);
 });
 
-expect.assertions(1);
 test("webpack bundle", () => {
+  expect.assertions(1);
   expect(runBundle(path.join(__dirname, "./out/webpack/index.js"))).toMatchInlineSnapshot(SNAPSHOT);
 });
