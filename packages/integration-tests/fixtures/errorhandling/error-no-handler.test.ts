@@ -12,12 +12,14 @@ describe("Error throwing by default (no errorHandler)", { timeout: 10_000 }, () 
     shell: true,
   });
 
+  const serverStarted = new Promise<void>((resolve) =>
+    sentryServer.on("spawn", () => {
+      resolve();
+    })
+  );
+
   beforeAll(async () => {
-    await new Promise<void>((resolve) =>
-      sentryServer.on("spawn", () => {
-        resolve();
-      })
-    );
+    await serverStarted;
   });
 
   afterAll(() => {
