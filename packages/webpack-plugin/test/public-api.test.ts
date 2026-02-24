@@ -1,4 +1,4 @@
-import { Plugin } from "webpack";
+import { WebpackPluginInstance } from "webpack";
 import { sentryWebpackPlugin } from "../src";
 import { describe, it, expect, test } from "vitest";
 
@@ -13,7 +13,7 @@ describe("sentryWebpackPlugin", () => {
       authToken: "test-token",
       org: "test-org",
       project: "test-project",
-    }) as Plugin;
+    }) as WebpackPluginInstance;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     expect(plugin).toEqual({ apply: expect.any(Function) });

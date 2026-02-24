@@ -1,9 +1,8 @@
-/* eslint-disable jest/expect-expect */
 import * as path from "path";
 import * as fs from "fs";
 import * as os from "os";
-import { describeNode18Plus } from "../../utils/testIf";
 import { execSync } from "child_process";
+import { expect, describe, beforeEach, test, afterEach } from "vitest";
 
 function createTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "sentry-bundler-plugin-upload-"));
@@ -43,7 +42,7 @@ function expected(tempDir: string) {
   expect(source).toContain(`="${debugId || "fail"}"`);
 }
 
-describeNode18Plus("vite 6 bundle", () => {
+describe("vite 6 bundle", () => {
   const viteRoot = path.join(__dirname, "input", "vite6");
   const tempDir = createTempDir();
 
@@ -65,8 +64,8 @@ describeNode18Plus("vite 6 bundle", () => {
   });
 });
 
-describeNode18Plus("webpack 5 bundle", () => {
-  const webpackRoot = path.join(__dirname, "input", "webpack5");
+describe("webpack bundle", () => {
+  const webpackRoot = path.join(__dirname, "input", "webpack");
   const tempDir = createTempDir();
 
   beforeEach(() => {
@@ -78,7 +77,7 @@ describeNode18Plus("webpack 5 bundle", () => {
     });
   });
 
-  test("check webpack 5 bundle", () => {
+  test("check webpack bundle", () => {
     expected(tempDir);
   });
 
@@ -87,7 +86,7 @@ describeNode18Plus("webpack 5 bundle", () => {
   });
 });
 
-describeNode18Plus("rollup bundle", () => {
+describe("rollup bundle", () => {
   const rollupRoot = path.join(__dirname, "input", "rollup4");
   const tempDir = createTempDir();
 

@@ -1,19 +1,21 @@
 // @ts-check
 const path = require("path");
-const webpack4 = require("webpack4");
+const webpack = require("webpack");
 const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 
-webpack4(
+webpack(
   {
-    mode: "production",
-    entry: "./src/entrypoint1.js",
     cache: false,
+    entry: "./src/entrypoint1.js",
     output: {
-      path: path.resolve(__dirname, "out", "webpack4"),
       filename: "index.js",
-      library: "ExampleBundle",
-      libraryTarget: "commonjs",
+      path: path.resolve(__dirname, "out", "webpack"),
+      library: {
+        type: "commonjs",
+        name: "ExampleBundle",
+      },
     },
+    mode: "production",
     plugins: [
       sentryWebpackPlugin({
         debug: true,

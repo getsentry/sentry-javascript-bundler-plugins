@@ -1,16 +1,13 @@
-/* eslint-disable jest/no-standalone-expect */
-/* eslint-disable jest/expect-expect */
 import path from "path";
 import { spawn } from "child_process";
+import { describe, test, expect, beforeAll, afterAll } from "vitest";
 
-jest.setTimeout(10_000);
-
-describe("Error throwing by default (no errorHandler)", () => {
+describe("Error throwing by default (no errorHandler)", { timeout: 10_000 }, () => {
   const FAKE_SENTRY_PORT = "9876";
 
   const sentryServer = spawn("node", [path.join(__dirname, "fakeSentry.js")], {
     cwd: __dirname,
-    stdio: "ignore", // <-- set to "inherit" to get server logs. Deactivated to avoid test logs.
+    stdio: "inherit", // <-- set to "inherit" to get server logs. Deactivated to avoid test logs.
     env: { ...process.env, FAKE_SENTRY_PORT },
     shell: true,
   });
@@ -27,11 +24,7 @@ describe("Error throwing by default (no errorHandler)", () => {
     sentryServer.kill();
   });
 
-  const bundlersToTest = ["vite", "rollup", "webpack5", "esbuild"];
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  if (parseInt(process.version.split(".")[0]!.slice(1)) < 18) {
-    bundlersToTest.push("webpack4");
-  }
+  const bundlersToTest = ["vite", "rollup", "webpack", "esbuild"];
 
   test.each(bundlersToTest)(
     "doesn't throw when Sentry server responds with error code for %s",

@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable jest/no-standalone-expect */
-/* eslint-disable jest/expect-expect */
 import path from "path";
 import * as rollup from "rollup";
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
+import { test, expect } from "vitest";
 
 function getGlobalWithInterceptor(): typeof global & {
   __SENTRY_INTERCEPT_TRANSPORT__?: unknown[];

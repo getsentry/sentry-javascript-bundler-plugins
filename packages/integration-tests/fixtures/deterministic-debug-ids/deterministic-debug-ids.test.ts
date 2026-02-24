@@ -1,11 +1,7 @@
-/* eslint-disable jest/no-standalone-expect */
-/* eslint-disable jest/expect-expect */
 import childProcess from "child_process";
 import path from "path";
 import fs from "fs/promises";
-
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const nodejsMajorversion = process.version.split(".")[0]!.slice(1);
+import { describe, test, expect, beforeEach, afterEach } from "vitest";
 
 function executeAndGetDebugIds(bundlePath: string): string[] {
   const processOutput = childProcess.execSync(`node ${bundlePath}`, { encoding: "utf-8" });
@@ -25,11 +21,7 @@ afterEach(async () => {
 });
 
 describe("Same debug IDs for multiple identical builds", () => {
-  const bundlers = ["rollup", "vite", "webpack5"];
-
-  if (parseInt(nodejsMajorversion) < 18) {
-    bundlers.push("webpack4");
-  }
+  const bundlers = ["rollup", "vite", "webpack"];
 
   test.each(bundlers)(
     "%s",
@@ -51,11 +43,7 @@ describe("Same debug IDs for multiple identical builds", () => {
 });
 
 describe("Different debug IDs for different builds", () => {
-  const bundlers = ["rollup", "vite", "webpack5"];
-
-  if (parseInt(nodejsMajorversion) < 18) {
-    bundlers.push("webpack4");
-  }
+  const bundlers = ["rollup", "vite", "webpack"];
 
   test.each(bundlers)(
     "%s",

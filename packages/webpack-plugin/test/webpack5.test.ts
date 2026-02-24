@@ -1,10 +1,6 @@
-import { Plugin } from "webpack";
-import { sentryWebpackPlugin } from "../src/webpack5";
-import { describe, it, expect, test, vi } from "vitest";
-
-vi.mock("webpack", () => {
-  throw new Error("Webpack 5 version of the plugin should use module from compiler.");
-});
+import { WebpackPluginInstance } from "webpack";
+import { sentryWebpackPlugin } from "../src/index";
+import { describe, it, expect, test } from "vitest";
 
 test("Webpack plugin should exist", () => {
   expect(sentryWebpackPlugin).toBeDefined();
@@ -17,7 +13,7 @@ describe("sentryWebpackPlugin", () => {
       authToken: "test-token",
       org: "test-org",
       project: "test-project",
-    }) as Plugin;
+    }) as WebpackPluginInstance;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     expect(plugin).toEqual({ apply: expect.any(Function) });

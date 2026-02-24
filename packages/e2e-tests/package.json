@@ -26,7 +26,6 @@
     "@sentry-internal/sentry-bundler-plugin-tsconfig": "4.9.1",
     "@types/axios": "^0.14.0",
     "@types/glob": "8.0.0",
-    "@types/webpack4": "npm:@types/webpack@^4",
     "esbuild": "0.14.49",
     "eslint": "^8.18.0",
     "glob": "8.0.3",
@@ -35,8 +34,7 @@
     "rollup": "3.2.0",
     "ts-node": "^10.9.1",
     "vite": "3.0.0",
-    "webpack4": "npm:webpack@^4",
-    "webpack5": "npm:webpack@5.74.0"
+    "webpack": "5.74.0"
   },
   "volta": {
     "extends": "../../package.json"
