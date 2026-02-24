@@ -7,7 +7,7 @@ describe("Error throwing by default (no errorHandler)", { timeout: 10_000 }, () 
 
   const sentryServer = spawn("node", [path.join(__dirname, "fakeSentry.js")], {
     cwd: __dirname,
-    stdio: "inherit", // <-- set to "inherit" to get server logs. Deactivated to avoid test logs.
+    stdio: "ignore", // <-- set to "inherit" to get server logs. Deactivated to avoid test logs.
     env: { ...process.env, FAKE_SENTRY_PORT },
     shell: true,
   });

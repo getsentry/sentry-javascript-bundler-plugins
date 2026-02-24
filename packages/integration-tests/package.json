@@ -6,7 +6,7 @@
   "scripts": {
     "test": "run-s test:setup test:vitest",
     "test:setup": "ts-node scripts/run-fixture-setups.ts",
-    "test:vitest": "vitest run -t \"Error throwing by default\"",
+    "test:vitest": "vitest run",
     "lint": "eslint .",
     "check:types": "tsc --project ./tsconfig.json --noEmit",
     "clean": "run-s clean:build",

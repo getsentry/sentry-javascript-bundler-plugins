@@ -39,13 +39,13 @@ vi.mock("@sentry/core", async () => ({
 vi.mock("../src/glob");
 vi.mock("../src/debug-id-upload");
 
-const mockGlobFiles = globFiles as jest.MockedFunction<typeof globFiles>;
+const mockGlobFiles = globFiles as MockedFunction<typeof globFiles>;
 const mockPrepareBundleForDebugIdUpload =
   prepareBundleForDebugIdUpload as unknown as MockedFunction<typeof prepareBundleForDebugIdUpload>;
 
 describe("createSentryBuildPluginManager", () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks();
     // Clean up environment variables
     delete process.env["SENTRY_LOG_LEVEL"];
   });
