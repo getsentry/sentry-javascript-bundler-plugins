@@ -60,7 +60,7 @@
     "dotenv": "^16.3.1",
     "find-up": "^5.0.0",
     "glob": "^13.0.6",
-    "magic-string": "0.30.8"
+    "magic-string": "~0.30.8"
   },
   "devDependencies": {
     "@sentry-internal/eslint-config": "5.1.0",
