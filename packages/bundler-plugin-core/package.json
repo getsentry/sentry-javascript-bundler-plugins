@@ -1,6 +1,6 @@
 {
   "name": "@sentry/bundler-plugin-core",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "Sentry Bundler Plugin Core",
   "repository": "git://github.com/getsentry/sentry-javascript-bundler-plugins.git",
   "homepage": "https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/bundler-plugin-core",
@@ -55,16 +55,16 @@
   },
   "dependencies": {
     "@babel/core": "^7.18.5",
-    "@sentry/babel-plugin-component-annotate": "5.1.0",
+    "@sentry/babel-plugin-component-annotate": "5.1.1",
     "@sentry/cli": "^2.58.5",
     "dotenv": "^16.3.1",
     "find-up": "^5.0.0",
     "glob": "^13.0.6",
-    "magic-string": "0.30.8"
+    "magic-string": "~0.30.8"
   },
   "devDependencies": {
-    "@sentry-internal/eslint-config": "5.1.0",
-    "@sentry-internal/sentry-bundler-plugin-tsconfig": "5.1.0",
+    "@sentry-internal/eslint-config": "5.1.1",
+    "@sentry-internal/sentry-bundler-plugin-tsconfig": "5.1.1",
     "@sentry/core": "8.30.0",
     "@sentry/types": "8.30.0",
     "@sentry/utils": "8.30.0",
@@ -82,7 +82,7 @@
     "extends": "../../package.json"
   },
   "engines": {
-    "node": ">= 14"
+    "node": ">= 18"
   },
   "sideEffects": [
     "./sentry-release-injection-file.js",

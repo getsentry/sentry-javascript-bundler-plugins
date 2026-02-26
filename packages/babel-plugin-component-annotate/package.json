@@ -1,6 +1,6 @@
 {
   "name": "@sentry/babel-plugin-component-annotate",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "A Babel plugin that annotates frontend components with additional data to enrich the experience in Sentry",
   "repository": "git://github.com/getsentry/sentry-javascript-bundler-plugins.git",
   "homepage": "https://github.com/getsentry/sentry-javascript-bundler-plugins/tree/main/packages/babel-plugin-component-annotate",
@@ -52,8 +52,8 @@
   "devDependencies": {
     "@babel/core": "7.18.5",
     "@babel/preset-react": "^7.23.3",
-    "@sentry-internal/eslint-config": "5.1.0",
-    "@sentry-internal/sentry-bundler-plugin-tsconfig": "5.1.0",
+    "@sentry-internal/eslint-config": "5.1.1",
+    "@sentry-internal/sentry-bundler-plugin-tsconfig": "5.1.1",
     "@swc/core": "^1.2.205",
     "@swc/jest": "^0.2.21",
     "@types/jest": "^28.1.3",
@@ -69,6 +69,6 @@
     "extends": "../../package.json"
   },
   "engines": {
-    "node": ">= 14"
+    "node": ">= 18"
   }
 }

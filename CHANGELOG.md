@@ -1,5 +1,15 @@
 # Changelog
 
+## 5.1.1
+
+### Bug Fixes 🐛
+
+- Align `engines` with Node support by @timfish in [#893](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/893)
+
+### Internal Changes 🔧
+
+- Use version range for magic-string by @JPeer264 in [#891](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/891)
+
 ## 5.1.0
 
 ### New Features ✨
