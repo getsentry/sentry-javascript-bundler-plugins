@@ -1,7 +1,6 @@
-/* eslint-disable jest/no-standalone-expect */
-/* eslint-disable jest/expect-expect */
 import childProcess from "child_process";
 import path from "path";
+import { test, expect } from "vitest";
 
 function checkBundle(bundlePath1: string, bundlePath2: string): string[] {
   const process1Output = childProcess.execSync(`node ${bundlePath1}`, { encoding: "utf-8" });
@@ -50,7 +49,7 @@ test("vite bundle", () => {
   );
 });
 
-test("webpack 5 bundle", () => {
+test("webpack bundle", () => {
   checkBundle(
     path.join(__dirname, "out", "webpack", "bundle1.js"),
     path.join(__dirname, "out", "webpack", "bundle2.js")

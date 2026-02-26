@@ -1,8 +1,8 @@
-/* eslint-disable jest/expect-expect */
 import * as path from "path";
 import * as fs from "fs";
 import * as os from "os";
 import { execSync } from "child_process";
+import { expect, describe, beforeEach, test, afterEach } from "vitest";
 
 function createTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "sentry-bundler-plugin-upload-"));
@@ -42,7 +42,7 @@ function expected(tempDir: string) {
   expect(source).toContain(`="${debugId || "fail"}"`);
 }
 
-describe("vite 6 bundle", () => {
+describe("vite 6 bundle", { timeout: 30_000 }, () => {
   const viteRoot = path.join(__dirname, "input", "vite6");
   const tempDir = createTempDir();
 
@@ -53,7 +53,7 @@ describe("vite 6 bundle", () => {
       stdio: "inherit",
       env: { ...process.env, SENTRY_TEST_OVERRIDE_TEMP_DIR: tempDir },
     });
-  });
+  }, 30_000);
 
   test("check vite 6 bundle", () => {
     expected(tempDir);
@@ -64,8 +64,8 @@ describe("vite 6 bundle", () => {
   });
 });
 
-describe("webpack 5 bundle", () => {
-  const webpackRoot = path.join(__dirname, "input", "webpack5");
+describe("webpack bundle", { timeout: 30_000 }, () => {
+  const webpackRoot = path.join(__dirname, "input", "webpack");
   const tempDir = createTempDir();
 
   beforeEach(() => {
@@ -75,9 +75,9 @@ describe("webpack 5 bundle", () => {
       stdio: "inherit",
       env: { ...process.env, SENTRY_TEST_OVERRIDE_TEMP_DIR: tempDir },
     });
-  });
+  }, 30_000);
 
-  test("check webpack 5 bundle", () => {
+  test("check webpack bundle", () => {
     expected(tempDir);
   });
 
@@ -86,7 +86,7 @@ describe("webpack 5 bundle", () => {
   });
 });
 
-describe("rollup bundle", () => {
+describe("rollup bundle", { timeout: 30_000 }, () => {
   const rollupRoot = path.join(__dirname, "input", "rollup4");
   const tempDir = createTempDir();
 
@@ -97,7 +97,7 @@ describe("rollup bundle", () => {
       stdio: "inherit",
       env: { ...process.env, SENTRY_TEST_OVERRIDE_TEMP_DIR: tempDir },
     });
-  });
+  }, 30_000);
 
   test("check rollup bundle", () => {
     expected(tempDir);

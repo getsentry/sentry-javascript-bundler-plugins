@@ -1,5 +1,6 @@
 import childProcess from "child_process";
 import path from "path";
+import { test, expect } from "vitest";
 
 /**
  * Runs a node file in a seprate process.
@@ -28,7 +29,7 @@ test("vite bundle", () => {
   checkBundle(path.join(__dirname, "out", "vite", "index.js"));
 });
 
-test("webpack 5 bundle", () => {
+test("webpack bundle", () => {
   expect.assertions(2);
   checkBundle(path.join(__dirname, "out", "webpack", "index.js"));
 });

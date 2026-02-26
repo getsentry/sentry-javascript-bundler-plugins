@@ -21,7 +21,7 @@ export const sentryVitePlugin = (options?: SentryRollupPluginOptions): Plugin[] 
   return [
     {
       enforce: "pre",
-      ..._rollupPluginInternal(options, "vite", getViteMajorVersion()),
+      ...(_rollupPluginInternal(options, "vite", getViteMajorVersion()) as Plugin),
     },
   ];
 };

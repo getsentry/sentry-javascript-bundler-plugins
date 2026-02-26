@@ -1,8 +1,7 @@
-/* eslint-disable jest/no-standalone-expect */
-/* eslint-disable jest/expect-expect */
 import childProcess from "child_process";
 import path from "path";
 import fs from "fs/promises";
+import { describe, test, expect, beforeEach, afterEach } from "vitest";
 
 function executeAndGetDebugIds(bundlePath: string): string[] {
   const processOutput = childProcess.execSync(`node ${bundlePath}`, { encoding: "utf-8" });

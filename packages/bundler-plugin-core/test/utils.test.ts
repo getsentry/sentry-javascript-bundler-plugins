@@ -10,7 +10,7 @@ import {
 } from "../src/utils";
 
 import fs from "fs";
-
+import { describe, it, expect, test, vi } from "vitest";
 import path from "node:path";
 
 type PackageJson = Record<string, unknown>;
@@ -232,7 +232,7 @@ describe("generateReleaseInjectorCode", () => {
   });
 
   it("generates code with release and build information", () => {
-    jest.spyOn(fs, "readFileSync").mockReturnValueOnce(
+    vi.spyOn(fs, "readFileSync").mockReturnValueOnce(
       JSON.stringify({
         name: "test-app",
         dependencies: {

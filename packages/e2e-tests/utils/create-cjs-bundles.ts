@@ -42,7 +42,7 @@ export function createCjsBundles(
             sentryPluginOptions.release.uploadLegacySourcemaps as string
           }/vite`,
         },
-      }),
+      }) as unknown as vite.Plugin,
     ],
   });
 

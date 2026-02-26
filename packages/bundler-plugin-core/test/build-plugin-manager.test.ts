@@ -5,49 +5,47 @@ import {
 import fs from "fs";
 import { globFiles } from "../src/glob";
 import { prepareBundleForDebugIdUpload } from "../src/debug-id-upload";
+import { describe, it, expect, afterEach, beforeEach, vi, MockedFunction } from "vitest";
 
-const mockCliExecute = jest.fn();
-const mockCliUploadSourceMaps = jest.fn();
-const mockCliNewDeploy = jest.fn();
+const { mockCliExecute, mockCliUploadSourceMaps, mockCliNewDeploy } = vi.hoisted(() => ({
+  mockCliExecute: vi.fn(),
+  mockCliUploadSourceMaps: vi.fn(),
+  mockCliNewDeploy: vi.fn(),
+}));
 
-jest.mock("@sentry/cli", () => {
-  return jest.fn().mockImplementation(() => ({
-    execute: mockCliExecute,
-    releases: {
+vi.mock("@sentry/cli", () => ({
+  default: class {
+    execute = mockCliExecute;
+    releases = {
       uploadSourceMaps: mockCliUploadSourceMaps,
-      new: jest.fn(),
-      finalize: jest.fn(),
-      setCommits: jest.fn(),
+      new: vi.fn(),
+      finalize: vi.fn(),
+      setCommits: vi.fn(),
       newDeploy: mockCliNewDeploy,
-    },
-  }));
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-jest.mock("../src/sentry/telemetry", () => ({
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  ...jest.requireActual("../src/sentry/telemetry"),
-  safeFlushTelemetry: jest.fn(),
+    };
+  },
 }));
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-jest.mock("@sentry/core", () => ({
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  ...jest.requireActual("@sentry/core"),
-  startSpan: jest.fn((options: unknown, callback: () => unknown) => callback()),
+vi.mock("../src/sentry/telemetry", async () => ({
+  ...(await vi.importActual("../src/sentry/telemetry")),
+  safeFlushTelemetry: vi.fn(),
 }));
 
-jest.mock("../src/glob");
-jest.mock("../src/debug-id-upload");
+vi.mock("@sentry/core", async () => ({
+  ...(await vi.importActual("@sentry/core")),
+  startSpan: vi.fn((options: unknown, callback: () => unknown) => callback()),
+}));
 
-const mockGlobFiles = globFiles as jest.MockedFunction<typeof globFiles>;
-const mockPrepareBundleForDebugIdUpload = prepareBundleForDebugIdUpload as jest.MockedFunction<
-  typeof prepareBundleForDebugIdUpload
->;
+vi.mock("../src/glob");
+vi.mock("../src/debug-id-upload");
+
+const mockGlobFiles = globFiles as MockedFunction<typeof globFiles>;
+const mockPrepareBundleForDebugIdUpload =
+  prepareBundleForDebugIdUpload as unknown as MockedFunction<typeof prepareBundleForDebugIdUpload>;
 
 describe("createSentryBuildPluginManager", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Clean up environment variables
     delete process.env["SENTRY_LOG_LEVEL"];
   });
@@ -236,11 +234,11 @@ describe("createSentryBuildPluginManager", () => {
     });
 
     it("does not log anything to the console", () => {
-      const logSpy = jest.spyOn(console, "log");
-      const infoSpy = jest.spyOn(console, "info");
-      const debugSpy = jest.spyOn(console, "debug");
-      const warnSpy = jest.spyOn(console, "warn");
-      const errorSpy = jest.spyOn(console, "error");
+      const logSpy = vi.spyOn(console, "log");
+      const infoSpy = vi.spyOn(console, "info");
+      const debugSpy = vi.spyOn(console, "debug");
+      const warnSpy = vi.spyOn(console, "warn");
+      const errorSpy = vi.spyOn(console, "error");
 
       createSentryBuildPluginManager(
         {
@@ -391,10 +389,10 @@ describe("createSentryBuildPluginManager", () => {
         "/app/dist/other.txt",
       ]);
 
-      jest.spyOn(fs.promises, "mkdtemp").mockResolvedValue("/tmp/sentry-upload-xyz");
-      jest.spyOn(fs.promises, "readdir").mockResolvedValue(["a.js", "a.js.map"] as never);
-      jest.spyOn(fs.promises, "stat").mockResolvedValue({ size: 10 } as fs.Stats);
-      jest.spyOn(fs.promises, "rm").mockResolvedValue(undefined as never);
+      vi.spyOn(fs.promises, "mkdtemp").mockResolvedValue("/tmp/sentry-upload-xyz");
+      vi.spyOn(fs.promises, "readdir").mockResolvedValue(["a.js", "a.js.map"] as never);
+      vi.spyOn(fs.promises, "stat").mockResolvedValue({ size: 10 } as fs.Stats);
+      vi.spyOn(fs.promises, "rm").mockResolvedValue(undefined as never);
 
       mockPrepareBundleForDebugIdUpload.mockResolvedValue(undefined);
 
@@ -475,20 +473,20 @@ describe("createSentryBuildPluginManager", () => {
 
   describe("uploadSourcemaps with multiple projects", () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       mockGlobFiles.mockResolvedValue(["/path/to/bundle.js"]);
       mockPrepareBundleForDebugIdUpload.mockResolvedValue(undefined);
       mockCliUploadSourceMaps.mockResolvedValue(undefined);
 
       // Mock fs operations needed for temp folder upload path
-      jest.spyOn(fs.promises, "mkdtemp").mockResolvedValue("/tmp/sentry-test");
-      jest.spyOn(fs.promises, "readdir").mockResolvedValue([]);
-      jest.spyOn(fs.promises, "stat").mockResolvedValue({ size: 1000 } as fs.Stats);
-      jest.spyOn(fs.promises, "rm").mockResolvedValue(undefined);
+      vi.spyOn(fs.promises, "mkdtemp").mockResolvedValue("/tmp/sentry-test");
+      vi.spyOn(fs.promises, "readdir").mockResolvedValue([]);
+      vi.spyOn(fs.promises, "stat").mockResolvedValue({ size: 1000 } as fs.Stats);
+      vi.spyOn(fs.promises, "rm").mockResolvedValue(undefined);
     });
 
     afterEach(() => {
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it("should pass projects array to uploadSourceMaps when multiple projects configured", async () => {
@@ -568,7 +566,7 @@ describe("createSentryBuildPluginManager", () => {
 
   describe("moduleMetadata callback with multiple projects", () => {
     it("should pass project as string and projects as array when multiple projects configured", () => {
-      const moduleMetadataCallback = jest.fn().mockReturnValue({ custom: "metadata" });
+      const moduleMetadataCallback = vi.fn().mockReturnValue({ custom: "metadata" });
 
       createSentryBuildPluginManager(
         {
@@ -593,7 +591,7 @@ describe("createSentryBuildPluginManager", () => {
     });
 
     it("should pass project as string and projects as array with single project", () => {
-      const moduleMetadataCallback = jest.fn().mockReturnValue({ custom: "metadata" });
+      const moduleMetadataCallback = vi.fn().mockReturnValue({ custom: "metadata" });
 
       createSentryBuildPluginManager(
         {
@@ -618,7 +616,7 @@ describe("createSentryBuildPluginManager", () => {
     });
 
     it("should pass undefined for projects when no project configured", () => {
-      const moduleMetadataCallback = jest.fn().mockReturnValue({ custom: "metadata" });
+      const moduleMetadataCallback = vi.fn().mockReturnValue({ custom: "metadata" });
 
       createSentryBuildPluginManager(
         {
@@ -644,7 +642,7 @@ describe("createSentryBuildPluginManager", () => {
 
   describe("createRelease deploy deduplication", () => {
     beforeEach(() => {
-      jest.clearAllMocks();
+      vi.clearAllMocks();
       _resetDeployedReleasesForTesting();
     });
 

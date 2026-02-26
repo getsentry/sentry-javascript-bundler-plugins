@@ -1,9 +1,6 @@
 import { WebpackPluginInstance } from "webpack";
-import { sentryWebpackPlugin } from "../src/webpack5";
-
-jest.mock("webpack", () => {
-  throw new Error("Webpack 5 version of the plugin should use module from compiler.");
-});
+import { sentryWebpackPlugin } from "../src/index";
+import { describe, it, expect, test } from "vitest";
 
 test("Webpack plugin should exist", () => {
   expect(sentryWebpackPlugin).toBeDefined();

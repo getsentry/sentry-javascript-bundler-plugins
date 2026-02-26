@@ -1,7 +1,6 @@
-/* eslint-disable jest/no-standalone-expect */
-/* eslint-disable jest/expect-expect */
 import path from "path";
 import fs from "fs";
+import { describe, test, expect } from "vitest";
 
 describe("Deletes with `filesToDeleteAfterUpload` even without uploading anything", () => {
   test("webpack bundle", () => {

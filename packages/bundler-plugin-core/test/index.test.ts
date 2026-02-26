@@ -1,11 +1,12 @@
 import { getDebugIdSnippet } from "../src";
 import { containsOnlyImports } from "../src/utils";
+import { describe, it, expect } from "vitest";
 
 describe("getDebugIdSnippet", () => {
   it("returns the debugId injection snippet for a passed debugId", () => {
     const snippet = getDebugIdSnippet("1234");
     expect(snippet.code()).toMatchInlineSnapshot(
-      `"!function(){try{var e=\\"undefined\\"!=typeof window?window:\\"undefined\\"!=typeof global?global:\\"undefined\\"!=typeof globalThis?globalThis:\\"undefined\\"!=typeof self?self:{};var n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]=\\"1234\\",e._sentryDebugIdIdentifier=\\"sentry-dbid-1234\\");}catch(e){}}();"`
+      `"!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{};var n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="1234",e._sentryDebugIdIdentifier="sentry-dbid-1234");}catch(e){}}();"`
     );
   });
 });

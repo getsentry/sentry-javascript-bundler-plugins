@@ -21,7 +21,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:
@@ -54,7 +54,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:
@@ -80,7 +80,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:
@@ -107,7 +107,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:
@@ -131,7 +131,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: ["18", "20", "22"]
+        node-version: [18, 20, 22, 24]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -144,7 +144,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:
@@ -182,7 +182,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:
@@ -214,7 +214,7 @@ jobs:
         id: dependency-cache
         with:
           path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
       - name: Use build cache
         uses: actions/cache@v4
         with:

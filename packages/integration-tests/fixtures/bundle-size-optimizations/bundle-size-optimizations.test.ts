@@ -1,7 +1,6 @@
-/* eslint-disable jest/no-standalone-expect */
-/* eslint-disable jest/expect-expect */
 import path from "path";
 import fs from "fs";
+import { describe, test, expect } from "vitest";
 
 const expectedOutputs: Record<string, Record<string, string>> = {
   esbuild: {
@@ -54,7 +53,7 @@ test("vite bundle", () => {
   checkBundle("vite", "bundle2.js");
 });
 
-test("webpack 5 bundle", () => {
+test("webpack bundle", () => {
   checkBundle("webpack", "bundle1.js");
   checkBundle("webpack", "bundle2.js");
 });

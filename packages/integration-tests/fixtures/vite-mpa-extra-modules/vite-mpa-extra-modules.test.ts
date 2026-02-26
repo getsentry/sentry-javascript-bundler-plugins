@@ -16,6 +16,7 @@
 import childProcess from "child_process";
 import fs from "fs";
 import path from "path";
+import { describe, beforeAll, it, expect } from "vitest";
 
 function getAssetFiles(outDir: string): string[] {
   const assetsDir = path.join(outDir, "assets");

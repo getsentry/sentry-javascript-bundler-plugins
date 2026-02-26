@@ -1,7 +1,6 @@
-/* eslint-disable jest/no-standalone-expect */
-/* eslint-disable jest/expect-expect */
 import { execSync } from "child_process";
 import path from "path";
+import { describe, test, expect } from "vitest";
 
 function checkBundle(bundlePath: string): void {
   const output = execSync(`node ${bundlePath}`, { encoding: "utf-8" });
@@ -15,7 +14,7 @@ function checkBundle(bundlePath: string): void {
 }
 
 describe("appKey injection", () => {
-  test("webpack 5 bundle", () => {
+  test("webpack bundle", () => {
     checkBundle(path.join(__dirname, "out", "webpack", "bundle.js"));
   });
 

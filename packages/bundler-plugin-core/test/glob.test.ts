@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 import { globFiles } from "../src/glob";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 let tmpDir: string;
 

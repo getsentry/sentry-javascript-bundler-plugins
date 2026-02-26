@@ -1,6 +1,7 @@
 import childProcess from "child_process";
 import path from "path";
 import fs from "fs";
+import { test, expect } from "vitest";
 
 const outputBundlePath = path.join(__dirname, "out", "index.js");
 

@@ -1,5 +1,6 @@
 import childProcess from "child_process";
 import path from "path";
+import { test, expect } from "vitest";
 
 /**
  * Runs a node file in a seprate process.

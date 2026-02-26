@@ -1,7 +1,6 @@
-/* eslint-disable jest/no-standalone-expect */
-/* eslint-disable jest/expect-expect */
 import { execSync } from "child_process";
 import path from "path";
+import { describe, test, expect } from "vitest";
 
 interface BundleOutput {
   debugIds: Record<string, string> | undefined;
@@ -34,7 +33,7 @@ function checkBundle(bundlePath: string): void {
 }
 
 describe("applicationKey with debug ID injection", () => {
-  test("webpack 5 bundle", () => {
+  test("webpack bundle", () => {
     checkBundle(path.join(__dirname, "out", "webpack", "bundle.js"));
   });
 

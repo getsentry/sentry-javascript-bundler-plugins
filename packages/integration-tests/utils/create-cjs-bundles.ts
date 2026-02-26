@@ -31,7 +31,7 @@ export function createCjsBundles(
           },
         },
       },
-      plugins: [sentryVitePlugin(sentryPluginOptions)],
+      plugins: [sentryVitePlugin(sentryPluginOptions) as unknown as vite.Plugin],
     });
   }
 

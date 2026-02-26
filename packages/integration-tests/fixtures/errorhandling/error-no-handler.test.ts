@@ -1,11 +1,8 @@
-/* eslint-disable jest/no-standalone-expect */
-/* eslint-disable jest/expect-expect */
 import path from "path";
 import { spawn } from "child_process";
+import { describe, test, expect, beforeAll, afterAll } from "vitest";
 
-jest.setTimeout(10_000);
-
-describe("Error throwing by default (no errorHandler)", () => {
+describe("Error throwing by default (no errorHandler)", { timeout: 10_000 }, () => {
   const FAKE_SENTRY_PORT = "9876";
 
   const sentryServer = spawn("node", [path.join(__dirname, "fakeSentry.js")], {
@@ -15,12 +12,14 @@ describe("Error throwing by default (no errorHandler)", () => {
     shell: true,
   });
 
+  const serverStarted = new Promise<void>((resolve) =>
+    sentryServer.on("spawn", () => {
+      resolve();
+    })
+  );
+
   beforeAll(async () => {
-    await new Promise<void>((resolve) =>
-      sentryServer.on("spawn", () => {
-        resolve();
-      })
-    );
+    await serverStarted;
   });
 
   afterAll(() => {

@@ -1,10 +1,11 @@
 import { createLogger } from "../../src/logger";
+import { describe, it, expect, vi, afterEach } from "vitest";
 
 describe("Logger", () => {
-  const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
-  const consoleInfoSpy = jest.spyOn(console, "info").mockImplementation(() => undefined);
-  const consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
-  const consoleDebugSpy = jest.spyOn(console, "debug").mockImplementation(() => undefined);
+  const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+  const consoleInfoSpy = vi.spyOn(console, "info").mockImplementation(() => undefined);
+  const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  const consoleDebugSpy = vi.spyOn(console, "debug").mockImplementation(() => undefined);
 
   afterEach(() => {
     consoleErrorSpy.mockReset();

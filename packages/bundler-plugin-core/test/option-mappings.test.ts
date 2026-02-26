@@ -1,5 +1,6 @@
 import { Options } from "../src";
 import { NormalizedOptions, normalizeUserOptions, validateOptions } from "../src/options-mapping";
+import { describe, it, test, expect, afterEach, vi, beforeEach } from "vitest";
 
 describe("normalizeUserOptions()", () => {
   test("should return correct value for default input", () => {
@@ -256,14 +257,14 @@ describe("normalizeUserOptions()", () => {
 
 describe("validateOptions", () => {
   const mockedLogger = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   };
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it("should return `true` if `injectRelease` is `true` and org is provided", () => {

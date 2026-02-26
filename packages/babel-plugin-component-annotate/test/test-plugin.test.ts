@@ -23,6 +23,7 @@
  *
  */
 
+import { describe, it, expect } from "vitest";
 import { transform } from "@babel/core";
 import plugin from "../src/index";
 
@@ -1072,7 +1073,7 @@ it("Bananas incompatible plugin @react-navigation source snapshot matches", () =
             height: 110,
             marginTop: 10
           },
-          fsClass: \\"test-class\\"
+          fsClass: "test-class"
         });
       }
     }"
@@ -1088,7 +1089,7 @@ it("skips components marked in ignoredComponents", () => {
   expect(result?.code).toMatchInlineSnapshot(`
     "import React, { Component } from 'react';
     import { StyleSheet, Text, TextInput, View, Image, UIManager } from 'react-native';
-    UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = \\"String\\";
+    UIManager.getViewManagerConfig('RCTView').NativeProps.fsClass = "String";
     class Bananas extends Component {
       render() {
         let pic = {
@@ -1101,7 +1102,7 @@ it("skips components marked in ignoredComponents", () => {
             height: 110,
             marginTop: 10
           },
-          fsClass: \\"test-class\\"
+          fsClass: "test-class"
         });
       }
     }
@@ -1117,48 +1118,48 @@ it("skips components marked in ignoredComponents", () => {
           style: {
             padding: 10
           },
-          dataSentryElement: \\"View\\",
-          dataSentryComponent: \\"PizzaTranslator\\",
-          dataSentrySourceFile: \\"filename-test.js\\"
+          dataSentryElement: "View",
+          dataSentryComponent: "PizzaTranslator",
+          dataSentrySourceFile: "filename-test.js"
         }, /*#__PURE__*/React.createElement(TextInput, {
           style: {
             backgroundColor: '#000',
             color: '#eee',
             padding: 8
           },
-          placeholder: \\"Type here to translate!\\" // not supported on iOS
+          placeholder: "Type here to translate!" // not supported on iOS
           ,
           onChangeText: text => this.setState({
             text
           }),
           value: this.state.text,
-          dataSentryElement: \\"TextInput\\",
-          dataSentrySourceFile: \\"filename-test.js\\"
+          dataSentryElement: "TextInput",
+          dataSentrySourceFile: "filename-test.js"
         }), /*#__PURE__*/React.createElement(Text, {
           style: {
             padding: 10,
             fontSize: 42
           },
-          dataSentryElement: \\"Text\\",
-          dataSentrySourceFile: \\"filename-test.js\\"
+          dataSentryElement: "Text",
+          dataSentrySourceFile: "filename-test.js"
         }, this.state.text.split(' ').map(word => word && '🍕').join(' ')));
       }
     }
     export default function App() {
       return /*#__PURE__*/React.createElement(View, {
         style: styles.container,
-        dataSentryElement: \\"View\\",
-        dataSentryComponent: \\"App\\",
-        dataSentrySourceFile: \\"filename-test.js\\"
+        dataSentryElement: "View",
+        dataSentryComponent: "App",
+        dataSentrySourceFile: "filename-test.js"
       }, /*#__PURE__*/React.createElement(Text, {
         style: {
           color: '#eee'
         },
-        dataSentryElement: \\"Text\\",
-        dataSentrySourceFile: \\"filename-test.js\\"
-      }, \\"FullStory ReactNative testing app\\"), /*#__PURE__*/React.createElement(Bananas, null), /*#__PURE__*/React.createElement(PizzaTranslator, {
-        dataSentryElement: \\"PizzaTranslator\\",
-        dataSentrySourceFile: \\"filename-test.js\\"
+        dataSentryElement: "Text",
+        dataSentrySourceFile: "filename-test.js"
+      }, "FullStory ReactNative testing app"), /*#__PURE__*/React.createElement(Bananas, null), /*#__PURE__*/React.createElement(PizzaTranslator, {
+        dataSentryElement: "PizzaTranslator",
+        dataSentrySourceFile: "filename-test.js"
       }));
     }
     const styles = StyleSheet.create({

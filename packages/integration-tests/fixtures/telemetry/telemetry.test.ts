@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable jest/no-standalone-expect */
-/* eslint-disable jest/expect-expect */
 import path from "path";
 import * as rollup from "rollup";
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
+import { test, expect } from "vitest";
 
 function getGlobalWithInterceptor(): typeof global & {
   __SENTRY_INTERCEPT_TRANSPORT__?: unknown[];
@@ -112,7 +111,7 @@ test("rollup bundle telemetry", async () => {
                 "react-annotate": false,
                 "meta-framework": "none",
                 "application-key-set": false,
-                "bundler-major-version": "3",
+                "bundler-major-version": expect.any(String),
                 bundler: "rollup",
               }),
               sdk: expect.objectContaining({

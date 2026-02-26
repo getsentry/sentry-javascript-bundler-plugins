@@ -17,5 +17,5 @@ void vite.build({
       },
     },
   },
-  plugins: [sentryVitePlugin(pluginOptions)],
+  plugins: [sentryVitePlugin(pluginOptions) as unknown as vite.Plugin],
 });

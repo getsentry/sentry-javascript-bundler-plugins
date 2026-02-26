@@ -1,10 +1,9 @@
-/* eslint-disable jest/no-standalone-expect */
-/* eslint-disable jest/expect-expect */
 import path from "path";
 import fs from "fs";
+import { describe, test, expect } from "vitest";
 
 describe("Deletes files with `filesToDeleteAfterUpload` set to a promise", () => {
-  test("webpack 5 bundle", () => {
+  test("webpack bundle", () => {
     expect(fs.existsSync(path.join(__dirname, "out", "webpack", "bundle.js.map"))).toBe(false);
   });
 
