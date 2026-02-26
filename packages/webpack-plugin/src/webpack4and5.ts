@@ -12,7 +12,7 @@ import {
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore Rollup transpiles import.meta for us for CJS
@@ -240,7 +240,7 @@ export function sentryWebpackPluginFactory({
                   const codeToInject = staticInjectionCode.clone();
                   if (sourcemapsEnabled) {
                     const hash = arg?.chunk?.contentHash?.javascript ?? arg?.chunk?.hash;
-                    const debugId = hash ? stringToUUID(hash) : uuidv4();
+                    const debugId = hash ? stringToUUID(hash) : randomUUID();
                     codeToInject.append(getDebugIdSnippet(debugId));
                   }
                   return codeToInject.code();
