@@ -9,7 +9,7 @@ import {
 } from "@sentry/bundler-plugin-core";
 import * as path from "node:path";
 import { createRequire } from "node:module";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 interface EsbuildOnResolveArgs {
   path: string;
@@ -268,7 +268,7 @@ export function sentryEsbuildPlugin(userOptions: Options = {}): any {
             sideEffects: true,
             pluginName,
             namespace: "sentry-debug-id-stub",
-            suffix: "?sentry-module-id=" + uuidv4(),
+            suffix: "?sentry-module-id=" + randomUUID(),
           };
         });
 
@@ -278,7 +278,7 @@ export function sentryEsbuildPlugin(userOptions: Options = {}): any {
             return {
               loader: "js",
               pluginName,
-              contents: getDebugIdSnippet(uuidv4()).code(),
+              contents: getDebugIdSnippet(randomUUID()).code(),
             };
           }
         );
