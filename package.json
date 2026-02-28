@@ -6,7 +6,8 @@
   "homepage": "https://github.com/getsentry/sentry-javascript-bundler-plugins",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/integration-tests-next/fixtures/*"
   ],
   "scripts": {
     "build": "nx run-many --target=build --all",
@@ -20,6 +21,7 @@
     "test:all": "nx run-many --target=test --all",
     "test:unit": "nx run-many --target=test --all --exclude=@sentry-internal/integration-tests,@sentry-internal/bundler-plugin-e2e-tests",
     "test:integration": "nx run @sentry-internal/integration-tests:test",
+    "test:integration-next": "nx run @sentry-internal/integration-tests-next:test",
     "test:e2e": "nx run @sentry-internal/bundler-plugin-e2e-tests:test",
     "lint": "nx run-many --target=lint --all",
     "check:formatting": "oxfmt --check .",

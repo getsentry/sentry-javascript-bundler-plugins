@@ -1697,10 +1697,10 @@
   dependencies:
     "@octokit/openapi-types" "^17.2.0"
 
-"@oxc-project/types@=0.113.0":
-  version "0.113.0"
-  resolved "https://registry.npmjs.org/@oxc-project/types/-/types-0.113.0.tgz#e323164a2d0cdc72c3eb980cd2a471e641df8d52"
-  integrity sha512-Tp3XmgxwNQ9pEN9vxgJBAqdRamHibi76iowQ38O2I4PMpcvNRQNVsU2n1x1nv9yh0XoTrGFzf7cZSGxmixxrhA==
+"@oxc-project/types@=0.115.0":
+  version "0.115.0"
+  resolved "https://registry.npmjs.org/@oxc-project/types/-/types-0.115.0.tgz#92a599543529bce45f8f2da77f40a124d63349dc"
+  integrity sha512-4n91DKnebUS4yjUHl2g3/b2T+IUdCfmoZGhmwsovZCDaJSs+QkVAM+0AqqTxHSsHfeiMuueT75cZaZcT/m0pSw==
 
 "@oxfmt/binding-android-arm-eabi@0.33.0":
   version "0.33.0"
@@ -1817,77 +1817,77 @@
   resolved "https://registry.npmjs.org/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@rolldown/binding-android-arm64@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/binding-android-arm64/-/binding-android-arm64-1.0.0-rc.4.tgz#bb275690413cd0109d49ba5dd4491e1c0296ad0e"
-  integrity sha512-vRq9f4NzvbdZavhQbjkJBx7rRebDKYR9zHfO/Wg486+I7bSecdUapzCm5cyXoK+LHokTxgSq7A5baAXUZkIz0w==
+"@rolldown/binding-android-arm64@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/binding-android-arm64/-/binding-android-arm64-1.0.0-rc.6.tgz#4ee6333152206902aa1beb74a487ec7bc9df20bd"
+  integrity sha512-kvjTSWGcrv+BaR2vge57rsKiYdVR8V8CoS0vgKrc570qRBfty4bT+1X0z3j2TaVV+kAYzA0PjeB9+mdZyqUZlg==
 
-"@rolldown/binding-darwin-arm64@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/binding-darwin-arm64/-/binding-darwin-arm64-1.0.0-rc.4.tgz#cd59b855ee90e464e8b6e97919089d00d98590e1"
-  integrity sha512-kFgEvkWLqt3YCgKB5re9RlIrx9bRsvyVUnaTakEpOPuLGzLpLapYxE9BufJNvPg8GjT6mB1alN4yN1NjzoeM8Q==
+"@rolldown/binding-darwin-arm64@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/binding-darwin-arm64/-/binding-darwin-arm64-1.0.0-rc.6.tgz#0c1853b3b07e739087b33919fc388fe3ce314e9e"
+  integrity sha512-+tJhD21KvGNtUrpLXrZQlT+j5HZKiEwR2qtcZb3vNOUpvoT9QjEykr75ZW/Kr0W89gose/HVXU6351uVZD8Qvw==
 
-"@rolldown/binding-darwin-x64@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/binding-darwin-x64/-/binding-darwin-x64-1.0.0-rc.4.tgz#5c1411b969c26ffd88b661b1a38bafcf1519a431"
-  integrity sha512-JXmaOJGsL/+rsmMfutcDjxWM2fTaVgCHGoXS7nE8Z3c9NAYjGqHvXrAhMUZvMpHS/k7Mg+X7n/MVKb7NYWKKww==
+"@rolldown/binding-darwin-x64@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/binding-darwin-x64/-/binding-darwin-x64-1.0.0-rc.6.tgz#6e52da0ad87253b9cf04dcadf025dca1928e658d"
+  integrity sha512-DKNhjMk38FAWaHwUt1dFR3rA/qRAvn2NUvSG2UGvxvlMxSmN/qqww/j4ABAbXhNRXtGQNmrAINMXRuwHl16ZHg==
 
-"@rolldown/binding-freebsd-x64@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/binding-freebsd-x64/-/binding-freebsd-x64-1.0.0-rc.4.tgz#5b06b2792df246bb3fcc64630bd92af9feff3f87"
-  integrity sha512-ep3Catd6sPnHTM0P4hNEvIv5arnDvk01PfyJIJ+J3wVCG1eEaPo09tvFqdtcaTrkwQy0VWR24uz+cb4IsK53Qw==
+"@rolldown/binding-freebsd-x64@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/binding-freebsd-x64/-/binding-freebsd-x64-1.0.0-rc.6.tgz#7e500eff970e39d1307e481b00874ab90af4a183"
+  integrity sha512-8TThsRkCPAnfyMBShxrGdtoOE6h36QepqRQI97iFaQSCRbHFWHcDHppcojZnzXoruuhPnjMEygzaykvPVJsMRg==
 
-"@rolldown/binding-linux-arm-gnueabihf@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/binding-linux-arm-gnueabihf/-/binding-linux-arm-gnueabihf-1.0.0-rc.4.tgz#93d9a3259cc41054425c8134d8ba41c9f92984f1"
-  integrity sha512-LwA5ayKIpnsgXJEwWc3h8wPiS33NMIHd9BhsV92T8VetVAbGe2qXlJwNVDGHN5cOQ22R9uYvbrQir2AB+ntT2w==
+"@rolldown/binding-linux-arm-gnueabihf@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/binding-linux-arm-gnueabihf/-/binding-linux-arm-gnueabihf-1.0.0-rc.6.tgz#247b60365081872f9ef8426e98bafbda7410c23a"
+  integrity sha512-ZfmFoOwPUZCWtGOVC9/qbQzfc0249FrRUOzV2XabSMUV60Crp211OWLQN1zmQAsRIVWRcEwhJ46Z1mXGo/L/nQ==
 
-"@rolldown/binding-linux-arm64-gnu@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/binding-linux-arm64-gnu/-/binding-linux-arm64-gnu-1.0.0-rc.4.tgz#aa9e8f5b3874dc29bf54940eb55cb23274956e32"
-  integrity sha512-AC1WsGdlV1MtGay/OQ4J9T7GRadVnpYRzTcygV1hKnypbYN20Yh4t6O1Sa2qRBMqv1etulUknqXjc3CTIsBu6A==
+"@rolldown/binding-linux-arm64-gnu@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/binding-linux-arm64-gnu/-/binding-linux-arm64-gnu-1.0.0-rc.6.tgz#504840853e42726c7b9c591792f6422aa93f118c"
+  integrity sha512-ZsGzbNETxPodGlLTYHaCSGVhNN/rvkMDCJYHdT7PZr5jFJRmBfmDi2awhF64Dt2vxrJqY6VeeYSgOzEbHRsb7Q==
 
-"@rolldown/binding-linux-arm64-musl@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/binding-linux-arm64-musl/-/binding-linux-arm64-musl-1.0.0-rc.4.tgz#e3b56288dcb2ba9219c3e3ff62bf0395c0dc9de4"
-  integrity sha512-lU+6rgXXViO61B4EudxtVMXSOfiZONR29Sys5VGSetUY7X8mg9FCKIIjcPPj8xNDeYzKl+H8F/qSKOBVFJChCQ==
+"@rolldown/binding-linux-arm64-musl@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/binding-linux-arm64-musl/-/binding-linux-arm64-musl-1.0.0-rc.6.tgz#f5f260bfa51083c45fcb59f10ba77991d29dbed4"
+  integrity sha512-elPpdevtCdUOqziemR86C4CSCr/5sUxalzDrf/CJdMT+kZt2C556as++qHikNOz0vuFf52h+GJNXZM08eWgGPQ==
 
-"@rolldown/binding-linux-x64-gnu@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/binding-linux-x64-gnu/-/binding-linux-x64-gnu-1.0.0-rc.4.tgz#003570df20ba503ed71f052d1b201535fd6a217d"
-  integrity sha512-DZaN1f0PGp/bSvKhtw50pPsnln4T13ycDq1FrDWRiHmWt1JeW+UtYg9touPFf8yt993p8tS2QjybpzKNTxYEwg==
+"@rolldown/binding-linux-x64-gnu@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/binding-linux-x64-gnu/-/binding-linux-x64-gnu-1.0.0-rc.6.tgz#c59a835f5f4f5ffd937ea4466862d522c5da4928"
+  integrity sha512-IBwXsf56o3xhzAyaZxdM1CX8UFiBEUFCjiVUgny67Q8vPIqkjzJj0YKhd3TbBHanuxThgBa59f6Pgutg2OGk5A==
 
-"@rolldown/binding-linux-x64-musl@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/binding-linux-x64-musl/-/binding-linux-x64-musl-1.0.0-rc.4.tgz#e1e22ee0b8913e45bf769291a7c7db57aa20b7fe"
-  integrity sha512-RnGxwZLN7fhMMAItnD6dZ7lvy+TI7ba+2V54UF4dhaWa/p8I/ys1E73KO6HmPmgz92ZkfD8TXS1IMV8+uhbR9g==
+"@rolldown/binding-linux-x64-musl@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/binding-linux-x64-musl/-/binding-linux-x64-musl-1.0.0-rc.6.tgz#1ea2a7c58f5ed50b3d35142935f6a0234c1d007b"
+  integrity sha512-vOk7G8V9Zm+8a6PL6JTpCea61q491oYlGtO6CvnsbhNLlKdf0bbCPytFzGQhYmCKZDKkEbmnkcIprTEGCURnwg==
 
-"@rolldown/binding-openharmony-arm64@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/binding-openharmony-arm64/-/binding-openharmony-arm64-1.0.0-rc.4.tgz#494ee66307a2b1192f24d6876564c1300ec90241"
-  integrity sha512-6lcI79+X8klGiGd8yHuTgQRjuuJYNggmEml+RsyN596P23l/zf9FVmJ7K0KVKkFAeYEdg0iMUKyIxiV5vebDNQ==
+"@rolldown/binding-openharmony-arm64@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/binding-openharmony-arm64/-/binding-openharmony-arm64-1.0.0-rc.6.tgz#8ffe37a43e9218af46770784dfbc1cda9efffd97"
+  integrity sha512-ASjEDI4MRv7XCQb2JVaBzfEYO98JKCGrAgoW6M03fJzH/ilCnC43Mb3ptB9q/lzsaahoJyIBoAGKAYEjUvpyvQ==
 
-"@rolldown/binding-wasm32-wasi@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/binding-wasm32-wasi/-/binding-wasm32-wasi-1.0.0-rc.4.tgz#dc98418ee2e5668f7dcc4bf4155523a079b34a80"
-  integrity sha512-wz7ohsKCAIWy91blZ/1FlpPdqrsm1xpcEOQVveWoL6+aSPKL4VUcoYmmzuLTssyZxRpEwzuIxL/GDsvpjaBtOw==
+"@rolldown/binding-wasm32-wasi@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/binding-wasm32-wasi/-/binding-wasm32-wasi-1.0.0-rc.6.tgz#e822081ac37a98c2f63e8a9f65432361a0ac185a"
+  integrity sha512-mYa1+h2l6Zc0LvmwUh0oXKKYihnw/1WC73vTqw+IgtfEtv47A+rWzzcWwVDkW73+UDr0d/Ie/HRXoaOY22pQDw==
   dependencies:
     "@napi-rs/wasm-runtime" "^1.1.1"
 
-"@rolldown/binding-win32-arm64-msvc@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/binding-win32-arm64-msvc/-/binding-win32-arm64-msvc-1.0.0-rc.4.tgz#a294ee643275bb099c1128ad294bd6101bae1eca"
-  integrity sha512-cfiMrfuWCIgsFmcVG0IPuO6qTRHvF7NuG3wngX1RZzc6dU8FuBFb+J3MIR5WrdTNozlumfgL4cvz+R4ozBCvsQ==
+"@rolldown/binding-win32-arm64-msvc@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/binding-win32-arm64-msvc/-/binding-win32-arm64-msvc-1.0.0-rc.6.tgz#f7e8455f618505f28e763c8e73213d61eeba2b7f"
+  integrity sha512-e2ABskbNH3MRUBMjgxaMjYIw11DSwjLJxBII3UgpF6WClGLIh8A20kamc+FKH5vIaFVnYQInmcLYSUVpqMPLow==
 
-"@rolldown/binding-win32-x64-msvc@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/binding-win32-x64-msvc/-/binding-win32-x64-msvc-1.0.0-rc.4.tgz#b9248d23625f6f59ec1af0b3140706cba6afc36c"
-  integrity sha512-p6UeR9y7ht82AH57qwGuFYn69S6CZ7LLKdCKy/8T3zS9VTrJei2/CGsTUV45Da4Z9Rbhc7G4gyWQ/Ioamqn09g==
+"@rolldown/binding-win32-x64-msvc@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/binding-win32-x64-msvc/-/binding-win32-x64-msvc-1.0.0-rc.6.tgz#5100c0a269f5a557cab7011951b48709c6216fa9"
+  integrity sha512-dJVc3ifhaRXxIEh1xowLohzFrlQXkJ66LepHm+CmSprTWgVrPa8Fx3OL57xwIqDEH9hufcKkDX2v65rS3NZyRA==
 
-"@rolldown/pluginutils@1.0.0-rc.4":
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/@rolldown/pluginutils/-/pluginutils-1.0.0-rc.4.tgz#267b477af268a082861c861e47f6a787dff59cc4"
-  integrity sha512-1BrrmTu0TWfOP1riA8uakjFc9bpIUGzVKETsOtzY39pPga8zELGDl8eu1Dx7/gjM5CAz14UknsUMpBO8L+YntQ==
+"@rolldown/pluginutils@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/@rolldown/pluginutils/-/pluginutils-1.0.0-rc.6.tgz#2f729fcf2d68c2d8cc2dcb05a7c3b2eeadfe20e1"
+  integrity sha512-Y0+JT8Mi1mmW08K6HieG315XNRu4L0rkfCpA364HtytjgiqYnMYRdFPcxRl+BQQqNXzecL2S9nii+RUpO93XIA==
 
 "@rollup/plugin-babel@^6.0.4":
   version "6.0.4"
@@ -8874,6 +8874,11 @@ react@^18.2.0:
   dependencies:
     loose-envify "^1.1.0"
 
+react@^19.2.4:
+  version "19.2.4"
+  resolved "https://registry.npmjs.org/react/-/react-19.2.4.tgz#438e57baa19b77cb23aab516cf635cd0579ee09a"
+  integrity sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==
+
 read-cmd-shim@3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/read-cmd-shim/-/read-cmd-shim-3.0.0.tgz#62b8c638225c61e6cc607f8f4b779f3b8238f155"
@@ -9116,27 +9121,27 @@ rimraf@^4.4.1:
   dependencies:
     glob "^9.2.0"
 
-rolldown@^1.0.0-rc.4:
-  version "1.0.0-rc.4"
-  resolved "https://registry.npmjs.org/rolldown/-/rolldown-1.0.0-rc.4.tgz#c22246260ab3da62caa209556e26d81fe516cf10"
-  integrity sha512-V2tPDUrY3WSevrvU2E41ijZlpF+5PbZu4giH+VpNraaadsJGHa4fR6IFwsocVwEXDoAdIv5qgPPxgrvKAOIPtA==
+rolldown@^1.0.0-rc.6:
+  version "1.0.0-rc.6"
+  resolved "https://registry.npmjs.org/rolldown/-/rolldown-1.0.0-rc.6.tgz#fc2209fde9a0947fedd78647af50d2262332e977"
+  integrity sha512-B8vFPV1ADyegoYfhg+E7RAucYKv0xdVlwYYsIJgfPNeiSxZGWNxts9RqhyGzC11ULK/VaeXyKezGCwpMiH8Ktw==
   dependencies:
-    "@oxc-project/types" "=0.113.0"
-    "@rolldown/pluginutils" "1.0.0-rc.4"
+    "@oxc-project/types" "=0.115.0"
+    "@rolldown/pluginutils" "1.0.0-rc.6"
   optionalDependencies:
-    "@rolldown/binding-android-arm64" "1.0.0-rc.4"
-    "@rolldown/binding-darwin-arm64" "1.0.0-rc.4"
-    "@rolldown/binding-darwin-x64" "1.0.0-rc.4"
-    "@rolldown/binding-freebsd-x64" "1.0.0-rc.4"
-    "@rolldown/binding-linux-arm-gnueabihf" "1.0.0-rc.4"
-    "@rolldown/binding-linux-arm64-gnu" "1.0.0-rc.4"
-    "@rolldown/binding-linux-arm64-musl" "1.0.0-rc.4"
-    "@rolldown/binding-linux-x64-gnu" "1.0.0-rc.4"
-    "@rolldown/binding-linux-x64-musl" "1.0.0-rc.4"
-    "@rolldown/binding-openharmony-arm64" "1.0.0-rc.4"
-    "@rolldown/binding-wasm32-wasi" "1.0.0-rc.4"
-    "@rolldown/binding-win32-arm64-msvc" "1.0.0-rc.4"
-    "@rolldown/binding-win32-x64-msvc" "1.0.0-rc.4"
+    "@rolldown/binding-android-arm64" "1.0.0-rc.6"
+    "@rolldown/binding-darwin-arm64" "1.0.0-rc.6"
+    "@rolldown/binding-darwin-x64" "1.0.0-rc.6"
+    "@rolldown/binding-freebsd-x64" "1.0.0-rc.6"
+    "@rolldown/binding-linux-arm-gnueabihf" "1.0.0-rc.6"
+    "@rolldown/binding-linux-arm64-gnu" "1.0.0-rc.6"
+    "@rolldown/binding-linux-arm64-musl" "1.0.0-rc.6"
+    "@rolldown/binding-linux-x64-gnu" "1.0.0-rc.6"
+    "@rolldown/binding-linux-x64-musl" "1.0.0-rc.6"
+    "@rolldown/binding-openharmony-arm64" "1.0.0-rc.6"
+    "@rolldown/binding-wasm32-wasi" "1.0.0-rc.6"
+    "@rolldown/binding-win32-arm64-msvc" "1.0.0-rc.6"
+    "@rolldown/binding-win32-x64-msvc" "1.0.0-rc.6"
 
 rollup@3.2.0:
   version "3.2.0"

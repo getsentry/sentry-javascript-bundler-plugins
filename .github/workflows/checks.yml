@@ -162,6 +162,43 @@ jobs:
           path: packages
       - run: yarn test:integration
 
+  test-integration-next:
+    needs: build
+    name: "Integration Tests Next (Node ${{ matrix.node-version }}, OS ${{ matrix.os }})"
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 20, 22, 24]
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Use dependency cache
+        uses: actions/cache@v4
+        id: dependency-cache
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Use build cache
+        uses: actions/cache@v4
+        with:
+          path: .nxcache
+          key: build-cache-key-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            build-cache-key-${{ runner.os }}-
+      - name: Install dependencies
+        run: yarn --frozen-lockfile --ignore-engines
+        if: steps.dependency-cache.outputs.cache-hit != 'true'
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-artifacts-${{ github.run_id }}
+          path: packages
+      - run: yarn test:integration-next
+
   test-e2e:
     # We only run E2E tests for non-fork PRs because the E2E tests require secrets to work and they can't be accessed from forks
     # Dependabot PRs sadly also don't have access to secrets, so we skip them as well
