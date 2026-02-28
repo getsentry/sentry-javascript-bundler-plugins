@@ -1,14 +1,5 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "nx/tasks-runners/default",
-      "options": {
-        "cacheableOperations": ["build", "lint", "test"],
-        "cacheDirectory": ".nxcache"
-      }
-    }
-  },
   "namedInputs": {
     "sharedGlobals": ["{workspaceRoot}/*.js", "{workspaceRoot}/*.json", "{workspaceRoot}/yarn.lock"]
   },
@@ -16,16 +7,19 @@
     "build": {
       "inputs": ["sharedGlobals"],
       "dependsOn": ["^build"],
-      "outputs": ["{projectRoot}/dist"]
+      "outputs": ["{projectRoot}/dist"],
+      "cache": true
     },
     "lint": {
       "inputs": ["sharedGlobals"],
       "dependsOn": ["^build", "build"],
-      "outputs": []
+      "outputs": [],
+      "cache": true
     },
     "test": {
       "inputs": ["sharedGlobals"],
-      "outputs": []
+      "outputs": [],
+      "cache": true
     },
     "check:types": {
       "inputs": ["sharedGlobals"],
@@ -35,5 +29,9 @@
     "build:npm": {
       "dependsOn": ["build", "^build"]
     }
+  },
+  "cacheDirectory": ".nxcache",
+  "tui": {
+    "autoExit": true
   }
 }
