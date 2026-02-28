@@ -1,0 +1,17 @@
+diff --git a/node_modules/@sentry/cli/js/helper.js b/node_modules/@sentry/cli/js/helper.js
+index 56f95c9..c70f216 100644
+--- a/node_modules/@sentry/cli/js/helper.js
++++ b/node_modules/@sentry/cli/js/helper.js
+@@ -298,6 +298,12 @@ function execute(args_1, live_1, silent_1, configFile_1) {
+         if (config.customHeader) {
+             env.CUSTOM_HEADER = config.customHeader;
+         }
++
++        if (process.env['SENTRY_CLI_FILE_APPEND']) {
++            fs.appendFileSync(process.env['SENTRY_CLI_FILE_APPEND'], JSON.stringify(args) + ',\n');
++            return Promise.resolve();
++        }
++
+         else if (config.headers) {
+             const headers = Object.entries(config.headers).flatMap(([key, value]) => [
+                 '--header',

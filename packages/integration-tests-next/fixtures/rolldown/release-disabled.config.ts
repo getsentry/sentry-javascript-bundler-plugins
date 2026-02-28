@@ -4,17 +4,15 @@ import { defineConfig } from "rolldown";
 export default defineConfig({
   input: "src/basic.js",
   output: {
-    file: "out/debugids-already-injected/basic.js",
-    sourcemap: true,
-    sourcemapDebugIds: true,
+    file: "out/release-disabled/basic.js",
   },
   plugins: [
     sentryRollupPlugin({
       telemetry: false,
-      // We need to specify these so that upload is attempted. Debug IDs will be injected before then...
       authToken: "fake-auth",
       org: "fake-org",
       project: "fake-project",
+      release: { create: false },
     }),
   ],
 });

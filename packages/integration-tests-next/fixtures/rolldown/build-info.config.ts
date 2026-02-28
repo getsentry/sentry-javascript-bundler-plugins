@@ -4,15 +4,15 @@ import { defineConfig } from "rolldown";
 export default defineConfig({
   input: "src/basic.js",
   output: {
-    file: "out/basic-sourcemaps/basic.js",
-    sourcemap: true,
+    file: "out/build-info/basic.js",
   },
   plugins: [
     sentryRollupPlugin({
       telemetry: false,
-      authToken: "fake-auth",
-      org: "fake-org",
-      project: "fake-project",
+      release: {
+        name: "build-information-injection-test",
+      },
+      _experiments: { injectBuildInformation: true },
     }),
   ],
 });

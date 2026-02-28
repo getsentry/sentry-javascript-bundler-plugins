@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --pool threads",
     "lint": "eslint .",
     "check:types": "tsc --project ./tsconfig.json --noEmit",
     "clean": "run-s clean:build",
@@ -13,7 +13,6 @@
     "clean:deps": "premove node_modules"
   },
   "dependencies": {
-    "@babel/preset-react": "^7.23.3",
     "@sentry-internal/eslint-config": "5.1.1",
     "@sentry-internal/sentry-bundler-plugin-tsconfig": "5.1.1",
     "@sentry/esbuild-plugin": "5.1.1",
@@ -22,7 +21,8 @@
     "@sentry/webpack-plugin": "5.1.1"
   },
   "devDependencies": {
-    "premove": "^4.0.0"
+    "premove": "^4.0.0",
+    "vitest": "^4.0.0"
   },
   "volta": {
     "extends": "../../package.json"

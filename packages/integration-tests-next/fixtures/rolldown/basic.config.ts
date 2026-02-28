@@ -6,5 +6,12 @@ export default defineConfig({
   output: {
     file: "out/basic/basic.js",
   },
-  plugins: [sentryRollupPlugin({ telemetry: false })],
+  plugins: [
+    sentryRollupPlugin({
+      telemetry: false,
+      authToken: "fake-auth",
+      org: "fake-org",
+      project: "fake-project",
+    }),
+  ],
 });
