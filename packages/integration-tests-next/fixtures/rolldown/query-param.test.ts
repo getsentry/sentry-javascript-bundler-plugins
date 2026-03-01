@@ -1,7 +1,12 @@
 import { expect } from "vitest";
 import { test } from "./utils";
 
-test(import.meta.url, ({ runRolldown, readOutputFiles }) => {
+test(import.meta.url, ({ runRolldown, readOutputFiles, ctx }) => {
+  if (process.platform === "win32") {
+    ctx.skip("Query params do not work in paths on Windows");
+    return;
+  }
+
   runRolldown();
   expect(readOutputFiles()).toMatchInlineSnapshot(`
     {

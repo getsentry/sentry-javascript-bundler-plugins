@@ -2,7 +2,7 @@ import { basename, dirname, join } from "node:path";
 import { createTempDir, readAllFiles, runBundler } from "../utils";
 import { fileURLToPath } from "node:url";
 import { rmSync } from "node:fs";
-import { test as vitestTest } from "vitest";
+import { TestContext, test as vitestTest } from "vitest";
 import { execSync } from "node:child_process";
 
 const cwd = dirname(fileURLToPath(import.meta.url));
@@ -14,6 +14,7 @@ type TestCallback = (props: {
   readOutputFiles: () => Record<string, string>;
   runFileInNode: (file: string) => string;
   createTempDir: () => string;
+  ctx: TestContext;
 }) => void;
 
 export function test(url: string, callback: TestCallback) {
@@ -30,7 +31,7 @@ export function test(url: string, callback: TestCallback) {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     vitestTest.skip(testName);
   } else {
-    vitestTest(`rolldown > ${testName}`, () =>
+    vitestTest(`rolldown > ${testName}`, (ctx) =>
       callback({
         outDir,
         runRolldown: (env) =>
@@ -54,6 +55,7 @@ export function test(url: string, callback: TestCallback) {
           }).toString();
         },
         createTempDir: () => createTempDir(),
+        ctx,
       })
     );
   }
