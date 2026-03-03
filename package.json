@@ -32,7 +32,7 @@
     "clean:all": "nx run-many --target=clean:all --all && yarn",
     "test": "nx run-many --target=test --all --exclude=@sentry-internal/bundler-plugin-e2e-tests",
     "test:all": "nx run-many --target=test --all",
-    "test:unit": "nx run-many --target=test --all --exclude=@sentry-internal/integration-tests,@sentry-internal/bundler-plugin-e2e-tests",
+    "test:unit": "nx run-many --target=test --all --exclude=@sentry-internal/integration-tests,@sentry-internal/integration-tests-next,@sentry-internal/bundler-plugin-e2e-tests",
     "test:integration": "nx run @sentry-internal/integration-tests:test",
     "test:integration-next": "nx run @sentry-internal/integration-tests-next:test",
     "test:e2e": "nx run @sentry-internal/bundler-plugin-e2e-tests:test",
