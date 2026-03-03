@@ -1,10 +1,10 @@
 diff --git a/node_modules/@sentry/cli/js/helper.js b/node_modules/@sentry/cli/js/helper.js
-index 56f95c9..b397122 100644
+index 56f95c9..b97e41b 100644
 --- a/node_modules/@sentry/cli/js/helper.js
 +++ b/node_modules/@sentry/cli/js/helper.js
-@@ -298,6 +298,13 @@ function execute(args_1, live_1, silent_1, configFile_1) {
-         if (config.customHeader) {
-             env.CUSTOM_HEADER = config.customHeader;
+@@ -295,6 +295,13 @@ function execute(args_1, live_1, silent_1, configFile_1) {
+         if (config.vcsRemote) {
+             env.SENTRY_VCS_REMOTE = config.vcsRemote;
          }
 +
 +        if (process.env['SENTRY_TEST_OUT_DIR']) {
@@ -13,6 +13,6 @@ index 56f95c9..b397122 100644
 +            return Promise.resolve();
 +        }
 +
-         else if (config.headers) {
-             const headers = Object.entries(config.headers).flatMap(([key, value]) => [
-                 '--header',
+         if (config.customHeader) {
+             env.CUSTOM_HEADER = config.customHeader;
+         }
