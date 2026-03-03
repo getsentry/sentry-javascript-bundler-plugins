@@ -6,5 +6,5 @@ export default defineConfig({
   output: {
     file: "out/basic-release-disabled/basic.js",
   },
-  plugins: [sentryRollupPlugin({ telemetry: false, release: { inject: false } })],
+  plugins: [sentryRollupPlugin({ telemetry: false, release: { create: false, inject: false } })],
 });
