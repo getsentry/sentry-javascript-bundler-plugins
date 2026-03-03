@@ -14,7 +14,7 @@ type TestCallback = (props: {
   readOutputFiles: () => Record<string, string>;
   runFileInNode: (file: string) => string;
   createTempDir: () => string;
-}) => void;
+}) => void | Promise<void>;
 
 export function test(url: string, callback: TestCallback) {
   const filePath = fileURLToPath(url);
