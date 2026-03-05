@@ -119,6 +119,15 @@ export function makeOptionallyEnabledNodeTransport(
         }
 
         if (await shouldSendTelemetry) {
+          if (process.env["SENTRY_TEST_OUT_DIR"]) {
+            // eslint-disable-next-line @typescript-eslint/unbound-method
+            const { join } = await import("node:path");
+            const { appendFileSync } = await import("node:fs");
+            const path = join(process.env["SENTRY_TEST_OUT_DIR"], "sentry-telemetry.json");
+            appendFileSync(path, JSON.stringify(request) + ",\n");
+            return { statusCode: 200 };
+          }
+
           return nodeTransport.send(request);
         }
 

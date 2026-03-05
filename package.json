@@ -17,9 +17,12 @@
     "packages/rollup-plugin",
     "packages/tsconfigs",
     "packages/vite-plugin",
-    "packages/webpack-plugin"
+    "packages/webpack-plugin",
+    "packages/integration-tests-next",
+    "packages/integration-tests-next/fixtures/rolldown"
   ],
   "scripts": {
+    "postinstall": "patch-package",
     "build": "nx run-many --target=build --all",
     "build:watch": "nx run-many --target=build:watch --all",
     "build:graph": "nx graph",
@@ -29,8 +32,9 @@
     "clean:all": "nx run-many --target=clean:all --all && yarn",
     "test": "nx run-many --target=test --all --exclude=@sentry-internal/bundler-plugin-e2e-tests",
     "test:all": "nx run-many --target=test --all",
-    "test:unit": "nx run-many --target=test --all --exclude=@sentry-internal/integration-tests,@sentry-internal/bundler-plugin-e2e-tests",
+    "test:unit": "nx run-many --target=test --all --exclude=@sentry-internal/integration-tests,@sentry-internal/integration-tests-next,@sentry-internal/bundler-plugin-e2e-tests",
     "test:integration": "nx run @sentry-internal/integration-tests:test",
+    "test:integration-next": "nx run @sentry-internal/integration-tests-next:test",
     "test:e2e": "nx run @sentry-internal/bundler-plugin-e2e-tests:test",
     "lint": "nx run-many --target=lint --all",
     "check:formatting": "oxfmt --check .",
@@ -41,7 +45,8 @@
     "npm-run-all": "^4.1.5",
     "nx": "22.5.2",
     "oxfmt": "^0.33.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "patch-package": "^8.0.1"
   },
   "volta": {
     "node": "22.22.0",

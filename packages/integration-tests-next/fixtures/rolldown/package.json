@@ -1,0 +1,10 @@
+{
+  "name": "rolldown-integration-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "react": "^19.2.4",
+    "rolldown": "^1.0.0-rc.6"
+  }
+}
