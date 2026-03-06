@@ -1,8 +1,8 @@
 import { expect } from "vitest";
 import { test } from "./utils";
 
-test(import.meta.url, ({ runRolldown, readOutputFiles, runFileInNode }) => {
-  runRolldown();
+test(import.meta.url, ({ runBundler, readOutputFiles, runFileInNode }) => {
+  runBundler();
   expect(readOutputFiles()).toMatchInlineSnapshot(`
     {
       "basic.js": "//#region src/basic.js
