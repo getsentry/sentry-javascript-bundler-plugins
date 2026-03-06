@@ -30,7 +30,7 @@ export function test(url: string, callback: TestCallback) {
       outDir,
       runBundler: (env) =>
         runBundler(
-          `rollup --config ${testName}.config.ts`,
+          `rollup --config ${testName}.config.js`,
           {
             cwd,
             env: {
