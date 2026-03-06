@@ -1,5 +1,5 @@
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
-import { defineConfig } from "rolldown";
+import { defineConfig } from "rollup";
 import { sentryConfig } from "../configs/component-annotation-disabled.config.js";
 import { babel } from "@rollup/plugin-babel";
 import resolve from "@rollup/plugin-node-resolve";

@@ -1,5 +1,5 @@
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
-import { defineConfig } from "rolldown";
+import { defineConfig } from "rollup";
 import { sentryConfig } from "../configs/debugids-already-injected.config.js";
 
 export default defineConfig({
