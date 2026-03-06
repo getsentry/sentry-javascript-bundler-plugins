@@ -2,10 +2,10 @@ import { expect } from "vitest";
 import { readAllFiles } from "../utils";
 import { test } from "./utils";
 
-test(import.meta.url, ({ runRolldown, createTempDir }) => {
+test(import.meta.url, ({ runBundler, createTempDir }) => {
   const tempDir = createTempDir();
 
-  runRolldown({ SENTRY_TEST_OVERRIDE_TEMP_DIR: tempDir });
+  runBundler({ SENTRY_TEST_OVERRIDE_TEMP_DIR: tempDir });
   const files = readAllFiles(tempDir);
   expect(files).toMatchInlineSnapshot(`
       {

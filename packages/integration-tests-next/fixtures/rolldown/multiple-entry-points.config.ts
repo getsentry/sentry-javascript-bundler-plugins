@@ -1,5 +1,6 @@
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 import { defineConfig } from "rolldown";
+import { sentryConfig } from "../configs/multiple-entry-points.config.js";
 
 export default defineConfig({
   input: ["src/entry1.js", "src/entry2.js"],
@@ -7,5 +8,5 @@ export default defineConfig({
     dir: "out/multiple-entry-points",
     chunkFileNames: "[name].js",
   },
-  plugins: [sentryRollupPlugin({ telemetry: false, release: { inject: false } })],
+  plugins: [sentryRollupPlugin(sentryConfig)],
 });
