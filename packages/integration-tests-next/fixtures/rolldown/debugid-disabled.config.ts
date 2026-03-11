@@ -1,5 +1,6 @@
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 import { defineConfig } from "rolldown";
+import { sentryConfig } from "../configs/debugid-disabled.config.js";
 
 export default defineConfig({
   input: "src/basic.js",
@@ -7,15 +8,5 @@ export default defineConfig({
     file: "out/debugid-disabled/basic.js",
     sourcemap: true,
   },
-  plugins: [
-    sentryRollupPlugin({
-      telemetry: false,
-      sourcemaps: {
-        disable: true,
-      },
-      release: {
-        inject: false,
-      },
-    }),
-  ],
+  plugins: [sentryRollupPlugin(sentryConfig)],
 });

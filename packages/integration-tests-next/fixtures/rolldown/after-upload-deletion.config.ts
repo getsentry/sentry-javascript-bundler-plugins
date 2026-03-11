@@ -1,5 +1,6 @@
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 import { defineConfig } from "rolldown";
+import { sentryConfig } from "../configs/after-upload-deletion.config.js";
 
 export default defineConfig({
   input: "src/basic.js",
@@ -7,12 +8,5 @@ export default defineConfig({
     file: "out/after-upload-deletion/basic.js",
     sourcemap: true,
   },
-  plugins: [
-    sentryRollupPlugin({
-      telemetry: false,
-      sourcemaps: {
-        filesToDeleteAfterUpload: ["out/after-upload-deletion/basic.js.map"],
-      },
-    }),
-  ],
+  plugins: [sentryRollupPlugin(sentryConfig)],
 });

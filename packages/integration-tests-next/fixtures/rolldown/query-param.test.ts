@@ -1,13 +1,13 @@
 import { expect } from "vitest";
 import { test } from "./utils";
 
-test(import.meta.url, ({ runRolldown, readOutputFiles, ctx }) => {
+test(import.meta.url, ({ runBundler, readOutputFiles, ctx }) => {
   if (process.platform === "win32") {
     ctx.skip("Query params do not work in paths on Windows");
     return;
   }
 
-  runRolldown();
+  runBundler();
   expect(readOutputFiles()).toMatchInlineSnapshot(`
     {
       "common.js?seP58q4g": "//#region src/common.js

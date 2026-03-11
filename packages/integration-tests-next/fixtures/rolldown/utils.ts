@@ -10,7 +10,7 @@ const NODE_MAJOR_VERSION = parseInt(process.versions.node.split(".")[0] || "0", 
 
 type TestCallback = (props: {
   outDir: string;
-  runRolldown: (env?: Record<string, string | undefined>) => void;
+  runBundler: (env?: Record<string, string | undefined>) => void;
   readOutputFiles: () => Record<string, string>;
   runFileInNode: (file: string) => string;
   createTempDir: () => string;
@@ -34,7 +34,7 @@ export function test(url: string, callback: TestCallback) {
     vitestTest(`rolldown > ${testName}`, (ctx) =>
       callback({
         outDir,
-        runRolldown: (env) =>
+        runBundler: (env) =>
           runBundler(
             `rolldown --config ${testName}.config.ts`,
             {

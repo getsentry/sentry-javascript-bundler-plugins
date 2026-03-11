@@ -1,5 +1,6 @@
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 import { defineConfig } from "rolldown";
+import { sentryConfig } from "../configs/component-annotation.config.js";
 
 export default defineConfig({
   input: "src/app.jsx",
@@ -9,5 +10,5 @@ export default defineConfig({
   output: {
     file: "out/component-annotation/app.js",
   },
-  plugins: [sentryRollupPlugin({ telemetry: false, reactComponentAnnotation: { enabled: true } })],
+  plugins: [sentryRollupPlugin(sentryConfig)],
 });

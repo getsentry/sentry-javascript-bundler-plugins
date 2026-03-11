@@ -1,17 +1,11 @@
 import { sentryRollupPlugin } from "@sentry/rollup-plugin";
 import { defineConfig } from "rolldown";
+import { sentryConfig } from "../configs/basic.config.js";
 
 export default defineConfig({
   input: "src/basic.js",
   output: {
     file: "out/basic/basic.js",
   },
-  plugins: [
-    sentryRollupPlugin({
-      telemetry: false,
-      authToken: "fake-auth",
-      org: "fake-org",
-      project: "fake-project",
-    }),
-  ],
+  plugins: [sentryRollupPlugin(sentryConfig)],
 });

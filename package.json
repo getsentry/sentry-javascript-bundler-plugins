@@ -19,7 +19,9 @@
     "packages/vite-plugin",
     "packages/webpack-plugin",
     "packages/integration-tests-next",
-    "packages/integration-tests-next/fixtures/rolldown"
+    "packages/integration-tests-next/fixtures/rolldown",
+    "packages/integration-tests-next/fixtures/rollup3",
+    "packages/integration-tests-next/fixtures/rollup4"
   ],
   "scripts": {
     "postinstall": "patch-package",
