@@ -21,7 +21,10 @@
     "packages/integration-tests-next",
     "packages/integration-tests-next/fixtures/rolldown",
     "packages/integration-tests-next/fixtures/rollup3",
-    "packages/integration-tests-next/fixtures/rollup4"
+    "packages/integration-tests-next/fixtures/rollup4",
+    "packages/integration-tests-next/fixtures/vite4",
+    "packages/integration-tests-next/fixtures/vite7",
+    "packages/integration-tests-next/fixtures/vite8"
   ],
   "scripts": {
     "postinstall": "patch-package",

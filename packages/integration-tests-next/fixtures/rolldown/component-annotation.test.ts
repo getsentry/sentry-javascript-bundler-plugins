@@ -5,8 +5,15 @@ test(import.meta.url, ({ runBundler, readOutputFiles }) => {
   runBundler();
   expect(readOutputFiles()).toMatchInlineSnapshot(`
     {
-      "app.js": "!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{};e.SENTRY_RELEASE={id:"CURRENT_SHA"};var n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="0880f8a4-f072-4b80-b577-4bb7d5be4841",e._sentryDebugIdIdentifier="sentry-dbid-0880f8a4-f072-4b80-b577-4bb7d5be4841");}catch(e){}}();import { jsx, jsxs } from "../../../../../node_modules/react/jsx-runtime.js";
-
+      "app.js": "(function() {
+    	try {
+    		var e = "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof globalThis ? globalThis : "undefined" != typeof self ? self : {};
+    		e.SENTRY_RELEASE = { id: "CURRENT_SHA" };
+    		var n = new e.Error().stack;
+    		n && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n] = "0880f8a4-f072-4b80-b577-4bb7d5be4841", e._sentryDebugIdIdentifier = "sentry-dbid-0880f8a4-f072-4b80-b577-4bb7d5be4841");
+    	} catch (e) {}
+    })();
+    import { jsx, jsxs } from "../../../../../node_modules/react/jsx-runtime.js";
     //#region src/component-a.jsx
     function ComponentA() {
     	return /* @__PURE__ */ jsx("span", {
@@ -15,7 +22,6 @@ test(import.meta.url, ({ runBundler, readOutputFiles }) => {
     		children: "Component A"
     	});
     }
-
     //#endregion
     //#region src/app.jsx
     function App() {
@@ -28,9 +34,9 @@ test(import.meta.url, ({ runBundler, readOutputFiles }) => {
     		}), ";"]
     	});
     }
-
     //#endregion
-    export { App as default };",
+    export { App as default };
+    ",
     }
   `);
 });

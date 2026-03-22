@@ -34,7 +34,11 @@ export function readAllFiles(directory: string): Record<string, string> {
       // We replace the current SHA with a placeholder to make snapshots deterministic
       contents = contents
         .replaceAll(CURRENT_SHA, "CURRENT_SHA")
-        .replaceAll(/"nodeVersion":\d+/g, `"nodeVersion":"NODE_VERSION"`);
+        .replaceAll(/"nodeVersion":\d+/g, `"nodeVersion":"NODE_VERSION"`)
+        .replaceAll(/"nodeVersion": \d+/g, `"nodeVersion":"NODE_VERSION"`)
+        .replaceAll(/nodeVersion:\d+/g, `nodeVersion:"NODE_VERSION"`)
+        .replaceAll(/nodeVersion: \d+/g, `nodeVersion:"NODE_VERSION"`);
+      // "nodeVersion": 24
 
       // Normalize Windows stuff in .map paths
       if (entry.endsWith(".map")) {
