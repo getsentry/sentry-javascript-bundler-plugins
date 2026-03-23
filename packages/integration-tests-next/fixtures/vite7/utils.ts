@@ -26,7 +26,7 @@ export function test(url: string, callback: TestCallback) {
   // Clear the output directory before running the test
   rmSync(outDir, { recursive: true, force: true });
 
-  // Vite v8 requires Node 20+
+  // Vite v7 requires Node 20+
   if (NODE_MAJOR_VERSION < 20) {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     vitestTest.skip(testName);
