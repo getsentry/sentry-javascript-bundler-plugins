@@ -7,3 +7,5 @@ export default function App() {
     </span>
   );
 }
+
+console.log(App());

@@ -36,6 +36,7 @@ export function test(url: string, callback: TestCallback) {
             env: {
               ...process.env,
               ...env,
+              NODE_ENV: "production",
             },
           },
           outDir
