@@ -38,7 +38,6 @@ export function readAllFiles(directory: string): Record<string, string> {
         .replaceAll(/"nodeVersion": \d+/g, `"nodeVersion":"NODE_VERSION"`)
         .replaceAll(/nodeVersion:\d+/g, `nodeVersion:"NODE_VERSION"`)
         .replaceAll(/nodeVersion: \d+/g, `nodeVersion:"NODE_VERSION"`);
-      // "nodeVersion": 24
 
       // Normalize Windows stuff in .map paths
       if (entry.endsWith(".map")) {
