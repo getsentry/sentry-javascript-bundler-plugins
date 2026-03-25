@@ -47,10 +47,7 @@ describe("esbuild proxy module default export handling", () => {
     // undefined" will be captured in result.warnings. On older esbuild versions this array
     // may be empty regardless, so the test at least verifies no build errors occur.
     const importUndefinedWarnings = (result.warnings || []).filter(
-      (w) =>
-        w.text.includes("Import") &&
-        w.text.includes("default") &&
-        w.text.includes("undefined")
+      (w) => w.text.includes("Import") && w.text.includes("default") && w.text.includes("undefined")
     );
 
     expect(importUndefinedWarnings).toHaveLength(0);
@@ -60,11 +57,9 @@ describe("esbuild proxy module default export handling", () => {
     const inputFile = path.join(tmpDir, "with-default.ts");
     fs.writeFileSync(
       inputFile,
-      [
-        "export const foo = 42;",
-        'export default function main() { return "hello"; }',
-        "",
-      ].join("\n")
+      ["export const foo = 42;", 'export default function main() { return "hello"; }', ""].join(
+        "\n"
+      )
     );
 
     const outDir = path.join(tmpDir, "out-with-default");
@@ -86,10 +81,7 @@ describe("esbuild proxy module default export handling", () => {
 
     // Should produce no warnings
     const importUndefinedWarnings = (result.warnings || []).filter(
-      (w) =>
-        w.text.includes("Import") &&
-        w.text.includes("default") &&
-        w.text.includes("undefined")
+      (w) => w.text.includes("Import") && w.text.includes("default") && w.text.includes("undefined")
     );
     expect(importUndefinedWarnings).toHaveLength(0);
 
@@ -97,10 +89,7 @@ describe("esbuild proxy module default export handling", () => {
     const outputFiles = fs.readdirSync(outDir).filter((f) => f.endsWith(".js"));
     expect(outputFiles.length).toBeGreaterThan(0);
 
-    const outputContent = fs.readFileSync(
-      path.join(outDir, outputFiles[0] as string),
-      "utf-8"
-    );
+    const outputContent = fs.readFileSync(path.join(outDir, outputFiles[0] as string), "utf-8");
     expect(outputContent).toContain("main");
   });
 
@@ -108,7 +97,7 @@ describe("esbuild proxy module default export handling", () => {
     const inputFile = path.join(tmpDir, "named-only.ts");
     fs.writeFileSync(
       inputFile,
-      ['export const foo = 42;', 'export const bar = "hello";', ""].join("\n")
+      ["export const foo = 42;", 'export const bar = "hello";', ""].join("\n")
     );
 
     const outDir = path.join(tmpDir, "out-named-only");
@@ -130,10 +119,7 @@ describe("esbuild proxy module default export handling", () => {
 
     // Should produce no warnings
     const importUndefinedWarnings = (result.warnings || []).filter(
-      (w) =>
-        w.text.includes("Import") &&
-        w.text.includes("default") &&
-        w.text.includes("undefined")
+      (w) => w.text.includes("Import") && w.text.includes("default") && w.text.includes("undefined")
     );
     expect(importUndefinedWarnings).toHaveLength(0);
 
@@ -141,10 +127,7 @@ describe("esbuild proxy module default export handling", () => {
     const outputFiles = fs.readdirSync(outDir).filter((f) => f.endsWith(".js"));
     expect(outputFiles.length).toBeGreaterThan(0);
 
-    const outputContent = fs.readFileSync(
-      path.join(outDir, outputFiles[0] as string),
-      "utf-8"
-    );
+    const outputContent = fs.readFileSync(path.join(outDir, outputFiles[0] as string), "utf-8");
     expect(outputContent).toContain("foo");
     expect(outputContent).toContain("bar");
   });
