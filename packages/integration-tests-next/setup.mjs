@@ -17,8 +17,10 @@ const directories = entries
 
 for (const dir of directories) {
   try {
-    const packageJson = await fs.readFile(join(dir, "package.json"), { encoding: "utf-8" });
-    if (packageJson.length < 50) {
+    const pkgString = await fs.readFile(join(dir, "package.json"), { encoding: "utf-8" });
+    const packageJson = JSON.parse(pkgString);
+    // If there are no dependencies, skip installation
+    if (!packageJson.dependencies) {
       continue;
     }
   } catch {
