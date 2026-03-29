@@ -1,7 +1,12 @@
 import { expect } from "vitest";
 import { test } from "./utils";
 
-test(import.meta.url, ({ runBundler, readOutputFiles }) => {
+test(import.meta.url, ({ runBundler, readOutputFiles, ctx }) => {
+  if (process.platform === "win32") {
+    ctx.skip("Windows Debug IDs do not match snapshots");
+    return;
+  }
+
   runBundler();
   expect(readOutputFiles()).toMatchInlineSnapshot(`
     {
