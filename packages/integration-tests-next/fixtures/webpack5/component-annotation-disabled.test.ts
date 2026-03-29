@@ -5,7 +5,7 @@ test(import.meta.url, ({ runBundler, readOutputFiles }) => {
   runBundler();
   expect(readOutputFiles()).toMatchInlineSnapshot(`
     {
-      "app.js": "!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{};e.SENTRY_RELEASE={id:"CURRENT_SHA"};var n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="0c0c0033-ce3e-495b-a746-b130c60bc714",e._sentryDebugIdIdentifier="sentry-dbid-0c0c0033-ce3e-495b-a746-b130c60bc714");}catch(e){}}();
+      "app.js": "!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{};e.SENTRY_RELEASE={id:"CURRENT_SHA"};var n=(new e.Error).stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="56aca27b-2809-426a-9842-c74241cd7985",e._sentryDebugIdIdentifier="sentry-dbid-56aca27b-2809-426a-9842-c74241cd7985");}catch(e){}}();
     /******/ (() => { // webpackBootstrap
     /******/ 	"use strict";
 
@@ -23,9 +23,8 @@ test(import.meta.url, ({ runBundler, readOutputFiles }) => {
     }
     ;// ./src/app.jsx
     /* unused harmony import specifier */ var app_ComponentA;
-    /* unused harmony import specifier */ var app_jsx;
     /* unused harmony import specifier */ var _jsxs;
-
+    /* unused harmony import specifier */ var app_jsx;
 
 
     function App() {

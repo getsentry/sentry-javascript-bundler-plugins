@@ -1,11 +1,12 @@
 {
-  "name": "rollup4-integration-tests",
+  "name": "webpack5-integration-tests",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "dependencies": {
     "webpack": "5.105.4",
     "webpack-cli": "6.0.1",
+    "@babel/preset-react": "7.23.3",
     "@sentry/webpack-plugin": "5.1.1"
   },
   "pnpm": {

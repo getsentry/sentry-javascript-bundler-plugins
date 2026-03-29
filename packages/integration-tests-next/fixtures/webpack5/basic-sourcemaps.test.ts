@@ -14,7 +14,7 @@ test(import.meta.url, ({ runBundler, readOutputFiles, runFileInNode }) => {
     /******/ })()
     ;
     //# sourceMappingURL=basic.js.map",
-      "basic.js.map": "{"version":3,"file":"basic.js","mappings":";;;AAAA;AACA","sources":["webpack://rollup4-integration-tests/./src/basic.js"],"sourcesContent":["// eslint-disable-next-line no-console\\nconsole.log(\\"hello world\\");\\n"],"names":[],"sourceRoot":""}",
+      "basic.js.map": "{"version":3,"file":"basic.js","mappings":";;;AAAA;AACA","sources":["webpack://webpack5-integration-tests/./src/basic.js"],"sourcesContent":["// eslint-disable-next-line no-console\\nconsole.log(\\"hello world\\");\\n"],"names":[],"sourceRoot":""}",
       "sentry-cli-mock.json": "["releases","new","CURRENT_SHA"],
     ["releases","set-commits","CURRENT_SHA","--auto","--ignore-missing"],
     ["releases","finalize","CURRENT_SHA"],
