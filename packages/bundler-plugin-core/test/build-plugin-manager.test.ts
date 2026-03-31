@@ -7,14 +7,13 @@ import { globFiles } from "../src/glob";
 import { prepareBundleForDebugIdUpload } from "../src/debug-id-upload";
 import { describe, it, expect, afterEach, beforeEach, vi, MockedFunction } from "vitest";
 
-const { mockCliExecute, mockCliUploadSourceMaps, mockCliNewDeploy, mockCliConstructor } = vi.hoisted(
-  () => ({
+const { mockCliExecute, mockCliUploadSourceMaps, mockCliNewDeploy, mockCliConstructor } =
+  vi.hoisted(() => ({
     mockCliExecute: vi.fn(),
     mockCliUploadSourceMaps: vi.fn(),
     mockCliNewDeploy: vi.fn(),
     mockCliConstructor: vi.fn(),
-  })
-);
+  }));
 
 vi.mock("@sentry/cli", () => ({
   default: class {
