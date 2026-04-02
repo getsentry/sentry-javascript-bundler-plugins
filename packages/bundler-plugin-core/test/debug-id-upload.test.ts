@@ -54,7 +54,7 @@ describe("prepareBundleForDebugIdUpload", () => {
       warn: vi.fn(),
       error: vi.fn(),
       debug: vi.fn(),
-    };  
+    };
 
     await prepareBundleForDebugIdUpload(
       bundlePath,
