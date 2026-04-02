@@ -4,6 +4,7 @@ import * as path from "path";
 import * as os from "os";
 import { prepareBundleForDebugIdUpload } from "../src/debug-id-upload";
 import type { RewriteSourcesHook } from "../src/types";
+import { Logger } from "../src";
 
 describe("prepareBundleForDebugIdUpload", () => {
   let tmpDir: string;
@@ -42,7 +43,7 @@ describe("prepareBundleForDebugIdUpload", () => {
       })
     );
 
-    const capturedContexts: Array<{ mapDir: string }> = [];
+    const capturedContexts: Array<{ mapDir?: string } | undefined> = [];
     const rewriteHook: RewriteSourcesHook = (source, _map, context) => {
       capturedContexts.push(context);
       return source;
@@ -53,13 +54,13 @@ describe("prepareBundleForDebugIdUpload", () => {
       warn: vi.fn(),
       error: vi.fn(),
       debug: vi.fn(),
-    };
+    };  
 
     await prepareBundleForDebugIdUpload(
       bundlePath,
       uploadDir,
       0,
-      logger as any,
+      logger as Logger,
       rewriteHook,
       undefined
     );
