@@ -1,5 +1,5 @@
 {
-  "name": "esbuild0-integration-tests",
+  "name": "esbuild-integration-tests",
   "version": "1.0.0",
   "private": true,
   "type": "module",
