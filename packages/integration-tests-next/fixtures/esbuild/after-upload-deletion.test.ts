@@ -1,13 +1,11 @@
 import { expect } from "vitest";
 import { test } from "./utils";
 
-test(import.meta.url, ({ runBundler, readOutputFiles, runFileInNode, createTempDir }) => {
-  const tempUploadDir = createTempDir();
-
-  runBundler({ SENTRY_UPLOAD_DIR: tempUploadDir });
+test(import.meta.url, ({ runBundler, readOutputFiles, runFileInNode }) => {
+  runBundler();
   expect(readOutputFiles()).toMatchInlineSnapshot(`
     {
-      "after-upload-deletion.js": "(() => {
+      "basic.js": "(() => {
       // _sentry-injection-stub
       !(function() {
         try {
@@ -33,10 +31,11 @@ test(import.meta.url, ({ runBundler, readOutputFiles, runFileInNode, createTempD
       // src/basic.js?sentryDebugIdProxy=true
       var basic_default = void 0;
     })();
+    //# sourceMappingURL=basic.js.map
     ",
     }
   `);
 
-  const output = runFileInNode("after-upload-deletion.js");
+  const output = runFileInNode("basic.js");
   expect(output).toBe("hello world\n");
 });
