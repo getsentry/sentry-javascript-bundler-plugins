@@ -18,12 +18,12 @@ test(import.meta.url, ({ runBundler, readOutputFiles, runFileInNode }) => {
       add
     } from "./chunk.js";
 
-    // sentry-debug-id-stub:_sentry-debug-id-injection-stub?sentry-module-id=24dd1f0c-68a8-4235-8490-299463364fe5
+    // sentry-debug-id-stub:_sentry-debug-id-injection-stub?sentry-module-id=00000000-0000-0000-0000-000000000000
     !(function() {
       try {
         var e = "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof globalThis ? globalThis : "undefined" != typeof self ? self : {};
         var n = new e.Error().stack;
-        n && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n] = "faec67e2-efc7-4a35-a05b-52f899f5a81c", e._sentryDebugIdIdentifier = "sentry-dbid-faec67e2-efc7-4a35-a05b-52f899f5a81c");
+        n && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n] = "00000000-0000-0000-0000-000000000000", e._sentryDebugIdIdentifier = "sentry-dbid-00000000-0000-0000-0000-000000000000");
       } catch (e2) {
       }
     })();
@@ -41,12 +41,12 @@ test(import.meta.url, ({ runBundler, readOutputFiles, runFileInNode }) => {
       add
     } from "./chunk.js";
 
-    // sentry-debug-id-stub:_sentry-debug-id-injection-stub?sentry-module-id=2c350a5f-13d4-4a2a-a0fd-b478b231fe0c
+    // sentry-debug-id-stub:_sentry-debug-id-injection-stub?sentry-module-id=00000000-0000-0000-0000-000000000000
     !(function() {
       try {
         var e = "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof globalThis ? globalThis : "undefined" != typeof self ? self : {};
         var n = new e.Error().stack;
-        n && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n] = "3673342a-03c7-4fd3-9248-302bc3cc793f", e._sentryDebugIdIdentifier = "sentry-dbid-3673342a-03c7-4fd3-9248-302bc3cc793f");
+        n && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n] = "00000000-0000-0000-0000-000000000000", e._sentryDebugIdIdentifier = "sentry-dbid-00000000-0000-0000-0000-000000000000");
       } catch (e2) {
       }
     })();

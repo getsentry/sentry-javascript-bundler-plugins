@@ -22,12 +22,12 @@ test(import.meta.url, ({ runBundler, readOutputFiles, runFileInNode }) => {
         }
       })();
 
-      // sentry-debug-id-stub:_sentry-debug-id-injection-stub?sentry-module-id=36ab4956-8bc7-41fe-ae11-ff1b128e260c
+      // sentry-debug-id-stub:_sentry-debug-id-injection-stub?sentry-module-id=00000000-0000-0000-0000-000000000000
       !(function() {
         try {
           var e = "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof globalThis ? globalThis : "undefined" != typeof self ? self : {};
           var n = new e.Error().stack;
-          n && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n] = "64bc859a-c7c1-4c92-a0e8-426b986498f6", e._sentryDebugIdIdentifier = "sentry-dbid-64bc859a-c7c1-4c92-a0e8-426b986498f6");
+          n && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n] = "00000000-0000-0000-0000-000000000000", e._sentryDebugIdIdentifier = "sentry-dbid-00000000-0000-0000-0000-000000000000");
         } catch (e2) {
         }
       })();

@@ -15,12 +15,12 @@ test(import.meta.url, ({ runBundler, readOutputFiles, runFileInNode }) => {
         }
       })();
 
-      // sentry-debug-id-stub:_sentry-debug-id-injection-stub?sentry-module-id=c8279241-c5a1-4eac-a18d-a76dafa5eebb
+      // sentry-debug-id-stub:_sentry-debug-id-injection-stub?sentry-module-id=00000000-0000-0000-0000-000000000000
       !(function() {
         try {
           var e = "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof globalThis ? globalThis : "undefined" != typeof self ? self : {};
           var n = new e.Error().stack;
-          n && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n] = "18c35f84-a9e2-4ff3-8f86-03b6125dfff4", e._sentryDebugIdIdentifier = "sentry-dbid-18c35f84-a9e2-4ff3-8f86-03b6125dfff4");
+          n && (e._sentryDebugIds = e._sentryDebugIds || {}, e._sentryDebugIds[n] = "00000000-0000-0000-0000-000000000000", e._sentryDebugIdIdentifier = "sentry-dbid-00000000-0000-0000-0000-000000000000");
         } catch (e2) {
         }
       })();

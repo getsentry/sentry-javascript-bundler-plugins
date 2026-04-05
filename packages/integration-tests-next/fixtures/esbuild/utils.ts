@@ -16,6 +16,15 @@ type TestCallback = (props: {
   ctx: TestContext;
 }) => void | Promise<void>;
 
+function esbuildReplacer(content: string): string {
+  // esbuild ends up with different debug IDs and UUIDs on different platforms
+  // so we replace them with placeholders to make snapshots deterministic
+  return content.replace(
+    /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g,
+    "00000000-0000-0000-0000-000000000000"
+  );
+}
+
 export function test(url: string, callback: TestCallback) {
   const filePath = fileURLToPath(url);
   const filename = basename(filePath);
@@ -40,7 +49,7 @@ export function test(url: string, callback: TestCallback) {
           },
           outDir
         ),
-      readOutputFiles: () => readAllFiles(outDir),
+      readOutputFiles: () => readAllFiles(outDir, esbuildReplacer),
       runFileInNode: (file) => {
         const fullPath = join(outDir, file);
         return execSync(`node ${fullPath}`, {
