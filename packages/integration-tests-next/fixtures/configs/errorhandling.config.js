@@ -1,5 +1,6 @@
 export function getErrorHandlingConfig(port) {
   return {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     url: `http://localhost:${port}`,
     authToken: "fake-auth",
     org: "fake-org",

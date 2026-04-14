@@ -3,6 +3,7 @@
 export function getSentryConfig(outDir) {
   const fileDeletionPromise = new Promise((resolve) => {
     setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       resolve([`${outDir}/basic.js.map`]);
     }, 100);
   });

@@ -27,7 +27,7 @@ export function readAllFiles(
 ): Record<string, string> {
   const files: Record<string, string> = {};
 
-  function readDirRecursive(currentDir: string, relativePath: string = ""): void {
+  function readDirRecursive(currentDir: string, relativePath = ""): void {
     const entries = readdirSync(currentDir);
 
     for (const entry of entries) {
