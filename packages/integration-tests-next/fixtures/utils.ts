@@ -97,3 +97,50 @@ process.on("exit", () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+/**
+ * Runs a callback with a fake Sentry server running on an auto-allocated port.
+ * The server returns 503 errors for all requests.
+ * Automatically starts and stops the server.
+ * The allocated port is passed to the callback.
+ */
+export async function withFakeSentryServer(
+  callback: (port: string) => void | Promise<void>
+): Promise<void> {
+  const { createServer } = await import("node:http");
+
+  const server = createServer((req, res) => {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.log("[FAKE SENTRY] incoming request", req.url);
+    }
+    res.statusCode = 503;
+    res.end("Error: Sentry unreachable");
+  });
+
+  // Listen on port 0 to get an auto-allocated port
+  await new Promise<void>((resolve) => {
+    server.listen(0, () => {
+      resolve();
+    });
+  });
+
+  const address = server.address();
+  if (!address || typeof address === "string") {
+    throw new Error("Failed to get server port");
+  }
+  const port = address.port.toString();
+
+  if (DEBUG) {
+    // eslint-disable-next-line no-console
+    console.log(`[FAKE SENTRY] running on http://localhost:${port}/`);
+  }
+
+  try {
+    await callback(port);
+  } finally {
+    await new Promise<void>((resolve) => {
+      server.close(() => resolve());
+    });
+  }
+}
