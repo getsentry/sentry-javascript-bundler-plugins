@@ -26,61 +26,70 @@ export function readAllFiles(
   customReplacer?: (content: string) => string
 ): Record<string, string> {
   const files: Record<string, string> = {};
-  const entries = readdirSync(directory);
 
-  for (const entry of entries) {
-    const fullPath = join(directory, entry);
-    const stat = statSync(fullPath);
+  function readDirRecursive(currentDir: string, relativePath: string = ""): void {
+    const entries = readdirSync(currentDir);
 
-    if (stat.isFile()) {
-      let contents = readFileSync(fullPath, "utf-8");
-      // We replace the current SHA with a placeholder to make snapshots deterministic
-      contents = contents
-        .replaceAll(CURRENT_SHA, "CURRENT_SHA")
-        .replaceAll(/"nodeVersion":\d+/g, `"nodeVersion":"NODE_VERSION"`)
-        .replaceAll(/"nodeVersion": \d+/g, `"nodeVersion":"NODE_VERSION"`)
-        .replaceAll(/nodeVersion:\d+/g, `nodeVersion:"NODE_VERSION"`)
-        .replaceAll(/nodeVersion: \d+/g, `nodeVersion:"NODE_VERSION"`);
+    for (const entry of entries) {
+      const fullPath = join(currentDir, entry);
+      const stat = statSync(fullPath);
+      const relativeFilePath = relativePath ? join(relativePath, entry) : entry;
 
-      if (customReplacer) {
-        contents = customReplacer(contents);
-      }
-
-      // Normalize Windows stuff in .map paths
-      if (entry.endsWith(".map")) {
-        const map = JSON.parse(contents) as SourceMap;
-        map.sources = map.sources.map((c) => c.replace(/\\/g, "/"));
-        map.sourcesContent = map.sourcesContent.map((c) => c.replace(/\r\n/g, "\n"));
-        contents = JSON.stringify(map);
-      } else if (entry === "sentry-cli-mock.json") {
-        // Remove the temporary directory path too
-        contents = contents.replace(
-          /"[^"]+sentry-bundler-plugin-upload.+?",/g,
-          '"sentry-bundler-plugin-upload-path",'
-        );
-      } else if (entry === "sentry-telemetry.json") {
-        // Remove the temporary directory path too
+      if (stat.isDirectory()) {
+        // Recursively read subdirectories
+        readDirRecursive(fullPath, relativeFilePath);
+      } else if (stat.isFile()) {
+        let contents = readFileSync(fullPath, "utf-8");
+        // We replace the current SHA with a placeholder to make snapshots deterministic
         contents = contents
-          .replace(
-            /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/g,
-            "TIMESTAMP"
-          )
-          .replace(/[a-f0-9]{32}/g, "UUID")
-          .replace(/"duration":[\d.]+/g, '"duration":DURATION')
-          .replace(/"release":"[\d.]+"/g, '"release":"PLUGIN_VERSION"');
-      } else {
-        // Normalize Windows line endings for cross-platform snapshots
-        contents = contents.replace(/\r\n/g, "\n");
-        // Normalize debug IDs to make snapshots deterministic across environments
-        contents = contents.replace(
-          /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
-          "00000000-0000-0000-0000-000000000000"
-        );
+          .replaceAll(CURRENT_SHA, "CURRENT_SHA")
+          .replaceAll(/"nodeVersion":\d+/g, `"nodeVersion":"NODE_VERSION"`)
+          .replaceAll(/"nodeVersion": \d+/g, `"nodeVersion":"NODE_VERSION"`)
+          .replaceAll(/nodeVersion:\d+/g, `nodeVersion:"NODE_VERSION"`)
+          .replaceAll(/nodeVersion: \d+/g, `nodeVersion:"NODE_VERSION"`);
+
+        if (customReplacer) {
+          contents = customReplacer(contents);
+        }
+
+        // Normalize Windows stuff in .map paths
+        if (entry.endsWith(".map")) {
+          const map = JSON.parse(contents) as SourceMap;
+          map.sources = map.sources.map((c) => c.replace(/\\/g, "/"));
+          map.sourcesContent = map.sourcesContent.map((c) => c.replace(/\r\n/g, "\n"));
+          contents = JSON.stringify(map);
+        } else if (entry === "sentry-cli-mock.json") {
+          // Remove the temporary directory path too
+          contents = contents.replace(
+            /"[^"]+sentry-bundler-plugin-upload.+?",/g,
+            '"sentry-bundler-plugin-upload-path",'
+          );
+        } else if (entry === "sentry-telemetry.json") {
+          // Remove the temporary directory path too
+          contents = contents
+            .replace(
+              /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/g,
+              "TIMESTAMP"
+            )
+            .replace(/[a-f0-9]{32}/g, "UUID")
+            .replace(/"duration":[\d.]+/g, '"duration":DURATION')
+            .replace(/"release":"[\d.]+"/g, '"release":"PLUGIN_VERSION"');
+        } else {
+          // Normalize Windows line endings for cross-platform snapshots
+          contents = contents.replace(/\r\n/g, "\n");
+          // Normalize debug IDs to make snapshots deterministic across environments
+          contents = contents.replace(
+            /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
+            "00000000-0000-0000-0000-000000000000"
+          );
+        }
+        // Use forward slashes for consistent cross-platform keys
+        files[relativeFilePath.replace(/\\/g, "/")] = contents;
       }
-      files[entry] = contents;
     }
   }
 
+  readDirRecursive(directory);
   return files;
 }
 
