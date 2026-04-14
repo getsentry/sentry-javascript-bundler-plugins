@@ -1,6 +1,6 @@
 const esbuild = require("esbuild");
 const { sentryEsbuildPlugin } = require("@sentry/esbuild-plugin");
-const { sentryConfig } = require("../configs/basic.config.js");
+const { sentryConfig } = require("../configs/basic.config.cjs");
 
 esbuild.build({
   entryPoints: ["./src/basic.js"],

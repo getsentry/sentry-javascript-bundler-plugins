@@ -1,6 +1,6 @@
 const { sentryRollupPlugin } = require("@sentry/rollup-plugin");
 const { defineConfig } = require("rollup");
-const { sentryConfig } = require("../configs/basic.config.js");
+const { sentryConfig } = require("../configs/basic.config.cjs");
 
 module.exports = defineConfig({
   input: "src/basic.js",
