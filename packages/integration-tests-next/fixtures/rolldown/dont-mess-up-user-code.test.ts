@@ -24,7 +24,7 @@ test(import.meta.url, ({ runBundler, readOutputFiles, runFileInNode }) => {
       "index.js.map": "{"version":3,"file":"index.js","names":[],"sources":["../../src/import.js","../../src/index.js"],"sourcesContent":["// eslint-disable-next-line no-console\\nconsole.log(\\"I am import!\\");\\n\\nexport {};\\n","import \\"./import\\";\\n\\n// eslint-disable-next-line no-console\\nconsole.log(\\"I am index!\\");\\n"],"mappings":";;;;;;;;;AACA,QAAQ,IAAI,eAAe;;;ACE3B,QAAQ,IAAI,cAAc"}",
     }
   `);
-  
+
   const output = runFileInNode("index.js");
   expect(output).toContain("I am import!");
   expect(output).toContain("I am index!");
