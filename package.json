@@ -28,7 +28,6 @@
     "clean": "nx run-many --target=clean --all",
     "clean:all": "nx run-many --target=clean:all --all && yarn",
     "test": "nx run-many --target=test --all",
-    "test:all": "nx run-many --target=test --all",
     "test:unit": "nx run-many --target=test --all --exclude=@sentry-internal/integration-tests,@sentry-internal/integration-tests-next",
     "test:integration": "nx run @sentry-internal/integration-tests:test",
     "test:integration-next": "nx run @sentry-internal/integration-tests-next:test",
