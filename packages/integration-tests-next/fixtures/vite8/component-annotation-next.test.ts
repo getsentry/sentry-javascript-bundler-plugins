@@ -15,7 +15,7 @@ test(import.meta.url, ({ runBundler, readOutputFiles }) => {
     })();
     import { jsxDEV } from "../node_modules/.pnpm/react@19.2.4/node_modules/react/jsx-dev-runtime.js";
     //#region src/component-a.jsx
-    var _jsxFileName$1 = "/Users/tim/Documents/Repositories/sentry-javascript-bundler-plugins/packages/integration-tests-next/fixtures/vite8/src/component-a.jsx";
+    var _jsxFileName$1 = "/fixtures/vite8/src/component-a.jsx";
     function ComponentA() {
     	return /* @__PURE__ */ jsxDEV("span", {
     		"data-sentry-component": "ComponentA",
@@ -28,7 +28,7 @@ test(import.meta.url, ({ runBundler, readOutputFiles }) => {
     }
     //#endregion
     //#region src/app.jsx
-    var _jsxFileName = "/Users/tim/Documents/Repositories/sentry-javascript-bundler-plugins/packages/integration-tests-next/fixtures/vite8/src/app.jsx";
+    var _jsxFileName = "/fixtures/vite8/src/app.jsx";
     function App() {
     	return /* @__PURE__ */ jsxDEV("span", {
     		"data-sentry-component": "App",
