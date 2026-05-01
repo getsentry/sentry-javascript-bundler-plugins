@@ -1,4 +1,4 @@
-import SentryCli from "@sentry/cli";
+import { SentryCli } from "@sentry/cli";
 import {
   closeSession,
   DEFAULT_ENVIRONMENT,
@@ -486,7 +486,9 @@ export function createSentryBuildPluginManager(
         const cliInstance = createCliInstance(options);
 
         if (options.release.create) {
-          const releaseOutput = await cliInstance.releases.new(options.release.name);
+          const releaseOutput = await cliInstance.releases.new(options.release.name, {
+            projects: getProjects(options.project),
+          });
           logger.debug("Release created:", releaseOutput);
         }
 
@@ -508,9 +510,6 @@ export function createSentryBuildPluginManager(
             include: normalizedInclude,
             dist: options.release.dist,
             projects: getProjects(options.project),
-            // We want this promise to throw if the sourcemaps fail to upload so that we know about it.
-            // see: https://github.com/getsentry/sentry-cli/pull/2605
-            live: "rejectOnError",
           });
         }
 
@@ -576,7 +575,7 @@ export function createSentryBuildPluginManager(
                 ...serializeIgnoreOptions(options.sourcemaps?.ignore),
                 ...buildArtifactPaths,
               ],
-              options.debug ? "rejectOnError" : false
+              options.debug
             );
           } catch (e) {
             sentryScope.captureException('Error in "debugIdInjectionPlugin" writeBundle hook');
@@ -659,7 +658,6 @@ export function createSentryBuildPluginManager(
                   ],
                   ignore: ignorePaths,
                   projects: getProjects(options.project),
-                  live: "rejectOnError",
                 });
               });
 
@@ -765,7 +763,6 @@ export function createSentryBuildPluginManager(
                             },
                           ],
                           projects: getProjects(options.project),
-                          live: "rejectOnError",
                         }
                       );
                     });
