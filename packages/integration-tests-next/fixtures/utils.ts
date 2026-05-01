@@ -46,7 +46,8 @@ export function readAllFiles(
           .replaceAll(/"nodeVersion":\d+/g, `"nodeVersion":"NODE_VERSION"`)
           .replaceAll(/"nodeVersion": \d+/g, `"nodeVersion":"NODE_VERSION"`)
           .replaceAll(/nodeVersion:\d+/g, `nodeVersion:"NODE_VERSION"`)
-          .replaceAll(/nodeVersion: \d+/g, `nodeVersion:"NODE_VERSION"`);
+          .replaceAll(/nodeVersion: \d+/g, `nodeVersion:"NODE_VERSION"`)
+          .replaceAll(process.cwd(), "");
 
         if (customReplacer) {
           contents = customReplacer(contents);
