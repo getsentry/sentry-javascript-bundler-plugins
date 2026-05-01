@@ -4,14 +4,14 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build:playground": "run-p build:rollup build:vite build:webpack build:esbuild",
+    "build:playground": "nx run-many -t build:rollup build:vite build:webpack build:esbuild",
     "build:rollup": "rollup --config rollup.config.mjs",
     "build:vite": "vite build --config vite.config.js",
     "build:webpack": "node build-webpack.js",
     "build:esbuild": "node build-esbuild.js",
     "build:smallNodeApp": "vite build --config vite.config.smallNodeApp.js",
-    "clean": "run-s clean:build",
-    "clean:all": "run-p clean:deps",
+    "clean": "yarn clean:build",
+    "clean:all": "nx run-many -t clean:deps",
     "clean:build": "premove ./out",
     "clean:deps": "premove node_modules",
     "start:proxyLogger": "ts-node scripts/request-logger-proxy.ts"

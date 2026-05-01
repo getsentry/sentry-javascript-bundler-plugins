@@ -4,13 +4,13 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "test": "run-s test:setup test:vitest",
+    "test": "nx run-many -t test:setup test:vitest --parallel=1",
     "test:setup": "ts-node scripts/run-fixture-setups.ts",
     "test:vitest": "vitest run",
     "lint": "eslint .",
     "check:types": "tsc --project ./tsconfig.json --noEmit",
-    "clean": "run-s clean:build",
-    "clean:all": "run-p clean clean:deps",
+    "clean": "yarn clean:build",
+    "clean:all": "nx run-many -t clean clean:deps",
     "clean:build": "premove ./fixtures/*/out",
     "clean:deps": "premove node_modules"
   },

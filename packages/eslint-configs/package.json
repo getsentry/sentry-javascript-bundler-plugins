@@ -18,7 +18,7 @@
     "premove": "^4.0.0"
   },
   "scripts": {
-    "clean:all": "run-s clean:deps",
+    "clean:all": "yarn clean:deps",
     "clean:deps": "premove node_modules"
   },
   "volta": {

@@ -7,8 +7,8 @@
     "test": "node setup.mjs && vitest run --pool threads --test-timeout=10000",
     "lint": "eslint .",
     "check:types": "tsc --project ./tsconfig.json --noEmit",
-    "clean": "run-s clean:build",
-    "clean:all": "run-p clean clean:deps",
+    "clean": "yarn clean:build",
+    "clean:all": "nx run-many -t clean clean:deps",
     "clean:build": "premove ./fixtures/*/out",
     "clean:deps": "premove node_modules"
   },
