@@ -8,7 +8,7 @@ const { mockCliExecute } = vi.hoisted(() => ({
 }));
 
 vi.mock("@sentry/cli", () => ({
-  default: class {
+  SentryCli: class {
     execute = mockCliExecute;
   },
 }));

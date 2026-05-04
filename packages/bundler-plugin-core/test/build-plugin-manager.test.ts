@@ -16,7 +16,7 @@ const { mockCliExecute, mockCliUploadSourceMaps, mockCliNewDeploy, mockCliConstr
   }));
 
 vi.mock("@sentry/cli", () => ({
-  default: class {
+  SentryCli: class {
     constructor(...args: unknown[]) {
       mockCliConstructor(...args);
     }
@@ -301,7 +301,6 @@ describe("createSentryBuildPluginManager", () => {
               dist: "1",
             }),
           ]),
-          live: "rejectOnError",
         })
       );
       // Should not glob when prepareArtifacts is false
@@ -340,7 +339,6 @@ describe("createSentryBuildPluginManager", () => {
               dist: "1",
             }),
           ]),
-          live: "rejectOnError",
         })
       );
       expect(mockGlobFiles).not.toHaveBeenCalled();
@@ -420,7 +418,6 @@ describe("createSentryBuildPluginManager", () => {
       expect(mockCliUploadSourceMaps).toHaveBeenCalledWith("some-release-name", {
         include: [{ paths: ["/tmp/sentry-upload-xyz"], rewrite: false, dist: "1" }],
         projects: ["p"],
-        live: "rejectOnError",
       });
     });
   });
@@ -471,7 +468,7 @@ describe("createSentryBuildPluginManager", () => {
 
       expect(mockCliExecute).toHaveBeenCalledWith(
         ["sourcemaps", "inject", "--ignore", "node_modules", "/path/to/bundle"],
-        "rejectOnError"
+        true
       );
     });
   });

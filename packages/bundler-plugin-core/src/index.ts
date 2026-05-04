@@ -2,7 +2,7 @@ import { transformAsync } from "@babel/core";
 import componentNameAnnotatePlugin, {
   experimentalComponentNameAnnotatePlugin,
 } from "@sentry/babel-plugin-component-annotate";
-import SentryCli from "@sentry/cli";
+import { SentryCli } from "@sentry/cli";
 import { logger } from "@sentry/utils";
 import * as fs from "fs";
 import { CodeInjection, containsOnlyImports, stripQueryAndHashFromPath } from "./utils";

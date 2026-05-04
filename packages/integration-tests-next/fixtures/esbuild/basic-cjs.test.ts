@@ -32,7 +32,7 @@ test(import.meta.url, ({ runBundler, readOutputFiles, runFileInNode }) => {
       var basic_default = void 0;
     })();
     ",
-      "sentry-cli-mock.json": "["releases","new","CURRENT_SHA"],
+      "sentry-cli-mock.json": "["releases","new","CURRENT_SHA","-p","fake-project"],
     ["releases","set-commits","CURRENT_SHA","--auto","--ignore-missing"],
     ["releases","finalize","CURRENT_SHA"],
     ["sourcemaps","upload","-p","fake-project","--release","CURRENT_SHA","sentry-bundler-plugin-upload-path","--ignore","node_modules","--no-rewrite"],

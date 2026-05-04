@@ -1,4 +1,4 @@
-import SentryCli from "@sentry/cli";
+import { SentryCli } from "@sentry/cli";
 import { Client } from "@sentry/types";
 import { applySdkMetadata, ServerRuntimeClient, ServerRuntimeClientOptions } from "@sentry/core";
 import { NormalizedOptions, SENTRY_SAAS_URL } from "../options-mapping";
