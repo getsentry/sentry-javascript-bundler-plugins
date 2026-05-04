@@ -37,7 +37,7 @@ export function test(url: string, callback: TestCallback) {
   // Detect CJS config files by test name suffix
   const configExt = testName.endsWith("-cjs") ? ".config.cjs" : ".config.js";
 
-  vitestTest(`pnpm esbuild > ${testName}`, (ctx) =>
+  vitestTest(`esbuild > ${testName}`, (ctx) =>
     callback({
       outDir,
       runBundler: (env) =>
