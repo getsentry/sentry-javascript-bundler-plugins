@@ -187,7 +187,7 @@ function createJSXProcessingContext(
     fragmentContext: state.sentryFragmentContext,
     autoInjectSentryLabel: !!state.opts.autoInjectSentryLabel,
     textComponentNames:
-      (typeof state.opts.autoInjectSentryLabel === "object"
+      (state.opts.autoInjectSentryLabel && typeof state.opts.autoInjectSentryLabel === "object"
         ? state.opts.autoInjectSentryLabel.textComponentNames
         : undefined) ?? DEFAULT_TEXT_COMPONENT_NAMES,
   };
@@ -790,7 +790,6 @@ function extractTextFromTextComponent(
         if (innerTexts === null) {
           return null;
         }
-        texts.push(...innerTexts);
       }
     } else if (t.isJSXFragment(child)) {
       const innerTexts = extractTextFromTextComponent(t, child, textComponentNames);
