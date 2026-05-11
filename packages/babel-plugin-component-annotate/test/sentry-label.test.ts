@@ -571,7 +571,7 @@ describe("autoInjectSentryLabel", () => {
       expect(result?.code).toContain('"sentry-label": "Hello World more"');
     });
 
-    it("handles Text wrapping only a non-text element", () => {
+    it("extracts text from non-text wrapper inside Text", () => {
       const result = transformWith(`
         import React from 'react';
         import { Text, View } from 'react-native';
@@ -579,12 +579,12 @@ describe("autoInjectSentryLabel", () => {
         export default function MyComponent() {
           return (
             <View>
-              <Text><Bold>hello</Bold></Text>
+              <Text>Hello <Bold>world</Bold></Text>
             </View>
           );
         }
       `);
-      expect(result?.code).not.toContain("sentry-label");
+      expect(result?.code).toContain('"sentry-label": "Hello world"');
     });
   });
 

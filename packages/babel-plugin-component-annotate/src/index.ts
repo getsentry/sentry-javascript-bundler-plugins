@@ -790,6 +790,7 @@ function extractTextFromTextComponent(
         if (innerTexts === null) {
           return null;
         }
+        texts.push(...innerTexts);
       }
     } else if (t.isJSXFragment(child)) {
       const innerTexts = extractTextFromTextComponent(t, child, textComponentNames);
