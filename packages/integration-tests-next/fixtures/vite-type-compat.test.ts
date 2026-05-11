@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as ts from "typescript";
-import { join } from "node:path";
+import { isAbsolute, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 
@@ -20,8 +20,11 @@ export default defineConfig({
 function assertFixtureViteVersion(fixtureDir: string, expectedMajor: string): void {
   const requireFromFixture = createRequire(join(fixtureDir, "package.json"));
   const vitePackageJsonPath = requireFromFixture.resolve("vite/package.json");
+  const relativeVitePackageJsonPath = relative(fixtureDir, vitePackageJsonPath);
 
-  expect(vitePackageJsonPath).toContain(`${fixtureDir}/node_modules/`);
+  expect(isAbsolute(relativeVitePackageJsonPath)).toBe(false);
+  expect(relativeVitePackageJsonPath.startsWith("..")).toBe(false);
+  expect(relativeVitePackageJsonPath.split(/[\\/]/)[0]).toBe("node_modules");
 
   const vitePackageJson = requireFromFixture("vite/package.json") as { version: string };
   expect(vitePackageJson.version.split(".")[0]).toBe(expectedMajor);
