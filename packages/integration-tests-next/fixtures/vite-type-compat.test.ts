@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as ts from "typescript";
-import { isAbsolute, join, relative } from "node:path";
+import { isAbsolute, join, normalize, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 
@@ -33,6 +33,7 @@ function assertFixtureViteVersion(fixtureDir: string, expectedMajor: string): vo
 function getDiagnosticsForFixture(fixtureName: string, expectedMajor: string): string[] {
   const fixtureDir = join(fixturesDir, fixtureName);
   const fileName = join(fixtureDir, "sentry-vite-plugin-type-compat.mts");
+  const isVirtualConfigFile = (path: string) => normalize(path) === normalize(fileName);
 
   assertFixtureViteVersion(fixtureDir, expectedMajor);
   assertFixtureViteVersion(pluginViteTypesFixtureDir, "6");
@@ -52,10 +53,10 @@ function getDiagnosticsForFixture(fixtureName: string, expectedMajor: string): s
   // eslint-disable-next-line @typescript-eslint/unbound-method
   const getSourceFile = host.getSourceFile;
 
-  host.fileExists = (path) => path === fileName || ts.sys.fileExists(path);
-  host.readFile = (path) => (path === fileName ? configSource : ts.sys.readFile(path));
+  host.fileExists = (path) => isVirtualConfigFile(path) || ts.sys.fileExists(path);
+  host.readFile = (path) => (isVirtualConfigFile(path) ? configSource : ts.sys.readFile(path));
   host.getSourceFile = (path, languageVersion, onError, shouldCreateNewSourceFile) =>
-    path === fileName
+    isVirtualConfigFile(path)
       ? ts.createSourceFile(path, configSource, languageVersion, true)
       : getSourceFile(path, languageVersion, onError, shouldCreateNewSourceFile);
   host.resolveModuleNames = (moduleNames, containingFile) =>
