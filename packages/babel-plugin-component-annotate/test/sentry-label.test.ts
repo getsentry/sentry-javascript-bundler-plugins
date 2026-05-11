@@ -468,7 +468,7 @@ describe("autoInjectSentryLabel", () => {
           );
         }
       `,
-        { textComponentNames: ["Label", "Text"] }
+        { autoInjectSentryLabel: { textComponentNames: ["Label", "Text"] } }
       );
       expect(result?.code).toContain('"sentry-label": "Custom text"');
     });
@@ -930,7 +930,7 @@ describe("autoInjectSentryLabel", () => {
           );
         }
       `,
-        { textComponentNames: ["Text", "MyLib.Text"] }
+        { autoInjectSentryLabel: { textComponentNames: ["Text", "MyLib.Text"] } }
       );
       expect(result?.code).toContain('"sentry-label": "Matched"');
     });

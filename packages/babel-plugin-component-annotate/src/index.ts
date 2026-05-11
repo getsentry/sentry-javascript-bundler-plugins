@@ -50,12 +50,16 @@ const MAX_LABEL_LENGTH = 64;
 const DEFAULT_TEXT_COMPONENT_NAMES = ["Text", "text"];
 const MAX_TEXT_SEARCH_DEPTH = 3;
 
+interface AutoInjectSentryLabelOpts {
+  textComponentNames?: string[];
+}
+
 interface AnnotationOpts {
   native?: boolean;
   "annotate-fragments"?: boolean;
   ignoredComponents?: string[];
-  autoInjectSentryLabel?: boolean;
-  textComponentNames?: string[];
+  /** @hidden */
+  autoInjectSentryLabel?: boolean | AutoInjectSentryLabelOpts;
 }
 
 interface FragmentContext {
@@ -181,8 +185,11 @@ function createJSXProcessingContext(
     attributeNames: attributeNamesFromState(state),
     ignoredComponents: state.opts.ignoredComponents ?? [],
     fragmentContext: state.sentryFragmentContext,
-    autoInjectSentryLabel: state.opts.autoInjectSentryLabel === true,
-    textComponentNames: state.opts.textComponentNames ?? DEFAULT_TEXT_COMPONENT_NAMES,
+    autoInjectSentryLabel: !!state.opts.autoInjectSentryLabel,
+    textComponentNames:
+      (typeof state.opts.autoInjectSentryLabel === "object"
+        ? state.opts.autoInjectSentryLabel.textComponentNames
+        : undefined) ?? DEFAULT_TEXT_COMPONENT_NAMES,
   };
 }
 
