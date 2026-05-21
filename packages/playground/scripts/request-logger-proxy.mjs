@@ -32,11 +32,9 @@ app.use(function (req, res, next) {
   res.write = function (chunk) {
     resBody.push(chunk);
 
-    // @ts-ignore
     return oldWrite.apply(res, arguments);
   };
 
-  // @ts-ignore
   res.end = function (chunk) {
     if (chunk) resBody.push(chunk);
 
@@ -54,7 +52,6 @@ app.use(function (req, res, next) {
       }
     );
 
-    // @ts-ignore
     oldEnd.apply(res, arguments);
   };
 
