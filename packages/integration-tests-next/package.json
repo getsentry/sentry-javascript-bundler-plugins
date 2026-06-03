@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "premove": "^4.0.0",
-    "vitest": "^4.0.0"
+    "vitest": "3.2.4"
   },
   "volta": {
     "extends": "../../package.json"
