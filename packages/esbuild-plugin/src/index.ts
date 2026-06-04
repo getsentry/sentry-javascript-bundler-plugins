@@ -253,10 +253,15 @@ export function sentryEsbuildPlugin(userOptions: Options = {}): any {
           return {
             loader: "js",
             pluginName,
+            // We wrap the default export access in a function call to prevent esbuild's
+            // static analysis from generating an "Import 'default' will always be undefined"
+            // warning when the original module has no default export. The function wrapper
+            // is transparent and correctly forwards the default export when it exists.
             contents: `
               import "_sentry-debug-id-injection-stub";
-              import * as OriginalModule from ${JSON.stringify(originalPath)};
-              export default OriginalModule.default;
+              import * as _sentry_original_module from ${JSON.stringify(originalPath)};
+              var _sentry_default_export = (function(m) { return m.default; })(_sentry_original_module);
+              export { _sentry_default_export as default };
               export * from ${JSON.stringify(originalPath)};`,
             resolveDir: originalResolveDir,
           };
