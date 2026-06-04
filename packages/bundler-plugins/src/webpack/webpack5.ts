@@ -7,6 +7,6 @@ const createSentryWebpackPlugin = sentryWebpackPluginFactory();
 export const sentryWebpackPlugin: (options?: SentryWebpackPluginOptions) => any =
   createSentryWebpackPlugin;
 
-export { sentryCliBinaryExists } from "@sentry/bundler-plugin-core";
+export { sentryCliBinaryExists } from "../core";
 
 export type { SentryWebpackPluginOptions };

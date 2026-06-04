@@ -13,6 +13,6 @@ export const sentryWebpackPlugin: (options?: SentryWebpackPluginOptions) => any 
     DefinePlugin,
   });
 
-export { sentryCliBinaryExists } from "@sentry/bundler-plugin-core";
+export { sentryCliBinaryExists } from "../core";
 
 export type { SentryWebpackPluginOptions };

@@ -1,5 +1,5 @@
-import type { SentryRollupPluginOptions } from "@sentry/rollup-plugin";
-import { _rollupPluginInternal } from "@sentry/rollup-plugin";
+import type { SentryRollupPluginOptions } from "../rollup";
+import { _rollupPluginInternal } from "../rollup";
 import { createRequire } from "node:module";
 
 interface SentryVitePlugin {
@@ -30,5 +30,5 @@ export const sentryVitePlugin = (options?: SentryRollupPluginOptions): SentryVit
   ];
 };
 
-export type { Options as SentryVitePluginOptions } from "@sentry/bundler-plugin-core";
-export { sentryCliBinaryExists } from "@sentry/bundler-plugin-core";
+export type { Options as SentryVitePluginOptions } from "../core";
+export { sentryCliBinaryExists } from "../core";

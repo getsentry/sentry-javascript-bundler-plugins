@@ -1,4 +1,4 @@
-import type { Options } from "@sentry/bundler-plugin-core";
+import type { Options } from "../core";
 import {
   createSentryBuildPluginManager,
   generateReleaseInjectorCode,
@@ -6,7 +6,7 @@ import {
   getDebugIdSnippet,
   createDebugIdUploadFunction,
   CodeInjection,
-} from "@sentry/bundler-plugin-core";
+} from "../core";
 import * as path from "node:path";
 import { createRequire } from "node:module";
 import { randomUUID } from "node:crypto";
@@ -308,5 +308,5 @@ export function sentryEsbuildPlugin(userOptions: Options = {}): any {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default sentryEsbuildPlugin;
-export type { Options as SentryEsbuildPluginOptions } from "@sentry/bundler-plugin-core";
-export { sentryCliBinaryExists } from "@sentry/bundler-plugin-core";
+export type { Options as SentryEsbuildPluginOptions } from "../core";
+export { sentryCliBinaryExists } from "../core";

@@ -1,4 +1,4 @@
-import type { Options } from "@sentry/bundler-plugin-core";
+import type { Options } from "../core";
 import {
   createSentryBuildPluginManager,
   generateReleaseInjectorCode,
@@ -13,7 +13,7 @@ import {
   createComponentNameAnnotateHooks,
   replaceBooleanFlagsInCode,
   CodeInjection,
-} from "@sentry/bundler-plugin-core";
+} from "../core";
 import type { SourceMap } from "magic-string";
 import MagicString from "magic-string";
 import type { TransformResult } from "rollup";
@@ -261,5 +261,5 @@ export function sentryRollupPlugin(userOptions: Options = {}): any {
   return [_rollupPluginInternal(userOptions, "rollup")];
 }
 
-export type { Options as SentryRollupPluginOptions } from "@sentry/bundler-plugin-core";
-export { sentryCliBinaryExists } from "@sentry/bundler-plugin-core";
+export type { Options as SentryRollupPluginOptions } from "../core";
+export { sentryCliBinaryExists } from "../core";
