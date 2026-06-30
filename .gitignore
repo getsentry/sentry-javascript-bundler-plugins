@@ -11,5 +11,4 @@ yarn-error.log
 packages/**/yarn.lock
 
 .DS_Store
-packages/bundler-plugins/src/core/version.ts
 packages/integration-tests-next/fixtures/**/pnpm-lock.yaml

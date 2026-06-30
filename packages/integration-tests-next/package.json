@@ -18,6 +18,7 @@
     "@sentry/webpack-plugin": "5.3.0"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7.23.3",
     "premove": "^4.0.0",
     "vitest": "^4.0.0"
   },
