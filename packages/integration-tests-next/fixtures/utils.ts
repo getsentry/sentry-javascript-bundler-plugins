@@ -82,7 +82,9 @@ export function readAllFiles(
             .replace(/"start_timestamp":[\d.]+/g, '"start_timestamp":START_TIMESTAMP')
             .replace(/"timestamp":[\d.]+/g, '"timestamp":TIMESTAMP')
             .replace(/"release":"[\d.]+"/g, '"release":"PLUGIN_VERSION"')
-            .replace(/"sample_rand":"\d.?\d*"/g, '"sample_rand":"SAMPLE_RAND"');
+            .replace(/"sample_rand":"\d.?\d*"/g, '"sample_rand":"SAMPLE_RAND"')
+            // Remove the Sentry SDK version so SDK upgrades don't break snapshots
+            .replace(/"version":"\d+\.\d+\.\d+"/g, '"version":"SDK_VERSION"');
         } else {
           // Normalize Windows line endings for cross-platform snapshots
           contents = contents.replace(/\r\n/g, "\n");
