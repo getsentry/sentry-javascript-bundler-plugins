@@ -47,7 +47,7 @@
     "prepack": "node ./prepack.mjs"
   },
   "dependencies": {
-    "@sentry/bundler-plugins": "5.3.0"
+    "@sentry/bundler-plugins": "^10.64.0"
   },
   "peerDependencies": {
     "rollup": ">=3.2.0"
