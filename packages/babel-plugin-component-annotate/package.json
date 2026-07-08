@@ -48,7 +48,7 @@
     "clean:deps": "premove node_modules"
   },
   "dependencies": {
-    "@sentry/bundler-plugins": "^10.62.0"
+    "@sentry/bundler-plugins": "^10.64.0"
   },
   "devDependencies": {
     "@types/node": "^18.6.3",

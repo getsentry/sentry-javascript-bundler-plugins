@@ -1220,14 +1220,14 @@
   resolved "https://registry.npmjs.org/@sentry-internal/typescript/-/typescript-10.53.1.tgz#216b3e3ec0d5aa7ef3e7055ea50d6371d9786cce"
   integrity sha512-7ncY4Ww9MsTf5lsX9qAUaiNeQdKNBeZm7rtFze0UeU8fTLxOKx9ink4jCFa1xB/sztIR1pq/rGmnBs7evvn+aw==
 
-"@sentry/bundler-plugins@^10.62.0":
-  version "10.62.0"
-  resolved "https://registry.npmjs.org/@sentry/bundler-plugins/-/bundler-plugins-10.62.0.tgz#cc56c975791a0c97d26259f779024228f0625816"
-  integrity sha512-4O93t2zyVg6XHSEbTxjScB8IlnyKmN5irkhabyT5CuAjK70YirO24J4fEhSLthGGaEg90hYsyBQn6ObD56xhQA==
+"@sentry/bundler-plugins@^10.64.0":
+  version "10.64.0"
+  resolved "https://registry.npmjs.org/@sentry/bundler-plugins/-/bundler-plugins-10.64.0.tgz#3772a2998ade0f8684a21c5e939996b9c0362b2b"
+  integrity sha512-YWUekpT5PFXmBIyMWSj9lxBmXr7U/TLspvBQQA863ugoLfa20bmX17ks5XdlHEomiUifSq0c0Prh+qiwaZhGMA==
   dependencies:
     "@babel/core" "^7.18.5"
     "@sentry/cli" "^2.58.6"
-    "@sentry/core" "10.62.0"
+    "@sentry/core" "10.64.0"
     dotenv "^16.3.1"
     find-up "^5.0.0"
     glob "^13.0.6"
@@ -1293,10 +1293,17 @@
     "@sentry/cli-win32-i686" "2.58.6"
     "@sentry/cli-win32-x64" "2.58.6"
 
-"@sentry/core@10.62.0":
-  version "10.62.0"
-  resolved "https://registry.npmjs.org/@sentry/core/-/core-10.62.0.tgz#73a4a8bcdded6d741d6cf58bfd055c1b60b3fe10"
-  integrity sha512-tV69fMg2sS5DUFmQSnS7Jd5qJAp0izxwcsvBVz2ieTM9VMRi99IfOSYW9UYr3p1yfuksk41kefN5PEbeedUE+A==
+"@sentry/conventions@^0.15.1":
+  version "0.15.1"
+  resolved "https://registry.npmjs.org/@sentry/conventions/-/conventions-0.15.1.tgz#5b8888862d1e444678938f5afdd7842bca42f7cc"
+  integrity sha512-ZLP8bRdMON3prWE2tJyImuYscCxdcJeIPIhrOs/rgyFm3C1nCh1B6gdvPj3AZ5zW08oSFFCsq7T+tYEW3h8MNA==
+
+"@sentry/core@10.64.0":
+  version "10.64.0"
+  resolved "https://registry.npmjs.org/@sentry/core/-/core-10.64.0.tgz#c2a75ce99853c2cff45aead638265392b2763fd1"
+  integrity sha512-HjojJcXD1l2qZ1AXje2s0XY/nYsaUt00wsM1HMBImA8vAClyPisFE/CC0/UD6pEvsGFhVgi8Dcxo7EN41uyeFw==
+  dependencies:
+    "@sentry/conventions" "^0.15.1"
 
 "@sentry/core@7.50.0":
   version "7.50.0"
