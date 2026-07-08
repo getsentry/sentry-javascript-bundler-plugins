@@ -75,14 +75,20 @@ export function readAllFiles(
             )
             .replace(/[a-f0-9]{32}/g, "UUID")
             .replace(/"[a-f0-9]{16}"/g, '"SHORT_UUID"')
-            .replaceAll(process.version, "NODE_VERSION")
+            // Normalize the node version by pattern rather than matching
+            // `process.version`. The version embedded in the telemetry comes from
+            // the bundler subprocess, which may run a different node than the test
+            // runner (e.g. a volta-pinned version), so a string match is unreliable.
+            .replace(/"v\d+\.\d+\.\d+"/g, '"NODE_VERSION"')
             .replace(/"ci":false/g, '"ci":true')
             .replace(/"platform":".+?"/g, '"platform":"PLATFORM"')
             .replace(/"duration":[\d.]+/g, '"duration":DURATION')
             .replace(/"start_timestamp":[\d.]+/g, '"start_timestamp":START_TIMESTAMP')
             .replace(/"timestamp":[\d.]+/g, '"timestamp":TIMESTAMP')
             .replace(/"release":"[\d.]+"/g, '"release":"PLUGIN_VERSION"')
-            .replace(/"sample_rand":"\d.?\d*"/g, '"sample_rand":"SAMPLE_RAND"');
+            .replace(/"sample_rand":"\d.?\d*"/g, '"sample_rand":"SAMPLE_RAND"')
+            // Remove the Sentry SDK version so SDK upgrades don't break snapshots
+            .replace(/"version":"\d+\.\d+\.\d+"/g, '"version":"SDK_VERSION"');
         } else {
           // Normalize Windows line endings for cross-platform snapshots
           contents = contents.replace(/\r\n/g, "\n");
