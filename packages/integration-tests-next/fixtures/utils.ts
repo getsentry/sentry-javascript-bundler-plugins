@@ -75,7 +75,11 @@ export function readAllFiles(
             )
             .replace(/[a-f0-9]{32}/g, "UUID")
             .replace(/"[a-f0-9]{16}"/g, '"SHORT_UUID"')
-            .replaceAll(process.version, "NODE_VERSION")
+            // Normalize the node version by pattern rather than matching
+            // `process.version`. The version embedded in the telemetry comes from
+            // the bundler subprocess, which may run a different node than the test
+            // runner (e.g. a volta-pinned version), so a string match is unreliable.
+            .replace(/"v\d+\.\d+\.\d+"/g, '"NODE_VERSION"')
             .replace(/"ci":false/g, '"ci":true')
             .replace(/"platform":".+?"/g, '"platform":"PLATFORM"')
             .replace(/"duration":[\d.]+/g, '"duration":DURATION')
