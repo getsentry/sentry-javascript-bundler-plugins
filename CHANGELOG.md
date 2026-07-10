@@ -2,11 +2,23 @@
 
 ## 5.4.0
 
-### New Features ✨
+### Important Changes ✨
 
+The Sentry bundler plugins are moving to our main [`sentry-javascript`](https://github.com/getsentry/sentry-javascript) monorepo and 
+will be bumped to version `11.0.0` with the next SDK major release. 
+In preparation, we've already ported the `@sentry/bundler-plugin-core` and `sentry/babel-plugin-component-annotate`
+packages, which are now merged and called `@@sentry/bundler-plugins`.
+If you're using any of our bundler plugins (e.g. `@sentry/vite-plugin`), nothing will change for you at the moment.
+
+If you encounter any problems, please open an issue in [`getsentry/sentry-javascript`](https://github.com/getsentry/sentry-javascript) going forward. 
+Thank you!
+
+This repo will be closed after the v11 bump.
+
+Related PRs:
 - Depend on JavaScript repo package. by @timfish in [#945](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/945)
 - Add `@sentry/bundler-plugins` core package by @timfish in [#938](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/938)
-- Update Sentry SDK for telemetry by @timfish in [#937](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/937)
+- Remove obsolete packages by @timfish in [#947](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/947)
 
 ### Bug Fixes 🐛
 
@@ -15,11 +27,11 @@
 
 ### Internal Changes 🔧
 
-- (sentry-cli) Upgrade to 2.58.6 by @szokeasaurusrex in [#936](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/936)
-- Remove obsolete packages by @timfish in [#947](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/947)
-- Remove versions from telemetry snapshots by @timfish in [#946](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/946)
 - Align lint configuration with JavaScript repo by @timfish in [#933](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/933)
 - Align TypeScript configuration with JavaScript repo by @timfish in [#932](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/932)
+- Update Sentry SDK for telemetry by @timfish in [#937](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/937)
+- (sentry-cli) Upgrade to 2.58.6 by @szokeasaurusrex in [#936](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/936)
+- Remove versions from telemetry snapshots by @timfish in [#946](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/946)
 - Fix CI caching on Windows by @timfish in [#934](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/934)
 - Remove `ts-node` usage by @timfish in [#931](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/931)
 
