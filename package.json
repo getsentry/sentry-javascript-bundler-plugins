@@ -6,8 +6,6 @@
   "homepage": "https://github.com/getsentry/sentry-javascript-bundler-plugins",
   "private": true,
   "workspaces": [
-    "packages/babel-plugin-component-annotate",
-    "packages/bundler-plugin-core",
     "packages/dev-utils",
     "packages/esbuild-plugin",
     "packages/playground",
