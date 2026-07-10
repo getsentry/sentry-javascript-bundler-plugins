@@ -1,5 +1,28 @@
 # Changelog
 
+## 5.4.0
+
+### New Features ✨
+
+- Depend on JavaScript repo package. by @timfish in [#945](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/945)
+- Add `@sentry/bundler-plugins` core package by @timfish in [#938](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/938)
+- Update Sentry SDK for telemetry by @timfish in [#937](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/937)
+
+### Bug Fixes 🐛
+
+- (webpack) Make `webpack` import lazy to support rspack-only projects by @s1gr1d in [#940](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/940)
+- Hide console window when running 'git rev-parse HEAD' on Windows by @jwwisgerhof in [#941](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/941)
+
+### Internal Changes 🔧
+
+- (sentry-cli) Upgrade to 2.58.6 by @szokeasaurusrex in [#936](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/936)
+- Remove obsolete packages by @timfish in [#947](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/947)
+- Remove versions from telemetry snapshots by @timfish in [#946](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/946)
+- Align lint configuration with JavaScript repo by @timfish in [#933](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/933)
+- Align TypeScript configuration with JavaScript repo by @timfish in [#932](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/932)
+- Fix CI caching on Windows by @timfish in [#934](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/934)
+- Remove `ts-node` usage by @timfish in [#931](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/931)
+
 ## 5.3.0
 
 ### New Features ✨
