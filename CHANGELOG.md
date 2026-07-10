@@ -27,11 +27,11 @@ Related PRs:
 
 ### Internal Changes 🔧
 
-- Align lint configuration with JavaScript repo by @timfish in [#933](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/933)
-- Align TypeScript configuration with JavaScript repo by @timfish in [#932](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/932)
 - Update Sentry SDK for telemetry by @timfish in [#937](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/937)
 - (sentry-cli) Upgrade to 2.58.6 by @szokeasaurusrex in [#936](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/936)
 - Remove versions from telemetry snapshots by @timfish in [#946](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/946)
+- Align lint configuration with JavaScript repo by @timfish in [#933](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/933)
+- Align TypeScript configuration with JavaScript repo by @timfish in [#932](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/932)
 - Fix CI caching on Windows by @timfish in [#934](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/934)
 - Remove `ts-node` usage by @timfish in [#931](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/931)
 
