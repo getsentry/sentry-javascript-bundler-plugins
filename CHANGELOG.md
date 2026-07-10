@@ -4,18 +4,19 @@
 
 ### Important Changes ✨
 
-The Sentry bundler plugins are moving to our main [`sentry-javascript`](https://github.com/getsentry/sentry-javascript) monorepo and 
-will be bumped to version `11.0.0` with the next SDK major release. 
+The Sentry bundler plugins are moving to our main [`sentry-javascript`](https://github.com/getsentry/sentry-javascript) monorepo and
+will be bumped to version `11.0.0` with the next SDK major release.
 In preparation, we've already ported the `@sentry/bundler-plugin-core` and `sentry/babel-plugin-component-annotate`
 packages, which are now merged and called `@@sentry/bundler-plugins`.
 If you're using any of our bundler plugins (e.g. `@sentry/vite-plugin`), nothing will change for you at the moment.
 
-If you encounter any problems, please open an issue in [`getsentry/sentry-javascript`](https://github.com/getsentry/sentry-javascript) going forward. 
+If you encounter any problems, please open an issue in [`getsentry/sentry-javascript`](https://github.com/getsentry/sentry-javascript) going forward.
 Thank you!
 
 This repo will be closed after the v11 bump.
 
 Related PRs:
+
 - Depend on JavaScript repo package. by @timfish in [#945](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/945)
 - Add `@sentry/bundler-plugins` core package by @timfish in [#938](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/938)
 - Remove obsolete packages by @timfish in [#947](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/947)
