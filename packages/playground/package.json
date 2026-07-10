@@ -17,7 +17,6 @@
     "start:proxyLogger": "node scripts/request-logger-proxy.mjs"
   },
   "dependencies": {
-    "@sentry/bundler-plugin-core": "5.3.0",
     "@sentry/integrations": "7.50",
     "@sentry/node": "7.50",
     "@types/express": "^4.17.13",

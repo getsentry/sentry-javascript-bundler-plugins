@@ -3,9 +3,5 @@
   "printWidth": 100,
   "experimentalSortPackageJson": false,
   "trailingComma": "es5",
-  "ignorePatterns": [
-    "packages/bundler-plugin-core/test/fixtures",
-    "packages/bundler-plugins/test/core/fixtures",
-    ".nxcache"
-  ]
+  "ignorePatterns": [".nxcache"]
 }
