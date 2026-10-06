@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.4.1
+
+### Internal Changes 🔧
+
+- (deps) Bump @sentry/bundler-plugins to ^10.76.0 by @Lms24 in [#954](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/954)
+
 ## 5.4.0
 
 ### Important Changes ✨
