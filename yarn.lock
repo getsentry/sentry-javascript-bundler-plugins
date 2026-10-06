@@ -1220,15 +1220,15 @@
   resolved "https://registry.npmjs.org/@sentry-internal/typescript/-/typescript-10.53.1.tgz#216b3e3ec0d5aa7ef3e7055ea50d6371d9786cce"
   integrity sha512-7ncY4Ww9MsTf5lsX9qAUaiNeQdKNBeZm7rtFze0UeU8fTLxOKx9ink4jCFa1xB/sztIR1pq/rGmnBs7evvn+aw==
 
-"@sentry/bundler-plugins@^10.64.0":
-  version "10.64.0"
-  resolved "https://registry.npmjs.org/@sentry/bundler-plugins/-/bundler-plugins-10.64.0.tgz#3772a2998ade0f8684a21c5e939996b9c0362b2b"
-  integrity sha512-YWUekpT5PFXmBIyMWSj9lxBmXr7U/TLspvBQQA863ugoLfa20bmX17ks5XdlHEomiUifSq0c0Prh+qiwaZhGMA==
+"@sentry/bundler-plugins@^10.76.0":
+  version "10.76.0"
+  resolved "https://registry.npmjs.org/@sentry/bundler-plugins/-/bundler-plugins-10.76.0.tgz#056aa7c4804ea2ad1d07b5dfbbfd4dd37ffac70a"
+  integrity sha512-xDcvwDk3WlvK67wtuHzNdaJit7z9dmp5urftgAtH2sIt8YmpdV68J8crFh6W4TEulYdhJHvSogLEnX+UoFl01A==
   dependencies:
     "@babel/core" "^7.18.5"
     "@sentry/cli" "^2.58.6"
-    "@sentry/core" "10.64.0"
-    dotenv "^16.3.1"
+    "@sentry/core" "10.76.0"
+    dotenv "^17.4.2"
     find-up "^5.0.0"
     glob "^13.0.6"
     magic-string "~0.30.8"
@@ -1293,17 +1293,17 @@
     "@sentry/cli-win32-i686" "2.58.6"
     "@sentry/cli-win32-x64" "2.58.6"
 
-"@sentry/conventions@^0.15.1":
-  version "0.15.1"
-  resolved "https://registry.npmjs.org/@sentry/conventions/-/conventions-0.15.1.tgz#5b8888862d1e444678938f5afdd7842bca42f7cc"
-  integrity sha512-ZLP8bRdMON3prWE2tJyImuYscCxdcJeIPIhrOs/rgyFm3C1nCh1B6gdvPj3AZ5zW08oSFFCsq7T+tYEW3h8MNA==
+"@sentry/conventions@^0.16.0":
+  version "0.16.0"
+  resolved "https://registry.npmjs.org/@sentry/conventions/-/conventions-0.16.0.tgz#3b58d15714cf44dca1518496c00749eec5525009"
+  integrity sha512-fO9PLmHdVURcSPUpWCItWAtgKiMwGdJHbovoSEyLplX5sxs2ugvI4CBPTrkkgqhObnZOD0CnWBKDzSVQYBKEyQ==
 
-"@sentry/core@10.64.0":
-  version "10.64.0"
-  resolved "https://registry.npmjs.org/@sentry/core/-/core-10.64.0.tgz#c2a75ce99853c2cff45aead638265392b2763fd1"
-  integrity sha512-HjojJcXD1l2qZ1AXje2s0XY/nYsaUt00wsM1HMBImA8vAClyPisFE/CC0/UD6pEvsGFhVgi8Dcxo7EN41uyeFw==
+"@sentry/core@10.76.0":
+  version "10.76.0"
+  resolved "https://registry.npmjs.org/@sentry/core/-/core-10.76.0.tgz#f2ad85b8b81a4fa59db0e8670a448d8c122d7814"
+  integrity sha512-H9irBNXHdkgvl86EKlQrPTGYyzvI8GUZ8eoWLay9IuqqZC6pWesf0nH7z/glxKBo7BEw3PIG+unQByHugBnsCg==
   dependencies:
-    "@sentry/conventions" "^0.15.1"
+    "@sentry/conventions" "^0.16.0"
 
 "@sentry/core@7.50.0":
   version "7.50.0"
@@ -2200,10 +2200,15 @@ dotenv-expand@~11.0.6:
   dependencies:
     dotenv "^16.4.5"
 
-dotenv@^16.3.1, dotenv@^16.4.5:
+dotenv@^16.4.5:
   version "16.6.1"
   resolved "https://registry.npmjs.org/dotenv/-/dotenv-16.6.1.tgz#773f0e69527a8315c7285d5ee73c4459d20a8020"
   integrity sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==
+
+dotenv@^17.4.2:
+  version "17.4.2"
+  resolved "https://registry.npmjs.org/dotenv/-/dotenv-17.4.2.tgz#c07e54a746e11eba021dd9e1047ced5afdc1c034"
+  integrity sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==
 
 dotenv@~16.4.5:
   version "16.4.7"
