@@ -176,6 +176,7 @@ Related PRs:
 - chore: Use pull_request_target for changelog preview ([#842](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/842))
 - ci(release): Switch from action-prepare-release to Craft ([#831](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/831))
 - test: Ensure Debug IDs match ([#840](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/840))
+
 </details>
 
 ## 4.6.2
@@ -193,6 +194,7 @@ Related PRs:
   <summary> <strong>Internal Changes</strong> </summary>
 
 - chore(core): Log release output ([#821](https://github.com/getsentry/sentry-javascript-bundler-plugins/pull/821))
+
 </details>
 
 ## 4.6.0
