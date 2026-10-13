@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "vite": "6.4.1",
+    "vite": "6.4.4",
     "@sentry/vite-plugin": "5.4.1"
   },
   "pnpm": {
