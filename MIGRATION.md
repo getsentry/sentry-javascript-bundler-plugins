@@ -18,8 +18,7 @@ This document serves as a migration guide, documenting all breaking changes betw
 
 ## Upgrading from 1.x to 2.x (Webpack Plugin Only)
 
-Version 2 of `@sentry/webpack-plugin` is a complete rewrite of version 1, relying on bundler-agnostic code (based on [unjs/unplugin](https://github.com/unjs/unplugin)). While we tried to keep changes to v1 of the webpack plugin minimal, a adjustments are nevertheless necessary:
-
+Version 2 of `@sentry/webpack-plugin` is a complete rewrite of version 1, relying on bundler-agnostic code (based on [unjs/unplugin](https://github.com/unjs/unplugin)). While we tried to keep changes to v1 of the webpack plugin minimal, a few adjustments are nevertheless necessary:
 ### Initialization and Required Values
 
 Previously, to use the plugin, you had to create a new class of the `SentryCLIPlugin` class.
@@ -41,8 +40,7 @@ sentryWebpackPlugin({
 
 ### Removal of `include` for `sourcemap` option
 
-The `include` option was removed in favour of the new `sourcemaps` option. If you cannot migrate to the `sourcemaps`, `include` is still avaliable as the `uploadLegacySourcemaps` option.
-
+The `include` option was removed in favour of the new `sourcemaps` option. If you cannot migrate to the `sourcemaps` option, `include` is still available as the `uploadLegacySourcemaps` option.
 Use the `sourcemaps.assets` and `sourcemaps.ignore` options to indicate to the plugin which sourcemaps should be uploaded to Sentry. The plugin now also exposes `sourcemaps.deleteAfterUpload` to delete your sourcemaps after they have been uploaded to Sentry. With the `sourcemaps` options, you no longer need to set filename transforms like `urlPrefix` because the plugin uses a new debug IDs system to associate sourcemaps to your bundles.
 
 ```js
