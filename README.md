@@ -10,7 +10,7 @@
 
 # Moved!
 
-> ⚠️ Notice: The repository for the Sentry bundler plugin packages moved to
+> ⚠️ The repository for the Sentry bundler plugin packages moved to
 > https://github.com/getsentry/sentry-javascript.
 >
 > Please open any issues and PRs over there, as this repository is no longer
