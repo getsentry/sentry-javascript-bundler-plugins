@@ -8,6 +8,14 @@
   </a>
 </p>
 
+# Moved!
+
+> ⚠️ Notice: The repository for the Sentry bundler plugin packages moved to
+> https://github.com/getsentry/sentry-javascript.
+>
+> Please open any issues and PRs over there, as this repository is no longer
+> maintained. Thank you!
+
 # Sentry Bundler Plugins
 
 Sentry plugins for various JavaScript bundlers. Currently supporting Rollup, Vite, esbuild, Webpack 5.
